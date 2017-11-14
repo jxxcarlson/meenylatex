@@ -23,7 +23,7 @@ init : ( Model, Cmd Msg )
 init =
     let
         initialSourceText =
-            initialSourceText3
+            initialSourceText2
 
         model =
             { sourceText = initialSourceText
@@ -94,11 +94,25 @@ is one that you learned in Calculus class.
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 \\end{equation}
 
+\\begin{equation}
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+\\end{equation}
+
+
+$$
+\\tag{2}
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+$$
+
 \\begin{theorem}
 There are infinitely many primes, and
 each satisfies $a^{p-1} \\equiv 1 \\text{ mod } p$, provided
 that $p$ does not divide $a$.
 \\end{theorem}
+
+$$
+  \\int_0^a x^n dx = \\frac{a^{n+1}}{n+1}
+$$
 """
 
 

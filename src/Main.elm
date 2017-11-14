@@ -9,6 +9,7 @@ import Html.Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
 import Json.Encode
 import MiniLatex.Driver as MiniLatex
+import MiniLatex.Differ exposing (EditRecord)
 
 
 main =
@@ -16,7 +17,7 @@ main =
 
 
 type alias Model =
-    { sourceText : String, renderedText : String, counter : Int }
+    { sourceText : String, editRecord : EditRecord }
 
 
 init : ( Model, Cmd Msg )
@@ -27,16 +28,16 @@ init =
 
         model =
             { sourceText = initialSourceText
-            , renderedText = Debug.log "Render (1)" (MiniLatex.render initialSourceText)
-            , counter = 0
+            , editRecord = MiniLatex.setup initialSourceText
             }
     in
         ( model, Cmd.none )
 
 
 type Msg
-    = Render
+    = FastRender
     | GetContent String
+    | ReRender
 
 
 port typeset : String -> Cmd msg
@@ -50,10 +51,16 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
-        Render ->
+        FastRender ->
             ( { model
-                | renderedText = Debug.log "Rendered (2)" (MiniLatex.render model.sourceText)
-                , counter = model.counter + 1
+                | editRecord = MiniLatex.update model.editRecord model.sourceText
+              }
+            , typeset "now"
+            )
+
+        ReRender ->
+            ( { model
+                | editRecord = MiniLatex.setup model.sourceText
               }
             , typeset "now"
             )
@@ -65,13 +72,121 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
+        [ editor model
+        , output model
+        ]
+
+
+
+{- VIEW FUNCTIONS -}
+
+
+editor model =
+    div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
         , label "Source text"
-        , editor model
-        , spacer 20
-        , button [ onClick Render, buttonStyle ] [ text "Render" ]
+        , editorPane model
+        ]
+
+
+output model =
+    div [ style [ ( "float", "left" ) ] ]
+        [ spacer 20
+        , fastRenderButton 0
+        , reRenderButton 0
         , showRenderedSource model
         ]
+
+
+reRenderButton offSet =
+    button [ onClick ReRender, buttonStyle offSet ] [ text "Render again" ]
+
+
+fastRenderButton offSet =
+    button [ onClick FastRender, buttonStyle offSet ] [ text "Fast render" ]
+
+
+spacer n =
+    div [ style [ ( "height", toString n ++ "px" ) ] ] []
+
+
+label text_ =
+    p [ labelStyle ] [ text text_ ]
+
+
+editorPane model =
+    textarea [ editorStyle, onInput GetContent ] [ text model.sourceText ]
+
+
+showRenderedSource model =
+    let
+        renderedText =
+            Debug.log "RT"
+                (MiniLatex.getRenderedText model.editRecord)
+    in
+        div
+            [ renderedSourceStyle
+            , property "innerHTML" (Json.Encode.string renderedText)
+            ]
+            []
+
+
+counterAsString model =
+    toString model.counter
+
+
+
+{- STYLE FUNCTIONS -}
+
+
+buttonStyle : Int -> Html.Attribute msg
+buttonStyle offSet =
+    let
+        realOffset =
+            offSet + 20 |> toString |> \x -> x ++ "px"
+    in
+        style
+            [ ( "backgroundColor", "rgb(100,100,100)" )
+            , ( "color", "white" )
+            , ( "width", "100px" )
+            , ( "height", "25px" )
+            , ( "margin-left", realOffset )
+            , ( "font-size", "12pt" )
+            , ( "text-align", "center" )
+            , ( "border", "none" )
+            ]
+
+
+labelStyle =
+    style
+        [ ( "margin-top", "5px" )
+        , ( "margin-bottom", "0px" )
+        , ( "margin-left", "20px" )
+        , ( "font-style", "bold" )
+        ]
+
+
+editorStyle =
+    textStyle "400px" "635px" "20px" "#eef"
+
+
+renderedSourceStyle =
+    textStyle "400px" "600px" "20px" "#eee"
+
+
+textStyle width height offset color =
+    style
+        [ ( "width", width )
+        , ( "height", height )
+        , ( "padding", "15px" )
+        , ( "margin-left", offset )
+        , ( "background-color", color )
+        , ( "overflow", "scroll" )
+        ]
+
+
+
+{- Examples -}
 
 
 initialSourceText1 =
@@ -100,7 +215,7 @@ is one that you learned in Calculus class.
 
 
 $$
-\\tag{2}
+\\tag{B}\\label{C}
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 $$
 
@@ -109,10 +224,6 @@ There are infinitely many primes, and
 each satisfies $a^{p-1} \\equiv 1 \\text{ mod } p$, provided
 that $p$ does not divide $a$.
 \\end{theorem}
-
-$$
-  \\int_0^a x^n dx = \\frac{a^{n+1}}{n+1}
-$$
 """
 
 
@@ -123,93 +234,3 @@ initialSourceText3 =
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 \\end{equation}
 """
-
-
-
-{- VIEW FUNCTIONS -}
-
-
-spacer n =
-    div [ style [ ( "height", toString n ++ "px" ) ] ] []
-
-
-label text_ =
-    p [ labelStyle ] [ text text_ ]
-
-
-editor model =
-    textarea [ myTextStyle "#eef", onInput GetContent ] [ text model.sourceText ]
-
-
-showSource model =
-    div
-        [ myTextStyle "#efe" ]
-        [ text model.sourceText ]
-
-
-showRenderedSource model =
-    div
-        [ myTextStyle "#eee"
-        , property "innerHTML" (Json.Encode.string model.renderedText)
-        ]
-        []
-
-
-showRenderedSourceRaw model =
-    div
-        [ myTextStyle "#eee" ]
-        [ text model.renderedText ]
-
-
-showRenderedSourceX model =
-    Keyed.node "div"
-        [ myTextStyle "#eee"
-        , property "innerHTML" (Json.Encode.string model.renderedText)
-        ]
-        [ ( counterAsString model, text "" ) ]
-
-
-counterAsString model =
-    toString model.counter
-
-
-
-{- STYLE FUNCTIONS -}
-
-
-buttonStyle : Html.Attribute msg
-buttonStyle =
-    style
-        [ ( "backgroundColor", "rgb(100,100,100)" )
-        , ( "color", "white" )
-        , ( "width", "100px" )
-        , ( "height", "25px" )
-        , ( "margin-left", "20px" )
-        , ( "font-size", "12pt" )
-        , ( "text-align", "center" )
-        , ( "border", "none" )
-        ]
-
-
-labelStyle =
-    style
-        [ ( "margin-top", "5px" )
-        , ( "margin-bottom", "0px" )
-        , ( "margin-left", "20px" )
-        , ( "font-style", "bold" )
-        ]
-
-
-myTextStyle =
-    textStyle "400px" "250px"
-
-
-textStyle width height color =
-    style
-        [ ( "width", width )
-        , ( "height", height )
-        , ( "padding", "15px" )
-        , ( "margin-left", "20px" )
-        , ( "background-color", color )
-        , ( "overflow", "scroll" )
-        ]

@@ -20,7 +20,11 @@
 <body>
 
     <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
+       MathJax.Hub.Config(
+         ["resetEquationNumbers",MathJax.InputJax.TeX],
+         ["PreProcess",MathJax.Hub],
+         ["Reprocess",MathJax.Hub],
+         {
       tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
       processEscapes: true
     });

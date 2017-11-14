@@ -209,21 +209,19 @@ is one that you learned in Calculus class.
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 \\end{equation}
 
-\\begin{equation}
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-\\end{equation}
-
-
-$$
-\\tag{B}\\label{C}
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-$$
-
 \\begin{theorem}
 There are infinitely many primes, and
 each satisfies $a^{p-1} \\equiv 1 \\text{ mod } p$, provided
 that $p$ does not divide $a$.
 \\end{theorem}
+
+$$
+\\begin{equation}
+\\tag{QQ}
+\\label{integral2}
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+\\end{equation}
+$$
 """
 
 

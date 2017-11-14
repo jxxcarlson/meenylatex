@@ -1,0 +1,52 @@
+<html>
+<head>
+  <style>
+   .code {font-family: "Courier New", Courier, monospace; background-color: #f5f5f5; font-weight: 300;}
+   .center {margin-left: auto; margin-right: auto;}
+   .indent {margin-left: 2em!important}
+   .italic {font-style: oblique!important}
+   .environment {margin-top: 1em; margin-bottom: 1em;}
+   .strong {font-weight: bold}
+   .subheading {margin-top: 0.75em; margin-bottom: 0.5em; font-weight: bold}
+   .verbatim {margin-top: 1em; margin-bottom: 1em; font-size: 10pt;}
+  </style>
+
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+
+</head>
+<body>
+
+    <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+    });
+   </script>
+
+<script src="../app.js"></script>
+
+  <script>
+    var app = Elm.Main.fullscreen()
+
+   /***
+    function updateMathContent(s) {
+       var math = MathJax.Hub.getAllJax("mathdiv")[0];
+       MathJax.Hub.Queue(["Text", math, s]);
+   }
+   ***/
+
+    app.ports.typeset.subscribe(function() {
+
+        console.log("typesetNow:  calling MathJax.Hub.Queue ... ")
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+     })
+
+  </script>
+
+
+
+
+</body>
+</html>

@@ -1,6 +1,8 @@
 MiniLaTeX is a subset of LaTeX that can be rendered
 into pdf by standard tools such as `pdflatex` or
-into HTML by
+into HTML by a suitable application, e.g.,
+<a href="https://jxxcarlson.github.io/app/minilatex/src/index.html">MiniLateX Demo</a>
+or <a href="http://www.knode.io">www.knode.io</a>.
 
 Example:
 ```

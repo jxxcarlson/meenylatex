@@ -146,8 +146,14 @@ diff u v =
 
         y =
             v |> List.drop la |> dropLast lb
+
+        bb =
+            if la == (List.length u) then
+                []
+            else
+                b
     in
-        DiffRecord a b x y
+        DiffRecord a bb x y
 
 
 renderList : (String -> String) -> List String -> List String

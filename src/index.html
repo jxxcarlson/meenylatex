@@ -1,6 +1,8 @@
 <html>
 <head>
+
   <meta charset="utf-8" />
+  
   <style>
    .code {font-family: "Courier New", Courier, monospace; background-color: #f5f5f5; font-weight: 300;}
    .center {margin-left: auto; margin-right: auto;}
@@ -12,11 +14,12 @@
    .verbatim {margin-top: 1em; margin-bottom: 1em; font-size: 10pt;}
   </style>
 
-    <script type="text/javascript" async
+  <script type="text/javascript" async
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML">
-    </script>
+  </script>
 
 </head>
+
 <body>
 
     <script type="text/x-mathjax-config">
@@ -32,24 +35,17 @@
   <script>
     var app = Elm.Main.fullscreen()
 
-   /***
-    function updateMathContent(s) {
-       var math = MathJax.Hub.getAllJax("mathdiv")[0];
-       MathJax.Hub.Queue(["Text", math, s]);
-   }
-   ***/
-
+    // This function is called by the Elm app when the user
+    // press the "Render" button
     app.ports.typeset.subscribe(function() {
-
         console.log("typesetNow:  calling MathJax.Hub.Queue ... ")
         MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
         MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        // ^^^ used this twice because one call does not
+        // make MathJax typeset.  I don't understand why :-(
      })
 
   </script>
-
-
-
 
 </body>
 </html>

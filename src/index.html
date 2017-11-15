@@ -39,12 +39,14 @@
     // This function is called by the Elm app when the user
     // press the "Render" button
     app.ports.typeset.subscribe(function() {
-        console.log("typesetNow:  calling MathJax.Hub.Queue ... ")
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
-        // ^^^ used this twice because one call does not
-        // make MathJax typeset.  I don't understand why :-(
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, "renderedText"],
+          ["resetEquationNumbers",MathJax.InputJax.TeX],
+          ["PreProcess",MathJax.Hub],
+          ["Reprocess",MathJax.Hub]
+          );
      })
+
+
 
   </script>
 

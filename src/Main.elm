@@ -23,9 +23,6 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     let
-        initialSourceText =
-            initialSourceText2
-
         model =
             { sourceText = initialSourceText
             , editRecord = MiniLatex.setup initialSourceText
@@ -38,6 +35,8 @@ type Msg
     = FastRender
     | GetContent String
     | ReRender
+    | Reset
+    | Restore
 
 
 port typeset : String -> Cmd msg
@@ -61,6 +60,22 @@ update msg model =
         ReRender ->
             ( { model
                 | editRecord = MiniLatex.setup model.sourceText
+              }
+            , typeset "now"
+            )
+
+        Reset ->
+            ( { model
+                | sourceText = Debug.log "Restore src" ""
+                , editRecord = Debug.log "Reset" (MiniLatex.setup "")
+              }
+            , typeset "now"
+            )
+
+        Restore ->
+            ( { model
+                | sourceText = Debug.log "Restore src" initialSourceText
+                , editRecord = Debug.log "Restore" (MiniLatex.setup initialSourceText)
               }
             , typeset "now"
             )
@@ -106,7 +121,7 @@ headerPanel =
 infoPanel =
     div
         [ ribbonStyle "#777" ]
-        [ text "There is currently a re-rendering bug that affects expression with a \\label. We're working on it!" ]
+        [ text "^^^ You can scroll both the source and rendered text panes to see more text.    ^^^" ]
 
 
 editor model =
@@ -121,8 +136,9 @@ editor model =
 output model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , fastRenderButton 0
         , reRenderButton 0
+        , resetButton 0
+        , restoreButton 0
         , spacer 5
         , showRenderedSource model
         ]
@@ -136,6 +152,14 @@ fastRenderButton offSet =
     button [ onClick FastRender, buttonStyle offSet ] [ text "Fast render" ]
 
 
+resetButton offSet =
+    button [ onClick Reset, buttonStyle offSet ] [ text "Reset" ]
+
+
+restoreButton offSet =
+    button [ onClick Restore, buttonStyle offSet ] [ text "Restore" ]
+
+
 spacer n =
     div [ style [ ( "height", toString n ++ "px" ), ( "clear", "left" ) ] ] []
 
@@ -145,7 +169,7 @@ label text_ =
 
 
 editorPane model =
-    textarea [ editorStyle, onInput GetContent ] [ text model.sourceText ]
+    textarea [ editorStyle, onInput GetContent, value model.sourceText ] [ text model.sourceText ]
 
 
 showRenderedSource model =
@@ -156,6 +180,7 @@ showRenderedSource model =
     in
         div
             [ renderedSourceStyle
+            , id "renderedText"
             , property "innerHTML" (Json.Encode.string renderedText)
             ]
             []
@@ -174,7 +199,8 @@ buttonStyle offSet =
         style
             [ ( "backgroundColor", "rgb(100,100,200)" )
             , ( "color", "white" )
-            , ( "width", "100px" )
+            , ( "width", "90px" )
+            , ( "font-size", "10pt" )
             , ( "height", "25px" )
             , ( "margin-left", realOffset )
             , ( "font-size", "12pt" )
@@ -215,16 +241,19 @@ textStyle width height offset color =
 {- Examples -}
 
 
-initialSourceText1 =
-    "This \\strong{is} a test!\n\n$$\n\\int_0^1 x^n dx = \\frac{1}{n+1}\n$$"
-
-
-initialSourceText2 =
+initialSourceText =
     """
 \\section{Introduction}
 
-This \\strong{is} a test.  Here is the
-Pythagorean Theorem: $a^2 + b^2 = c^2$.
+\\italic{This a MiniLatex test document.}
+See the article
+\\href{http://www.knode.io/#@public/445}{MiniLatex}
+at \\href{http://www.knode.io}{www.knode.io} for more info.
+
+\\section{Examples}
+
+The Pythagorean Theorem, $a^2 + b^2 = c^2$,
+is useful for computing distances.
 
 
 Formula \\eqref{integral}
@@ -241,16 +270,6 @@ each satisfies $a^{p-1} \\equiv 1 \\text{ mod } p$, provided
 that $p$ does not divide $a$.
 \\end{theorem}
 
-According to Oresme (14th Century):
-
-$$
-\\begin{equation}
-\\tag{QQ}
-\\label{oresme}
-\\sum_{n=1}^\\infty \\frac{1}{n} = \\infty
-\\end{equation}
-$$
-
 \\strong{Light Elements}
 \\begin{tabular}{l l l l}
 Hydrogen & H & 1 & 1.008 \\\\
@@ -258,13 +277,28 @@ Helium & He & 2 & 4.003 \\\\
 Lithium & Li & 3 &  6.94 \\\\
 Beryllium & Be & 4 & 9.012 \\\\
 \\end{tabular}
-"""
+
+\\image{http://psurl.s3.amazonaws.com/images/jc/propagator_t=2-6feb.png}{Free particle propagator}{width: 300, align: center}
+
+\\section{Appendix}
 
 
-initialSourceText3 =
-    """
-\\begin{equation}
-\\label{integral}
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-\\end{equation}
+\\begin{itemize}
+%%
+\\item \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards LaTeX in the Browser}
+%%
+\\item \\href{https://github.com/jxxcarlson/minilatexDemo}{Code for the Demo App}
+%%
+\\item \\href{http://package.elm-lang.org/packages/jxxcarlson/minilatex/latest}{The MiniLatex Elm Library}
+%%
+\\end{itemize}
+
+To try out MiniLatex for real, sign up for a free account at
+ \\href{http://www.knode.io}{www.knode.io}.  The app is still
+ in beta, and we need people to test it and give feedback.
+Also, contributions to help improve the open-source
+\\href{https://github.com/jxxcarlson/minilatex}{MiniLatex Parser-Renderer}
+are most welcome.
+
+Please send comments to jxxcarlson at gmail.
 """

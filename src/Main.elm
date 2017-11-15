@@ -121,7 +121,7 @@ headerPanel =
 infoPanel =
     div
         [ ribbonStyle "#777" ]
-        [ text "^^^ You can scroll both the source and rendered text panes to see more text.    ^^^" ]
+        [ text "^^^ You can scroll both the source and rendered text panes.  ......   ^^^  ...... Coming soon: live update ...... " ]
 
 
 editor model =
@@ -295,7 +295,7 @@ Beryllium & Be & 4 & 9.012 \\\\
 
 To try out MiniLatex for real, sign up for a free account at
  \\href{http://www.knode.io}{www.knode.io}.  The app is still
- in beta, and we need people to test it and give feedback.
+ under development &mdash;  we need people to test it and give feedback.
 Also, contributions to help improve the open-source
 \\href{https://github.com/jxxcarlson/minilatex}{MiniLatex Parser-Renderer}
 are most welcome.

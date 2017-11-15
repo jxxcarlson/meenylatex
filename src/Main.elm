@@ -241,13 +241,23 @@ each satisfies $a^{p-1} \\equiv 1 \\text{ mod } p$, provided
 that $p$ does not divide $a$.
 \\end{theorem}
 
+According to Oresme (14th Century):
+
 $$
 \\begin{equation}
 \\tag{QQ}
-\\label{integral2}
-\\int_0^1 x^n dx = \\frac{1}{n+1}
+\\label{oresme}
+\\sum_{n=1}^\\infty \\frac{1}{n} = \\infty
 \\end{equation}
 $$
+
+\\strong{Light Elements}
+\\begin{tabular}{l l l l}
+Hydrogen & H & 1 & 1.008 \\\\
+Helium & He & 2 & 4.003 \\\\
+Lithium & Li & 3 &  6.94 \\\\
+Beryllium & Be & 4 & 9.012 \\\\
+\\end{tabular}
 """
 
 

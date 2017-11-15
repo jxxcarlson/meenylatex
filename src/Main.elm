@@ -72,8 +72,11 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ editor model
+        [ headerPanel
+        , editor model
         , output model
+        , spacer 5
+        , infoPanel
         ]
 
 
@@ -81,10 +84,36 @@ view model =
 {- VIEW FUNCTIONS -}
 
 
+ribbonStyle color =
+    style
+        [ ( "width", "835px" )
+        , ( "height", "20px" )
+        , ( "margin-left", "20px" )
+        , ( "margin-bottom", "-16px" )
+        , ( "padding", "8px" )
+        , ( "clear", "left" )
+        , ( "background-color", color )
+        , ( "color", "#eee" )
+        ]
+
+
+headerPanel =
+    div
+        [ ribbonStyle "#555" ]
+        [ text "MiniLatex Demo" ]
+
+
+infoPanel =
+    div
+        [ ribbonStyle "#777" ]
+        [ text "There is currently a re-rendering bug that affects expression with a \\label. We're working on it!" ]
+
+
 editor model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
         , label "Source text"
+        , spacer 5
         , editorPane model
         ]
 
@@ -94,12 +123,13 @@ output model =
         [ spacer 20
         , fastRenderButton 0
         , reRenderButton 0
+        , spacer 5
         , showRenderedSource model
         ]
 
 
 reRenderButton offSet =
-    button [ onClick ReRender, buttonStyle offSet ] [ text "Render again" ]
+    button [ onClick ReRender, buttonStyle offSet ] [ text "Render" ]
 
 
 fastRenderButton offSet =
@@ -107,7 +137,7 @@ fastRenderButton offSet =
 
 
 spacer n =
-    div [ style [ ( "height", toString n ++ "px" ) ] ] []
+    div [ style [ ( "height", toString n ++ "px" ), ( "clear", "left" ) ] ] []
 
 
 label text_ =
@@ -131,10 +161,6 @@ showRenderedSource model =
             []
 
 
-counterAsString model =
-    toString model.counter
-
-
 
 {- STYLE FUNCTIONS -}
 
@@ -146,7 +172,7 @@ buttonStyle offSet =
             offSet + 20 |> toString |> \x -> x ++ "px"
     in
         style
-            [ ( "backgroundColor", "rgb(100,100,100)" )
+            [ ( "backgroundColor", "rgb(100,100,200)" )
             , ( "color", "white" )
             , ( "width", "100px" )
             , ( "height", "25px" )

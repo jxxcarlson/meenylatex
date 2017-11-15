@@ -28,7 +28,7 @@ init =
             , editRecord = MiniLatex.setup initialSourceText
             }
     in
-        ( model, typeset "now" )
+        ( model, Cmd.none )
 
 
 type Msg

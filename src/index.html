@@ -46,7 +46,12 @@
           );
      })
 
-
+    // For startup:
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, "renderedText"],
+      ["resetEquationNumbers",MathJax.InputJax.TeX],
+      ["PreProcess",MathJax.Hub],
+      ["Reprocess",MathJax.Hub]
+      );
 
   </script>
 

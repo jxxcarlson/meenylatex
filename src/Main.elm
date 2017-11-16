@@ -86,6 +86,12 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
+    div [ style [ ( "width", "900px" ), ( "margin", "auto" ) ] ]
+        [ mainView model
+        ]
+
+
+mainView model =
     div []
         [ headerPanel
         , editor model
@@ -115,7 +121,18 @@ ribbonStyle color =
 headerPanel =
     div
         [ ribbonStyle "#555" ]
-        [ text "MiniLatex Demo" ]
+        [ span [ style [ ( "margin-left", "5px" ) ] ] [ text "MiniLatex Demo" ]
+        , a
+            [ class "linkback"
+            , style
+                [ ( "float", "right" )
+                , ( "margin-right", "10px" )
+                ]
+            , href "http://www.knode.io"
+            , target "_blank"
+            ]
+            [ text "www.knode.io" ]
+        ]
 
 
 infoPanel =
@@ -137,7 +154,7 @@ output model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
         , reRenderButton 0
-        , resetButton 0
+        , resetButton 120
         , restoreButton 0
         , spacer 5
         , showRenderedSource model

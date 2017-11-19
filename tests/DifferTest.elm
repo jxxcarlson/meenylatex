@@ -47,9 +47,9 @@ suite =
                         Debug.log "diffRecord 2" (diff p1 p2)
 
                     r2 =
-                        renderDiff String.toUpper diffRecord r1
+                        renderDiff 0 String.toUpper diffRecord r1
                 in
-                    Expect.equal r2 [ "RED", "VERDE", "BLUE" ]
+                    Expect.equal r2.renderedParagraphs [ "RED", "VERDE", "BLUE" ]
         , test "(3) initialize generated the correct paragraph list" <|
             \_ ->
                 let
@@ -80,7 +80,7 @@ suite =
                         initialize String.toUpper text
 
                     newEditRecord =
-                        update String.toUpper editRecord text
+                        update 0 String.toUpper editRecord text
                 in
                     Expect.equal editRecord.renderedParagraphs newEditRecord.renderedParagraphs
         ]

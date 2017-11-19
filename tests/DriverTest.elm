@@ -26,10 +26,10 @@ suite =
 """
 
                     output =
-                        render input
+                        render "" input
 
                     expectedOutput =
-                        "\n<p>\n \n$$\n\\begin{equation}\\tag{1}\n\\label{integral}\n\\int_0^1 x^n dx = \\frac{1}{n+1}\n\\end{equation}\n$$\n</p>"
+                        "<p>\n \n$$\n\\begin{equation}\\tag{1}\n\\label{integral}\n\\int_0^1 x^n dx = \\frac{1}{n+1}\n\\end{equation}\n$$\n\n</p>\n\n"
                 in
                     Expect.equal output expectedOutput
         ]

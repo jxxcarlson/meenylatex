@@ -10,6 +10,7 @@ import Html.Keyed as Keyed
 import Json.Encode
 import MiniLatex.Driver as MiniLatex
 import MiniLatex.Differ exposing (EditRecord)
+import Random
 
 
 main =
@@ -17,7 +18,7 @@ main =
 
 
 type alias Model =
-    { sourceText : String, editRecord : EditRecord }
+    { sourceText : String, editRecord : EditRecord, seed : Int }
 
 
 init : ( Model, Cmd Msg )
@@ -25,10 +26,11 @@ init =
     let
         model =
             { sourceText = initialSourceText
-            , editRecord = MiniLatex.setup initialSourceText
+            , editRecord = MiniLatex.setup 0 initialSourceText
+            , seed = 0
             }
     in
-        ( model, Cmd.none )
+        ( model, Random.generate NewSeed (Random.int 1 10000) )
 
 
 type Msg
@@ -37,6 +39,8 @@ type Msg
     | ReRender
     | Reset
     | Restore
+    | GenerateSeed
+    | NewSeed Int
 
 
 port typeset : String -> Cmd msg
@@ -47,41 +51,47 @@ subscriptions model =
     Sub.none
 
 
-update : Msg -> Model -> ( Model, Cmd msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FastRender ->
             ( { model
-                | editRecord = MiniLatex.update model.editRecord model.sourceText
+                | editRecord = MiniLatex.update model.seed model.editRecord model.sourceText
               }
             , typeset "now"
             )
 
         ReRender ->
             ( { model
-                | editRecord = MiniLatex.setup model.sourceText
+                | editRecord = MiniLatex.setup model.seed model.sourceText
               }
             , typeset "now"
             )
 
         Reset ->
             ( { model
-                | sourceText = Debug.log "Restore src" ""
-                , editRecord = Debug.log "Reset" (MiniLatex.setup "")
+                | sourceText = ""
+                , editRecord = MiniLatex.setup model.seed ""
               }
             , typeset "now"
             )
 
         Restore ->
             ( { model
-                | sourceText = Debug.log "Restore src" initialSourceText
-                , editRecord = Debug.log "Restore" (MiniLatex.setup initialSourceText)
+                | sourceText = initialSourceText
+                , editRecord = MiniLatex.setup model.seed initialSourceText
               }
             , typeset "now"
             )
 
         GetContent str ->
             ( { model | sourceText = str }, Cmd.none )
+
+        GenerateSeed ->
+            ( model, Random.generate NewSeed (Random.int 1 10000) )
+
+        NewSeed newSeed ->
+            ( { model | seed = newSeed }, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -192,8 +202,7 @@ editorPane model =
 showRenderedSource model =
     let
         renderedText =
-            Debug.log "RT"
-                (MiniLatex.getRenderedText model.editRecord)
+            MiniLatex.getRenderedText "" model.editRecord
     in
         div
             [ renderedSourceStyle

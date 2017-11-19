@@ -122,11 +122,11 @@ view model =
 
 mainView model =
     div []
-        [ headerPanel
+        [ headerRibbon
         , editor model
-        , outputPane model
+        , renderedSource model
         , spacer 5
-        , infoPanel
+        , footerRibbon
         ]
 
 
@@ -134,48 +134,75 @@ mainView model =
 {- VIEW FUNCTIONS -}
 
 
-headerPanel =
+headerRibbon =
     div
         [ ribbonStyle "#555" ]
         [ span [ style [ ( "margin-left", "5px" ) ] ] [ text "MiniLatex Demo" ]
-        , a
-            [ class "linkback"
-            , style
-                [ ( "float", "right" )
-                , ( "margin-right", "10px" )
-                ]
-            , href "http://www.knode.io"
-            , target "_blank"
-            ]
-            [ text "www.knode.io" ]
+        , link "http://www.knode.io" "www.knode.io"
         ]
 
 
-infoPanel =
+link url linkText =
+    a
+        [ class "linkback"
+        , style
+            [ ( "float", "right" )
+            , ( "margin-right", "10px" )
+            ]
+        , href url
+        , target "_blank"
+        ]
+        [ text linkText ]
+
+
+footerRibbon =
     div
         [ ribbonStyle "#777" ]
-        [ text "Fast render updates only those paragraphs which have changed." ]
+        [ text "Fast render updates only those paragraphs which have changed."
+        , link "http://jxxcarlson.github.io" "jxxcarlson.github.io"
+        ]
 
 
 editor model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , buttonBar1
+        , buttonBarLeft
         , spacer 5
         , editorPane model
         ]
 
 
-outputPane model =
+editorPane model =
+    textarea [ editorStyle, onInput GetContent, value model.sourceText ] [ text model.sourceText ]
+
+
+renderedSource model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , buttonBar2
+        , buttonBarRight
         , spacer 5
-        , showRenderedSource model
+        , renderedSourcePane model
         ]
 
 
-buttonBar1 =
+renderedSourcePane model =
+    let
+        renderedText =
+            MiniLatex.getRenderedText "" model.editRecord
+    in
+        div
+            [ renderedSourceStyle
+            , id "renderedText"
+            , property "innerHTML" (Encode.string (Debug.log "RT" renderedText))
+            ]
+            []
+
+
+
+{- Buttons -}
+
+
+buttonBarLeft =
     div
         [ style [ ( "margin-left", "20px" ) ] ]
         [ resetButton 0
@@ -183,7 +210,7 @@ buttonBar1 =
         ]
 
 
-buttonBar2 =
+buttonBarRight =
     div
         [ style [ ( "margin-left", "20px" ) ] ]
         [ reRenderButton 0
@@ -207,29 +234,16 @@ restoreButton offSet =
     button [ onClick Restore, buttonStyle offSet ] [ text "Restore" ]
 
 
+
+{- Elements -}
+
+
 spacer n =
     div [ style [ ( "height", toString n ++ "px" ), ( "clear", "left" ) ] ] []
 
 
 label text_ =
     p [ labelStyle ] [ text text_ ]
-
-
-editorPane model =
-    textarea [ editorStyle, onInput GetContent, value model.sourceText ] [ text model.sourceText ]
-
-
-showRenderedSource model =
-    let
-        renderedText =
-            MiniLatex.getRenderedText "" model.editRecord
-    in
-        div
-            [ renderedSourceStyle
-            , id "renderedText"
-            , property "innerHTML" (Encode.string (Debug.log "RT" renderedText))
-            ]
-            []
 
 
 

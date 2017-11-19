@@ -16,12 +16,21 @@ You can also experiment with MiniLaTeX using this <a href="https://ellie-app.com
 Basics
 ------
 
-Example:
+Example.  First, import MiniLatex
 ```
 > import MiniLatex.Driver as MiniLatex
+```
+Second, make these definitions
+```
 > text = "\\begin{itemize}\n\\item Eggs\n\\item Milk\n\\item Bread\n\\end{itemize}"
 > macroDefinitions = ""
+```
+Third, run `MiniLatex.render`;
+```
 > MiniLatex.render marcroDefinitions text
+```
+to get the HTML
+```
 "<p>\n \n<ul>\n <li class=\"item1\"> Eggs</li>\n <li class=\"item1\"> Milk</li>\n <li class=\"item1\"> Bread</li>\n\n</ul>\n\n</p>"
     : String
 ```

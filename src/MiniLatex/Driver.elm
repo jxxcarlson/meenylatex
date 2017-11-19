@@ -78,7 +78,6 @@ getRenderedText macroDefinitions editRecord =
     in
         List.map2 (\para pTag -> pTag ++ "\n" ++ para ++ "\n</p>") paragraphs pTagList
             |> String.join "\n\n"
-            |> Debug.log "RENDERED"
             |> (\x -> x ++ "\n\n" ++ macroDefinitions)
 
 

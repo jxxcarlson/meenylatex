@@ -7,7 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
-import Json.Encode
+import Json.Encode as Encode
 import MiniLatex.Driver as MiniLatex
 import MiniLatex.Differ exposing (EditRecord)
 import Random
@@ -43,7 +43,19 @@ type Msg
     | NewSeed Int
 
 
-port typeset : String -> Cmd msg
+port sendToJs : Encode.Value -> Cmd msg
+
+
+encodeData mode idList =
+    let
+        idValueList =
+            Debug.log "idValueList"
+                (List.map Encode.string idList)
+    in
+        [ ( "mode", Encode.string mode )
+        , ( "idList", Encode.list idValueList )
+        ]
+            |> Encode.object
 
 
 subscriptions : Model -> Sub Msg
@@ -55,17 +67,24 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FastRender ->
-            ( { model
-                | editRecord = MiniLatex.update model.seed model.editRecord model.sourceText
-              }
-            , typeset "now"
-            )
+            let
+                newEditRecord =
+                    MiniLatex.update model.seed model.editRecord model.sourceText
+            in
+                ( { model
+                    | editRecord = newEditRecord
+                  }
+                , Cmd.batch
+                    [ sendToJs <| encodeData "fast" newEditRecord.idList
+                    , Random.generate NewSeed (Random.int 1 10000)
+                    ]
+                )
 
         ReRender ->
             ( { model
                 | editRecord = MiniLatex.setup model.seed model.sourceText
               }
-            , typeset "now"
+            , sendToJs <| encodeData "full" []
             )
 
         Reset ->
@@ -73,7 +92,7 @@ update msg model =
                 | sourceText = ""
                 , editRecord = MiniLatex.setup model.seed ""
               }
-            , typeset "now"
+            , sendToJs <| encodeData "full" []
             )
 
         Restore ->
@@ -81,7 +100,7 @@ update msg model =
                 | sourceText = initialSourceText
                 , editRecord = MiniLatex.setup model.seed initialSourceText
               }
-            , typeset "now"
+            , sendToJs <| encodeData "full" []
             )
 
         GetContent str ->
@@ -105,7 +124,7 @@ mainView model =
     div []
         [ headerPanel
         , editor model
-        , output model
+        , outputPane model
         , spacer 5
         , infoPanel
         ]
@@ -113,19 +132,6 @@ mainView model =
 
 
 {- VIEW FUNCTIONS -}
-
-
-ribbonStyle color =
-    style
-        [ ( "width", "835px" )
-        , ( "height", "20px" )
-        , ( "margin-left", "20px" )
-        , ( "margin-bottom", "-16px" )
-        , ( "padding", "8px" )
-        , ( "clear", "left" )
-        , ( "background-color", color )
-        , ( "color", "#eee" )
-        ]
 
 
 headerPanel =
@@ -148,26 +154,40 @@ headerPanel =
 infoPanel =
     div
         [ ribbonStyle "#777" ]
-        [ text "^^^ You can scroll both the source and rendered text panes.  ......   ^^^  ...... Coming soon: live update ...... " ]
+        [ text "Fast render updates only those paragraphs which have changed." ]
 
 
 editor model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , label "Source text"
+        , buttonBar1
         , spacer 5
         , editorPane model
         ]
 
 
-output model =
+outputPane model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , reRenderButton 0
-        , resetButton 120
-        , restoreButton 0
+        , buttonBar2
         , spacer 5
         , showRenderedSource model
+        ]
+
+
+buttonBar1 =
+    div
+        [ style [ ( "margin-left", "20px" ) ] ]
+        [ resetButton 0
+        , restoreButton 0
+        ]
+
+
+buttonBar2 =
+    div
+        [ style [ ( "margin-left", "20px" ) ] ]
+        [ reRenderButton 0
+        , fastRenderButton 0
         ]
 
 
@@ -176,7 +196,7 @@ reRenderButton offSet =
 
 
 fastRenderButton offSet =
-    button [ onClick FastRender, buttonStyle offSet ] [ text "Fast render" ]
+    button [ onClick FastRender, buttonStyle offSet ] [ text "Fast Render" ]
 
 
 resetButton offSet =
@@ -207,7 +227,7 @@ showRenderedSource model =
         div
             [ renderedSourceStyle
             , id "renderedText"
-            , property "innerHTML" (Json.Encode.string renderedText)
+            , property "innerHTML" (Encode.string (Debug.log "RT" renderedText))
             ]
             []
 
@@ -216,20 +236,33 @@ showRenderedSource model =
 {- STYLE FUNCTIONS -}
 
 
+ribbonStyle color =
+    style
+        [ ( "width", "835px" )
+        , ( "height", "20px" )
+        , ( "margin-left", "20px" )
+        , ( "margin-bottom", "-16px" )
+        , ( "padding", "8px" )
+        , ( "clear", "left" )
+        , ( "background-color", color )
+        , ( "color", "#eee" )
+        ]
+
+
 buttonStyle : Int -> Html.Attribute msg
 buttonStyle offSet =
     let
         realOffset =
-            offSet + 20 |> toString |> \x -> x ++ "px"
+            offSet + 0 |> toString |> \x -> x ++ "px"
     in
         style
             [ ( "backgroundColor", "rgb(100,100,200)" )
             , ( "color", "white" )
-            , ( "width", "90px" )
-            , ( "font-size", "10pt" )
+            , ( "width", "85px" )
             , ( "height", "25px" )
             , ( "margin-left", realOffset )
-            , ( "font-size", "12pt" )
+            , ( "margin-right", "8px" )
+            , ( "font-size", "9pt" )
             , ( "text-align", "center" )
             , ( "border", "none" )
             ]

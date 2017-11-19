@@ -46,14 +46,51 @@
   <script>
     var app = Elm.Main.fullscreen()
 
+      function typesetNow(){
+        console.log("** typesetNow ... ")
+        MathJax.Hub.Queue([
+          "Typeset",
+          MathJax.Hub]);
+      }
+
+     function idList2Elements(idList) {
+         var elementList = []
+         for (var i = 0; i < idList.length; i++ ) {
+           var element = document.getElementById(idList[i])
+           elementList.push(element);
+         }
+         return elementList
+     }
+
+     function typesetIdList(idList){
+         console.log("** typesetIdList ... " + idList)
+         var elements = idList2Elements(idList)
+         for(var i = 0; i < idList.length; i++) {
+           MathJax.Hub.Queue( ["Typeset", MathJax.Hub, elements[i]])
+         }
+         MathJax.Hub.Queue(["resetEquationNumbers",MathJax.InputJax.TeX],
+           ["PreProcess",MathJax.Hub],
+           ["Reprocess",MathJax.Hub]
+           );
+     }
+
+     function typesetFull() {
+       MathJax.Hub.Queue(["Typeset", MathJax.Hub, "renderedText"],
+         ["resetEquationNumbers",MathJax.InputJax.TeX],
+         ["PreProcess",MathJax.Hub],
+         ["Reprocess",MathJax.Hub]
+         );
+     }
+
     // This function is called by the Elm app when the user
     // press the "Render" button
-    app.ports.typeset.subscribe(function() {
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, "renderedText"],
-          ["resetEquationNumbers",MathJax.InputJax.TeX],
-          ["PreProcess",MathJax.Hub],
-          ["Reprocess",MathJax.Hub]
-          );
+    app.ports.sendToJs.subscribe(function(data) {
+      if (data.mode == "full") {
+        typesetFull()
+      } else {
+        typesetIdList(data.idList)
+      }
+
      })
 
     // For startup:

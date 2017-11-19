@@ -309,6 +309,8 @@ See the article
 \\href{http://www.knode.io/#@public/445}{MiniLatex}
 at \\href{http://www.knode.io}{www.knode.io} for more info.
 
+Feel free to edit and re-render the text on the left.
+
 \\section{Examples}
 
 The Pythagorean Theorem, $a^2 + b^2 = c^2$,

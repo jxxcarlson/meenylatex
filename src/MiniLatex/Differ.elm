@@ -100,11 +100,8 @@ initialize transformer text =
         n =
             List.length paragraphs
 
-        _ =
-            Debug.log "idList - initialize"
-
         idList =
-            Debug.log "idList" (List.range 1 n |> List.map (prefixer 0))
+            List.range 1 n |> List.map (prefixer 0)
 
         renderedParagraphs =
             List.map transformer paragraphs
@@ -121,11 +118,8 @@ initialize2 transformParagraphs text =
         n =
             List.length paragraphs
 
-        _ =
-            Debug.log "idList - initialize2"
-
         idList =
-            Debug.log "idList" (List.range 1 n |> List.map (prefixer 0))
+            List.range 1 n |> List.map (prefixer 0)
 
         ( renderedParagraphs, latexState ) =
             transformParagraphs paragraphs
@@ -207,7 +201,7 @@ renderDiff seed renderer diffRecord renderedStringList =
             List.length diffRecord.middleSegmentInTarget
 
         idList =
-            Debug.log "idList" (List.range 1 n |> List.map (prefixer seed))
+            List.range 1 n |> List.map (prefixer seed)
 
         middleSegmentRendered =
             (List.map renderer) diffRecord.middleSegmentInTarget

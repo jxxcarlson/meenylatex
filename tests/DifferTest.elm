@@ -30,7 +30,7 @@ suite =
             \_ ->
                 let
                     diffRecord =
-                        Debug.log "diffRecord 0" (diff p1 p1)
+                        diff p1 p1
                 in
                     Expect.equal diffRecord.middleSegmentInTarget []
         , test "(1) compute diff of p1 and p2 " <|
@@ -44,7 +44,7 @@ suite =
             \_ ->
                 let
                     diffRecord =
-                        Debug.log "diffRecord 2" (diff p1 p2)
+                        diff p1 p2
 
                     r2 =
                         renderDiff 0 String.toUpper diffRecord r1

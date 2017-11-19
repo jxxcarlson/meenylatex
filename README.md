@@ -1,10 +1,20 @@
+
+MiniLaTeX
+=========
+
 MiniLaTeX is a subset of LaTeX that can be rendered
 into pdf by standard tools such as `pdflatex` or
 into HTML by a suitable application, e.g.,
 <a href="https://jxxcarlson.github.io/app/minilatex/src/index.html">MiniLateX Demo</a>
 or <a href="http://www.knode.io">www.knode.io</a>.  For a technical discussion,
 see the Hackernoon article,
-<a href"https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08">Towards LaTeX in the Browser</a>
+<a href"https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08">Towards LaTeX in the Browser</a>.
+
+You can also experiment with MiniLaTeX using this <a href="https://ellie-app.com/3n2QNQdTMa1/0">Ellie</a>.
+
+
+Basics
+------
 
 Example:
 ```
@@ -28,6 +38,9 @@ In this case, there are no macro definitions; the rendered text is
 
   </p>
 ```
+
+API
+---
 
 If your applications simply renders strings of MiniLatex
 text to HTML, `Driver.renderMiniLatex` is all you
@@ -94,6 +107,9 @@ in the model, you will need to initialize that data
 structure.  For this use the 0-ary `emptyEditRecord` function,
 e.g., `model.editRecord = emptyEditRecord`.
 
+Summary
+-------
+
 To summarize, most work can be done with five points of contact
 with the MiniLatex API:
 
@@ -105,6 +121,8 @@ with the MiniLatex API:
 
 The above assumes `import MiniLatex.Driver as MiniLatex`
 
-For an example of an app in which MiniLatex is used, see https://ellie-app.com/pnwBbs4vqa1/9
 
-**Acknowledgments**  I wish to acknowledge the generous help that I have received throughout this project from the community at http://elmlang.slack.com, with special thanks to Ilias van Peer (@ilias).
+Acknowledgments
+---------------  
+
+I wish to acknowledge the generous help that I have received throughout this project from the community at http://elmlang.slack.com, with special thanks to Ilias van Peer (@ilias).

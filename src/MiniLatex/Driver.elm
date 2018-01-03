@@ -5,6 +5,7 @@ module MiniLatex.Driver
         , render
         , setup
         , update
+        , parse
         )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
@@ -19,6 +20,7 @@ module MiniLatex.Driver
 import MiniLatex.LatexDiffer as MiniLatexDiffer
 import MiniLatex.Differ as Differ exposing (EditRecord)
 import MiniLatex.LatexState exposing (emptyLatexState)
+import MiniLatex.Parser as MiniLatexParser exposing (LatexExpression)
 
 
 {-| The function call `render macros sourceTest` produces
@@ -47,6 +49,14 @@ then `render macros source` yields the HTML text
 render : String -> String -> String
 render macroDefinitions text =
     MiniLatexDiffer.initialize2 emptyLatexState text |> getRenderedText macroDefinitions
+
+
+parse : String -> List (List LatexExpression)
+parse text =
+    text
+        |> MiniLatexDiffer.prepareContentForLatex
+        |> Differ.paragraphify
+        |> List.map MiniLatexParser.parseParagraph
 
 
 pTags : EditRecord -> List String

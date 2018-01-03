@@ -10,6 +10,7 @@ import Html.Keyed as Keyed
 import Json.Encode as Encode
 import MiniLatex.Driver as MiniLatex
 import MiniLatex.Differ exposing (EditRecord)
+import MiniLatex.Parser exposing (LatexExpression)
 import Random
 
 
@@ -18,7 +19,7 @@ main =
 
 
 type alias Model =
-    { sourceText : String, editRecord : EditRecord, seed : Int }
+    { sourceText : String, parseResult : List (List LatexExpression), editRecord : EditRecord, seed : Int }
 
 
 init : ( Model, Cmd Msg )
@@ -27,6 +28,7 @@ init =
         model =
             { sourceText = initialSourceText
             , editRecord = MiniLatex.setup 0 initialSourceText
+            , parseResult = MiniLatex.parse initialSourceText
             , seed = 0
             }
     in
@@ -73,6 +75,7 @@ update msg model =
             in
                 ( { model
                     | editRecord = newEditRecord
+                    , parseResult = MiniLatex.parse model.sourceText
                   }
                 , Cmd.batch
                     [ sendToJs <| encodeData "fast" newEditRecord.idList
@@ -83,6 +86,7 @@ update msg model =
         ReRender ->
             ( { model
                 | editRecord = MiniLatex.setup model.seed model.sourceText
+                , parseResult = MiniLatex.parse model.sourceText
               }
             , sendToJs <| encodeData "full" []
             )
@@ -115,7 +119,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ style [ ( "width", "900px" ), ( "margin", "auto" ) ] ]
+    div [ style [ ( "width", "1350px" ), ( "margin", "auto" ) ] ]
         [ mainView model
         ]
 
@@ -125,6 +129,7 @@ mainView model =
         [ headerRibbon
         , editor model
         , renderedSource model
+        , showParseResult model
         , spacer 5
         , footerRibbon
         ]
@@ -185,6 +190,21 @@ renderedSource model =
         ]
 
 
+showParseResult model =
+    div [ style [ ( "float", "left" ) ] ]
+        [ spacer 20
+        , buttonBarBlank
+        , spacer 5
+        , parseResultPane model
+        ]
+
+
+parseResultPane model =
+    div
+        [ renderedSourceStyle ]
+        [ text (toString model.parseResult) ]
+
+
 renderedSourcePane model =
     let
         renderedText =
@@ -216,6 +236,12 @@ buttonBarRight =
         [ reRenderButton 0
         , fastRenderButton 0
         ]
+
+
+buttonBarBlank =
+    div
+        [ style [ ( "margin-left", "20px" ), ( "margin-top", "25px" ) ] ]
+        []
 
 
 reRenderButton offSet =
@@ -357,6 +383,7 @@ Beryllium & Be & 4 & 9.012 \\\\
 
 \\section{Appendix}
 
+Articles and code:
 
 \\begin{itemize}
 %%
@@ -372,8 +399,10 @@ To try out MiniLatex for real, sign up for a free account at
  \\href{http://www.knode.io}{www.knode.io}.  The app is still
  under development &mdash;  we need people to test it and give feedback.
 Also, contributions to help improve the open-source
-\\href{https://github.com/jxxcarlson/minilatex}{MiniLatex Parser-Renderer}
-are most welcome.
+MiniLatex Parser-Renderer are most welcome.
+Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}.
+The MiniLatex Demo as well as the app at knode.io are written in
+\\href{http://elm-lang.org/}{Elm}.
 
 Please send comments to jxxcarlson at gmail.
 """

@@ -1,4 +1,4 @@
-module MiniLatex.LatexDiffer exposing (initialize, initialize2, safeUpdate)
+module MiniLatex.LatexDiffer exposing (initialize, initialize2, safeUpdate, prepareContentForLatex)
 
 import MiniLatex.Accumulator as Accumulator
 import MiniLatex.Differ as Differ exposing (EditRecord)

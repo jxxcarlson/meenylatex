@@ -41,7 +41,7 @@ init =
             , editRecord = MiniLatex.setup 0 initialSourceText
             , parseResult = MiniLatex.parse initialSourceText
             , seed = 0
-            , configuration = ShowParseResults
+            , configuration = Standard
             }
     in
         ( model, Random.generate NewSeed (Random.int 1 10000) )
@@ -55,6 +55,7 @@ type Msg
     | Restore
     | GenerateSeed
     | NewSeed Int
+    | ToggleConfiguration
 
 
 port sendToJs : Encode.Value -> Cmd msg
@@ -127,6 +128,14 @@ update msg model =
 
         NewSeed newSeed ->
             ( { model | seed = newSeed }, Cmd.none )
+
+        ToggleConfiguration ->
+            case model.configuration of
+                ShowParseResults ->
+                    ( { model | configuration = Standard }, Cmd.none )
+
+                Standard ->
+                    ( { model | configuration = ShowParseResults }, Cmd.none )
 
 
 appWidth : Configuration -> String
@@ -247,7 +256,7 @@ prettyPrint parseResult =
 
 parseResultPane model =
     pre
-        [ renderedSourceStyle ]
+        [ parseResultsStyle ]
         [ text (prettyPrint model.parseResult) ]
 
 
@@ -281,13 +290,14 @@ buttonBarRight =
         [ style [ ( "margin-left", "20px" ) ] ]
         [ reRenderButton 0
         , fastRenderButton 0
+        , toggleConfigButton 0
         ]
 
 
 buttonBarBlank =
     div
-        [ style [ ( "margin-left", "20px" ), ( "margin-top", "12.5px" ) ] ]
-        []
+        [ style [ ( "margin-left", "20px" ), ( "margin-top", "0" ) ] ]
+        [ parseTitleButton 0 ]
 
 
 reRenderButton offSet =
@@ -304,6 +314,14 @@ resetButton offSet =
 
 restoreButton offSet =
     button [ onClick Restore, buttonStyle offSet ] [ text "Restore" ]
+
+
+toggleConfigButton offSet =
+    button [ onClick ToggleConfiguration, buttonStyleWide offSet ] [ text "Toggle display" ]
+
+
+parseTitleButton offSet =
+    button [ buttonStyleWide offSet ] [ text "Parse results" ]
 
 
 
@@ -354,6 +372,25 @@ buttonStyle offSet =
             ]
 
 
+buttonStyleWide : Int -> Html.Attribute msg
+buttonStyleWide offSet =
+    let
+        realOffset =
+            offSet + 0 |> toString |> \x -> x ++ "px"
+    in
+        style
+            [ ( "backgroundColor", "rgb(100,100,200)" )
+            , ( "color", "white" )
+            , ( "width", "190px" )
+            , ( "height", "25px" )
+            , ( "margin-left", realOffset )
+            , ( "margin-right", "8px" )
+            , ( "font-size", "9pt" )
+            , ( "text-align", "center" )
+            , ( "border", "none" )
+            ]
+
+
 labelStyle =
     style
         [ ( "margin-top", "5px" )
@@ -371,11 +408,27 @@ renderedSourceStyle =
     textStyle "400px" "600px" "20px" "#eee"
 
 
+parseResultsStyle =
+    textStyle2 "400px" "600px" "20px" "#eee"
+
+
 textStyle width height offset color =
     style
         [ ( "width", width )
         , ( "height", height )
         , ( "padding", "15px" )
+        , ( "margin-left", offset )
+        , ( "background-color", color )
+        , ( "overflow", "scroll" )
+        ]
+
+
+textStyle2 width height offset color =
+    style
+        [ ( "width", width )
+        , ( "height", height )
+        , ( "padding", "15px" )
+        , ( "margin-top", "0" )
         , ( "margin-left", offset )
         , ( "background-color", color )
         , ( "overflow", "scroll" )

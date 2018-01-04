@@ -51,8 +51,8 @@ renderString parser latexState str =
                 Ok latexExpression ->
                     render latexState latexExpression
 
-                Err _ ->
-                    "PARSE ERROR"
+                Err error ->
+                    "Error: " ++ (toString error)
     in
         renderOutput
 
@@ -98,35 +98,7 @@ render latexState latexExpression =
             renderLatexList latexState args
 
         LXString str ->
-            xRenderString str
-
-
-xRenderString str =
-    str
-
-
-spaceify str =
-    let
-        lastChar =
-            String.right 1 str
-
-        firstChar =
-            String.left 1 str
-    in
-        if List.member str [ ".", ",", "?", "!", ";", ":" ] then
             str
-        else if List.member firstChar [ ".", ",", "?", "!", ";", ":" ] then
-            str
-        else
-            " " ++ str
-
-
-
-{- RENDER ELEMENTS -}
--- renderLatexList : LatexState -> List LatexExpression -> String
--- renderLatexList latexState args =
---     args |> List.map (render latexState) |> List.map spaceify |> String.join ("")
-{- New code -}
 
 
 renderLatexList : LatexState -> List LatexExpression -> String
@@ -568,7 +540,7 @@ renderHRef latexState args =
         label =
             renderArg 1 emptyLatexState args
     in
-        " <a href=\"" ++ url ++ "\" target=_blank>" ++ label ++ "</a>"
+        "<a href=\"" ++ url ++ "\" target=_blank>" ++ label ++ "</a>"
 
 
 renderIFrame : LatexState -> List LatexExpression -> String

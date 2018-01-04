@@ -286,7 +286,7 @@ buttonBarRight =
 
 buttonBarBlank =
     div
-        [ style [ ( "margin-left", "20px" ), ( "margin-top", "25px" ) ] ]
+        [ style [ ( "margin-left", "20px" ), ( "margin-top", "12.5px" ) ] ]
         []
 
 

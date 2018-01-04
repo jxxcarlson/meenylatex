@@ -244,7 +244,7 @@ logicalParagraphify text =
         lastState =
             logicalParagraphParse text
     in
-        lastState.paragraphList |> List.filter (\x -> x /= "")
+        lastState.paragraphList ++ [ lastState.currentParagraph ] |> List.filter (\x -> x /= "")
 
 
 paragraphify : String -> List String

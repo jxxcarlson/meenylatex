@@ -17,8 +17,8 @@ module MiniLatex.Driver
 
 -}
 
-import MiniLatex.LatexDiffer as MiniLatexDiffer
 import MiniLatex.Differ as Differ exposing (EditRecord)
+import MiniLatex.LatexDiffer as MiniLatexDiffer
 import MiniLatex.LatexState exposing (emptyLatexState)
 import MiniLatex.Parser as MiniLatexParser exposing (LatexExpression)
 
@@ -55,7 +55,7 @@ parse : String -> List (List LatexExpression)
 parse text =
     text
         |> MiniLatexDiffer.prepareContentForLatex
-        |> Differ.paragraphify
+        |> Differ.logicalParagraphify
         |> List.map MiniLatexParser.parseParagraph
 
 
@@ -82,8 +82,8 @@ return a string representing the HTML of the paragraph list
 of the editRecord. Append the macroDefinitions for use
 by MathJax.
 -}
-getRenderedText : String -> EditRecord -> String
-getRenderedText macroDefinitions editRecord =
+getRenderedText2 : String -> EditRecord -> String
+getRenderedText2 macroDefinitions editRecord =
     let
         paragraphs =
             editRecord.renderedParagraphs
@@ -94,6 +94,20 @@ getRenderedText macroDefinitions editRecord =
         List.map2 (\para pTag -> pTag ++ "\n" ++ para ++ "\n</p>") paragraphs pTagList
             |> String.join "\n\n"
             |> (\x -> x ++ "\n\n" ++ macroDefinitions)
+
+
+{-| This version of getRenderedText ignores the idList.
+This give better mathJax performance.
+-}
+getRenderedText : String -> EditRecord -> String
+getRenderedText macroDefinitions editRecord =
+    let
+        paragraphs =
+            editRecord.renderedParagraphs
+    in
+        List.map (\para -> "<p>\n" ++ para ++ "\n</p>") paragraphs
+            |> String.join "\n\n"
+            |> (\x -> macroDefinitions ++ "\n\n" ++ x)
 
 
 {-| Create an EditRecord from a string of MiniLaTeX text:

@@ -20,7 +20,7 @@ initialize2 latexState text =
         paragraphs =
             text
                 |> prepareContentForLatex
-                |> Differ.paragraphify
+                |> Differ.logicalParagraphify
 
         ( latexExpressionList, latexState1 ) =
             paragraphs

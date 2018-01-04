@@ -1,8 +1,8 @@
 module MiniLatex.Parser exposing (..)
 
-import Parser exposing (..)
 import Dict
 import List.Extra
+import Parser exposing (..)
 
 
 {- ELLIE: https://ellie-app.com/pcB5b3BPfa1/0
@@ -27,7 +27,7 @@ type LatexExpression
 
 defaultLatexList : LatexExpression
 defaultLatexList =
-    LatexList ([ LXString "Parse Error" ])
+    LatexList [ LXString "Parse Error" ]
 
 
 defaultLatexExpression : List LatexExpression
@@ -214,9 +214,10 @@ displayMathDollar : Parser LatexExpression
 displayMathDollar =
     inContext "display math" <|
         succeed DisplayMath
+            |. spaces
             |. symbol "$$"
             |= parseUntil "$$"
-            |. ws
+            |. spaces
 
 
 displayMathBrackets : Parser LatexExpression
@@ -261,7 +262,7 @@ arg : Parser LatexExpression
 arg =
     succeed identity
         |. keyword "{"
-        |= repeat zeroOrMore (oneOf [ words2, inlineMath2, (lazy (\_ -> macro)) ])
+        |= repeat zeroOrMore (oneOf [ words2, inlineMath2, lazy (\_ -> macro) ])
         |. symbol "}"
         |> map LatexList
 
@@ -346,12 +347,12 @@ environmentOfType envType =
             "\\end{" ++ envType ++ "}"
 
         envKind =
-            if List.member envType [ "equation", "align", "eqnarray", "verbatim" ] then
+            if List.member envType [ "equation", "align", "eqnarray", "verbatim", "verse" ] then
                 "mathJax"
             else
                 envType
     in
-        (environmentParser envKind) endWord envType
+        environmentParser envKind endWord envType
 
 
 
@@ -460,4 +461,12 @@ beginWord =
     succeed identity
         |. ignore zeroOrMore ((==) ' ')
         |. symbol "\\begin{"
+        |= parseUntil "}"
+
+
+endWord : Parser String
+endWord =
+    succeed identity
+        |. ignore zeroOrMore ((==) ' ')
+        |. symbol "\\end{"
         |= parseUntil "}"

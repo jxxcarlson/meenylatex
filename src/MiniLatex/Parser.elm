@@ -45,8 +45,11 @@ parseParagraph text =
             Ok (LatexList list) ->
                 list
 
+            Err error ->
+                [ LXString ("<strong>Error:</strong> " ++ "<span>" ++ (toString error.problem) ++ " <strong>in</strong></span><p>" ++ (toString error.source) ++ "</p>") ]
+
             _ ->
-                []
+                [ LXString "yada!" ]
 
 
 

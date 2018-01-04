@@ -141,6 +141,9 @@ nextState line parserState =
         ( InBlock arg, Text ) ->
             InBlock arg
 
+        ( InBlock arg, BeginBlock arg2 ) ->
+            InBlock arg
+
         ( InBlock arg1, EndBlock arg2 ) ->
             if arg1 == arg2 then
                 Start
@@ -195,6 +198,9 @@ updateParserRecord line parserRecord =
     let
         state2 =
             nextState line parserRecord.state
+
+        _ =
+            Debug.log "nextState" state2
     in
         case state2 of
             Start ->

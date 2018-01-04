@@ -12,6 +12,7 @@ import MiniLatex.Driver as MiniLatex
 import MiniLatex.Differ exposing (EditRecord)
 import MiniLatex.Parser exposing (LatexExpression)
 import Random
+import String.Extra
 
 
 main =
@@ -19,7 +20,17 @@ main =
 
 
 type alias Model =
-    { sourceText : String, parseResult : List (List LatexExpression), editRecord : EditRecord, seed : Int }
+    { sourceText : String
+    , parseResult : List (List LatexExpression)
+    , editRecord : EditRecord
+    , seed : Int
+    , configuration : Configuration
+    }
+
+
+type Configuration
+    = Standard
+    | ShowParseResults
 
 
 init : ( Model, Cmd Msg )
@@ -30,6 +41,7 @@ init =
             , editRecord = MiniLatex.setup 0 initialSourceText
             , parseResult = MiniLatex.parse initialSourceText
             , seed = 0
+            , configuration = ShowParseResults
             }
     in
         ( model, Random.generate NewSeed (Random.int 1 10000) )
@@ -117,14 +129,43 @@ update msg model =
             ( { model | seed = newSeed }, Cmd.none )
 
 
+appWidth : Configuration -> String
+appWidth configuration =
+    case configuration of
+        Standard ->
+            "900px"
+
+        ShowParseResults ->
+            "1350px"
+
+
 view : Model -> Html Msg
 view model =
-    div [ style [ ( "width", "1350px" ), ( "margin", "auto" ) ] ]
+    div [ style [ ( "width", appWidth model.configuration ), ( "margin", "auto" ) ] ]
         [ mainView model
         ]
 
 
 mainView model =
+    case model.configuration of
+        Standard ->
+            standardView model
+
+        ShowParseResults ->
+            parseResultsView model
+
+
+standardView model =
+    div []
+        [ headerRibbon
+        , editor model
+        , renderedSource model
+        , spacer 5
+        , footerRibbon
+        ]
+
+
+parseResultsView model =
     div []
         [ headerRibbon
         , editor model
@@ -199,10 +240,15 @@ showParseResult model =
         ]
 
 
+prettyPrint : List (List LatexExpression) -> String
+prettyPrint parseResult =
+    parseResult |> List.map toString |> List.map (String.Extra.replace " " "\n ") |> String.join "\n\n"
+
+
 parseResultPane model =
-    div
+    pre
         [ renderedSourceStyle ]
-        [ text (toString model.parseResult) ]
+        [ text (prettyPrint model.parseResult) ]
 
 
 renderedSourcePane model =

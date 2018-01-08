@@ -103,7 +103,6 @@ render latexState latexExpression =
 
 renderLatexList : LatexState -> List LatexExpression -> String
 renderLatexList latexState args =
-    -- args |> List.map (render latexState) |> List.map spaceify |> String.join ("")
     args |> List.map (render latexState) |> joinList
 
 
@@ -195,11 +194,13 @@ renderEnvironmentDict =
     Dict.fromList
         [ ( "align", \x y -> renderAlignEnvironment x y )
         , ( "center", \x y -> renderCenterEnvironment x y )
+        , ( "comment", \x y -> renderCommentEnvironment x y )
         , ( "indent", \x y -> renderIndentEnvironment x y )
         , ( "enumerate", \x y -> renderEnumerate x y )
         , ( "eqnarray", \x y -> renderEqnArray x y )
         , ( "equation", \x y -> renderEquationEnvironment x y )
         , ( "itemize", \x y -> renderItemize x y )
+        , ( "listing", \x y -> renderListing x y )
         , ( "macros", \x y -> renderMacros x y )
         , ( "quotation", \x y -> renderQuotation x y )
         , ( "tabular", \x y -> renderTabular x y )
@@ -276,6 +277,10 @@ renderCenterEnvironment latexState body =
             render latexState body
     in
         "\n<div class=\"center\" >\n" ++ r ++ "\n</div>\n"
+
+
+renderCommentEnvironment latexState body =
+    ""
 
 
 renderEquationEnvironment latexState body =
@@ -390,6 +395,36 @@ renderVerbatim latexState body =
     "\n<pre class=\"verbatim\">" ++ (render latexState body) ++ "</pre>\n"
 
 
+renderListing latexState body =
+    let
+        text =
+            render latexState body
+    in
+        "\n<pre class=\"verbatim\">" ++ (addLineNumbers text) ++ "</pre>\n"
+
+
+addLineNumbers text =
+    text
+        |> String.trim
+        |> String.split "\n"
+        |> List.foldl addNumberedLine ( 0, [] )
+        |> Tuple.second
+        |> List.reverse
+        |> String.join "\n"
+
+
+addNumberedLine line data =
+    let
+        ( k, lines ) =
+            data
+    in
+        ( k + 1, [ numberedLine (k + 1) line ] ++ lines )
+
+
+numberedLine k line =
+    (String.padLeft 5 ' ' (toString k)) ++ "  " ++ line
+
+
 
 {- MACROS: DISPATCHERS AND HELPERS -}
 
@@ -401,6 +436,7 @@ renderMacroDict =
         , ( "bigskip", \x y -> renderBigSkip x y )
         , ( "cite", \x y -> renderCite x y )
         , ( "code", \x y -> renderCode x y )
+        , ( "comment", \x y -> renderInlineComment x y )
         , ( "ellie", \x y -> renderEllie x y )
         , ( "emph", \x y -> renderItalic x y )
         , ( "eqref", \x y -> renderEqRef x y )
@@ -486,7 +522,16 @@ renderCite latexState args =
 
 renderCode : LatexState -> List LatexExpression -> String
 renderCode latexState args =
-    " <span class=\"code\">" ++ (renderArg 0 latexState args) ++ "</span>"
+    let
+        arg =
+            renderArg 0 latexState args
+    in
+        " <span class=\"code\">" ++ arg ++ "</span>"
+
+
+renderInlineComment : LatexState -> List LatexExpression -> String
+renderInlineComment latexState args =
+    ""
 
 
 renderEllie : LatexState -> List LatexExpression -> String

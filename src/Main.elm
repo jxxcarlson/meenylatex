@@ -22,6 +22,7 @@ main =
 type alias Model =
     { sourceText : String
     , parseResult : List (List LatexExpression)
+    , hasMathResult : List Bool
     , editRecord : EditRecord
     , seed : Int
     , configuration : Configuration
@@ -36,10 +37,14 @@ type Configuration
 init : ( Model, Cmd Msg )
 init =
     let
+        parseResult =
+            MiniLatex.parse initialSourceText
+
         model =
             { sourceText = initialSourceText
             , editRecord = MiniLatex.setup 0 initialSourceText
-            , parseResult = MiniLatex.parse initialSourceText
+            , parseResult = parseResult
+            , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.Parser.listHasMath parseResult)
             , seed = 0
             , configuration = Standard
             }
@@ -85,10 +90,17 @@ update msg model =
             let
                 newEditRecord =
                     MiniLatex.update model.seed model.editRecord model.sourceText
+
+                parseResult =
+                    MiniLatex.parse model.sourceText
+
+                hasMathResult =
+                    Debug.log "hasMathResult" (List.map MiniLatex.Parser.listHasMath parseResult)
             in
                 ( { model
                     | editRecord = newEditRecord
-                    , parseResult = MiniLatex.parse model.sourceText
+                    , parseResult = parseResult
+                    , hasMathResult = hasMathResult
                   }
                 , Cmd.batch
                     [ sendToJs <| encodeData "fast" newEditRecord.idList
@@ -245,7 +257,9 @@ showParseResult model =
         [ spacer 20
         , buttonBarBlank
         , spacer 5
-        , parseResultPane model
+
+        -- , parseResultPane model
+        , rawRenderedSourcePane model
         ]
 
 
@@ -258,6 +272,16 @@ parseResultPane model =
     pre
         [ parseResultsStyle ]
         [ text (prettyPrint model.parseResult) ]
+
+
+rawRenderedSourcePane model =
+    let
+        renderedText =
+            MiniLatex.getRenderedText "" model.editRecord
+    in
+        pre
+            [ parseResultsStyle ]
+            [ text renderedText ]
 
 
 renderedSourcePane model =
@@ -479,6 +503,25 @@ Beryllium & Be & 4 & 9.012 \\\\
 \\end{tabular}
 
 \\image{http://psurl.s3.amazonaws.com/images/jc/propagator_t=2-6feb.png}{Free particle propagator}{width: 300, align: center}
+
+
+Note that in the source of the listing below,
+there are no line numbers.
+
+\\strong{MiniLaTeX Abstract Syntax Tree}
+
+\\begin{listing}
+type LatexExpression
+    = LXString String
+    | Comment String
+    | Item Int LatexExpression
+    | InlineMath String
+    | DisplayMath String
+    | Macro String (List LatexExpression)
+    | Environment String LatexExpression
+    | LatexList (List LatexExpression)
+\\end{listing}
+
 
 \\section{Appendix}
 

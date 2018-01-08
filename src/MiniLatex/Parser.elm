@@ -25,6 +25,44 @@ type LatexExpression
     | LatexList (List LatexExpression)
 
 
+listHasMath : List LatexExpression -> Bool
+listHasMath list =
+    list |> List.foldr (\x acc -> hasMath x || acc) False
+
+
+hasMath : LatexExpression -> Bool
+hasMath expr =
+    case expr of
+        LXString str ->
+            False
+
+        Comment str ->
+            False
+
+        Item k expr ->
+            hasMath expr
+
+        InlineMath str ->
+            True
+
+        DisplayMath str ->
+            True
+
+        Macro str expr ->
+            expr |> List.foldr (\x acc -> hasMath x || acc) False
+
+        Environment str expr ->
+            envHasMath str expr
+
+        LatexList list ->
+            list |> List.foldr (\x acc -> hasMath x || acc) False
+
+
+envHasMath : String -> LatexExpression -> Bool
+envHasMath envType expr =
+    List.member envType [ "equation", "align", "eqnarray" ] || hasMath expr
+
+
 defaultLatexList : LatexExpression
 defaultLatexList =
     LatexList [ LXString "Parse Error" ]
@@ -41,15 +79,15 @@ parseParagraph text =
         expr =
             Parser.run latexList text
     in
-        case expr of
-            Ok (LatexList list) ->
-                list
+    case expr of
+        Ok (LatexList list) ->
+            list
 
-            Err error ->
-                [ LXString ("<strong>Error:</strong> " ++ "<pre>" ++ (toString error.problem) ++ " </pre><strong>in </strong> </span><pre>" ++ error.source ++ "</pre>") ]
+        Err error ->
+            [ LXString ("<strong>Error:</strong> " ++ "<pre class=\"errormessage\">" ++ toString error.problem ++ " </pre><strong>in </strong> </span><pre class=\"errormessage\">" ++ error.source ++ "</pre>") ]
 
-            _ ->
-                [ LXString "yada!" ]
+        _ ->
+            [ LXString "yada!" ]
 
 
 
@@ -61,6 +99,7 @@ latexList : Parser LatexExpression
 latexList =
     inContext "latexList" <|
         (succeed identity
+            |. ws
             |= repeat oneOrMore parse
             |> map LatexList
         )
@@ -290,7 +329,7 @@ innerMacroName =
 allOrNothing : Parser a -> Parser a
 allOrNothing parser =
     inContext "allOrNothing" <|
-        (delayedCommitMap always parser (succeed ()))
+        delayedCommitMap always parser (succeed ())
 
 
 mustFail : Parser a -> Parser ()
@@ -328,7 +367,7 @@ reservedWord =
 environment : Parser LatexExpression
 environment =
     inContext "environment" <|
-        (lazy (\_ -> beginWord |> andThen environmentOfType))
+        lazy (\_ -> beginWord |> andThen environmentOfType)
 
 
 parseEnvirnomentDict =
@@ -352,18 +391,17 @@ environmentParser name =
 environmentOfType : String -> Parser LatexExpression
 environmentOfType envType =
     inContext "environmentOfType" <|
-        (let
+        let
             endWord =
                 "\\end{" ++ envType ++ "}"
 
             envKind =
-                if List.member envType [ "equation", "align", "eqnarray", "verbatim", "verse" ] then
+                if List.member envType [ "equation", "align", "eqnarray", "verbatim", "listing", "verse" ] then
                     "mathJax"
                 else
                     envType
-         in
-            environmentParser envKind endWord envType
-        )
+        in
+        environmentParser envKind endWord envType
 
 
 
@@ -451,12 +489,11 @@ tableRow =
 tableCellHelp : List LatexExpression -> Parser (List LatexExpression)
 tableCellHelp revCells =
     inContext "tableCellHelp" <|
-        (oneOf
+        oneOf
             [ nextCell
                 |> andThen (\c -> tableCellHelp (c :: revCells))
             , succeed (List.reverse revCells)
             ]
-        )
 
 
 nextCell : Parser LatexExpression

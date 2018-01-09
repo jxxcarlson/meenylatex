@@ -30,8 +30,9 @@ type alias Model =
 
 
 type Configuration
-    = Standard
-    | ShowParseResults
+    = StandardView
+    | ParseResultsView
+    | RawHtmlView
 
 
 init : ( Model, Cmd Msg )
@@ -46,7 +47,7 @@ init =
             , parseResult = parseResult
             , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.Parser.listHasMath parseResult)
             , seed = 0
-            , configuration = Standard
+            , configuration = StandardView
             }
     in
         ( model, Random.generate NewSeed (Random.int 1 10000) )
@@ -60,7 +61,9 @@ type Msg
     | Restore
     | GenerateSeed
     | NewSeed Int
-    | ToggleConfiguration
+    | ShowStandardView
+    | ShowParseResultsView
+    | ShowRawHtmlView
 
 
 port sendToJs : Encode.Value -> Cmd msg
@@ -141,22 +144,26 @@ update msg model =
         NewSeed newSeed ->
             ( { model | seed = newSeed }, Cmd.none )
 
-        ToggleConfiguration ->
-            case model.configuration of
-                ShowParseResults ->
-                    ( { model | configuration = Standard }, Cmd.none )
+        ShowStandardView ->
+            ( { model | configuration = StandardView }, Cmd.none )
 
-                Standard ->
-                    ( { model | configuration = ShowParseResults }, Cmd.none )
+        ShowParseResultsView ->
+            ( { model | configuration = ParseResultsView }, Cmd.none )
+
+        ShowRawHtmlView ->
+            ( { model | configuration = RawHtmlView }, Cmd.none )
 
 
 appWidth : Configuration -> String
 appWidth configuration =
     case configuration of
-        Standard ->
+        StandardView ->
             "900px"
 
-        ShowParseResults ->
+        ParseResultsView ->
+            "1350px"
+
+        RawHtmlView ->
             "1350px"
 
 
@@ -169,11 +176,14 @@ view model =
 
 mainView model =
     case model.configuration of
-        Standard ->
+        StandardView ->
             standardView model
 
-        ShowParseResults ->
+        ParseResultsView ->
             parseResultsView model
+
+        RawHtmlView ->
+            rawHtmlResultsView model
 
 
 standardView model =
@@ -192,6 +202,17 @@ parseResultsView model =
         , editor model
         , renderedSource model
         , showParseResult model
+        , spacer 5
+        , footerRibbon
+        ]
+
+
+rawHtmlResultsView model =
+    div []
+        [ headerRibbon
+        , editor model
+        , renderedSource model
+        , showHtmlResult model
         , spacer 5
         , footerRibbon
         ]
@@ -246,7 +267,7 @@ editorPane model =
 renderedSource model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , buttonBarRight
+        , buttonBarRight model
         , spacer 5
         , renderedSourcePane model
         ]
@@ -255,10 +276,17 @@ renderedSource model =
 showParseResult model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , buttonBarBlank
+        , buttonBarBlank model
         , spacer 5
+        , parseResultPane model
+        ]
 
-        -- , parseResultPane model
+
+showHtmlResult model =
+    div [ style [ ( "float", "left" ) ] ]
+        [ spacer 20
+        , buttonBarBlank model
+        , spacer 5
         , rawRenderedSourcePane model
         ]
 
@@ -304,48 +332,80 @@ renderedSourcePane model =
 buttonBarLeft =
     div
         [ style [ ( "margin-left", "20px" ) ] ]
-        [ resetButton 0
-        , restoreButton 0
+        [ resetButton 93
+        , restoreButton 93
+        , reRenderButton 93
+        , fastRenderButton 96
         ]
 
 
-buttonBarRight =
+buttonBarRight model =
     div
         [ style [ ( "margin-left", "20px" ) ] ]
-        [ reRenderButton 0
-        , fastRenderButton 0
-        , toggleConfigButton 0
+        [ viewLabel "View" 80
+        , standardViewButton model 108
+        , parseResultsViewButton model 108
+        , rawHtmlViewButton model 108
         ]
 
 
-buttonBarBlank =
+buttonBarBlank model =
     div
         [ style [ ( "margin-left", "20px" ), ( "margin-top", "0" ) ] ]
-        [ parseTitleButton 0 ]
+        [ optionaViewTitleButton model 190 ]
 
 
-reRenderButton offSet =
-    button [ onClick ReRender, buttonStyle offSet ] [ text "Render" ]
+reRenderButton width =
+    button [ onClick ReRender, buttonStyle colorBlue width ] [ text "Render" ]
 
 
-fastRenderButton offSet =
-    button [ onClick FastRender, buttonStyle offSet ] [ text "Fast Render" ]
+fastRenderButton width =
+    button [ onClick FastRender, buttonStyle colorBlue width ] [ text "Fast Render" ]
 
 
-resetButton offSet =
-    button [ onClick Reset, buttonStyle offSet ] [ text "Reset" ]
+resetButton width =
+    button [ onClick Reset, buttonStyle colorBlue width ] [ text "Clear" ]
 
 
-restoreButton offSet =
-    button [ onClick Restore, buttonStyle offSet ] [ text "Restore" ]
+restoreButton width =
+    button [ onClick Restore, buttonStyle colorBlue width ] [ text "Restore" ]
 
 
-toggleConfigButton offSet =
-    button [ onClick ToggleConfiguration, buttonStyleWide offSet ] [ text "Toggle display" ]
+standardViewButton model width =
+    if model.configuration == StandardView then
+        button [ onClick ShowStandardView, buttonStyle colorBlue width ] [ text "Basic" ]
+    else
+        button [ onClick ShowStandardView, buttonStyle colorLight width ] [ text "Basic" ]
 
 
-parseTitleButton offSet =
-    button [ buttonStyleWide offSet ] [ text "Parse results" ]
+parseResultsViewButton model width =
+    if model.configuration == ParseResultsView then
+        button [ onClick ShowParseResultsView, buttonStyle colorBlue width ] [ text "Parse Results" ]
+    else
+        button [ onClick ShowParseResultsView, buttonStyle colorLight width ] [ text "Parse Results" ]
+
+
+rawHtmlViewButton model width =
+    if model.configuration == RawHtmlView then
+        button [ onClick ShowRawHtmlView, buttonStyle colorBlue width ] [ text "Raw Html" ]
+    else
+        button [ onClick ShowRawHtmlView, buttonStyle colorLight width ] [ text "Raw Html" ]
+
+
+optionaViewTitleButton model width =
+    case model.configuration of
+        StandardView ->
+            button [ buttonStyle colorDark width ] [ text "Basic" ]
+
+        ParseResultsView ->
+            button [ buttonStyle colorDark width ] [ text "Parse results" ]
+
+        RawHtmlView ->
+            button [ buttonStyle colorDark width ] [ text "Raw HTML" ]
+
+
+viewLabel text_ width =
+    button [ buttonStyle colorDark width ] [ text text_ ]
 
 
 
@@ -377,37 +437,29 @@ ribbonStyle color =
         ]
 
 
-buttonStyle : Int -> Html.Attribute msg
-buttonStyle offSet =
-    let
-        realOffset =
-            offSet + 0 |> toString |> \x -> x ++ "px"
-    in
-        style
-            [ ( "backgroundColor", "rgb(100,100,200)" )
-            , ( "color", "white" )
-            , ( "width", "85px" )
-            , ( "height", "25px" )
-            , ( "margin-left", realOffset )
-            , ( "margin-right", "8px" )
-            , ( "font-size", "9pt" )
-            , ( "text-align", "center" )
-            , ( "border", "none" )
-            ]
+colorBlue =
+    "rgb(100,100,200)"
 
 
-buttonStyleWide : Int -> Html.Attribute msg
-buttonStyleWide offSet =
+colorLight =
+    "#88a"
+
+
+colorDark =
+    "#444"
+
+
+buttonStyle : String -> Int -> Html.Attribute msg
+buttonStyle color width =
     let
-        realOffset =
-            offSet + 0 |> toString |> \x -> x ++ "px"
+        realWidth =
+            width + 0 |> toString |> \x -> x ++ "px"
     in
         style
-            [ ( "backgroundColor", "rgb(100,100,200)" )
+            [ ( "backgroundColor", color )
             , ( "color", "white" )
-            , ( "width", "190px" )
+            , ( "width", realWidth )
             , ( "height", "25px" )
-            , ( "margin-left", realOffset )
             , ( "margin-right", "8px" )
             , ( "font-size", "9pt" )
             , ( "text-align", "center" )
@@ -505,7 +557,7 @@ Beryllium & Be & 4 & 9.012 \\\\
 \\image{http://psurl.s3.amazonaws.com/images/jc/propagator_t=2-6feb.png}{Free particle propagator}{width: 300, align: center}
 
 
-Note that in the source of the listing below,
+Note that in the \\italic{source} of the listing below,
 there are no line numbers.
 
 \\strong{MiniLaTeX Abstract Syntax Tree}

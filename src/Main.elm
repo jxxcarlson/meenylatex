@@ -26,6 +26,7 @@ type alias Model =
     , editRecord : EditRecord
     , seed : Int
     , configuration : Configuration
+    , lineViewStyle : LineViewStyle
     }
 
 
@@ -33,6 +34,11 @@ type Configuration
     = StandardView
     | ParseResultsView
     | RawHtmlView
+
+
+type LineViewStyle
+    = Horizontal
+    | Vertical
 
 
 init : ( Model, Cmd Msg )
@@ -48,6 +54,7 @@ init =
             , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.Parser.listHasMath parseResult)
             , seed = 0
             , configuration = StandardView
+            , lineViewStyle = Horizontal
             }
     in
         ( model, Random.generate NewSeed (Random.int 1 10000) )
@@ -64,6 +71,8 @@ type Msg
     | ShowStandardView
     | ShowParseResultsView
     | ShowRawHtmlView
+    | SetHorizontalView
+    | SetVerticalView
 
 
 port sendToJs : Encode.Value -> Cmd msg
@@ -152,6 +161,12 @@ update msg model =
 
         ShowRawHtmlView ->
             ( { model | configuration = RawHtmlView }, Cmd.none )
+
+        SetHorizontalView ->
+            ( { model | lineViewStyle = Horizontal }, Cmd.none )
+
+        SetVerticalView ->
+            ( { model | lineViewStyle = Vertical }, Cmd.none )
 
 
 appWidth : Configuration -> String
@@ -276,7 +291,7 @@ renderedSource model =
 showParseResult model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , buttonBarBlank model
+        , buttonBarParserResults model
         , spacer 5
         , parseResultPane model
         ]
@@ -285,21 +300,26 @@ showParseResult model =
 showHtmlResult model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , buttonBarBlank model
+        , buttonBarRawHtmlResults model
         , spacer 5
         , rawRenderedSourcePane model
         ]
 
 
-prettyPrint : List (List LatexExpression) -> String
-prettyPrint parseResult =
-    parseResult |> List.map toString |> List.map (String.Extra.replace " " "\n ") |> String.join "\n\n"
+prettyPrint : LineViewStyle -> List (List LatexExpression) -> String
+prettyPrint lineViewStyle parseResult =
+    case lineViewStyle of
+        Vertical ->
+            parseResult |> List.map toString |> List.map (String.Extra.replace " " "\n ") |> String.join "\n\n"
+
+        Horizontal ->
+            parseResult |> List.map toString |> String.join "\n\n"
 
 
 parseResultPane model =
     pre
         [ parseResultsStyle ]
-        [ text (prettyPrint model.parseResult) ]
+        [ text (prettyPrint model.lineViewStyle model.parseResult) ]
 
 
 rawRenderedSourcePane model =
@@ -349,10 +369,19 @@ buttonBarRight model =
         ]
 
 
-buttonBarBlank model =
+buttonBarRawHtmlResults model =
     div
         [ style [ ( "margin-left", "20px" ), ( "margin-top", "0" ) ] ]
         [ optionaViewTitleButton model 190 ]
+
+
+buttonBarParserResults model =
+    div
+        [ style [ ( "margin-left", "20px" ), ( "margin-top", "0" ) ] ]
+        [ optionaViewTitleButton model 190
+        , setHorizontalViewButton model 90
+        , setVerticalViewButton model 90
+        ]
 
 
 reRenderButton width =
@@ -369,6 +398,20 @@ resetButton width =
 
 restoreButton width =
     button [ onClick Restore, buttonStyle colorBlue width ] [ text "Restore" ]
+
+
+setHorizontalViewButton model width =
+    if model.lineViewStyle == Horizontal then
+        button [ onClick SetHorizontalView, buttonStyle colorBlue width ] [ text "Horizontal" ]
+    else
+        button [ onClick SetHorizontalView, buttonStyle colorLight width ] [ text "Horizontal" ]
+
+
+setVerticalViewButton model width =
+    if model.lineViewStyle == Vertical then
+        button [ onClick SetVerticalView, buttonStyle colorBlue width ] [ text "Vertical" ]
+    else
+        button [ onClick SetVerticalView, buttonStyle colorLight width ] [ text "Vertical" ]
 
 
 standardViewButton model width =

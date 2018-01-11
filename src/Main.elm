@@ -9,6 +9,7 @@ import Html.Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
 import Json.Encode as Encode
 import MiniLatex.Driver as MiniLatex
+import MiniLatex.HasMath
 import MiniLatex.Differ exposing (EditRecord)
 import MiniLatex.Parser exposing (LatexExpression)
 import Random
@@ -51,7 +52,7 @@ init =
             { sourceText = initialSourceText
             , editRecord = MiniLatex.setup 0 initialSourceText
             , parseResult = parseResult
-            , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.Parser.listHasMath parseResult)
+            , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.HasMath.listHasMath parseResult)
             , seed = 0
             , configuration = StandardView
             , lineViewStyle = Horizontal
@@ -107,7 +108,7 @@ update msg model =
                     MiniLatex.parse model.sourceText
 
                 hasMathResult =
-                    Debug.log "hasMathResult" (List.map MiniLatex.Parser.listHasMath parseResult)
+                    Debug.log "hasMathResult" (List.map MiniLatex.HasMath.listHasMath parseResult)
             in
                 ( { model
                     | editRecord = newEditRecord

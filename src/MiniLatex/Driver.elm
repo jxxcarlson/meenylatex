@@ -57,7 +57,7 @@ parse text =
     text
         |> MiniLatexDiffer.prepareContentForLatex
         |> Paragraph.logicalParagraphify
-        |> List.map MiniLatexParser.parseParagraph
+        |> List.map MiniLatexParser.parse
 
 
 pTags : EditRecord -> List String

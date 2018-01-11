@@ -12,7 +12,7 @@ import Parser exposing (..)
 -}
 
 
-{-| Types
+{-| The type for the Abstract syntax tree
 -}
 type LatexExpression
     = LXString String
@@ -25,11 +25,19 @@ type LatexExpression
     | LatexList (List LatexExpression)
 
 
+
+{- Has Math code -}
+
+
+{-| Determine whether a (List LatexExpression) has math text in it
+-}
 listHasMath : List LatexExpression -> Bool
 listHasMath list =
     list |> List.foldr (\x acc -> hasMath x || acc) False
 
 
+{-| Determine whether a LatexExpression has math text in it
+-}
 hasMath : LatexExpression -> Bool
 hasMath expr =
     case expr of
@@ -58,9 +66,15 @@ hasMath expr =
             list |> List.foldr (\x acc -> hasMath x || acc) False
 
 
+{-| Determine whether an environment has math in it
+-}
 envHasMath : String -> LatexExpression -> Bool
 envHasMath envType expr =
     List.member envType [ "equation", "align", "eqnarray" ] || hasMath expr
+
+
+
+{- End of Has Math code -}
 
 
 defaultLatexList : LatexExpression
@@ -91,10 +105,11 @@ parseParagraph text =
 
 
 
--- |> Result.withDefault defaultLatexExpression
 {- PARSER: TOP LEVEL -}
 
 
+{-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
+-}
 latexList : Parser LatexExpression
 latexList =
     inContext "latexList" <|
@@ -105,6 +120,9 @@ latexList =
         )
 
 
+{-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment
+|\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
+-}
 parse : Parser LatexExpression
 parse =
     oneOf
@@ -112,7 +130,7 @@ parse =
         , lazy (\_ -> environment)
         , displayMathDollar
         , displayMathBrackets
-        , inlineMath
+        , inlineMath ws
         , macro
         , words
         ]
@@ -150,28 +168,29 @@ word =
     inContext "word" <|
         succeed identity
             |. spaces
-            |= keep oneOrMore (\c -> not (c == ' ' || c == '\n' || c == '\\' || c == '$'))
-            |. ignore zeroOrMore (\c -> c == ' ' || c == '\n')
+            |= keep oneOrMore notSpecialCharacter
+            |. ws
+
+
+notSpecialCharacter : Char -> Bool
+notSpecialCharacter c =
+    not (c == ' ' || c == '\n' || c == '\\' || c == '$')
 
 
 {-| Like `word`, but after a word is recognized spaces, not spaces + newlines are consumed
 -}
-word2 : Parser String
-word2 =
-    inContext "word2" <|
+specialWord : Parser String
+specialWord =
+    inContext "specialWord" <|
         succeed identity
             |. spaces
-            |= keep oneOrMore (\c -> not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == '&'))
+            |= keep oneOrMore notSpecialTableorMacroCharacter
             |. spaces
 
 
-word2a : Parser String
-word2a =
-    inContext "word" <|
-        succeed identity
-            |. spaces
-            |= keep oneOrMore (\c -> not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}'))
-            |. spaces
+notSpecialTableorMacroCharacter : Char -> Bool
+notSpecialTableorMacroCharacter c =
+    not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == '&')
 
 
 words : Parser LatexExpression
@@ -190,7 +209,7 @@ words2 : Parser LatexExpression
 words2 =
     inContext "words2" <|
         (succeed identity
-            |= repeat oneOrMore word2
+            |= repeat oneOrMore specialWord
             |> map (String.join " ")
             |> map LXString
         )
@@ -217,7 +236,7 @@ item =
             |. ws
             |. keyword "\\item"
             |. spaces
-            |= repeat zeroOrMore (oneOf [ words2, inlineMath2, macro2 ])
+            |= repeat zeroOrMore (oneOf [ words2, inlineMath spaces, macro2 ])
             |. symbol "\n"
             |. spaces
             |> map (\x -> Item 1 (LatexList x))
@@ -228,24 +247,13 @@ item =
 {- MATHEMATICAL TEXT -}
 
 
-inlineMath : Parser LatexExpression
-inlineMath =
+inlineMath : Parser () -> Parser LatexExpression
+inlineMath wsParser =
     inContext "inline math" <|
         succeed InlineMath
             |. symbol "$"
             |= parseUntil "$"
-            |. ws
-
-
-{-| Like `inlineMath`, but only spaces, note spaces + newlines, are consumed after recognizing an element
--}
-inlineMath2 : Parser LatexExpression
-inlineMath2 =
-    inContext "inline math" <|
-        succeed InlineMath
-            |. symbol "$"
-            |= parseUntil "$"
-            |. spaces
+            |. wsParser
 
 
 displayMathDollar : Parser LatexExpression
@@ -301,7 +309,7 @@ arg =
     inContext "arg" <|
         (succeed identity
             |. keyword "{"
-            |= repeat zeroOrMore (oneOf [ words2, inlineMath2, lazy (\_ -> macro) ])
+            |= repeat zeroOrMore (oneOf [ words2, inlineMath spaces, lazy (\_ -> macro) ])
             |. symbol "}"
             |> map LatexList
         )
@@ -470,7 +478,7 @@ tableCell =
     inContext "tableCell" <|
         (succeed identity
             |. spaces
-            |= oneOf [ inlineMath2, words2 ]
+            |= oneOf [ inlineMath spaces, words2 ]
         )
 
 

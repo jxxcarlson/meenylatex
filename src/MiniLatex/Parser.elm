@@ -173,22 +173,12 @@ innerMacroName =
         succeed identity
             |. spaces
             |. symbol "\\"
-            |= keep zeroOrMore notMacroSpecialCharacter
+            |= keep oneOrMore notMacroSpecialCharacter
 
 
 notMacroSpecialCharacter : Char -> Bool
 notMacroSpecialCharacter c =
     not (c == '{' || c == ' ' || c == '\n')
-
-
-beginWord : Parser String
-beginWord =
-    inContext "beginWord" <|
-        (succeed identity
-            |. ignore zeroOrMore ((==) ' ')
-            |. symbol "\\begin{"
-            |= parseUntil "}"
-        )
 
 
 endWord : Parser String
@@ -269,24 +259,6 @@ texComment =
 
 
 
-{- ITEMIZED LISTS -}
-
-
-item : Parser LatexExpression
-item =
-    inContext "item" <|
-        (succeed identity
-            |. ws
-            |. keyword "\\item"
-            |. spaces
-            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces, macro spaces ])
-            |. symbol "\n"
-            |. spaces
-            |> map (\x -> Item 1 (LatexList x))
-        )
-
-
-
 {- MATHEMATICAL TEXT -}
 
 
@@ -355,27 +327,17 @@ arg =
 environment : Parser LatexExpression
 environment =
     inContext "environment" <|
-        lazy (\_ -> beginWord |> andThen environmentOfType)
+        lazy (\_ -> envName |> andThen environmentOfType)
 
 
-parseEnvironmentDict : Dict.Dict String (String -> String -> Parser LatexExpression)
-parseEnvironmentDict =
-    Dict.fromList
-        [ ( "enumerate", \endWord envType -> itemEnvironmentBody endWord envType )
-        , ( "itemize", \endWord envType -> itemEnvironmentBody endWord envType )
-        , ( "tabular", \endWord envType -> tabularEnvironmentBody endWord envType )
-        , ( "mathJax", \endWord envType -> mathJaxBody endWord envType )
-        ]
-
-
-environmentParser : String -> String -> String -> Parser LatexExpression
-environmentParser name =
-    case Dict.get name parseEnvironmentDict of
-        Just p ->
-            p
-
-        Nothing ->
-            standardEnvironmentBody
+envName : Parser String
+envName =
+    inContext "envName" <|
+        (succeed identity
+            |. spaces
+            |. symbol "\\begin{"
+            |= parseUntil "}"
+        )
 
 
 environmentOfType : String -> Parser LatexExpression
@@ -387,11 +349,31 @@ environmentOfType envType =
 
             envKind =
                 if List.member envType [ "equation", "align", "eqnarray", "verbatim", "listing", "verse" ] then
-                    "mathJax"
+                    "passThrough"
                 else
                     envType
         in
         environmentParser envKind endWord envType
+
+
+parseEnvironmentDict : Dict.Dict String (String -> String -> Parser LatexExpression)
+parseEnvironmentDict =
+    Dict.fromList
+        [ ( "enumerate", \endWord envType -> itemEnvironmentBody endWord envType )
+        , ( "itemize", \endWord envType -> itemEnvironmentBody endWord envType )
+        , ( "tabular", \endWord envType -> tabularEnvironmentBody endWord envType )
+        , ( "passThrough", \endWord envType -> passThroughBody endWord envType )
+        ]
+
+
+environmentParser : String -> String -> String -> Parser LatexExpression
+environmentParser name =
+    case Dict.get name parseEnvironmentDict of
+        Just p ->
+            p
+
+        Nothing ->
+            standardEnvironmentBody
 
 
 
@@ -412,6 +394,10 @@ standardEnvironmentBody endWord envType =
         )
 
 
+
+{- ITEMIZED LISTS -}
+
+
 itemEnvironmentBody : String -> String -> Parser LatexExpression
 itemEnvironmentBody endWord envType =
     inContext "itemEnvironmentBody" <|
@@ -423,6 +409,20 @@ itemEnvironmentBody endWord envType =
             |. ws
             |> map LatexList
             |> map (Environment envType)
+        )
+
+
+item : Parser LatexExpression
+item =
+    inContext "item" <|
+        (succeed identity
+            |. ws
+            |. keyword "\\item"
+            |. spaces
+            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces, macro spaces ])
+            |. symbol "\n"
+            |. spaces
+            |> map (\x -> Item 1 (LatexList x))
         )
 
 
@@ -444,9 +444,9 @@ This parser is used for envronments whose body is to be
 passed to MathJax for processing and also for the verbatim
 environment.
 -}
-mathJaxBody : String -> String -> Parser LatexExpression
-mathJaxBody endWord envType =
-    inContext "mathJaxBody" <|
+passThroughBody : String -> String -> Parser LatexExpression
+passThroughBody endWord envType =
+    inContext "passThroughBody" <|
         (succeed identity
             |= parseUntil endWord
             |. ws

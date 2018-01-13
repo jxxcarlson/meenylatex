@@ -565,7 +565,7 @@ initialSourceText =
 
 \\italic{This a MiniLatex test document.}
 See the article
-\\href{http://www.knode.io/#@public/445}{MiniLatex}
+\\href{http://www.knode.io/#@public/559}{MiniLatex}
 at \\href{http://www.knode.io}{www.knode.io} for more info.
 
 Feel free to edit and re-render the text on the left.

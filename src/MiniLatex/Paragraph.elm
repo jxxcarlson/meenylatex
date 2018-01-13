@@ -27,7 +27,7 @@ getBeginArg : String -> String
 getBeginArg line =
     let
         parseResult =
-            Parser.run MiniLatex.Parser.beginWord line
+            Parser.run MiniLatex.Parser.envName line
 
         arg =
             case parseResult of

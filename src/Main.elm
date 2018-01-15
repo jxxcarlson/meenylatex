@@ -654,9 +654,6 @@ Please send comments to jxxcarlson at gmail.
 
 Below
 are some of the current restrictions and limitations.
-The main work is to extend the parser.  Expanding the
-scope of \\code{render : LatexExpression -> String} is
-straightforward.
 
 \\begin{enumerate}
 
@@ -668,6 +665,7 @@ and left-justifies everything in the cell.
 \\end{enumerate}
 
 We are working on these and other issues  to expand the scope of MiniLatex.
+The project is still in the R&D phase -- we welcome comments (jxxcarlson at gmail)
 
 \\bigskip
 

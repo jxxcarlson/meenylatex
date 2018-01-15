@@ -647,17 +647,19 @@ Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}.
 The MiniLatex Demo as well as the app at knode.io are written in
 \\href{http://elm-lang.org/}{Elm}.  We also plan a Haskell version.
 
-\\strong{Technical Note.}
-Here is a \\italic{very rough} \\href{http://www.knode.io/#@public/628}{draft Grammar} for MiniLaTeX.
-The grammar is written mostly in EBNF.  However, there are a few
+Please send comments, bug reports, etc. to jxxcarlson at gmail.
+
+\\section{Technical Note}
+There is a \\italic{very rough} \\href{http://www.knode.io/#@public/628}{draft grammar}
+for MiniLaTeX, written mostly in EBNF.  However, there are a few
 productions, notably for enviroments, which are not context-free.
 Recall that in a context-free grammar, all productions are
 of the form $A \\Rightarrow \\beta$, where $A$ is a terminal symbol
 and $\\beta$ is a sequence of terminals and nonterminals.  There
 are some productions of the form $A\\beta \\Rightarrow \\gamma$,
-where $\x08eta$ is a terminal symbol.
+where $\\beta$ is a terminal symbol.  These are
+context-sensitive productions, with $\\beta$ providing the context.
 
-Please send comments to jxxcarlson at gmail.
 
 
 \\section{Restrictions and Limitations}

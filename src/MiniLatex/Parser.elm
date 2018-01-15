@@ -401,27 +401,27 @@ standardEnvironmentBody endWord envType =
 itemEnvironmentBody : String -> String -> Parser LatexExpression
 itemEnvironmentBody endWord envType =
     inContext "itemEnvironmentBody" <|
-        (succeed identity
+        let
+            beginSymbol =
+                ""
+        in
+        succeed identity
             |. ws
-            |= repeat zeroOrMore (oneOf [ item, texComment ])
-            |. ws
-            |. symbol endWord
+            |. symbol "\\item"
+            |= repeat zeroOrMore (item endWord)
             |. ws
             |> map LatexList
             |> map (Environment envType)
-        )
 
 
-item : Parser LatexExpression
-item =
+item : String -> Parser LatexExpression
+item endWord =
     inContext "item" <|
         (succeed identity
+            |. spaces
+            |= repeat zeroOrMore (oneOf [ words, inlineMath ws, macro ws ])
             |. ws
-            |. keyword "\\item"
-            |. spaces
-            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces, macro spaces ])
-            |. symbol "\n"
-            |. spaces
+            |. oneOf [ symbol "\\item", symbol endWord ]
             |> map (\x -> Item 1 (LatexList x))
         )
 

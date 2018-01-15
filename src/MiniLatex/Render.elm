@@ -402,7 +402,11 @@ renderTableBody body =
 
 
 renderVerbatim latexState body =
-    "\n<pre class=\"verbatim\">" ++ render latexState body ++ "</pre>\n"
+    let
+        body2 =
+            render latexState body |> String.Extra.replace ">" "&gt;" |> String.Extra.replace "<" "&lt;"
+    in
+    "\n<pre class=\"verbatim\">" ++ body2 ++ "</pre>\n"
 
 
 renderListing latexState body =

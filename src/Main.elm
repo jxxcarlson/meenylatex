@@ -604,7 +604,7 @@ Beryllium & Be & 4 & 9.012 \\\\
 Note that in the \\italic{source} of the listing below,
 there are no line numbers.
 
-\\strong{MiniLaTeX Abstract Syntax Tree}
+\\strong{MiniLaTeX Abstract Syntax Tree (AST)}
 
 \\begin{listing}
 type LatexExpression
@@ -618,29 +618,59 @@ type LatexExpression
     | LatexList (List LatexExpression)
 \\end{listing}
 
+The MiniLaTeX parser reads text and produces
+an AST.  A rendering function converts the AST
+into HTML.  One could easily write
+functions \\code{render: LatexExpression -> String}
+to make other conversions.
 
-\\section{Appendix}
+\\section{More about MiniLaTeX}
 
 Articles and code:
 
 \\begin{itemize}
-%%
+
 \\item \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards LaTeX in the Browser}
-%%
+
 \\item \\href{https://github.com/jxxcarlson/minilatexDemo}{Code for the Demo App}
-%%
+
 \\item \\href{http://package.elm-lang.org/packages/jxxcarlson/minilatex/latest}{The MiniLatex Elm Library}
-%%
+
 \\end{itemize}
 
 To try out MiniLatex for real, sign up for a free account at
  \\href{http://www.knode.io}{www.knode.io}.  The app is still
  under development &mdash;  we need people to test it and give feedback.
-Also, contributions to help improve the open-source
+Contributions to help improve the open-source
 MiniLatex Parser-Renderer are most welcome.
 Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}.
 The MiniLatex Demo as well as the app at knode.io are written in
-\\href{http://elm-lang.org/}{Elm}.
+\\href{http://elm-lang.org/}{Elm}.  We also plan a Haskell version.
 
 Please send comments to jxxcarlson at gmail.
+
+
+\\section{Restrictions and Limitations}
+
+Below
+are some of the current restrictions and limitations.
+The main work is to extend the parser.  Expanding the
+scope of \\code{render : LatexExpression -> String} is
+straightforward.
+
+\\begin{enumerate}
+
+\\item The enumerate and itemize environments cannot be nested.
+
+\\item The tabular environment ignores formatting information
+and left-justifies everything in the cell.
+
+\\end{enumerate}
+
+We are working on these and other issues  to expand the scope of MiniLatex.
+
+\\bigskip
+
+\\image{https://cdn-images-1.medium.com/max/1200/1*HlpVE5TFBUp17ua1AdiKpw.gif}{The way we used to do it.}{align: center}
+
 """

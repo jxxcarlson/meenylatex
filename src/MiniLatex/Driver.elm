@@ -13,7 +13,7 @@ module MiniLatex.Driver
 
 # API
 
-@docs render, setup, getRenderedText, update, emptyEditRecord
+@docs render, setup, getRenderedText, parse, update, emptyEditRecord
 
 -}
 
@@ -52,6 +52,8 @@ render macroDefinitions text =
     MiniLatexDiffer.initialize emptyLatexState text |> getRenderedText macroDefinitions
 
 
+{-| Parse the given text and return an AST represeting it.
+-}
 parse : String -> List (List LatexExpression)
 parse text =
     text

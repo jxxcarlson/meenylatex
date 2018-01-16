@@ -122,12 +122,19 @@ update msg model =
                 )
 
         ReRender ->
-            ( { model
-                | editRecord = MiniLatex.setup model.seed model.sourceText
-                , parseResult = MiniLatex.parse model.sourceText
-              }
-            , sendToJs <| encodeData "full" []
-            )
+            let
+                editRecord =
+                    MiniLatex.setup model.seed model.sourceText
+
+                _ =
+                    Debug.log "TOC" editRecord.latexState.tableOfContents
+            in
+                ( { model
+                    | editRecord = editRecord
+                    , parseResult = MiniLatex.parse model.sourceText
+                  }
+                , sendToJs <| encodeData "full" []
+                )
 
         Reset ->
             ( { model
@@ -561,6 +568,18 @@ textStyle2 width height offset color =
 
 initialSourceText =
     """
+\\title{MiniLaTeX Demo}
+
+\\author{James Carlson}
+
+\\email{jxxcarlson at gmail}
+
+\\date{January 16, 2018}
+
+\\maketitle
+
+\\tableofcontents
+
 \\section{Introduction}
 
 \\italic{This a MiniLatex test document.}
@@ -662,19 +681,23 @@ context-sensitive productions, with $\\beta$ providing the context.
 
 
 
-\\section{Restrictions and Limitations}
+\\section{Restrictions, Limitations, and Todos}
 
 Below
 are some of the current restrictions and limitations.
 
 \\begin{enumerate}
 
-\\item The enumerate and itemize environments cannot be nested.
+\\item The enumerate and itemize environments cannot be nested (but can containe inline math and macros).
 
 \\item The tabular environment ignores formatting information
 and left-justifies everything in the cell.
 
+\\item We plan to make the table of contents entries into live links
+in the next few days.
+
 \\end{enumerate}
+
 
 We are working on these and other issues  to expand the scope of MiniLatex.
 The project is still in the R&D phase -- we welcome comments (jxxcarlson at gmail)

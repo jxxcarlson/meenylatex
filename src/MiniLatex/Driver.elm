@@ -79,6 +79,9 @@ getRenderedText macroDefinitions editRecord =
         _ =
             Debug.log "idList" editRecord.idList
 
+        _ =
+            Debug.log "latexState2" editRecord.latexState
+
         pTagList =
             Debug.log "pTags"
                 (pTags editRecord)

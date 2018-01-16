@@ -574,7 +574,9 @@ initialSourceText =
 
 \\email{jxxcarlson at gmail}
 
-\\date{January 16, 2018}
+\\date{November 13, 2017}
+
+\\revision{January 16, 2018}
 
 \\maketitle
 

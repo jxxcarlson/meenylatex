@@ -585,11 +585,14 @@ initialSourceText =
 \\section{Introduction}
 
 \\italic{This a MiniLatex test document.}
-See the article
-\\href{http://www.knode.io/#@public/559}{MiniLatex}
-at \\href{http://www.knode.io}{www.knode.io} for more info.
+For examples, see
+\\href{http://www.knode.io/#@public/559}{this article},
+or read the
+\\href{http://www.knode.io/#@public/525}{Technical Report}
+for more information.
 
-Feel free to edit and re-render the text on the left.
+Feel free to edit and re-render the text on the left and
+to experiment with the buttons above.
 
 \\section{Examples}
 

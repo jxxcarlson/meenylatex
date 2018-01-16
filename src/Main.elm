@@ -27,9 +27,13 @@ init =
         parseResult =
             MiniLatex.parse Source.initialText
 
+        editRecord =
+            MiniLatex.setup 0 Source.initialText
+
         model =
             { sourceText = Source.initialText
-            , editRecord = MiniLatex.setup 0 Source.initialText
+            , editRecord = editRecord
+            , textToExport = ""
             , parseResult = parseResult
             , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.HasMath.listHasMath parseResult)
             , seed = 0
@@ -49,7 +53,7 @@ encodeData model idList =
             Debug.log "idValueList"
                 (List.map Encode.string idList)
     in
-        [ ( "mode", Encode.string model )
+        [ ( "model", Encode.string model )
         , ( "idList", Encode.list idValueList )
         ]
             |> Encode.object
@@ -134,6 +138,9 @@ update msg model =
         ShowRawHtmlView ->
             ( { model | configuration = RawHtmlView }, Cmd.none )
 
+        ShowExportLatexView ->
+            ( { model | configuration = ExportLatexView }, Cmd.none )
+
         SetHorizontalView ->
             ( { model | lineViewStyle = Horizontal }, Cmd.none )
 
@@ -155,7 +162,11 @@ update msg model =
         Grammar ->
             useSource Source.grammar model
 
+        ExportLatex ->
+            exportLatex model
 
+
+useSource : String -> Model -> ( Model, Cmd Msg )
 useSource text model =
     ( { model
         | sourceText = text
@@ -163,6 +174,28 @@ useSource text model =
       }
     , sendToJs <| encodeData "full" []
     )
+
+
+exportLatex : Model -> ( Model, Cmd Msg )
+exportLatex model =
+    let
+        editRecord =
+            MiniLatex.setup model.seed model.sourceText
+
+        renderedText =
+            MiniLatex.getRenderedText "" editRecord
+
+        textToExport =
+            Debug.log "EXPORT"
+                (Source.htmlPrefix ++ renderedText ++ Source.htmlSuffix)
+    in
+        ( { model
+            | editRecord = editRecord
+            , textToExport = textToExport
+            , configuration = ExportLatexView
+          }
+        , Cmd.none
+        )
 
 
 appWidth : Configuration -> String
@@ -175,6 +208,9 @@ appWidth configuration =
             "1350px"
 
         RawHtmlView ->
+            "1350px"
+
+        ExportLatexView ->
             "1350px"
 
 
@@ -195,6 +231,9 @@ mainView model =
 
         RawHtmlView ->
             rawHtmlResultsView model
+
+        ExportLatexView ->
+            exportLatexView model
 
 
 standardView model =
@@ -224,6 +263,17 @@ rawHtmlResultsView model =
         , editor model
         , renderedSource model
         , showHtmlResult model
+        , spacer 5
+        , footerRibbon model
+        ]
+
+
+exportLatexView model =
+    div [ style [ ( "float", "left" ) ] ]
+        [ headerRibbon
+        , editor model
+        , renderedSource model
+        , showExportResult model
         , spacer 5
         , footerRibbon model
         ]

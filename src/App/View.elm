@@ -47,9 +47,6 @@ appWidth configuration =
         RawHtmlView ->
             "1350px"
 
-        ExportLatexView ->
-            "1350px"
-
 
 headerRibbon =
     div
@@ -92,7 +89,7 @@ editor model =
 
 
 editorPane model =
-    textarea [ editorStyle, onInput GetContent, value model.sourceText ] [ text model.sourceText ]
+    Keyed.node "textarea" [ editorStyle, onInput GetContent, value model.sourceText ] [ ( toString model.counter, text model.sourceText ) ]
 
 
 renderedSource model =
@@ -124,18 +121,13 @@ showHtmlResult model =
         ]
 
 
-showExportResult model =
-    div [ style [ ( "float", "left" ) ] ]
-        [ Html.div [ downloadStyle ]
-            [ Html.textarea [ Events.onInput Types.Input, Attr.value model.inputString, textAreaStyle ] []
-            , Html.a [ Attr.href (dataUrl model.inputString), Attr.downloadAs "file.html", innerDownloadStyle ]
-                [ text "Download HTML File" ]
-            ]
+exporterTextArea model =
+    Html.textarea [ Events.onInput Types.Input, Attr.value model.inputString, textAreaStyle ] []
 
-        --, buttonBarRawHtmlResults model
-        , spacer 8
-        , exportLatexPane model
-        ]
+
+exporterLink model =
+    Html.a [ Attr.href (dataUrl model.inputString), Attr.downloadAs "file.html", downloadStyle ]
+        [ text "Export" ]
 
 
 textAreaStyle =
@@ -145,20 +137,16 @@ textAreaStyle =
         ]
 
 
-innerDownloadStyle =
+downloadStyle =
     style
-        [ ( "margin-left", "20px" )
+        [ ( "margin-left", "0px" )
+        , ( "margin-right", "8px" )
         , ( "padding", "4px" )
         , ( "padding-left", "10px" )
         , ( "padding-right", "10px" )
         , ( "background-color", "#aaa" )
         , ( "font-size", "11pt" )
         ]
-
-
-downloadStyle =
-    style
-        [ ( "margin-top", "25px" ) ]
 
 
 dataUrl : String -> String
@@ -206,7 +194,7 @@ renderedSourcePane model =
         div
             [ renderedSourceStyle
             , id "renderedText"
-            , property "innerHTML" (Encode.string (Debug.log "RT" renderedText))
+            , property "innerHTML" (Encode.string renderedText)
             ]
             []
 
@@ -228,10 +216,11 @@ buttonBarLeft =
 buttonBarRight model =
     div
         [ style [ ( "margin-left", "20px" ) ] ]
-        [ standardViewButton model 98
+        [ exporterTextArea model
+        , exporterLink model
+        , standardViewButton model 98
         , parseResultsViewButton model 106
         , rawHtmlViewButton model 106
-        , exportLatexButton model 93
         ]
 
 
@@ -280,13 +269,6 @@ resetButton width =
 
 restoreButton width =
     button [ onClick Restore, buttonStyle colorBlue width ] [ text "Restore" ]
-
-
-exportLatexButton model width =
-    if model.configuration == ExportLatexView then
-        button [ onClick ExportLatex, buttonStyle colorBlue width ] [ text "Export LaTeX" ]
-    else
-        button [ onClick ExportLatex, buttonStyle colorLight width ] [ text "Export LaTeX" ]
 
 
 techReportButton width =
@@ -362,9 +344,6 @@ optionaViewTitleButton model width =
 
         RawHtmlView ->
             button [ buttonStyle colorDark width ] [ text "Raw HTML" ]
-
-        ExportLatexView ->
-            button [ buttonStyle colorDark width ] [ text "Exported LaTeX" ]
 
 
 viewLabel text_ width =

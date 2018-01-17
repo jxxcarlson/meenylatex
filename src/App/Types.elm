@@ -5,9 +5,9 @@ import MiniLatex.Differ exposing (EditRecord)
 
 
 type alias Model =
-    { sourceText : String
+    { counter : Int
+    , sourceText : String
     , parseResult : List (List LatexExpression)
-    , textToExport : String
     , inputString : String
     , hasMathResult : List Bool
     , editRecord : EditRecord
@@ -28,7 +28,6 @@ type Msg
     | ShowStandardView
     | ShowParseResultsView
     | ShowRawHtmlView
-    | ShowExportLatexView
     | SetHorizontalView
     | SetVerticalView
     | TechReport
@@ -36,7 +35,6 @@ type Msg
     | WeatherApp
     | MathPaper
     | Grammar
-    | ExportLatex
     | Input String
 
 
@@ -49,4 +47,3 @@ type Configuration
     = StandardView
     | ParseResultsView
     | RawHtmlView
-    | ExportLatexView

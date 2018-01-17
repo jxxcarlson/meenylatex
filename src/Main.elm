@@ -31,10 +31,10 @@ init =
             MiniLatex.setup 0 Source.initialText
 
         model =
-            { sourceText = Source.initialText
+            { counter = 0
+            , sourceText = Source.initialText
             , editRecord = editRecord
-            , textToExport = ""
-            , inputString = ""
+            , inputString = exportLatex2Html editRecord
             , parseResult = parseResult
             , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.HasMath.listHasMath parseResult)
             , seed = 0
@@ -68,7 +68,8 @@ update msg model =
                     Debug.log "hasMathResult" (List.map MiniLatex.HasMath.listHasMath parseResult)
             in
                 ( { model
-                    | editRecord = newEditRecord
+                    | counter = model.counter + 1
+                    , editRecord = newEditRecord
                     , parseResult = parseResult
                     , hasMathResult = hasMathResult
                   }
@@ -79,23 +80,12 @@ update msg model =
                 )
 
         ReRender ->
-            let
-                editRecord =
-                    MiniLatex.setup model.seed model.sourceText
-
-                _ =
-                    Debug.log "TOC" editRecord.latexState.tableOfContents
-            in
-                ( { model
-                    | editRecord = editRecord
-                    , parseResult = MiniLatex.parse model.sourceText
-                  }
-                , sendToJs <| encodeData "full" []
-                )
+            useSource model.sourceText model
 
         Reset ->
             ( { model
-                | sourceText = ""
+                | counter = model.counter + 1
+                , sourceText = ""
                 , editRecord = MiniLatex.setup model.seed ""
               }
             , sendToJs <| encodeData "full" []
@@ -103,7 +93,8 @@ update msg model =
 
         Restore ->
             ( { model
-                | sourceText = Source.initialText
+                | counter = model.counter + 1
+                , sourceText = Source.initialText
                 , editRecord = MiniLatex.setup model.seed Source.initialText
               }
             , sendToJs <| encodeData "full" []
@@ -127,9 +118,6 @@ update msg model =
         ShowRawHtmlView ->
             ( { model | configuration = RawHtmlView }, Cmd.none )
 
-        ShowExportLatexView ->
-            ( { model | configuration = ExportLatexView }, Cmd.none )
-
         SetHorizontalView ->
             ( { model | lineViewStyle = Horizontal }, Cmd.none )
 
@@ -151,9 +139,6 @@ update msg model =
         Grammar ->
             useSource Source.grammar model
 
-        ExportLatex ->
-            exportLatex model
-
         Types.Input s ->
             ( { model | inputString = s }, Cmd.none )
 
@@ -165,8 +150,10 @@ useSource text model =
             MiniLatex.setup model.seed text
     in
         ( { model
-            | sourceText = text
+            | counter = model.counter + 1
+            , sourceText = text
             , editRecord = editRecord
+            , parseResult = MiniLatex.parse text
             , inputString = exportLatex2Html editRecord
           }
         , sendToJs <| encodeData "full" []
@@ -178,29 +165,6 @@ exportLatex2Html editRecord =
     editRecord
         |> MiniLatex.getRenderedText ""
         |> \text -> Source.htmlPrefix ++ text ++ Source.htmlSuffix
-
-
-exportLatex : Model -> ( Model, Cmd Msg )
-exportLatex model =
-    let
-        editRecord =
-            MiniLatex.setup model.seed model.sourceText
-
-        renderedText =
-            MiniLatex.getRenderedText "" editRecord
-
-        textToExport =
-            Debug.log "EXPORT"
-                (Source.htmlPrefix ++ renderedText ++ Source.htmlSuffix)
-    in
-        ( { model
-            | editRecord = editRecord
-            , textToExport = textToExport
-            , inputString = textToExport
-            , configuration = ExportLatexView
-          }
-        , Cmd.none
-        )
 
 
 encodeData model idList =
@@ -237,9 +201,6 @@ mainView model =
         RawHtmlView ->
             rawHtmlResultsView model
 
-        ExportLatexView ->
-            exportLatexView model
-
 
 standardView model =
     div [ style [ ( "float", "left" ) ] ]
@@ -268,17 +229,6 @@ rawHtmlResultsView model =
         , editor model
         , renderedSource model
         , showHtmlResult model
-        , spacer 5
-        , footerRibbon model
-        ]
-
-
-exportLatexView model =
-    div [ style [ ( "float", "left" ) ] ]
-        [ headerRibbon
-        , editor model
-        , renderedSource model
-        , showExportResult model
         , spacer 5
         , footerRibbon model
         ]

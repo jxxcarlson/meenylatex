@@ -100,9 +100,11 @@ initialText =
 
 MiniLaTeX is a subset of LaTeX which can be displayed in a web browser.  This document is written in MiniLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}
 
+Feel free to edit and re-render the text on the left and to experiment with the buttons above.  To export a rendered LaTeX file, simply click on the "Export" button above.  Your file will be downloaded as "file.html".
 
-Feel free to edit and re-render the text on the left and to experiment with the buttons above.  To export a rendered LaTeX file, click on the "Export LaTeX" button above, then press the "Download HTML File" button.  Your file will be downloaded as "file.html".
-Please bear in mind that MiniLaTeX is still an R&D operation -- we are working hard to extend its scope.
+Please bear in mind that MiniLaTeX is still an R&D operation. We are working hard to extend its scope; we welcome bug reports, comments and suggestions.
+
+MiniLatex is written in Elm, the functional language for front-end web development that began with Evan Czaplicki's 2012 senior thesis. MiniLatex, does not, however, depend on any particular language.  Indeed, we plan a second implementation in Haskell.
 
 \\section{Examples}
 
@@ -158,6 +160,31 @@ into HTML.  One could easily write
 functions \\code{render: LatexExpression -> String}
 to make other conversions.
 
+\\section{Short Writer's Guide}
+
+We plan a complete Writer's Guide for MiniLaTeX.  For now, however, just a few pointers.
+
+\\begin{itemize}
+
+\\item Make liberal use of blank lines. Your source text will be much easier to read, and the converter has optimizations that work especially well when this is done.
+
+\\item Equations and environments should have a blank line above one below.  Items in lists should be separated by blank lines.    This is not strictly necessary, but it helps the converter and it helps you.
+
+\\item  The begin-end pairs that delimit environments should begin at the left margin of the text.  For the moment this is mandatory.
+
+\\end{itemize}
+
+\\italic{Fast Render} is an optimization that speeds
+up parsing and rendering for long documents.
+Only paragraphs which are changed are re-parsed
+(expensive) and re-rendered (inexpensive).
+However, to resolve section numbers, cross-references,
+etc., a full render is necessary.
+
+All of these operations will have a very significant speed-up
+when version 0.19 of the Elm compiler is released and
+when MathJax 3.0 is released and integrated into MiniLaTeX.
+
 \\section{More about MiniLaTeX}
 
 Articles and code:
@@ -203,7 +230,9 @@ are some of the current restrictions and limitations.
 
 \\begin{enumerate}
 
-\\item The enumerate and itemize environments cannot be nested (but can containe inline math and macros).
+\\item The enumerate and itemize environments cannot be nested (but can contain inline math and macros).
+  In addition there is a parser bug which prevents the use of these environments within
+  other environments such as theorem.
 
 \\item The tabular environment ignores formatting information
 and left-justifies everything in the cell.
@@ -212,12 +241,11 @@ and left-justifies everything in the cell.
 \\end{enumerate}
 
 
-We are working on these and other issues  to expand the scope of MiniLatex.
-The project is still in the R&D phase -- we welcome comments (jxxcarlson at gmail)
+We are working to fix known issues and to expand the scope of MiniLatex.
 
 \\bigskip
 
-\\image{https://cdn-images-1.medium.com/max/1200/1*HlpVE5TFBUp17ua1AdiKpw.gif}{The way we used to do it.}{align: center}
+\\image{https://cdn-images-1.medium.com/max/1200/1*HlpVE5TFBUp17ua1AdiKpw.gif}{}{align: center}
 
 """
 

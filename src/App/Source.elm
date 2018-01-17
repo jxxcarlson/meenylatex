@@ -102,7 +102,7 @@ MiniLaTeX is a subset of LaTeX which can be displayed in a web browser.
 It applies a parser-renderer toolchain to convert MiniLaTeX into HTML,
 then uses MathJax to render formulas and equations.
 This document is written in MiniLatex; for additional examples,
-try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}
+try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
 
 Feel free to edit and re-render the text on the left and to
 experiment with the buttons above.  To export a rendered LaTeX
@@ -114,10 +114,14 @@ operation. We are working hard to extend its scope;
 we welcome bug reports, comments and suggestions.
 
 MiniLatex is written in Elm, the functional
-language for front-end web development that began
-with Evan Czaplicki's 2012 senior thesis. MiniLatex,
-does not, however, depend on any particular language.
-Indeed, we plan a second implementation in Haskell.
+language for building web apps developed by
+Evan Czaplicki, starting with his 2012 senior thesis.
+Although Elm is especially well-suited for writing
+a parser for MiniLatex and integrating that parser
+into an interactive editing environment, MiniLatex
+does not depend on any particular language.
+Indeed, we plan a second implementation of the parrser-renderer
+toolchain in Haskell.
 
 
 

@@ -48,18 +48,6 @@ init =
 port sendToJs : Encode.Value -> Cmd msg
 
 
-encodeData model idList =
-    let
-        idValueList =
-            Debug.log "idValueList"
-                (List.map Encode.string idList)
-    in
-        [ ( "model", Encode.string model )
-        , ( "idList", Encode.list idValueList )
-        ]
-            |> Encode.object
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
@@ -172,12 +160,24 @@ update msg model =
 
 useSource : String -> Model -> ( Model, Cmd Msg )
 useSource text model =
-    ( { model
-        | sourceText = text
-        , editRecord = MiniLatex.setup model.seed text
-      }
-    , sendToJs <| encodeData "full" []
-    )
+    let
+        editRecord =
+            MiniLatex.setup model.seed text
+    in
+        ( { model
+            | sourceText = text
+            , editRecord = editRecord
+            , inputString = exportLatex2Html editRecord
+          }
+        , sendToJs <| encodeData "full" []
+        )
+
+
+exportLatex2Html : EditRecord -> String
+exportLatex2Html editRecord =
+    editRecord
+        |> MiniLatex.getRenderedText ""
+        |> \text -> Source.htmlPrefix ++ text ++ Source.htmlSuffix
 
 
 exportLatex : Model -> ( Model, Cmd Msg )
@@ -203,20 +203,20 @@ exportLatex model =
         )
 
 
-appWidth : Configuration -> String
-appWidth configuration =
-    case configuration of
-        StandardView ->
-            "900px"
+encodeData model idList =
+    let
+        idValueList =
+            Debug.log "idValueList"
+                (List.map Encode.string idList)
+    in
+        [ ( "model", Encode.string model )
+        , ( "idList", Encode.list idValueList )
+        ]
+            |> Encode.object
 
-        ParseResultsView ->
-            "1350px"
 
-        RawHtmlView ->
-            "1350px"
 
-        ExportLatexView ->
-            "1350px"
+{- VIEW FUNCTIONS -}
 
 
 view : Model -> Html Msg

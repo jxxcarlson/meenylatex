@@ -13,7 +13,7 @@ import MiniLatex.Differ exposing (EditRecord)
 import Random
 import App.Source as Source
 import App.View exposing (..)
-import App.Types exposing (..)
+import App.Types as Types exposing (..)
 import Json.Encode as Encode
 
 
@@ -34,6 +34,7 @@ init =
             { sourceText = Source.initialText
             , editRecord = editRecord
             , textToExport = ""
+            , inputString = ""
             , parseResult = parseResult
             , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.HasMath.listHasMath parseResult)
             , seed = 0
@@ -165,6 +166,9 @@ update msg model =
         ExportLatex ->
             exportLatex model
 
+        Types.Input s ->
+            ( { model | inputString = s }, Cmd.none )
+
 
 useSource : String -> Model -> ( Model, Cmd Msg )
 useSource text model =
@@ -192,6 +196,7 @@ exportLatex model =
         ( { model
             | editRecord = editRecord
             , textToExport = textToExport
+            , inputString = textToExport
             , configuration = ExportLatexView
           }
         , Cmd.none

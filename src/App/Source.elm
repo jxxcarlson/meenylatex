@@ -213,7 +213,7 @@ Please send comments, bug reports, etc. to jxxcarlson at gmail.
 \\section{Technical Note}
 There is a \\italic{very rough} \\href{http://www.knode.io/#@public/628}{draft grammar}
 for MiniLaTeX, written mostly in EBNF.  However, there are a few
-productions, notably for enviroments, which are not context-free.
+productions, notably for environments, which are not context-free.
 Recall that in a context-free grammar, all productions are
 of the form $A \\Rightarrow \\beta$, where $A$ is a terminal symbol
 and $\\beta$ is a sequence of terminals and nonterminals.  There

@@ -215,7 +215,7 @@ There is a \\italic{very rough} \\href{http://www.knode.io/#@public/628}{draft g
 for MiniLaTeX, written mostly in EBNF.  However, there are a few
 productions, notably for environments, which are not context-free.
 Recall that in a context-free grammar, all productions are
-of the form $A \\Rightarrow \\beta$, where $A$ is a terminal symbol
+of the form $A \\Rightarrow \\beta$, where $A$ is a non-terminal symbol
 and $\\beta$ is a sequence of terminals and nonterminals.  There
 are some productions of the form $A\\beta \\Rightarrow \\gamma$,
 where $\\beta$ is a terminal symbol.  These are

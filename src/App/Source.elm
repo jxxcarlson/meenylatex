@@ -98,13 +98,29 @@ initialText =
 
 \\section{Introduction}
 
-MiniLaTeX is a subset of LaTeX which can be displayed in a web browser.  This document is written in MiniLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}
+MiniLaTeX is a subset of LaTeX which can be displayed in a web browser.
+It uses MathJax to render formulas and equations, and applies
+a parser-renderer toolchain to convert MiniLaTeX into HTML.
+This document is written in MiniLatex; for additional examples,
+try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}
 
-Feel free to edit and re-render the text on the left and to experiment with the buttons above.  To export a rendered LaTeX file, simply click on the "Export" button above.  Your file will be downloaded as "file.html".
+Feel free to edit and re-render the text on the left and to
+experiment with the buttons above.  To export a rendered LaTeX
+file, simply click on the "Export" button above.
+  Your file will be downloaded as "file.html".
 
-Please bear in mind that MiniLaTeX is still an R&D operation. We are working hard to extend its scope; we welcome bug reports, comments and suggestions.
+Please bear in mind that MiniLaTeX is still an R&D
+operation. We are working hard to extend its scope;
+we welcome bug reports, comments and suggestions.
 
-MiniLatex is written in Elm, the functional language for front-end web development that began with Evan Czaplicki's 2012 senior thesis. MiniLatex, does not, however, depend on any particular language.  Indeed, we plan a second implementation in Haskell.
+MiniLatex is written in Elm, the functional
+language for front-end web development that began
+with Evan Czaplicki's 2012 senior thesis. MiniLatex,
+does not, however, depend on any particular language.
+Indeed, we plan a second implementation in Haskell.
+
+
+
 
 \\section{Examples}
 

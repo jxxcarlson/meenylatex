@@ -99,8 +99,8 @@ initialText =
 \\section{Introduction}
 
 MiniLaTeX is a subset of LaTeX which can be displayed in a web browser.
-It uses MathJax to render formulas and equations, and applies
-a parser-renderer toolchain to convert MiniLaTeX into HTML.
+It applies a parser-renderer toolchain to convert MiniLaTeX into HTML,
+then uses MathJax to render formulas and equations.
 This document is written in MiniLatex; for additional examples,
 try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}
 

@@ -116,6 +116,9 @@ update msg model =
         ShowParseResultsView ->
             ( { model | configuration = ParseResultsView }, Cmd.none )
 
+        ShowRenderToLatexView ->
+            ( { model | configuration = RenderToLatexView }, Cmd.none )
+
         ShowRawHtmlView ->
             ( { model | configuration = RawHtmlView }, Cmd.none )
 
@@ -202,12 +205,25 @@ mainView model =
         RawHtmlView ->
             rawHtmlResultsView model
 
+        RenderToLatexView ->
+            renderToLatexView model
+
 
 standardView model =
     div [ style [ ( "float", "left" ) ] ]
         [ headerRibbon
         , editor model
         , renderedSource model
+        , spacer 5
+        , footerRibbon model
+        ]
+
+
+renderToLatexView model =
+    div [ style [ ( "float", "left" ) ] ]
+        [ headerRibbon
+        , editor model
+        , renderToLatex model
         , spacer 5
         , footerRibbon model
         ]

@@ -9,6 +9,7 @@ import App.Types as Types exposing (..)
 import String.Extra
 import MiniLatex.Parser exposing (LatexExpression)
 import MiniLatex.Driver as MiniLatex
+import MiniLatex.RenderToLatex
 import Json.Encode as Encode
 
 
@@ -39,6 +40,9 @@ appWidth : Configuration -> String
 appWidth configuration =
     case configuration of
         StandardView ->
+            "900px"
+
+        RenderToLatexView ->
             "900px"
 
         ParseResultsView ->
@@ -98,6 +102,17 @@ renderedSource model =
         , buttonBarRight model
         , spacer 5
         , renderedSourcePane model
+        , spacer 5
+        , buttonBarBottomRight model
+        ]
+
+
+renderToLatex model =
+    div [ style [ ( "float", "left" ) ] ]
+        [ spacer 20
+        , buttonBarRight model
+        , spacer 5
+        , renderToLatexPane model
         , spacer 5
         , buttonBarBottomRight model
         ]
@@ -180,6 +195,16 @@ rawRenderedSourcePane model =
             [ text renderedText ]
 
 
+renderToLatexPane model =
+    let
+        rerenderedText =
+            MiniLatex.RenderToLatex.quasiIdentity model.sourceText
+    in
+        pre
+            [ parseResultsStyle ]
+            [ text rerenderedText ]
+
+
 exportLatexPane model =
     pre
         [ parseResultsStyle ]
@@ -221,6 +246,7 @@ buttonBarRight model =
         , standardViewButton model 98
         , parseResultsViewButton model 106
         , rawHtmlViewButton model 106
+        , renderToLatexViewButton model 24
         ]
 
 
@@ -312,6 +338,13 @@ standardViewButton model width =
         button [ onClick ShowStandardView, buttonStyle colorLight width ] [ text "Basic View" ]
 
 
+renderToLatexViewButton model width =
+    if model.configuration == StandardView then
+        button [ onClick ShowRenderToLatexView, buttonStyle colorBlue width ] [ text "2" ]
+    else
+        button [ onClick ShowRenderToLatexView, buttonStyle colorLight width ] [ text "2" ]
+
+
 parseResultsViewButton model width =
     if model.configuration == ParseResultsView then
         button [ onClick ShowParseResultsView, buttonStyle colorBlue width ] [ text "Parse Results" ]
@@ -344,6 +377,9 @@ optionaViewTitleButton model width =
 
         RawHtmlView ->
             button [ buttonStyle colorDark width ] [ text "Raw HTML" ]
+
+        RenderToLatexView ->
+            button [ buttonStyle colorDark width ] [ text "Latex (2)" ]
 
 
 viewLabel text_ width =

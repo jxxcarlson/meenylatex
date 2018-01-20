@@ -29,6 +29,7 @@ type Msg
     | ShowStandardView
     | ShowParseResultsView
     | ShowRawHtmlView
+    | ShowRenderToLatexView
     | SetHorizontalView
     | SetVerticalView
     | TechReport
@@ -48,3 +49,4 @@ type Configuration
     = StandardView
     | ParseResultsView
     | RawHtmlView
+    | RenderToLatexView

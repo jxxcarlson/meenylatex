@@ -33,6 +33,7 @@ init =
         model =
             { counter = 0
             , sourceText = Source.initialText
+            , sourceText2 = Source.initialText
             , editRecord = editRecord
             , inputString = exportLatex2Html editRecord
             , parseResult = parseResult

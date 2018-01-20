@@ -7,6 +7,7 @@ import MiniLatex.Differ exposing (EditRecord)
 type alias Model =
     { counter : Int
     , sourceText : String
+    , sourceText2 : String
     , parseResult : List (List LatexExpression)
     , inputString : String
     , hasMathResult : List Bool

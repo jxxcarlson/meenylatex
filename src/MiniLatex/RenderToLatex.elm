@@ -10,6 +10,7 @@ module MiniLatex.RenderToLatex
 
 import List.Extra
 import MiniLatex.JoinStrings as JoinStrings
+import MiniLatex.Paragraph
 import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Parser
 import String.Extra
@@ -17,9 +18,18 @@ import String.Extra
 
 {-| parse a stringg and render it back into Latex
 -}
+quasiIdentity1 : String -> String
+quasiIdentity1 str =
+    str |> MiniLatex.Parser.parse |> renderLatexList
+
+
 quasiIdentity : String -> String
 quasiIdentity str =
-    str |> MiniLatex.Parser.parse |> renderLatexList
+    str
+        |> MiniLatex.Paragraph.logicalParagraphify
+        |> List.map MiniLatex.Parser.parse
+        |> List.map renderLatexList
+        |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
 
 
 quasiIdentityTest : String -> Bool

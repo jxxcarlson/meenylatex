@@ -11,6 +11,7 @@ import MiniLatex.Parser exposing (LatexExpression)
 import MiniLatex.Driver as MiniLatex
 import MiniLatex.RenderToLatex
 import Json.Encode as Encode
+import MiniLatex.Paragraph
 
 
 {- Word count -}
@@ -43,7 +44,7 @@ appWidth configuration =
             "900px"
 
         RenderToLatexView ->
-            "900px"
+            "1350px"
 
         ParseResultsView ->
             "1350px"
@@ -199,6 +200,8 @@ renderToLatexPane model =
     let
         rerenderedText =
             MiniLatex.RenderToLatex.quasiIdentity model.sourceText
+
+        --|> MiniLatex.RenderToLatex.eval
     in
         pre
             [ parseResultsStyle ]

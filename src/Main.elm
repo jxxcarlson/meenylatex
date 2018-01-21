@@ -224,6 +224,7 @@ renderToLatexView model =
         [ headerRibbon
         , editor model
         , renderToLatex model
+        , showParseResult model
         , spacer 5
         , footerRibbon model
         ]

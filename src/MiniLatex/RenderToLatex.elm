@@ -5,7 +5,6 @@ module MiniLatex.RenderToLatex
         , renderBackToLatexTest
         , renderBackToLatexTestModSpace
         , renderLatexList
-        , renderString
         )
 
 import List.Extra
@@ -37,22 +36,6 @@ renderBackToLatexTestModSpace str =
     (str |> String.Extra.replace " " "") == (renderBackToLatex str |> String.Extra.replace " " "")
 
 
-renderString parser str =
-    let
-        parserOutput =
-            Parser.run parser str
-
-        renderOutput =
-            case parserOutput of
-                Ok latexExpression ->
-                    render latexExpression
-
-                Err error ->
-                    "Error: " ++ toString error
-    in
-    renderOutput
-
-
 render : LatexExpression -> String
 render latexExpression =
     case latexExpression of
@@ -66,7 +49,7 @@ render latexExpression =
             renderItem level latexExpression
 
         InlineMath str ->
-            "$" ++ str ++ "$"
+            " $" ++ str ++ "$"
 
         DisplayMath str ->
             "$$" ++ str ++ "$$"
@@ -83,7 +66,11 @@ render latexExpression =
 
 renderLatexList : List LatexExpression -> String
 renderLatexList args =
-    args |> List.map render |> JoinStrings.joinList
+    args |> List.map render |> List.foldl (\item acc -> acc ++ item) ""
+
+
+
+-- JoinStrings.joinList
 
 
 renderArgList : List LatexExpression -> String

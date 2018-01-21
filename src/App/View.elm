@@ -12,6 +12,7 @@ import MiniLatex.Driver as MiniLatex
 import MiniLatex.RenderToLatex
 import Json.Encode as Encode
 import MiniLatex.Paragraph
+import MiniLatex.RenderLatexForExport
 
 
 {- Word count -}
@@ -201,6 +202,8 @@ renderToLatexPane model =
         rerenderedText =
             MiniLatex.RenderToLatex.renderBackToLatex model.sourceText
 
+        -- rerenderedText =
+        --     MiniLatex.RenderLatexForExport.renderLatexForExport model.sourceText
         --|> MiniLatex.RenderToLatex.eval
     in
         pre

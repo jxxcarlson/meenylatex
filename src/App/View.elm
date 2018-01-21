@@ -111,7 +111,7 @@ renderedSource model =
 renderToLatex model =
     div [ style [ ( "float", "left" ) ] ]
         [ spacer 20
-        , buttonBarRight model
+        , viewLabel "Text parsed and rendered back to LaTeX (Almost Identity)" 400 --buttonBarRight model
         , spacer 5
         , renderToLatexPane model
         , spacer 5
@@ -199,12 +199,12 @@ rawRenderedSourcePane model =
 renderToLatexPane model =
     let
         rerenderedText =
-            MiniLatex.RenderToLatex.quasiIdentity model.sourceText
+            MiniLatex.RenderToLatex.renderBackToLatex model.sourceText
 
         --|> MiniLatex.RenderToLatex.eval
     in
         pre
-            [ parseResultsStyle ]
+            [ reRenderedLatexStyle ]
             [ text rerenderedText ]
 
 
@@ -248,8 +248,8 @@ buttonBarRight model =
         , exporterLink model
         , standardViewButton model 98
         , parseResultsViewButton model 106
-        , rawHtmlViewButton model 106
-        , renderToLatexViewButton model 24
+        , rawHtmlViewButton model 85
+        , renderToLatexViewButton model 40
         ]
 
 
@@ -342,10 +342,10 @@ standardViewButton model width =
 
 
 renderToLatexViewButton model width =
-    if model.configuration == StandardView then
-        button [ onClick ShowRenderToLatexView, buttonStyle colorBlue width ] [ text "2" ]
+    if model.configuration == RenderToLatexView then
+        button [ onClick ShowRenderToLatexView, buttonStyle colorBlue width ] [ text "AI" ]
     else
-        button [ onClick ShowRenderToLatexView, buttonStyle colorLight width ] [ text "2" ]
+        button [ onClick ShowRenderToLatexView, buttonStyle colorLight width ] [ text "AI" ]
 
 
 parseResultsViewButton model width =
@@ -386,7 +386,7 @@ optionaViewTitleButton model width =
 
 
 viewLabel text_ width =
-    button [ buttonStyle colorDark width ] [ text text_ ]
+    button [ buttonStyle colorDark width, style [ ( "margin-left", "20px" ) ] ] [ text text_ ]
 
 
 
@@ -472,6 +472,10 @@ parseResultsStyle =
     textStyle2 "400px" "600px" "20px" "#eee"
 
 
+reRenderedLatexStyle =
+    textStyle3 "400px" "600px" "20px" "#eee"
+
+
 textStyle width height offset color =
     style
         [ ( "width", width )
@@ -492,4 +496,17 @@ textStyle2 width height offset color =
         , ( "margin-left", offset )
         , ( "background-color", color )
         , ( "overflow", "scroll" )
+        ]
+
+
+textStyle3 width height offset color =
+    style
+        [ ( "width", width )
+        , ( "height", height )
+        , ( "padding", "15px" )
+        , ( "margin-top", "0" )
+        , ( "margin-left", offset )
+        , ( "background-color", color )
+        , ( "overflow", "scroll" )
+        , ( "white-space", "pre-line" )
         ]

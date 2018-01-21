@@ -265,7 +265,9 @@ We are working to fix known issues and to expand the scope of MiniLatex.
 
 \\bigskip
 
-\\image{https://cdn-images-1.medium.com/max/1200/1*HlpVE5TFBUp17ua1AdiKpw.gif}{}{align: center}
+\\image{https://cdn-images-1.medium.com/max/1200/1*HlpVE5TFBUp17ua1AdiKpw.gif}{The way we used to do it.}{align: center}
+
+
 
 """
 

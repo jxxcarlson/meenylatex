@@ -1,9 +1,9 @@
 module MiniLatex.RenderToLatex
     exposing
-        ( quasiIdentity
-        , quasiIdentityTest
-        , quasiIdentityTestModSpace
-        , render
+        ( render
+        , renderBackToLatex
+        , renderBackToLatexTest
+        , renderBackToLatexTestModSpace
         , renderLatexList
         , renderString
         )
@@ -18,13 +18,8 @@ import String.Extra
 
 {-| parse a stringg and render it back into Latex
 -}
-quasiIdentity1 : String -> String
-quasiIdentity1 str =
-    str |> MiniLatex.Parser.parse |> renderLatexList
-
-
-quasiIdentity : String -> String
-quasiIdentity str =
+renderBackToLatex : String -> String
+renderBackToLatex str =
     str
         |> MiniLatex.Paragraph.logicalParagraphify
         |> List.map MiniLatex.Parser.parse
@@ -32,28 +27,14 @@ quasiIdentity str =
         |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
 
 
-quasiIdentityTest : String -> Bool
-quasiIdentityTest str =
-    str == quasiIdentity str
+renderBackToLatexTest : String -> Bool
+renderBackToLatexTest str =
+    str == renderBackToLatex str
 
 
-quasiIdentityTestModSpace : String -> Bool
-quasiIdentityTestModSpace str =
-    (str |> String.Extra.replace " " "") == (quasiIdentity str |> String.Extra.replace " " "")
-
-
-
--- |> \str -> "\n<p>" ++ str ++ "</p>\n"
-{- FUNCTIONS FOR TESTING THINGS -}
-
-
-getElement : Int -> List LatexExpression -> LatexExpression
-getElement k list =
-    List.Extra.getAt k list |> Maybe.withDefault (LXString "xxx")
-
-
-parseString parser str =
-    Parser.run parser str
+renderBackToLatexTestModSpace : String -> Bool
+renderBackToLatexTestModSpace str =
+    (str |> String.Extra.replace " " "") == (renderBackToLatex str |> String.Extra.replace " " "")
 
 
 renderString parser str =
@@ -72,22 +53,6 @@ renderString parser str =
     renderOutput
 
 
-
-{- TYPES AND DEFAULT VALJUES -}
-
-
-extractList : LatexExpression -> List LatexExpression
-extractList latexExpression =
-    case latexExpression of
-        LatexList a ->
-            a
-
-        _ ->
-            []
-
-
-{-| THE MAIN RENDERING FUNCTION
--}
 render : LatexExpression -> String
 render latexExpression =
     case latexExpression of
@@ -136,17 +101,9 @@ renderComment str =
     "% " ++ str ++ "\n"
 
 
-
-{- ENVIROMENTS -}
-
-
 renderEnvironment : String -> LatexExpression -> String
 renderEnvironment name body =
     "\\begin{" ++ name ++ "}\n" ++ render body ++ "\n\\end{" ++ name ++ "}\n\n"
-
-
-
-{- MACROS: DISPATCHERS AND HELPERS -}
 
 
 renderMacro : String -> List LatexExpression -> String

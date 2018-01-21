@@ -223,8 +223,8 @@ renderToLatexView model =
     div [ style [ ( "float", "left" ) ] ]
         [ headerRibbon
         , editor model
+        , renderedSource model
         , renderToLatex model
-        , showParseResult model
         , spacer 5
         , footerRibbon model
         ]

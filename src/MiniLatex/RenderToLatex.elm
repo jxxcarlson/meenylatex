@@ -95,4 +95,4 @@ renderEnvironment name body =
 
 renderMacro : String -> List LatexExpression -> String
 renderMacro name args =
-    "\\" ++ name ++ renderArgList args
+    " \\" ++ name ++ renderArgList args

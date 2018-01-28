@@ -139,11 +139,25 @@ reservedWord =
 
 word : Parser String
 word =
-    inContext "word" <|
+    (inContext "word" <|
         succeed identity
             |. spaces
             |= keep oneOrMore notSpecialCharacter
             |. ws
+    )
+        |> map transformWords
+
+
+{-| Transform special words
+-}
+transformWords : String -> String
+transformWords str =
+    if str == "--" then
+        "&ndash;"
+    else if str == "---" then
+        "&mdash;"
+    else
+        str
 
 
 notSpecialCharacter : Char -> Bool

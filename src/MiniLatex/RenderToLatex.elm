@@ -90,7 +90,7 @@ renderComment str =
 
 renderEnvironment : String -> LatexExpression -> String
 renderEnvironment name body =
-    "\\begin{" ++ name ++ "}\n" ++ render body ++ "\n\\end{" ++ name ++ "}\n\n"
+    "\\begin{" ++ name ++ "}\n" ++ render body ++ "\n\\end{" ++ name ++ "}\n"
 
 
 renderMacro : String -> List LatexExpression -> String

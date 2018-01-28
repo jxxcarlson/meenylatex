@@ -24,6 +24,7 @@ import MiniLatex.LatexState
         , getDictionaryItem
         )
 import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import MiniLatex.Utility as Utility
 import Parser
 import Regex
 import String.Extra
@@ -152,6 +153,9 @@ renderEnvironmentDict =
         , ( "macros", \x y -> renderMacros x y )
         , ( "quotation", \x y -> renderQuotation x y )
         , ( "tabular", \x y -> renderTabular x y )
+        , ( "thebibliography", \x y -> renderTheBiblography x y )
+        , ( "maskforweb", \x y -> renderCommentEnvironment x y )
+        , ( "useforweb", \x y -> renderUseForWeb x y )
         , ( "verbatim", \x y -> renderVerbatim x y )
         , ( "verse", \x y -> renderVerse x y )
         ]
@@ -301,6 +305,26 @@ renderVerse latexState body =
     Html.div [ "class=\"verse\"" ] [ String.trim <| render latexState body ]
 
 
+renderUseForWeb latexState body =
+    "\n$$\n" ++ render latexState body ++ "\n$$\n"
+
+
+renderTheBiblography : LatexState -> LatexExpression -> String
+renderTheBiblography latexState body =
+    "xxx"
+
+
+
+-- let
+--     bibText =
+--         body
+--             |> List.map render
+--             |> List.map (\par -> "<p>" ++ par ++ "</p>")
+--             |> List.foldr (\par acc -> par ++ "\n\n" ++ acc)
+-- in
+-- Html.div [ "class=\"verse\"" ] [ bibText ]
+
+
 renderTabular latexState body =
     renderTableBody body
 
@@ -352,29 +376,7 @@ renderListing latexState body =
         text =
             render latexState body
     in
-    "\n<pre class=\"verbatim\">" ++ addLineNumbers text ++ "</pre>\n"
-
-
-addLineNumbers text =
-    text
-        |> String.trim
-        |> String.split "\n"
-        |> List.foldl addNumberedLine ( 0, [] )
-        |> Tuple.second
-        |> List.reverse
-        |> String.join "\n"
-
-
-addNumberedLine line data =
-    let
-        ( k, lines ) =
-            data
-    in
-    ( k + 1, [ numberedLine (k + 1) line ] ++ lines )
-
-
-numberedLine k line =
-    String.padLeft 5 ' ' (toString k) ++ "  " ++ line
+    "\n<pre class=\"verbatim\">" ++ Utility.addLineNumbers text ++ "</pre>\n"
 
 
 
@@ -481,7 +483,7 @@ renderSmallSkip latexState args =
 -}
 renderCite : LatexState -> List LatexExpression -> String
 renderCite latexState args =
-    " <strong>" ++ renderArg 0 latexState args ++ "</strong>"
+    " [" ++ renderArg 0 latexState args ++ "]"
 
 
 renderCode : LatexState -> List LatexExpression -> String

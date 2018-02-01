@@ -194,7 +194,7 @@ renderIndentEnvironment latexState body =
 
 renderTheBibliography : LatexState -> LatexExpression -> String
 renderTheBibliography latexState body =
-    Html.div [ "style=\"\"" ] [ Html.h3 "Bibliography", render latexState body ]
+    Html.div [ "style=\"\"" ] [ render latexState body ]
 
 
 renderTheoremLikeEnvironment : LatexState -> String -> LatexExpression -> String

@@ -208,6 +208,7 @@ Below are some of the current restrictions and limitations.
 
 We are working to fix known issues and to expand the scope of MiniLatex.
 
+\\strong{Bibliography}
 
 \\begin{thebibliography}
 
@@ -223,6 +224,14 @@ We are working to fix known issues and to expand the scope of MiniLatex.
 \\bigskip
 
 \\image{https://cdn-images-1.medium.com/max/1200/1*HlpVE5TFBUp17ua1AdiKpw.gif}{The way we used to do it.}{align: center}
+
+\\begin{comment}
+
+This text
+
+should not appear
+
+\\end{comment}
 
 """
 

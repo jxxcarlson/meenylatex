@@ -90,6 +90,9 @@ render latexState latexExpression =
         Macro name args ->
             renderMacro latexState name args
 
+        SMacro name args le ->
+            renderSMacro latexState name args le
+
         Item level latexExpression ->
             renderItem latexState level latexExpression
 
@@ -153,7 +156,7 @@ renderEnvironmentDict =
         , ( "macros", \x y -> renderMacros x y )
         , ( "quotation", \x y -> renderQuotation x y )
         , ( "tabular", \x y -> renderTabular x y )
-        , ( "thebibliography", \x y -> renderTheBiblography x y )
+        , ( "thebibliography", \x y -> renderTheBibliography x y )
         , ( "maskforweb", \x y -> renderCommentEnvironment x y )
         , ( "useforweb", \x y -> renderUseForWeb x y )
         , ( "verbatim", \x y -> renderVerbatim x y )
@@ -186,8 +189,12 @@ renderDefaultEnvironment name latexState body =
 
 renderIndentEnvironment : LatexState -> LatexExpression -> String
 renderIndentEnvironment latexState body =
-    -- div [ "style=\"margin-left:2em\"" ] [ (render latexState body) ]
     Html.div [ "style=\"margin-left:2em\"" ] [ render latexState body ]
+
+
+renderTheBibliography : LatexState -> LatexExpression -> String
+renderTheBibliography latexState body =
+    Html.div [ "style=\"\"" ] [ Html.h3 "Bibliography", render latexState body ]
 
 
 renderTheoremLikeEnvironment : LatexState -> String -> LatexExpression -> String
@@ -309,22 +316,6 @@ renderUseForWeb latexState body =
     "\n$$\n" ++ render latexState body ++ "\n$$\n"
 
 
-renderTheBiblography : LatexState -> LatexExpression -> String
-renderTheBiblography latexState body =
-    "xxx"
-
-
-
--- let
---     bibText =
---         body
---             |> List.map render
---             |> List.map (\par -> "<p>" ++ par ++ "</p>")
---             |> List.foldr (\par acc -> par ++ "\n\n" ++ acc)
--- in
--- Html.div [ "class=\"verse\"" ] [ bibText ]
-
-
 renderTabular latexState body =
     renderTableBody body
 
@@ -430,6 +421,13 @@ renderMacroDict =
         ]
 
 
+renderSMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> LatexExpression -> String)
+renderSMacroDict =
+    Dict.fromList
+        [ ( "bibitem", \x y z -> renderBibItem x y z )
+        ]
+
+
 macroRenderer : String -> (LatexState -> List LatexExpression -> String)
 macroRenderer name =
     case Dict.get name renderMacroDict of
@@ -455,6 +453,16 @@ renderArg k latexState args =
     render latexState (getElement k args) |> String.trim
 
 
+renderSMacro : LatexState -> String -> List LatexExpression -> LatexExpression -> String
+renderSMacro latexState name args le =
+    case Dict.get name renderSMacroDict of
+        Just f ->
+            f latexState args le
+
+        Nothing ->
+            "\\" ++ name ++ renderArgList emptyLatexState args ++ " " ++ render latexState le
+
+
 
 {- INDIVIDUAL MACRO RENDERERS -}
 
@@ -462,6 +470,15 @@ renderArg k latexState args =
 renderBozo : LatexState -> List LatexExpression -> String
 renderBozo latexState args =
     "bozo{" ++ renderArg 0 latexState args ++ "}{" ++ renderArg 1 latexState args ++ "}"
+
+
+renderBibItem : LatexState -> List LatexExpression -> LatexExpression -> String
+renderBibItem latexState args le =
+    let
+        label =
+            renderArg 0 latexState args
+    in
+    " <p id=\"bib:" ++ label ++ "\">[" ++ label ++ "] " ++ render latexState le ++ "</p>\n"
 
 
 renderBigSkip : LatexState -> List LatexExpression -> String
@@ -483,7 +500,11 @@ renderSmallSkip latexState args =
 -}
 renderCite : LatexState -> List LatexExpression -> String
 renderCite latexState args =
-    " [" ++ renderArg 0 latexState args ++ "]"
+    let
+        label =
+            renderArg 0 latexState args
+    in
+    " <span>[<a href=\"#bib:" ++ label ++ "\">" ++ label ++ "</a>]</span>"
 
 
 renderCode : LatexState -> List LatexExpression -> String

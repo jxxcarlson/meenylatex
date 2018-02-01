@@ -1,14 +1,14 @@
-module MiniLatex.Parser
-    exposing
-        ( LatexExpression(..)
-        , defaultLatexList
-        , endWord
-        , envName
-        , latexList
-        , macro
-        , parse
-        , ws
-        )
+module MiniLatex.Parser exposing (..)
+
+-- ( LatexExpression(..)
+-- , defaultLatexList
+-- , endWord
+-- , envName
+-- , latexList
+-- , macro
+-- , parse
+-- , ws
+-- )
 
 import Dict
 import Parser exposing (..)
@@ -29,6 +29,7 @@ type LatexExpression
     | Item Int LatexExpression
     | InlineMath String
     | DisplayMath String
+    | SMacro String (List LatexExpression) LatexExpression
     | Macro String (List LatexExpression)
     | Environment String LatexExpression
     | LatexList (List LatexExpression)
@@ -36,6 +37,31 @@ type LatexExpression
 
 
 {- End of Has Math code -}
+
+
+smacro : Parser LatexExpression
+smacro =
+    succeed SMacro
+        |= smacroName
+        |= repeat zeroOrMore arg
+        |= smacroBody
+
+
+smacroBody : Parser LatexExpression
+smacroBody =
+    inContext "smacroBody" <|
+        (succeed identity
+            |. spaces
+            |= repeat oneOrMore (oneOf [ specialWords, inlineMath spaces, macro spaces ])
+            |. symbol "\n\n"
+            |> map (\x -> LatexList x)
+        )
+
+
+
+-- bibitem =
+--     andThen (parseUntil "\n\n")
+-- |= andThen (\x -> "foo") parseUntil "\n\n"
 
 
 defaultLatexList : LatexExpression
@@ -126,6 +152,14 @@ reservedWord : Parser ()
 reservedWord =
     inContext "reservedWord" <|
         (succeed identity
+            |= oneOf [ symbol "\\begin", keyword "\\end", keyword "\\item", keyword "\\bibitem" ]
+        )
+
+
+smacroReservedWord : Parser ()
+smacroReservedWord =
+    inContext "reservedWord" <|
+        (succeed identity
             |= oneOf [ symbol "\\begin", keyword "\\end", keyword "\\item" ]
         )
 
@@ -191,6 +225,16 @@ macroName =
         )
 
 
+smacroName : Parser String
+smacroName =
+    inContext "macroName" <|
+        (allOrNothing <|
+            succeed identity
+                |. mustFail smacroReservedWord
+                |= innerMacroName
+        )
+
+
 innerMacroName : Parser String
 innerMacroName =
     inContext "innerMacroName" <|
@@ -246,6 +290,7 @@ latexExpression =
         , displayMathBrackets
         , inlineMath ws
         , macro ws
+        , smacro
         , words
         ]
 

@@ -45,6 +45,9 @@ render latexExpression =
         Macro name args ->
             renderMacro name args
 
+        SMacro name args le ->
+            renderSMacro name args le
+
         Item level latexExpression ->
             renderItem level latexExpression
 
@@ -96,3 +99,8 @@ renderEnvironment name body =
 renderMacro : String -> List LatexExpression -> String
 renderMacro name args =
     " \\" ++ name ++ renderArgList args
+
+
+renderSMacro : String -> List LatexExpression -> LatexExpression -> String
+renderSMacro name args le =
+    " \\" ++ name ++ renderArgList args ++ " " ++ render le ++ "\n\n"

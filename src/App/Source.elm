@@ -90,7 +90,7 @@ initialText =
 
 \\date{November 13, 2017}
 
-\\revision{January 16, 2018}
+\\revision{February 1, 2018}
 
 \\maketitle
 
@@ -98,164 +98,109 @@ initialText =
 
 \\section{Introduction}
 
-MiniLaTeX is a subset of LaTeX which can be displayed in a web browser.
-One applies a parser-renderer toolchain to convert MiniLaTeX into HTML,
-then uses MathJax to render formulas and equations.
-This document is written in MiniLatex; for additional examples,
-try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
+MiniLaTeX is a subset of LaTeX which can be displayed in a web browser \\cite{HN}. One applies a parser-renderer toolchain to convert MiniLaTeX into HTML, then uses MathJax to render formulas and equations. This document is written in MiniLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
 
-Feel free to edit and re-render the text on the left and to
-experiment with the buttons above.  To export a rendered LaTeX
-file, simply click on the "Export" button above.
-  Your file will be downloaded as "file.html".
+Feel free to edit and re-render the text on the left and to experiment with the buttons above. To export a rendered LaTeX file, simply click on the "Export" button above. Your file will be downloaded as "file.html".
 
-Please bear in mind that MiniLaTeX is still an R&D
-operation. We are working hard to extend its scope;
-we welcome bug reports, comments and suggestions.
+Please bear in mind that MiniLaTeX is still an R&D operation \\cite{TR}. We are working hard to refine its grammar \\cite{GR} and extend its scope; we welcome bug reports, comments and suggestions.
 
-MiniLatex is written in Elm, the functional
-language for building web apps developed by
-Evan Czaplicki, starting with his 2012 senior thesis.
-Although Elm is especially well-suited for writing
-a parser for MiniLatex and integrating that parser
-into an interactive editing environment, MiniLatex
-does not depend on any particular language.
-Indeed, we plan a second implementation of the parrser-renderer
-toolchain in Haskell.
-
-
-
+MiniLatex is written in Elm, the functional language for building web apps developed by Evan Czaplicki, starting with his 2012 senior thesis. Although Elm is especially well-suited for writing a parser for MiniLatex and integrating that parser into an interactive editing environment, MiniLatex does not depend on any particular language. Indeed, we plan a second implementation of the parrser-renderer toolchain in Haskell.
 
 \\section{Examples}
 
-The Pythagorean Theorem, $a^2 + b^2 = c^2$,
-is useful for computing distances.
+The Pythagorean Theorem, $a^2 + b^2 = c^2$, is useful for computing distances.
 
-
-Formula \\eqref{integral}
-is one that you learned in Calculus class.
+Formula \\eqref{integral}is one that you learned in Calculus class.
 
 \\begin{equation}
+
 \\label{integral}
 \\int_0^1 x^n dx = \\frac{1}{n+1}
+
 \\end{equation}
 
+
 \\begin{theorem}
-There are infinitely many primes, and
-each satisfies $a^{p-1} \\equiv 1 \\text{ mod } p$, provided
-that $p$ does not divide $a$.
+There are infinitely many primes, and each satisfies $a^{p-1} \\equiv 1 \\text{ mod } p$, provided that $p$does not divide $a$.
 \\end{theorem}
 
-\\strong{Light Elements}
-\\begin{tabular}{l l l l}
-Hydrogen & H & 1 & 1.008 \\\\
-Helium & He & 2 & 4.003 \\\\
-Lithium & Li & 3 &  6.94 \\\\
-Beryllium & Be & 4 & 9.012 \\\\
+
+\\strong{Light Elements}\\begin{tabular}
+HydrogenH11.008HeliumHe24.003LithiumLi36.94BerylliumBe49.012
 \\end{tabular}
+
 
 \\image{http://psurl.s3.amazonaws.com/images/jc/propagator_t=2-6feb.png}{Free particle propagator}{width: 300, align: center}
 
-
-Note that in the \\italic{source} of the listing below,
-there are no line numbers.
+Note that in the \\italic{source}of the listing below, there are no line numbers.
 
 \\strong{MiniLaTeX Abstract Syntax Tree (AST)}
 
 \\begin{listing}
+
 type LatexExpression
-    = LXString String
-    | Comment String
-    | Item Int LatexExpression
-    | InlineMath String
-    | DisplayMath String
-    | Macro String (List LatexExpression)
-    | Environment String LatexExpression
-    | LatexList (List LatexExpression)
+= LXString String
+| Comment String
+| Item Int LatexExpression
+| InlineMath String
+| DisplayMath String
+| Macro String (List LatexExpression)
+| Environment String LatexExpression
+| LatexList (List LatexExpression)
+
 \\end{listing}
 
-The MiniLaTeX parser reads text and produces
-an AST.  A rendering function converts the AST
-into HTML.  One could easily write
-functions \\code{render: LatexExpression -> String}
-to make other conversions.
+
+The MiniLaTeX parser reads text and produces an AST. A rendering function converts the AST into HTML. One could easily write functions \\code{render: LatexExpression -> String}to make other conversions.
 
 \\section{Short Writer's Guide}
 
-We plan a complete Writer's Guide for MiniLaTeX.  For now, however, just a few pointers.
+We plan a complete Writer's Guide for MiniLaTeX. For now, however, just a few pointers.
 
 \\begin{itemize}
-
 \\item Make liberal use of blank lines. Your source text will be much easier to read, and the converter has optimizations that work especially well when this is done.
 
-\\item Equations and environments should have a blank line above one below.  Items in lists should be separated by blank lines.    This is not strictly necessary, but it helps the converter and it helps you.
+\\item Equations and environments should have a blank line above one below. Items in lists should be separated by blank lines. This is not strictly necessary, but it helps the converter and it helps you.
 
-\\item  The begin-end pairs that delimit environments should begin at the left margin of the text.  For the moment this is mandatory.
+\\item The begin-end pairs that delimit environments should begin at the left margin of the text. For the moment this is mandatory.
+
 
 \\end{itemize}
 
-\\italic{Fast Render} is an optimization that speeds
-up parsing and rendering for long documents.
-Only paragraphs which are changed are re-parsed
-(expensive) and re-rendered (inexpensive).
-However, to resolve section numbers, cross-references,
-etc., a full render is necessary.
 
-All of these operations will have a very significant speed-up
-when version 0.19 of the Elm compiler is released and
-when MathJax 3.0 is released and integrated into MiniLaTeX.
+\\italic{Fast Render}is an optimization that speeds up parsing and rendering for long documents. Only paragraphs which are changed are re-parsed (expensive) and re-rendered (inexpensive). However, to resolve section numbers, cross-references, etc., a full render is necessary.
+
+All of these operations will have a very significant speed-up when version 0.19 of the Elm compiler is released and when MathJax 3.0 is released and integrated into MiniLaTeX.
 
 \\section{More about MiniLaTeX}
 
 Articles and code:
 
 \\begin{itemize}
-
 \\item \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards LaTeX in the Browser}
 
 \\item \\href{https://github.com/jxxcarlson/minilatexDemo}{Code for the Demo App}
 
 \\item \\href{http://package.elm-lang.org/packages/jxxcarlson/minilatex/latest}{The MiniLatex Elm Library}
 
+
 \\end{itemize}
 
-To try out MiniLatex for real, sign up for a free account at
- \\href{http://www.knode.io}{www.knode.io}.  The app is still
- under development &mdash;  we need people to test it and give feedback.
-Contributions to help improve the open-source
-MiniLatex Parser-Renderer are most welcome.
-Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}.
-The MiniLatex Demo as well as the app at knode.io are written in
-\\href{http://elm-lang.org/}{Elm}.  We also plan a Haskell version.
+
+To try out MiniLatex for real, sign up for a free account at \\href{http://www.knode.io}{www.knode.io}. The app is still under development &mdash; we need people to test it and give feedback. Contributions to help improve the open-source MiniLatex Parser-Renderer are most welcome. Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}. The MiniLatex Demo as well as the app at knode.io are written in \\href{http://elm-lang.org/}{Elm}. We also plan a Haskell version.
 
 Please send comments, bug reports, etc. to jxxcarlson at gmail.
 
-\\section{Technical Note}
-There is a \\italic{very rough} \\href{http://www.knode.io/#@public/628}{draft grammar}
-for MiniLaTeX, written mostly in EBNF.  However, there are a few
-productions, notably for environments, which are not context-free.
-Recall that in a context-free grammar, all productions are
-of the form $A \\Rightarrow \\beta$, where $A$ is a non-terminal symbol
-and $\\beta$ is a sequence of terminals and nonterminals.  There
-are some productions of the form $A\\beta \\Rightarrow \\gamma$,
-where $\\beta$ is a terminal symbol.  These are
-context-sensitive productions, with $\\beta$ providing the context.
-
-
+\\section{Technical Note}There is a \\italic{very rough} \\href{http://www.knode.io/#@public/628}{draft grammar}for MiniLaTeX, written mostly in EBNF. However, there are a few productions, notably for environments, which are not context-free. Recall that in a context-free grammar, all productions are of the form $A \\Rightarrow \\beta$, where $A$is a non-terminal symbol and $\\beta$is a sequence of terminals and nonterminals. There are some productions of the form $A\\beta \\Rightarrow \\gamma$, where $\\beta$is a terminal symbol. These are context-sensitive productions, with $\\beta$providing the context.
 
 \\section{Restrictions, Limitations, and Todos}
 
-Below
-are some of the current restrictions and limitations.
+Below are some of the current restrictions and limitations.
 
 \\begin{enumerate}
+\\item The enumerate and itemize environments cannot be nested (but can contain inline math and macros). In addition there is a parser bug which prevents the use of these environments within other environments such as theorem.
 
-\\item The enumerate and itemize environments cannot be nested (but can contain inline math and macros).
-  In addition there is a parser bug which prevents the use of these environments within
-  other environments such as theorem.
-
-\\item The tabular environment ignores formatting information
-and left-justifies everything in the cell.
+\\item The tabular environment ignores formatting information and left-justifies everything in the cell.
 
 
 \\end{enumerate}
@@ -263,11 +208,21 @@ and left-justifies everything in the cell.
 
 We are working to fix known issues and to expand the scope of MiniLatex.
 
+
+\\begin{thebibliography}
+
+\\bibitem{HN} \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
+
+\\bibitem{GR} \\href{http://www.knode.io/#@public/628}{MiniLatex Grammar}
+
+\\bibitem{TR} \\href{http://www.knode.io/#@public/525}{MiniLatex Technical Report}
+
+
+\\end{thebibliography}
+
 \\bigskip
 
 \\image{https://cdn-images-1.medium.com/max/1200/1*HlpVE5TFBUp17ua1AdiKpw.gif}{The way we used to do it.}{align: center}
-
-
 
 """
 

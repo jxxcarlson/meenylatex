@@ -85,10 +85,32 @@ parse text =
             list
 
         Err error ->
-            [ LXString ("<strong>Error:</strong> " ++ "<pre class=\"errormessage\">" ++ toString error.problem ++ " </pre><strong>in </strong> </span><pre class=\"errormessage\">" ++ error.source ++ "</pre>") ]
+            [ LXString (errorMessage2 error) ]
 
         _ ->
             [ LXString "yada!" ]
+
+
+errorMessage error =
+    "<strong>Error:</strong> "
+        ++ "<pre class=\"errormessage\">"
+        ++ toString error.problem
+        ++ " </pre><strong>in </strong> </span><pre class=\"errormessage\">"
+        ++ error.source
+        ++ "</pre>"
+
+
+errorMessage2 error =
+    "row: "
+        ++ toString error.row
+        ++ "\ncol: "
+        ++ toString error.col
+        ++ "\nProblem: "
+        ++ toString error.problem
+        ++ "\nContext: "
+        ++ toString error.context
+        ++ "\nSource: "
+        ++ error.source
 
 
 
@@ -476,21 +498,23 @@ itemEnvironmentBody endWord envType =
         in
         succeed identity
             |. ws
-            |. symbol "\\item"
-            |= repeat zeroOrMore (item endWord)
+            |= repeat zeroOrMore item
+            |. ws
+            |. symbol endWord
             |. ws
             |> map LatexList
             |> map (Environment envType)
 
 
-item : String -> Parser LatexExpression
-item endWord =
+item : Parser LatexExpression
+item =
     inContext "item" <|
         (succeed identity
             |. spaces
-            |= repeat zeroOrMore (oneOf [ words, inlineMath ws, macro ws ])
+            |. symbol "\\item"
+            |. spaces
+            |= repeat zeroOrMore (oneOf [ words, inlineMath spaces, macro spaces ])
             |. ws
-            |. oneOf [ symbol "\\item", symbol endWord ]
             |> map (\x -> Item 1 (LatexList x))
         )
 

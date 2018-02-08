@@ -162,8 +162,6 @@ We plan a complete Writer's Guide for MiniLaTeX. For now, however, just a few po
 
 \\item Equations and environments should have a blank line above one below. Items in lists should be separated by blank lines. This is not strictly necessary, but it helps the converter and it helps you.
 
-\\item The begin-end pairs that delimit environments should begin at the left margin of the text. For the moment this is mandatory.
-
 
 \\end{itemize}
 
@@ -203,7 +201,9 @@ Below are some of the current restrictions and limitations.
 \\begin{restrictions}
 \\begin{enumerate}
 
-\\item The enumerate and itemize environments cannot be nested (but can contain inline math and macros).
+\\item The enumerate and itemize environments cannot be nested inside one another.  They
+can, however, contain inline math and macros, and they may be contained in other environments,
+e.g., theorem.
 
 \\item The tabular environment ignores formatting information and left-justifies everything in the cell.
 

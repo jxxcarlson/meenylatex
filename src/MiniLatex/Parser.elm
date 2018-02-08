@@ -11,6 +11,7 @@ module MiniLatex.Parser exposing (..)
 -- )
 
 import Dict
+import MiniLatex.ErrorMessages exposing (explanation)
 import MiniLatex.ParserHelpers exposing (..)
 import Parser exposing (..)
 
@@ -38,41 +39,6 @@ type LatexExpression
     | LXError String String
 
 
-smacro : Parser LatexExpression
-smacro =
-    succeed SMacro
-        |= smacroName
-        |= repeat zeroOrMore arg
-        |= smacroBody
-
-
-smacroBody : Parser LatexExpression
-smacroBody =
-    inContext "smacroBody" <|
-        (succeed identity
-            |. spaces
-            |= repeat oneOrMore (oneOf [ specialWords, inlineMath spaces, macro spaces ])
-            |. symbol "\n\n"
-            |> map (\x -> LatexList x)
-        )
-
-
-
--- bibitem =
---     andThen (parseUntil "\n\n")
--- |= andThen (\x -> "foo") parseUntil "\n\n"
-
-
-defaultLatexList : LatexExpression
-defaultLatexList =
-    LatexList [ LXString "Parse Error" ]
-
-
-defaultLatexExpression : List LatexExpression
-defaultLatexExpression =
-    [ Macro "NULL" [] ]
-
-
 parse : String -> List LatexExpression
 parse text =
     let
@@ -90,68 +56,14 @@ parse text =
             [ LXString "yada!" ]
 
 
-errorMessage1 error =
-    "<div style=\"color: red\">ERROR: "
-        ++ toString error.source
-        ++ "</div>\n"
-        ++ "<div style=\"color: blue\">"
-        ++ explanation error
-        ++ "</div>"
+defaultLatexList : LatexExpression
+defaultLatexList =
+    LatexList [ LXString "Parse Error" ]
 
 
-errorDict : Dict.Dict String String
-errorDict =
-    Dict.fromList
-        [ ( "ExpectingSymbol \"\\end{enumerate}\"", "Check \\begin--\\end par, then check \\items" )
-        , ( "ExpectingSymbol \"\\end{itemize}\"", "Check \\begin--\\end par, then check \\items" )
-        , ( "ExpectingSymbol \"}\"", "Looks like you didn't close a macro argument." )
-        ]
-
-
-errorDict2 : Dict.Dict String String
-errorDict2 =
-    Dict.fromList
-        [ ( "ExpectingClosing", "I believe you didn't close your begin-end pair properly." )
-        ]
-
-
-explanation error =
-    case Dict.get (toString error.problem) errorDict of
-        Just explanationText ->
-            explanationText
-
-        _ ->
-            explanation2 error
-
-
-explanation2 error =
-    let
-        errorWords =
-            Debug.log "errorWords" (toString error.problem |> String.words)
-
-        headError =
-            Debug.log "headError"
-                (errorWords |> List.head |> Maybe.withDefault "XXXX")
-    in
-    case Dict.get headError errorDict2 of
-        Just explanationText ->
-            explanationText
-
-        _ ->
-            "Problem: " ++ toString error.problem
-
-
-errorMessage2 error =
-    "row: "
-        ++ toString error.row
-        ++ "\ncol: "
-        ++ toString error.col
-        ++ "\nProblem: "
-        ++ toString error.problem
-        ++ "\nContext: "
-        ++ toString error.context
-        ++ "\nSource: "
-        ++ error.source
+defaultLatexExpression : List LatexExpression
+defaultLatexExpression =
+    [ Macro "NULL" [] ]
 
 
 
@@ -229,6 +141,23 @@ macroName =
         )
 
 
+innerMacroName : Parser String
+innerMacroName =
+    inContext "innerMacroName" <|
+        succeed identity
+            |. spaces
+            |. symbol "\\"
+            |= keep oneOrMore notMacroSpecialCharacter
+
+
+smacro : Parser LatexExpression
+smacro =
+    succeed SMacro
+        |= smacroName
+        |= repeat zeroOrMore arg
+        |= smacroBody
+
+
 smacroName : Parser String
 smacroName =
     inContext "macroName" <|
@@ -239,13 +168,15 @@ smacroName =
         )
 
 
-innerMacroName : Parser String
-innerMacroName =
-    inContext "innerMacroName" <|
-        succeed identity
+smacroBody : Parser LatexExpression
+smacroBody =
+    inContext "smacroBody" <|
+        (succeed identity
             |. spaces
-            |. symbol "\\"
-            |= keep oneOrMore notMacroSpecialCharacter
+            |= repeat oneOrMore (oneOf [ specialWords, inlineMath spaces, macro spaces ])
+            |. symbol "\n\n"
+            |> map (\x -> LatexList x)
+        )
 
 
 
@@ -419,11 +350,7 @@ passThroughBody endWord envType =
 itemEnvironmentBody : String -> String -> Parser LatexExpression
 itemEnvironmentBody endWord envType =
     inContext "itemEnvironmentBody" <|
-        let
-            beginSymbol =
-                ""
-        in
-        succeed identity
+        (succeed identity
             |. ws
             |= repeat zeroOrMore item
             |. ws
@@ -431,6 +358,7 @@ itemEnvironmentBody endWord envType =
             |. ws
             |> map LatexList
             |> map (Environment envType)
+        )
 
 
 item : Parser LatexExpression
@@ -439,6 +367,7 @@ item =
         (succeed identity
             |. spaces
             |. symbol "\\item"
+            |. symbol " "
             |. spaces
             |= repeat zeroOrMore (oneOf [ words, inlineMath spaces, macro spaces ])
             |. ws

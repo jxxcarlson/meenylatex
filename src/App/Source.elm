@@ -200,7 +200,7 @@ Below are some of the current restrictions and limitations.
 
 %% COMMENT: below we nest one environment inside another
 
-\\begin{advice}
+\\begin{restrictions}
 \\begin{enumerate}
 
 \\item The enumerate and itemize environments cannot be nested (but can contain inline math and macros).
@@ -208,7 +208,7 @@ Below are some of the current restrictions and limitations.
 \\item The tabular environment ignores formatting information and left-justifies everything in the cell.
 
 \\end{enumerate}
-\\end{advice}
+\\end{restrictions}
 
 We are working to fix known issues and to expand the scope of MiniLatex.
 

@@ -113,10 +113,8 @@ The Pythagorean Theorem, $a^2 + b^2 = c^2$, is useful for computing distances.
 Formula \\eqref{integral}is one that you learned in Calculus class.
 
 \\begin{equation}
-
 \\label{integral}
 \\int_0^1 x^n dx = \\frac{1}{n+1}
-
 \\end{equation}
 
 

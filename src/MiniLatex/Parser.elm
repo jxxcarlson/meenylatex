@@ -11,6 +11,7 @@ module MiniLatex.Parser exposing (..)
 -- )
 
 import Dict
+import MiniLatex.ParserHelpers exposing (..)
 import Parser exposing (..)
 
 
@@ -19,6 +20,7 @@ import Parser exposing (..)
    https://ellie-app.com/pcB5b3BPfa1/1
 
 -}
+{- End of Has Math code -}
 
 
 {-| The type for the Abstract syntax tree
@@ -33,10 +35,7 @@ type LatexExpression
     | Macro String (List LatexExpression)
     | Environment String LatexExpression
     | LatexList (List LatexExpression)
-
-
-
-{- End of Has Math code -}
+    | LXError String String
 
 
 smacro : Parser LatexExpression
@@ -85,19 +84,61 @@ parse text =
             list
 
         Err error ->
-            [ LXString (errorMessage2 error) ]
+            [ LXError (toString error.source) (explanation error) ]
 
         _ ->
             [ LXString "yada!" ]
 
 
-errorMessage error =
-    "<strong>Error:</strong> "
-        ++ "<pre class=\"errormessage\">"
-        ++ toString error.problem
-        ++ " </pre><strong>in </strong> </span><pre class=\"errormessage\">"
-        ++ error.source
-        ++ "</pre>"
+errorMessage1 error =
+    "<div style=\"color: red\">ERROR: "
+        ++ toString error.source
+        ++ "</div>\n"
+        ++ "<div style=\"color: blue\">"
+        ++ explanation error
+        ++ "</div>"
+
+
+errorDict : Dict.Dict String String
+errorDict =
+    Dict.fromList
+        [ ( "ExpectingSymbol \"\\end{enumerate}\"", "Check \\begin--\\end par, then check \\items" )
+        , ( "ExpectingSymbol \"\\end{itemize}\"", "Check \\begin--\\end par, then check \\items" )
+        , ( "ExpectingSymbol \"}\"", "Looks like you didn't close a macro argument." )
+        ]
+
+
+errorDict2 : Dict.Dict String String
+errorDict2 =
+    Dict.fromList
+        [ ( "ExpectingClosing", "I believe you didn't close your begin-end pair properly." )
+        ]
+
+
+explanation error =
+    case Dict.get (toString error.problem) errorDict of
+        Just explanationText ->
+            explanationText
+
+        _ ->
+            explanation2 error
+
+
+explanation2 error =
+    let
+        errorWords =
+            Debug.log "errorWords" (toString error.problem |> String.words)
+
+        headError =
+            Debug.log "headError"
+                (errorWords |> List.head |> Maybe.withDefault "XXXX")
+    in
+    case Dict.get headError errorDict2 of
+        Just explanationText ->
+            explanationText
+
+        _ ->
+            "Problem: " ++ toString error.problem
 
 
 errorMessage2 error =
@@ -114,207 +155,7 @@ errorMessage2 error =
 
 
 
-{- PARSER HELPERS
-
-   These have varaous types, e.g.,
-
-     - Parser ()
-     - String -> Parser String
-     - Parser a -> Parser a
-     - Parser a -> Parser ()
-
--}
-
-
-spaces : Parser ()
-spaces =
-    ignore zeroOrMore (\c -> c == ' ')
-
-
-ws : Parser ()
-ws =
-    ignore zeroOrMore (\c -> c == ' ' || c == '\n')
-
-
-parseUntil : String -> Parser String
-parseUntil marker =
-    inContext "parseUntil" <|
-        (ignoreUntil marker
-            |> source
-            |> map (String.dropRight <| String.length marker)
-        )
-
-
-allOrNothing : Parser a -> Parser a
-allOrNothing parser =
-    inContext "allOrNothing" <|
-        delayedCommitMap always parser (succeed ())
-
-
-mustFail : Parser a -> Parser ()
-mustFail parser =
-    inContext "mustFail" <|
-        (oneOf
-            [ delayedCommitMap always parser (succeed ()) |> map (always <| Err "I didn't fail")
-            , succeed (Ok ())
-            ]
-            |> andThen
-                (\res ->
-                    case res of
-                        Err e ->
-                            fail e
-
-                        Ok _ ->
-                            succeed ()
-                )
-        )
-
-
-reservedWord : Parser ()
-reservedWord =
-    inContext "reservedWord" <|
-        (succeed identity
-            |= oneOf [ symbol "\\begin", keyword "\\end", keyword "\\item", keyword "\\bibitem" ]
-        )
-
-
-smacroReservedWord : Parser ()
-smacroReservedWord =
-    inContext "reservedWord" <|
-        (succeed identity
-            |= oneOf [ symbol "\\begin", keyword "\\end", keyword "\\item" ]
-        )
-
-
-
-{- PARSERS FOR TERMINALS -- Type Parser String
-
-   and helpers of type  Char -> Bool
--}
-
-
-word : Parser String
-word =
-    (inContext "word" <|
-        succeed identity
-            |. spaces
-            |= keep oneOrMore notSpecialCharacter
-            |. ws
-    )
-        |> map transformWords
-
-
-{-| Transform special words
--}
-transformWords : String -> String
-transformWords str =
-    if str == "--" then
-        "&ndash;"
-    else if str == "---" then
-        "&mdash;"
-    else
-        str
-
-
-notSpecialCharacter : Char -> Bool
-notSpecialCharacter c =
-    not (c == ' ' || c == '\n' || c == '\\' || c == '$')
-
-
-{-| Like `word`, but after a word is recognized spaces, not spaces + newlines are consumed
--}
-specialWord : Parser String
-specialWord =
-    inContext "specialWord" <|
-        succeed identity
-            |. spaces
-            |= keep oneOrMore notSpecialTableOrMacroCharacter
-            |. spaces
-
-
-notSpecialTableOrMacroCharacter : Char -> Bool
-notSpecialTableOrMacroCharacter c =
-    not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == '&')
-
-
-macroName : Parser String
-macroName =
-    inContext "macroName" <|
-        (allOrNothing <|
-            succeed identity
-                |. mustFail reservedWord
-                |= innerMacroName
-        )
-
-
-smacroName : Parser String
-smacroName =
-    inContext "macroName" <|
-        (allOrNothing <|
-            succeed identity
-                |. mustFail smacroReservedWord
-                |= innerMacroName
-        )
-
-
-innerMacroName : Parser String
-innerMacroName =
-    inContext "innerMacroName" <|
-        succeed identity
-            |. spaces
-            |. symbol "\\"
-            |= keep oneOrMore notMacroSpecialCharacter
-
-
-notMacroSpecialCharacter : Char -> Bool
-notMacroSpecialCharacter c =
-    not (c == '{' || c == ' ' || c == '\n')
-
-
-endWord : Parser String
-endWord =
-    inContext "endWord" <|
-        (succeed identity
-            |. ignore zeroOrMore ((==) ' ')
-            |. symbol "\\end{"
-            |= parseUntil "}"
-        )
-
-
-
-{- PARSERS FOR NON-TERMINAS: Type Parser LatexExpression
-
-   or sometiemes Parser () -> Parser LatexExpresson
-
--}
-
-
-{-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
--}
-latexList : Parser LatexExpression
-latexList =
-    inContext "latexList" <|
-        (succeed identity
-            |. ws
-            |= repeat oneOrMore latexExpression
-            |> map LatexList
-        )
-
-
-{-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment\ |\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
--}
-latexExpression : Parser LatexExpression
-latexExpression =
-    oneOf
-        [ texComment
-        , lazy (\_ -> environment)
-        , displayMathDollar
-        , displayMathBrackets
-        , inlineMath ws
-        , macro ws
-        , smacro
-        , words
-        ]
+{- WORDS AND TEXT -}
 
 
 words : Parser LatexExpression
@@ -350,6 +191,96 @@ texComment =
 
 
 
+{- MACROS -}
+{- NOTE: macro sequences should be of the form "" followed by alphabetic characterS,
+   but not equal to certain reserved words, e.g., "\begin", "\end", "\item"
+-}
+
+
+macro : Parser () -> Parser LatexExpression
+macro wsParser =
+    inContext "macro" <|
+        succeed Macro
+            |= macroName
+            |= repeat zeroOrMore arg
+            |. wsParser
+
+
+{-| Use to parse arguments for macros
+-}
+arg : Parser LatexExpression
+arg =
+    inContext "arg" <|
+        (succeed identity
+            |. keyword "{"
+            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces, lazy (\_ -> macro ws) ])
+            |. symbol "}"
+            |> map LatexList
+        )
+
+
+macroName : Parser String
+macroName =
+    inContext "macroName" <|
+        (allOrNothing <|
+            succeed identity
+                |. mustFail reservedWord
+                |= innerMacroName
+        )
+
+
+smacroName : Parser String
+smacroName =
+    inContext "macroName" <|
+        (allOrNothing <|
+            succeed identity
+                |. mustFail smacroReservedWord
+                |= innerMacroName
+        )
+
+
+innerMacroName : Parser String
+innerMacroName =
+    inContext "innerMacroName" <|
+        succeed identity
+            |. spaces
+            |. symbol "\\"
+            |= keep oneOrMore notMacroSpecialCharacter
+
+
+
+{- Latex List and Expression -}
+
+
+{-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
+-}
+latexList : Parser LatexExpression
+latexList =
+    inContext "latexList" <|
+        (succeed identity
+            |. ws
+            |= repeat oneOrMore latexExpression
+            |> map LatexList
+        )
+
+
+{-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment\ |\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
+-}
+latexExpression : Parser LatexExpression
+latexExpression =
+    oneOf
+        [ texComment
+        , lazy (\_ -> environment)
+        , displayMathDollar
+        , displayMathBrackets
+        , inlineMath ws
+        , macro ws
+        , smacro
+        , words
+        ]
+
+
+
 {- MATHEMATICAL TEXT -}
 
 
@@ -382,37 +313,7 @@ displayMathBrackets =
 
 
 
-{- MACROS -}
-{- NOTE: macro sequences should be of the form "" followed by alphabetic characterS,
-   but not equal to certain reserved words, e.g., "\begin", "\end", "\item"
--}
-
-
-macro : Parser () -> Parser LatexExpression
-macro wsParser =
-    inContext "macro" <|
-        succeed Macro
-            |= macroName
-            |= repeat zeroOrMore arg
-            |. wsParser
-
-
-{-| Use to parse arguments for macros
--}
-arg : Parser LatexExpression
-arg =
-    inContext "arg" <|
-        (succeed identity
-            |. keyword "{"
-            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces, lazy (\_ -> macro ws) ])
-            |. symbol "}"
-            |> map LatexList
-        )
-
-
-
 {- ENVIRONMENTS -}
-{- Dispatcher code -}
 
 
 environment : Parser LatexExpression
@@ -447,14 +348,18 @@ environmentOfType envType =
         environmentParser envKind endWord envType
 
 
-parseEnvironmentDict : Dict.Dict String (String -> String -> Parser LatexExpression)
-parseEnvironmentDict =
-    Dict.fromList
-        [ ( "enumerate", \endWord envType -> itemEnvironmentBody endWord envType )
-        , ( "itemize", \endWord envType -> itemEnvironmentBody endWord envType )
-        , ( "tabular", \endWord envType -> tabularEnvironmentBody endWord envType )
-        , ( "passThrough", \endWord envType -> passThroughBody endWord envType )
-        ]
+endWord : Parser String
+endWord =
+    inContext "endWord" <|
+        (succeed identity
+            |. ignore zeroOrMore ((==) ' ')
+            |. symbol "\\end{"
+            |= parseUntil "}"
+        )
+
+
+
+{- DISPATCHER AND SUBPARSERS -}
 
 
 environmentParser : String -> String -> String -> Parser LatexExpression
@@ -467,8 +372,14 @@ environmentParser name =
             standardEnvironmentBody
 
 
-
-{- Subparsers -}
+parseEnvironmentDict : Dict.Dict String (String -> String -> Parser LatexExpression)
+parseEnvironmentDict =
+    Dict.fromList
+        [ ( "enumerate", \endWord envType -> itemEnvironmentBody endWord envType )
+        , ( "itemize", \endWord envType -> itemEnvironmentBody endWord envType )
+        , ( "tabular", \endWord envType -> tabularEnvironmentBody endWord envType )
+        , ( "passThrough", \endWord envType -> passThroughBody endWord envType )
+        ]
 
 
 standardEnvironmentBody : String -> String -> Parser LatexExpression
@@ -481,6 +392,22 @@ standardEnvironmentBody endWord envType =
             |. symbol endWord
             |. ws
             |> map LatexList
+            |> map (Environment envType)
+        )
+
+
+{-| The body of the environment is parsed as an LXString.
+This parser is used for envronments whose body is to be
+passed to MathJax for processing and also for the verbatim
+environment.
+-}
+passThroughBody : String -> String -> Parser LatexExpression
+passThroughBody endWord envType =
+    inContext "passThroughBody" <|
+        (succeed identity
+            |= parseUntil endWord
+            |. ws
+            |> map LXString
             |> map (Environment envType)
         )
 
@@ -519,6 +446,10 @@ item =
         )
 
 
+
+{- TABLES -}
+
+
 tabularEnvironmentBody : String -> String -> Parser LatexExpression
 tabularEnvironmentBody endWord envType =
     inContext "tabularEnvironmentBody" <|
@@ -532,32 +463,14 @@ tabularEnvironmentBody endWord envType =
         )
 
 
-{-| The body of the environment is parsed as an LXString.
-This parser is used for envronments whose body is to be
-passed to MathJax for processing and also for the verbatim
-environment.
--}
-passThroughBody : String -> String -> Parser LatexExpression
-passThroughBody endWord envType =
-    inContext "passThroughBody" <|
+tableBody : Parser LatexExpression
+tableBody =
+    inContext "tableBody" <|
         (succeed identity
-            |= parseUntil endWord
+            |. repeat zeroOrMore arg
             |. ws
-            |> map LXString
-            |> map (Environment envType)
-        )
-
-
-
-{- TABLE -}
-
-
-tableCell : Parser LatexExpression
-tableCell =
-    inContext "tableCell" <|
-        (succeed identity
-            |. spaces
-            |= oneOf [ inlineMath spaces, specialWords ]
+            |= repeat oneOrMore tableRow
+            |> map LatexList
         )
 
 
@@ -570,6 +483,15 @@ tableRow =
             |. spaces
             |. oneOf [ symbol "\n", symbol "\\\\\n" ]
             |> map LatexList
+        )
+
+
+tableCell : Parser LatexExpression
+tableCell =
+    inContext "tableCell" <|
+        (succeed identity
+            |. spaces
+            |= oneOf [ inlineMath spaces, specialWords ]
         )
 
 
@@ -591,15 +513,4 @@ nextCell =
                 |. symbol "&"
                 |. spaces
                 |= tableCell
-        )
-
-
-tableBody : Parser LatexExpression
-tableBody =
-    inContext "tableBody" <|
-        (succeed identity
-            |. repeat zeroOrMore arg
-            |. ws
-            |= repeat oneOrMore tableRow
-            |> map LatexList
         )

@@ -82,6 +82,7 @@ htmlSuffix =
 
 initialText =
     """
+
 \\title{MiniLaTeX Demo}
 
 \\author{James Carlson}
@@ -123,14 +124,23 @@ There are infinitely many primes, and each satisfies $a^{p-1} \\equiv 1 \\text{ 
 \\end{theorem}
 
 
-\\strong{Light Elements}\\begin{tabular}
-HydrogenH11.008HeliumHe24.003LithiumLi36.94BerylliumBe49.012
-\\end{tabular}
+A Table ...
 
+\\begin{indent}
+\\strong{Light Elements}
+\\begin{tabular}{ l l l l }
+Hydrogen & H & 1 & 1.008 \\\\
+Helium & He & 2 & 4.003 \\\\
+Lithium& Li & 3 & 6.94 \\\\
+Beryllium& Be& 4& 9.012 \\\\
+\\end{tabular}
+\\end{indent}
+
+An Image ....
 
 \\image{http://psurl.s3.amazonaws.com/images/jc/propagator_t=2-6feb.png}{Free particle propagator}{width: 300, align: center}
 
-Note that in the \\italic{source}of the listing below, there are no line numbers.
+A listing.  Note that in the \\italic{source}of the listing, there are no line numbers.
 
 \\strong{MiniLaTeX Abstract Syntax Tree (AST)}
 
@@ -234,6 +244,7 @@ This text
 should not appear
 
 \\end{comment}
+
 
 """
 

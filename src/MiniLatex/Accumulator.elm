@@ -165,10 +165,10 @@ renderTransformer render latexStateReducer input acc =
 info : LatexExpression -> LatexInfo
 info latexExpression =
     case latexExpression of
-        Macro name args ->
+        Macro name optArgs args ->
             { typ = "macro", name = name, value = args }
 
-        Environment name body ->
+        Environment name args body ->
             { typ = "env", name = name, value = [ body ] }
 
         _ ->
@@ -218,7 +218,7 @@ latexStateReducer parsedParagraph latexState =
             parsedParagraph
                 |> List.head
                 |> Maybe.map info
-                |> Maybe.withDefault (LatexInfo "null" "null" [ Macro "null" [] ])
+                |> Maybe.withDefault (LatexInfo "null" "null" [ Macro "null" [] [] ])
 
         he =
             { typ = "macro", name = "setcounter", value = [ LatexList [ LXString "section" ], LatexList [ LXString "7" ] ] }

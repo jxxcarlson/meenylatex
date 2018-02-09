@@ -42,8 +42,8 @@ render latexExpression =
         Comment str ->
             renderComment str
 
-        Macro name args ->
-            renderMacro name args
+        Macro name optArgs args ->
+            renderMacro name optArgs args
 
         SMacro name args le ->
             renderSMacro name args le
@@ -57,8 +57,8 @@ render latexExpression =
         DisplayMath str ->
             "$$" ++ str ++ "$$"
 
-        Environment name args ->
-            renderEnvironment name args
+        Environment name args body ->
+            renderEnvironment name args body
 
         LatexList args ->
             renderLatexList args
@@ -91,6 +91,11 @@ renderArgList args =
     args |> List.map render |> List.map (\x -> "{" ++ x ++ "}") |> String.join ""
 
 
+renderOptArgList : List LatexExpression -> String
+renderOptArgList args =
+    args |> List.map render |> List.map (\x -> "[" ++ x ++ "]") |> String.join ""
+
+
 renderItem : Int -> LatexExpression -> String
 renderItem level latexExpression =
     "\\item " ++ render latexExpression ++ "\n\n"
@@ -101,14 +106,14 @@ renderComment str =
     "% " ++ str ++ "\n"
 
 
-renderEnvironment : String -> LatexExpression -> String
-renderEnvironment name body =
-    "\\begin{" ++ name ++ "}\n" ++ render body ++ "\n\\end{" ++ name ++ "}\n"
+renderEnvironment : String -> List LatexExpression -> LatexExpression -> String
+renderEnvironment name args body =
+    "\\begin{" ++ name ++ "}" ++ renderArgList args ++ "\n" ++ render body ++ "\n\\end{" ++ name ++ "}\n"
 
 
-renderMacro : String -> List LatexExpression -> String
-renderMacro name args =
-    " \\" ++ name ++ renderArgList args
+renderMacro : String -> List LatexExpression -> List LatexExpression -> String
+renderMacro name optArgs args =
+    " \\" ++ name ++ renderOptArgList args ++ renderArgList args
 
 
 renderSMacro : String -> List LatexExpression -> LatexExpression -> String

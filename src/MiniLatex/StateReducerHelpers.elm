@@ -116,7 +116,7 @@ setTheoremNumber info latexState =
         label =
             info.value
                 |> List.head
-                |> Maybe.withDefault (Macro "NULL" [])
+                |> Maybe.withDefault (Macro "NULL" [] [])
                 |> PT.getFirstMacroArg "label"
 
         latexState1 =
@@ -143,7 +143,7 @@ setEquationNumber info latexState =
         data =
             info.value
                 |> List.head
-                |> Maybe.withDefault (Macro "NULL" [])
+                |> Maybe.withDefault (Macro "NULL" [] [])
 
         label =
             case data of

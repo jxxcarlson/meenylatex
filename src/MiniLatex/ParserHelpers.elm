@@ -104,12 +104,12 @@ notSpecialCharacter c =
 
 notMacroSpecialCharacter : Char -> Bool
 notMacroSpecialCharacter c =
-    not (c == '{' || c == ' ' || c == '\n')
+    not (c == '{' || c == '[' || c == ' ' || c == '\n')
 
 
 notSpecialTableOrMacroCharacter : Char -> Bool
 notSpecialTableOrMacroCharacter c =
-    not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == '&')
+    not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == ']' || c == '&')
 
 
 {-| Transform special words

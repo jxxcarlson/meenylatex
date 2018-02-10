@@ -99,11 +99,11 @@ initialText =
 
 \\section{Introduction}
 
-MiniLaTeX is a subset of LaTeX which can be displayed in a web browser \\cite{HN}. One applies a parser-renderer toolchain to convert MiniLaTeX into HTML, then uses MathJax to render formulas and equations. This document is written in MiniLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
+MiniLaTeX is a subset of LaTeX which can be displayed in a web browser \\cite{hakernews}. One applies a parser-renderer toolchain to convert MiniLaTeX into HTML, then uses MathJax to render formulas and equations. This document is written in MiniLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
 
 Feel free to edit and re-render the text on the left and to experiment with the buttons above. To export a rendered LaTeX file, simply click on the "Export" button above. Your file will be downloaded as "file.html".
 
-Please bear in mind that MiniLaTeX is still an R&D operation \\cite{TR}. We are working hard to refine its grammar \\cite{GR} and extend its scope; we welcome bug reports, comments and suggestions.
+Please bear in mind that MiniLaTeX is still an R&D operation \\cite{techreport}. We are working hard to refine its grammar \\cite{grammar} and extend its scope; we welcome bug reports, comments and suggestions.
 
 MiniLatex is written in Elm, the functional language for building web apps developed by Evan Czaplicki, starting with his 2012 senior thesis. Although Elm is especially well-suited for writing a parser for MiniLatex and integrating that parser into an interactive editing environment, MiniLatex does not depend on any particular language. Indeed, we plan a second implementation of the parrser-renderer toolchain in Haskell.
 
@@ -224,11 +224,11 @@ We are working to fix known issues and to expand the scope of MiniLatex.
 
 \\begin{thebibliography}
 
-\\bibitem{HN} \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
+\\bibitem[HN]{hackernews} \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
 
-\\bibitem{GR} \\href{http://www.knode.io/#@public/628}{MiniLatex Grammar}
+\\bibitem[GR]{grammar} \\href{http://www.knode.io/#@public/628}{MiniLatex Grammar}
 
-\\bibitem{TR} \\href{http://www.knode.io/#@public/525}{MiniLatex Technical Report}
+\\bibitem[TR]{techreport} \\href{http://www.knode.io/#@public/525}{MiniLatex Technical Report}
 
 
 \\end{thebibliography}

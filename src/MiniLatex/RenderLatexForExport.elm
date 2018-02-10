@@ -5,6 +5,7 @@ module MiniLatex.RenderLatexForExport
 
 import Dict
 import List.Extra
+import MiniLatex.ErrorMessages as ErrorMessages
 import MiniLatex.Image as Image
 import MiniLatex.JoinStrings as JoinStrings
 import MiniLatex.Paragraph
@@ -53,15 +54,8 @@ render latexExpression =
         LXString str ->
             str
 
-        LXError source explanation ->
-            renderError source explanation
-
-
-renderError source explanation =
-    "ERROR: \n"
-        ++ source
-        ++ "\nExplanation: "
-        ++ explanation
+        LXError error ->
+            ErrorMessages.renderError error
 
 
 renderLatexList : List LatexExpression -> String

@@ -20,7 +20,7 @@ import Parser as P
 
 
 type alias LatexInfo =
-    { typ : String, name : String, value : List LatexExpression }
+    { typ : String, name : String, options : List LatexExpression, value : List LatexExpression }
 
 
 setSectionCounters : LatexInfo -> LatexState -> LatexState
@@ -108,6 +108,21 @@ setDictionaryItemForMacro latexInfo latexState =
             PT.unpackString latexInfo.value
     in
     setDictionaryItem latexInfo.name value latexState
+
+
+setBibItemXRef : LatexInfo -> LatexState -> LatexState
+setBibItemXRef latexInfo latexState =
+    let
+        label =
+            "bibitem:" ++ PT.unpackString latexInfo.value
+
+        value =
+            PT.unpackString latexInfo.options
+
+        _ =
+            Debug.log "setBibItemXRef" [ label, value ]
+    in
+    setDictionaryItem label value latexState
 
 
 setTheoremNumber : LatexInfo -> LatexState -> LatexState

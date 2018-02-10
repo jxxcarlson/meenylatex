@@ -11,7 +11,6 @@ module MiniLatex.Parser exposing (..)
 --     )
 
 import Dict
-import MiniLatex.ErrorMessages exposing (explanation)
 import MiniLatex.ParserHelpers exposing (..)
 import Parser exposing (..)
 
@@ -36,7 +35,7 @@ type LatexExpression
     | Macro String (List LatexExpression) (List LatexExpression) -- Macro name optArgs args
     | Environment String (List LatexExpression) LatexExpression -- Environment name optArgs body
     | LatexList (List LatexExpression)
-    | LXError String String
+    | LXError Error
 
 
 parse : String -> List LatexExpression
@@ -50,7 +49,7 @@ parse text =
             list
 
         Err error ->
-            [ LXError (toString error.source) (explanation error) ]
+            [ LXError error ]
 
         _ ->
             [ LXString "yada!" ]
@@ -146,7 +145,7 @@ optionalArg =
     inContext "optionalArg" <|
         (succeed identity
             |. symbol "["
-            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces, lazy (\_ -> macro ws) ])
+            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces ])
             |. symbol "]"
             |> map LatexList
         )
@@ -159,7 +158,7 @@ arg =
     inContext "arg" <|
         (succeed identity
             |. symbol "{"
-            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces, lazy (\_ -> macro ws) ])
+            |= repeat zeroOrMore (oneOf [ macroArgWords, inlineMath spaces, lazy (\_ -> macro ws) ])
             |. symbol "}"
             |> map LatexList
         )

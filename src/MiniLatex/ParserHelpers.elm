@@ -81,6 +81,11 @@ specialWord =
             |. spaces
 
 
+notSpecialTableOrMacroCharacter : Char -> Bool
+notSpecialTableOrMacroCharacter c =
+    not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == ']' || c == '&')
+
+
 macroArgWord : Parser String
 macroArgWord =
     inContext "specialWord" <|
@@ -92,7 +97,7 @@ macroArgWord =
 
 notMacroArgWordCharacter : Char -> Bool
 notMacroArgWordCharacter c =
-    not (c == '{' || c == ' ' || c == '\n')
+    not (c == '}' || c == ' ' || c == '\n')
 
 
 reservedWord : Parser ()
@@ -119,11 +124,6 @@ notSpecialCharacter c =
 notMacroSpecialCharacter : Char -> Bool
 notMacroSpecialCharacter c =
     not (c == '{' || c == '[' || c == ' ' || c == '\n')
-
-
-notSpecialTableOrMacroCharacter : Char -> Bool
-notSpecialTableOrMacroCharacter c =
-    not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == ']' || c == '&')
 
 
 {-| Transform special words

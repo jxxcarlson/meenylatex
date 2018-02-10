@@ -36,8 +36,8 @@ hasMath expr =
         Macro str optArgs args ->
             args |> List.foldr (\x acc -> hasMath x || acc) False
 
-        SMacro str expr str2 ->
-            expr |> List.foldr (\x acc -> hasMath x || acc) False
+        SMacro str optArgs args str2 ->
+            args |> List.foldr (\x acc -> hasMath x || acc) False
 
         Environment str args body ->
             envHasMath str body
@@ -45,7 +45,7 @@ hasMath expr =
         LatexList list ->
             list |> List.foldr (\x acc -> hasMath x || acc) False
 
-        LXError _ _ ->
+        LXError _ ->
             False
 
 

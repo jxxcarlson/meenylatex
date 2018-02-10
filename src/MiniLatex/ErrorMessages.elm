@@ -97,9 +97,6 @@ handleExpectingSymbol error errorWords =
 
 handleSecondWord error secondWord =
     let
-        _ =
-            Debug.log "secondWord" secondWord
-
         lead =
             leadErrorDescription error
     in

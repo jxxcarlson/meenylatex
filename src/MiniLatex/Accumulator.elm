@@ -224,9 +224,6 @@ latexStateReducer parsedParagraph latexState =
                 |> Maybe.map info
                 |> Maybe.withDefault (LatexInfo "null" "null" [] [])
 
-        _ =
-            Debug.log "headElement" headElement
-
         he =
             { typ = "macro", name = "setcounter", value = [ LatexList [ LXString "section" ], LatexList [ LXString "7" ] ] }
     in

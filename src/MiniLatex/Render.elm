@@ -89,8 +89,8 @@ render latexState latexExpression =
         Macro name optArgs args ->
             renderMacro latexState name optArgs args
 
-        SMacro name args le ->
-            renderSMacro latexState name args le
+        SMacro name optArgs args le ->
+            renderSMacro latexState name optArgs args le
 
         Item level latexExpression ->
             renderItem latexState level latexExpression
@@ -486,8 +486,8 @@ renderArg k latexState args =
     render latexState (getElement k args) |> String.trim
 
 
-renderSMacro : LatexState -> String -> List LatexExpression -> LatexExpression -> String
-renderSMacro latexState name args le =
+renderSMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> String
+renderSMacro latexState name optArgs args le =
     case Dict.get name renderSMacroDict of
         Just f ->
             f latexState args le

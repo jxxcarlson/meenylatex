@@ -81,6 +81,20 @@ specialWord =
             |. spaces
 
 
+macroArgWord : Parser String
+macroArgWord =
+    inContext "specialWord" <|
+        succeed identity
+            |. spaces
+            |= keep oneOrMore notMacroArgWordCharacter
+            |. spaces
+
+
+notMacroArgWordCharacter : Char -> Bool
+notMacroArgWordCharacter c =
+    not (c == '{' || c == ' ' || c == '\n')
+
+
 reservedWord : Parser ()
 reservedWord =
     inContext "reservedWord" <|

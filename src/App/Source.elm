@@ -1709,25 +1709,23 @@ In summary:
 
 
 \\begin{thebibliography}
+\\bibitem[Ca86]{carlson} J. A. Carlson, \\emph{Bounds on the dimension of a variation of Hodge Structure}, Trans. AMS \\strong{294} (1986), 45 -- 64.
 
-\\bibitem{carlson} J. A. Carlson, \\emph{Bounds on the dimension of a variation of Hodge Structure}, Trans. AMS \\strong{294} (1986), 45 -- 64.
+\\bibitem[CD87]{carlsondonagi} J. A. Carlson and R. Donagi, \\emph{Hypersurface variations are maximal}, I, Invent. Math. \\strong{89} (1987) 371--374.
 
-\\bibitem{carlsondonagi} J. A. Carlson and R. Donagi, \\emph{Hypersurface variations are maximal}, I, Invent. Math. \\strong{89} (1987) 371--374.
+\\bibitem[CT89a]{carlsontoledotrans} J. A. Carlson and D. Toledo, \\emph{Variations of Hodge structure, Legendre submanifolds, and accessibility}, Trans. AMS \\strong{311} (1989), 391--411
 
-\\bibitem{carlsontoledotrans} J. A. Carlson and D. Toledo, \\emph{Variations of Hodge structure, Legendre submanifolds, and accessibility}, Trans. AMS \\strong{311} (1989), 391--411
+\\bibitem[CT89b]{carlsontoledo} J.A. Carlson and D. Toledo, \\emph{Harmonic mappings of K\\"ahler manifolds to locally symmetric spaces},  Pub. Maths. IHES \\strong{69} (1989), 173--201.
 
-\\bibitem{carlsontoledo} J.A. Carlson and D. Toledo, \\emph{Harmonic mappings of K\\"ahler manifolds to locally symmetric spaces},  Pub. Maths. IHES \\strong{69} (1989), 173--201.
+\\bibitem[Do82]{dolgachev} I. Dolgachev, \\emph{Weighted projective varieties}, in Lecture Notes in Mathematics \\strong{956}, 34--71, Springer, 1982.
 
-\\bibitem{dolgachev} I. Dolgachev, \\emph{Weighted projective varieties}, in Lecture Notes in Mathematics \\strong{956}, 34--71, Springer, 1982.
+\\bibitem[DT87]{donagitu}  R. Donagi and L. W. Tu, Generic Torelli for weighted hypersurfaces, Math. Annalen \\strong{276} (1987), 399 -- 413.
 
-\\bibitem{donagitu}  R. Donagi and L. W. Tu, Generic Torelli for weighted hypersurfaces, Math. Annalen \\strong{276} (1987), 399 -- 413.
+\\bibitem[G70]{griffiths} P. A, Griffiths, Periods of integrals on algebraic manifolds, III, Pub. Maths. IHES, \\strong{38} (1970), 125 --180.
 
-\\bibitem{griffiths} P. A, Griffiths, Periods of integrals on algebraic manifolds, III, Pub. Maths. IHES, \\strong{38} (1970), 125 --180.
+\\bibitem[S77]{steenbrink}  J. Steenbrink, Intersection form for quasi-homogeneous singularities, Comp. Math. \\strong{34} (1977), 211--223.
 
-\\bibitem{steenbrink}  J. Steenbrink, Intersection form for quasi-homogeneous singularities, Comp. Math. \\strong{34} (1977), 211--223.
-
-\\bibitem{wolf} J. A Wolf, Complex homogeneous contact manifolds and quaternionic symmetric spaces, Jour. Math. Mechanics \\strong{14} (1965), 1033--1048.
-
+\\bibitem[W65]{wolf} J. A Wolf, Complex homogeneous contact manifolds and quaternionic symmetric spaces, Jour. Math. Mechanics \\strong{14} (1965), 1033--1048.
 
 \\end{thebibliography}
 

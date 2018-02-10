@@ -32,9 +32,9 @@ type LatexExpression
     | Item Int LatexExpression
     | InlineMath String
     | DisplayMath String
-    | SMacro String (List LatexExpression) LatexExpression
-    | Macro String (List LatexExpression) (List LatexExpression)
-    | Environment String (List LatexExpression) LatexExpression
+    | SMacro String (List LatexExpression) (List LatexExpression) LatexExpression -- SMacro name optArgs args body
+    | Macro String (List LatexExpression) (List LatexExpression) -- Macro name optArgs args
+    | Environment String (List LatexExpression) LatexExpression -- Environment name optArgs body
     | LatexList (List LatexExpression)
     | LXError String String
 
@@ -92,6 +92,16 @@ specialWords =
         )
 
 
+macroArgWords : Parser LatexExpression
+macroArgWords =
+    inContext "specialWords" <|
+        (succeed identity
+            |= repeat oneOrMore macroArgWord
+            |> map (String.join " ")
+            |> map LXString
+        )
+
+
 texComment : Parser LatexExpression
 texComment =
     inContext "texComment" <|
@@ -120,7 +130,6 @@ macro wsParser =
             |= macroName
             |= repeat zeroOrMore optionalArg
             |= repeat zeroOrMore arg
-            -- |= andThen (\x -> repeat zeroOrMore arg) (repeat zeroOrMore optionalArg)
             |. wsParser
         )
 
@@ -179,6 +188,7 @@ smacro : Parser LatexExpression
 smacro =
     succeed SMacro
         |= smacroName
+        |= repeat zeroOrMore optionalArg
         |= repeat zeroOrMore arg
         |= smacroBody
 
@@ -416,21 +426,6 @@ tabularEnvironmentBody endWord envType =
             |. symbol endWord
             |. ws
         )
-
-
-
--- tabularEnvironmentBody : String -> String -> Parser LatexExpression
--- tabularEnvironmentBody endWord envType =
---     inContext "tabularEnvironmentBody" <|
---         (succeed identity
---             |. ws
---             -- |= repeat zeroOrMore arg
---             |= tableBody
---             |. ws
---             |. symbol endWord
---             |. ws
---             |> map (Environment envType [])
---         )
 
 
 tableBody : Parser LatexExpression

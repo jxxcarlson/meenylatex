@@ -199,11 +199,11 @@ rawRenderedSourcePane model =
 
 renderToLatexPane model =
     let
-        rerenderedText =
-            MiniLatex.RenderToLatex.renderBackToLatex model.sourceText
-
         -- rerenderedText =
-        --     MiniLatex.RenderLatexForExport.renderLatexForExport model.sourceText
+        --     MiniLatex.RenderToLatex.renderBackToLatex model.sourceText
+        rerenderedText =
+            MiniLatex.RenderLatexForExport.renderLatexForExport model.sourceText
+
         --|> MiniLatex.RenderToLatex.eval
     in
         pre

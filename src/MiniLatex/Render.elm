@@ -235,7 +235,7 @@ renderDefaultEnvironment2 latexState name args body =
         r =
             render latexState body
     in
-    "\n<div class=\"environment\">\n<strong>" ++ String.Extra.toSentenceCase name ++ "</strong>\n<div class=\"italic\">\n" ++ r ++ "\n</div>\n</div>\n"
+    "\n<div class=\"environment\">\n<strong>" ++ String.Extra.toSentenceCase name ++ "</strong>\n<div>\n" ++ r ++ "\n</div>\n</div>\n"
 
 
 renderCenterEnvironment latexState body =

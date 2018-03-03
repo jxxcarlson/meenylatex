@@ -57,14 +57,18 @@ renderString parser latexState str =
         renderOutput =
             case parserOutput of
                 Ok latexExpression ->
-                    render latexState latexExpression
+                    render latexState latexExpression |> postProcess
 
                 Err error ->
                     "Error: " ++ toString error
     in
     renderOutput
 
-
+postProcess : String -> String
+postProcess str =
+  str 
+    |> String.Extra.replace "---" "&mdash;"
+    |> String.Extra.replace "--" "&ndash;"
 
 {- TYPES AND DEFAULT VALJUES -}
 
@@ -117,7 +121,7 @@ render latexState latexExpression =
 
 renderLatexList : LatexState -> List LatexExpression -> String
 renderLatexList latexState args =
-    args |> List.map (render latexState) |> JoinStrings.joinList
+    args |> List.map (render latexState) |> JoinStrings.joinList |> postProcess
 
 
 renderArgList : LatexState -> List LatexExpression -> String

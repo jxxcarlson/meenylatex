@@ -66,6 +66,7 @@ renderArgList : List LatexExpression -> String
 renderArgList args =
     args 
       |> List.map render 
+      |> List.map fixBadChars
       |> List.map (\x -> "{" ++ x ++ "}") 
       |> String.join ""
 
@@ -153,7 +154,7 @@ renderUseForWeb body =
 renderMacroDict : Dict.Dict String (List LatexExpression -> List LatexExpression -> String)
 renderMacroDict =
     Dict.fromList
-        [ ( "image", \x y -> renderImage x )
+        [ ( "image", \x y -> renderImage y )
          , ( "code", \x y -> renderCode x y )
          , ( "href", \x y -> renderHref x y )
         ]
@@ -224,9 +225,11 @@ renderImage args =
 
         imageAttrs =
             Image.parseImageAttributes attributeString
+        
+        width_ = imageAttrs.width |> toFloat |> (\x -> 2.5)
 
         width =
-            toString imageAttrs.width ++ "px"
+            toString width_ ++ "px"
     in
     case ( imageAttrs.float, imageAttrs.align ) of
         ( "left", _ ) ->

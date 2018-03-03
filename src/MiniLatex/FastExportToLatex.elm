@@ -25,9 +25,9 @@ processParagraph par =
             if String.left 6 prefix == "\\begin" then
                 String.dropLeft 7 prefix |> String.dropRight 1
             else if String.contains  "\\code" par then
-                "code__"
+                "code"
             else if String.contains "\\href" par then
-                "href__"
+                "href"
             else
                 String.left 6 prefix
 
@@ -40,7 +40,7 @@ processParagraph par =
         "listin" ->
             RLE.renderLatexForExport par
 
-        "code__" -> 
+        "code" -> 
            RLE.renderLatexForExport par 
 
         "href" -> 
@@ -50,4 +50,4 @@ processParagraph par =
             RLE.renderLatexForExport par
 
         _ ->
-            par
+            RLE.renderLatexForExport par

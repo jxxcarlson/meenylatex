@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
-    "repository": "https://github.com/jxxcarlson/meenyLatex.git",
+    "repository": "https://github.com/jxxcarlson/meenylatex.git",
     "license": "BSD3",
     "source-directories": [
         "./src", "."

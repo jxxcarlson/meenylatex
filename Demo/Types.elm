@@ -1,7 +1,7 @@
-module App.Types exposing (..)
+module Demo.Types exposing (..)
 
-import MiniLatex.Parser exposing (LatexExpression)
-import MiniLatex.Differ exposing (EditRecord)
+import MeenyLatex.Parser exposing (LatexExpression)
+import MeenyLatex.Differ exposing (EditRecord)
 
 
 type alias Model =

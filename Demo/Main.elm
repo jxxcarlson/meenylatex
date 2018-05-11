@@ -1,19 +1,19 @@
 port module Main exposing (..)
 
-{-| Test app for MiniLatex
+{-| Test app for MeenyLatex
 -}
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
-import MiniLatex.HasMath
-import MiniLatex.Driver as MiniLatex
-import MiniLatex.Differ exposing (EditRecord)
+import MeenyLatex.HasMath
+import MeenyLatex.Driver as MeenyLatex
+import MeenyLatex.Differ exposing (EditRecord)
 import Random
-import App.Source as Source
-import App.View exposing (..)
-import App.Types as Types exposing (..)
+import Demo.Source as Source
+import Demo.View exposing (..)
+import Demo.Types as Types exposing (..)
 import Json.Encode as Encode
 
 
@@ -25,10 +25,10 @@ init : ( Model, Cmd Msg )
 init =
     let
         parseResult =
-            MiniLatex.parse Source.initialText
+            MeenyLatex.parse Source.initialText
 
         editRecord =
-            MiniLatex.setup 0 Source.initialText
+            MeenyLatex.setup 0 Source.initialText
 
         model =
             { counter = 0
@@ -37,7 +37,7 @@ init =
             , editRecord = editRecord
             , inputString = exportLatex2Html editRecord
             , parseResult = parseResult
-            , hasMathResult = Debug.log "hasMathResult" (List.map MiniLatex.HasMath.listHasMath parseResult)
+            , hasMathResult = Debug.log "hasMathResult" (List.map MeenyLatex.HasMath.listHasMath parseResult)
             , seed = 0
             , configuration = StandardView
             , lineViewStyle = Horizontal
@@ -60,13 +60,13 @@ update msg model =
         FastRender ->
             let
                 newEditRecord =
-                    MiniLatex.update model.seed model.editRecord model.sourceText
+                    MeenyLatex.update model.seed model.editRecord model.sourceText
 
                 parseResult =
-                    MiniLatex.parse model.sourceText
+                    MeenyLatex.parse model.sourceText
 
                 hasMathResult =
-                    Debug.log "hasMathResult" (List.map MiniLatex.HasMath.listHasMath parseResult)
+                    Debug.log "hasMathResult" (List.map MeenyLatex.HasMath.listHasMath parseResult)
             in
                 ( { model
                     | counter = model.counter + 1
@@ -87,7 +87,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = ""
-                , editRecord = MiniLatex.setup model.seed ""
+                , editRecord = MeenyLatex.setup model.seed ""
               }
             , sendToJs <| encodeData "full" []
             )
@@ -96,7 +96,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = Source.initialText
-                , editRecord = MiniLatex.setup model.seed Source.initialText
+                , editRecord = MeenyLatex.setup model.seed Source.initialText
               }
             , sendToJs <| encodeData "full" []
             )
@@ -151,13 +151,13 @@ useSource : String -> Model -> ( Model, Cmd Msg )
 useSource text model =
     let
         editRecord =
-            MiniLatex.setup model.seed text
+            MeenyLatex.setup model.seed text
     in
         ( { model
             | counter = model.counter + 1
             , sourceText = text
             , editRecord = editRecord
-            , parseResult = MiniLatex.parse text
+            , parseResult = MeenyLatex.parse text
             , inputString = exportLatex2Html editRecord
           }
         , sendToJs <| encodeData "full" []
@@ -167,7 +167,7 @@ useSource text model =
 exportLatex2Html : EditRecord -> String
 exportLatex2Html editRecord =
     editRecord
-        |> MiniLatex.getRenderedText ""
+        |> MeenyLatex.getRenderedText ""
         |> \text -> Source.htmlPrefix ++ text ++ Source.htmlSuffix
 
 

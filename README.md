@@ -16,18 +16,18 @@ You can also experiment with MiniLaTeX using this <a href="https://ellie-app.com
 Basics
 ------
 
-Example.  First, import MiniLatex
+Example.  First, import MeenyLatex
 ```
-> import MiniLatex.Driver as MiniLatex
+> import MeenyLatex.Driver as MeenyLatex
 ```
 Second, make these definitions
 ```
 > text = "\\begin{itemize}\n\\item Eggs\n\\item Milk\n\\item Bread\n\\end{itemize}"
 > macroDefinitions = ""
 ```
-Third, run `MiniLatex.render`;
+Third, run `MeenyLatex.render`;
 ```
-> MiniLatex.render marcroDefinitions text
+> MeenyLatex.render marcroDefinitions text
 ```
 to get the HTML
 ```
@@ -51,7 +51,7 @@ In this case, there are no macro definitions; the rendered text is
 API
 ---
 
-If your applications simply renders strings of MiniLatex
+If your applications simply renders strings of MeenyLatex
 text to HTML, `Driver.renderMiniLatex` is all you
 need from this package.  If you wish to do some
 kind of live editing on a piece of text, there is a another,
@@ -66,13 +66,13 @@ Other optimizations for rendering equations by Mathjax require
 a "random" integer seed.  Its role is explained in the documentation
 of the `Differ` module.
 
-An edit record record can be set up using `MiniLatex.setup`.  
+An edit record record can be set up using `MeenyLatex.setup`.  
 It is generally stored in the application model, e.g.,
 
 
 ```
 seed = 1234
-model.editRecord = MiniLatex.setup seed text
+model.editRecord = MeenyLatex.setup seed text
 ```
 
 At this point, `editRecord` contains a list of strings
@@ -82,7 +82,7 @@ strings representing those paragraphs rendered into HTML.
 To extract the rendered text from the `EditRecord`, use
 
 ```
-MiniLatex.getRenderedText macroDefinitions editRecord
+MeenyLatex.getRenderedText macroDefinitions editRecord
 ```
 
 Here `macroDefinitions` is a string representing
@@ -105,7 +105,7 @@ Note that the definitions are enclosed in double dollar signs.
 To update the `EditRecord` with modified text, use
 
 ```
-MiniLatex.update seed editRecord text
+MeenyLatex.update seed editRecord text
 ```
 
 The integer seed should be either chosen at random or
@@ -120,15 +120,15 @@ Summary
 -------
 
 To summarize, most work can be done with five points of contact
-with the MiniLatex API:
+with the MeenyLatex API:
 
-1. `MiniLatex.render macroDefinitions text           : String`
-2. `MiniLatex.setup seed text                        : EditRecord`
-3. `MiniLatex.getRenderedText macroDefs editRecord   : String`
-4. `MiniLatex.update seed editRecord text            : EditRecord`
-5. `MiniLatex.emptyEditRecord                        : EditRecord`
+1. `MeenyLatex.render macroDefinitions text           : String`
+2. `MeenyLatex.setup seed text                        : EditRecord`
+3. `MeenyLatex.getRenderedText macroDefs editRecord   : String`
+4. `MeenyLatex.update seed editRecord text            : EditRecord`
+5. `MeenyLatex.emptyEditRecord                        : EditRecord`
 
-The above assumes `import MiniLatex.Driver as MiniLatex`
+The above assumes `import MeenyLatex.Driver as MeenyLatex`
 
 
 Acknowledgments

@@ -1,18 +1,18 @@
-module App.View exposing (..)
+module Demo.View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes as Attr exposing (..)
 import Html.Events as Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
 import Http
-import App.Types as Types exposing (..)
+import Demo.Types as Types exposing (..)
 import String.Extra
-import MiniLatex.Parser exposing (LatexExpression)
-import MiniLatex.Driver as MiniLatex
-import MiniLatex.RenderToLatex
+import MeenyLatex.Parser exposing (LatexExpression)
+import MeenyLatex.Driver as MeenyLatex
+import MeenyLatex.RenderToLatex
 import Json.Encode as Encode
-import MiniLatex.Paragraph
-import MiniLatex.RenderLatexForExport
+import MeenyLatex.Paragraph
+import MeenyLatex.RenderLatexForExport
 
 
 {- Word count -}
@@ -57,7 +57,7 @@ appWidth configuration =
 headerRibbon =
     div
         [ ribbonStyle "#555" ]
-        [ span [ style [ ( "margin-left", "5px" ) ] ] [ text "MiniLatex Demo" ]
+        [ span [ style [ ( "margin-left", "5px" ) ] ] [ text "MeenyLatex Demo" ]
         , link "http://www.knode.io" "www.knode.io"
         ]
 
@@ -190,7 +190,7 @@ parseResultPane model =
 rawRenderedSourcePane model =
     let
         renderedText =
-            MiniLatex.getRenderedText "" model.editRecord
+            MeenyLatex.getRenderedText "" model.editRecord
     in
         pre
             [ parseResultsStyle ]
@@ -200,11 +200,11 @@ rawRenderedSourcePane model =
 renderToLatexPane model =
     let
         -- rerenderedText =
-        --     MiniLatex.RenderToLatex.renderBackToLatex model.sourceText
+        --     MeenyLatex.RenderToLatex.renderBackToLatex model.sourceText
         rerenderedText =
-            MiniLatex.RenderLatexForExport.renderLatexForExport model.sourceText
+            MeenyLatex.RenderLatexForExport.renderLatexForExport model.sourceText
 
-        --|> MiniLatex.RenderToLatex.eval
+        --|> MeenyLatex.RenderToLatex.eval
     in
         pre
             [ reRenderedLatexStyle ]
@@ -220,7 +220,7 @@ exportLatexPane model =
 renderedSourcePane model =
     let
         renderedText =
-            MiniLatex.getRenderedText "" model.editRecord
+            MeenyLatex.getRenderedText "" model.editRecord
     in
         div
             [ renderedSourceStyle

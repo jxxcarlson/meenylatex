@@ -1,4 +1,4 @@
-module App.Source exposing (..)
+module Demo.Source exposing (..)
 
 
 htmlPrefix =
@@ -99,13 +99,13 @@ initialText =
 
 \\section{Introduction}
 
-MiniLaTeX is a subset of LaTeX which can be displayed in a web browser \\cite{hakernews}. One applies a parser-renderer toolchain to convert MiniLaTeX into HTML, then uses MathJax to render formulas and equations. This document is written in MiniLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
+MiniLaTeX is a subset of LaTeX which can be displayed in a web browser \\cite{hakernews}. One applies a parser-renderer toolchain to convert MiniLaTeX into HTML, then uses MathJax to render formulas and equations. This document is written in MeenyLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
 
 Feel free to edit and re-render the text on the left and to experiment with the buttons above. To export a rendered LaTeX file, simply click on the "Export" button above. Your file will be downloaded as "file.html".
 
 Please bear in mind that MiniLaTeX is still an R&D operation \\cite{techreport}. We are working hard to refine its grammar \\cite{grammar} and extend its scope; we welcome bug reports, comments and suggestions.
 
-MiniLatex is written in Elm, the functional language for building web apps developed by Evan Czaplicki, starting with his 2012 senior thesis. Although Elm is especially well-suited for writing a parser for MiniLatex and integrating that parser into an interactive editing environment, MiniLatex does not depend on any particular language. Indeed, we plan a second implementation of the parrser-renderer toolchain in Haskell.
+MeenyLatex is written in Elm, the functional language for building web apps developed by Evan Czaplicki, starting with his 2012 senior thesis. Although Elm is especially well-suited for writing a parser for MeenyLatex and integrating that parser into an interactive editing environment, MeenyLatex does not depend on any particular language. Indeed, we plan a second implementation of the parrser-renderer toolchain in Haskell.
 
 \\section{Examples}
 
@@ -187,13 +187,13 @@ Articles and code:
 
 \\item \\href{https://github.com/jxxcarlson/minilatexDemo}{Code for the Demo App}
 
-\\item \\href{http://package.elm-lang.org/packages/jxxcarlson/minilatex/latest}{The MiniLatex Elm Library}
+\\item \\href{http://package.elm-lang.org/packages/jxxcarlson/minilatex/latest}{The MeenyLatex Elm Library}
 
 
 \\end{itemize}
 
 
-To try out MiniLatex for real, sign up for a free account at \\href{http://www.knode.io}{www.knode.io}. The app is still under development &mdash; we need people to test it and give feedback. Contributions to help improve the open-source MiniLatex Parser-Renderer are most welcome. Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}. The MiniLatex Demo as well as the app at knode.io are written in \\href{http://elm-lang.org/}{Elm}. We also plan a Haskell version.
+To try out MeenyLatex for real, sign up for a free account at \\href{http://www.knode.io}{www.knode.io}. The app is still under development &mdash; we need people to test it and give feedback. Contributions to help improve the open-source MeenyLatex Parser-Renderer are most welcome. Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}. The MeenyLatex Demo as well as the app at knode.io are written in \\href{http://elm-lang.org/}{Elm}. We also plan a Haskell version.
 
 Please send comments, bug reports, etc. to jxxcarlson at gmail.
 
@@ -218,7 +218,7 @@ e.g., theorem.
 \\end{enumerate}
 \\end{restrictions}
 
-We are working to fix known issues and to expand the scope of MiniLatex.
+We are working to fix known issues and to expand the scope of MeenyLatex.
 
 \\strong{Bibliography}
 
@@ -226,9 +226,9 @@ We are working to fix known issues and to expand the scope of MiniLatex.
 
 \\bibitem[HN]{hackernews} \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
 
-\\bibitem[GR]{grammar} \\href{http://www.knode.io/#@public/628}{MiniLatex Grammar}
+\\bibitem[GR]{grammar} \\href{http://www.knode.io/#@public/628}{MeenyLatex Grammar}
 
-\\bibitem[TR]{techreport} \\href{http://www.knode.io/#@public/525}{MiniLatex Technical Report}
+\\bibitem[TR]{techreport} \\href{http://www.knode.io/#@public/525}{MeenyLatex Technical Report}
 
 
 \\end{thebibliography}
@@ -312,11 +312,11 @@ An experimental web app for using MiniLaTeX in the browser can be found at \\hre
 
 \\section{Technology}
 
-The MiniLaTeX parser/renderer is written in Elm, the functional language with Haskell-like syntax created by Evan Czaplicki.  Elm is best known as language for building robust front-end apps for the web.  The fact that it also has powerful parser tools makes it an excellent choice for a project like MiniLatex, for which an editor/reader app is needed to make real-world use of the parser/renderer.  The app at \\href{http://www.knode.io}{www.knode.io} talks to a back-end app written using the Phoenix web framework for Elixir  (see \\href{https://elixir-lang.org/}{elixir-lang.org}).  Elixir is the functional programming language based on Erlang created by José Valim.
+The MiniLaTeX parser/renderer is written in Elm, the functional language with Haskell-like syntax created by Evan Czaplicki.  Elm is best known as language for building robust front-end apps for the web.  The fact that it also has powerful parser tools makes it an excellent choice for a project like MeenyLatex, for which an editor/reader app is needed to make real-world use of the parser/renderer.  The app at \\href{http://www.knode.io}{www.knode.io} talks to a back-end app written using the Phoenix web framework for Elixir  (see \\href{https://elixir-lang.org/}{elixir-lang.org}).  Elixir is the functional programming language based on Erlang created by José Valim.
 
 \\section{Components and Strategy}
 
-The overall flow of data in MiniLatex is
+The overall flow of data in MeenyLatex is
 
 $$
 \\text{MiniLaTeX source text} \\longrightarrow
@@ -375,7 +375,7 @@ This is MiniLaTeX:
 \\end{theorem}
 \\end{verbatim}
 
-Running \\code{MiniLatex.Parser.latexList} on this text results in the following AST:
+Running \\code{MeenyLatex.Parser.latexList} on this text results in the following AST:
 
 \\begin{verbatim}
 Ok (LatexList (
@@ -391,11 +391,11 @@ Ok (LatexList (
 \\end{verbatim}
 
 At the top level it is a list of \\code{LatexExpressions} -- a string and an \\code{Environment}.
-The body of the environment is a list of \\code{LatexExpressions} -- a string, an \\code{InlineMath} element, a \\code{Macro} with one argument, and another \\code{Environment},  This is a structure which \\code{MiniLatex.Render.render} can transform into HTML.
+The body of the environment is a list of \\code{LatexExpressions} -- a string, an \\code{InlineMath} element, a \\code{Macro} with one argument, and another \\code{Environment},  This is a structure which \\code{MeenyLatex.Render.render} can transform into HTML.
 
 \\subsection{Parser Combinators}
 
-The MiniLaTeX parser, comprising 222 lines of code as of this writing, is built using parser combinators from Evan Czaplicki's \\href{https://github.com/elm-tools/parser}{elm-tools/parser} package.  The combinators are akin to those in the Haskell parsec package.  As as example, the main MiniLatex parsing function is
+The MiniLaTeX parser, comprising 222 lines of code as of this writing, is built using parser combinators from Evan Czaplicki's \\href{https://github.com/elm-tools/parser}{elm-tools/parser} package.  The combinators are akin to those in the Haskell parsec package.  As as example, the main MeenyLatex parsing function is
 
 \\begin{verbatim}
 parse : Parser LatexExpression
@@ -467,7 +467,7 @@ $$
 \\text{HTML}
 $$
 
-Code for the second step is housed in the module \\code{MiniLatex.Render}. The primary function is
+Code for the second step is housed in the module \\code{MeenyLatex.Render}. The primary function is
 
 \\begin{verbatim}
 render : LatexState -> LatexExpression -> String
@@ -540,7 +540,7 @@ $$
 {\\bf transformParagraphs\\ } \\text{List SourceText} \\longrightarrow  \\text{List HTMLText}
 $$
 
-that maps a  list of paragraphs of MiniLatex source text to its rendition as list of HTML strings.  The \\code{transformParagraphs} function is defined in terms of the \\code{accumulator}:
+that maps a  list of paragraphs of MeenyLatex source text to its rendition as list of HTML strings.  The \\code{transformParagraphs} function is defined in terms of the \\code{accumulator}:
 
 \\begin{verbatim}
 transformParagraphs : List String -> List String
@@ -566,7 +566,7 @@ type alias EditRecord =
     }
 \\end{verbatim}
 
-To set up this structure when an author begins editing, we make use of the general \\code{initialize} function in module \\code{MiniLatex.Differ}:
+To set up this structure when an author begins editing, we make use of the general \\code{initialize} function in module \\code{MeenyLatex.Differ}:
 
 \\begin{verbatim}
 initialize : (List String -> List String) -> String -> EditRecord
@@ -1796,7 +1796,7 @@ grammar =
 
   \\section{Abstract Syntax Tree}
 
-  The MiniLatex parser accepts text as input and produces an abstract syntax tree (AST) as output.  An AST is a $LatexExpression$, as defined by the following type.
+  The MeenyLatex parser accepts text as input and produces an abstract syntax tree (AST) as output.  An AST is a $LatexExpression$, as defined by the following type.
 
   \\begin{verbatim}
   type LatexExpression
@@ -1810,7 +1810,7 @@ grammar =
       | LatexList (List LatexExpression)
   \\end{verbatim}
 
-  The translation from source text to abstract syntax tree is accomplished by a function in the \\code{MiniLatex.Parser} module:
+  The translation from source text to abstract syntax tree is accomplished by a function in the \\code{MeenyLatex.Parser} module:
 
   \\begin{equation}
   parse: {\\tt String} \\rightarrow {\\tt LatexExpression}.

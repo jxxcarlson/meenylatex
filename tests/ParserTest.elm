@@ -4,14 +4,14 @@ module ParserTest exposing (..)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import MiniLatex.Parser exposing (..)
+import MeenyLatex.Parser exposing (..)
 import Parser exposing (run)
 import Test exposing (..)
 
 
 suite : Test
 suite =
-    describe "MiniLatex Parser"
+    describe "MeenyLatex Parser"
         -- Nest as many descriptions as you like.
         [ test "(1) Comment" <|
             \_ ->

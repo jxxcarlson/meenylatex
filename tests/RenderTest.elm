@@ -1,8 +1,8 @@
 module RenderTest exposing (..)
 
-import MiniLatex.Parser exposing (..)
-import MiniLatex.Render exposing (..)
-import MiniLatex.LatexState
+import MeenyLatex.Parser exposing (..)
+import MeenyLatex.Render exposing (..)
+import MeenyLatex.LatexState
 import Parser exposing (run)
 
 
@@ -14,12 +14,12 @@ import Test exposing (..)
 
 
 renderString2 parser str =
-    renderString parser MiniLatex.LatexState.emptyLatexState str
+    renderString parser MeenyLatex.LatexState.emptyLatexState str
 
 
 suite : Test
 suite =
-    describe "MiniLatex Render"
+    describe "MeenyLatex Render"
         -- Nest as many descriptions as you like.
         [ test "(1) Words (plain text)" <|
             \_ ->

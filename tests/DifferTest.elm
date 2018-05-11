@@ -1,6 +1,6 @@
 module DifferTest exposing (..)
 
-import MiniLatex.Differ exposing (..)
+import MeenyLatex.Differ exposing (..)
 
 
 -- http://package.elm-lang.org/packages/elm-community/elm-test/latest

@@ -131,6 +131,10 @@ with the MeenyLatex API:
 
 The above assumes `import MeenyLatex.Driver as MeenyLatex`
 
+Note to myself
+--------------
+On my laptop, this repository is in /Users/carlson/dev/apps/MeenyLatex
+
 
 Acknowledgments
 ---------------  

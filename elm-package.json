@@ -1,5 +1,5 @@
 {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
     "repository": "https://github.com/jxxcarlson/meenylatex.git",
     "license": "BSD3",
@@ -12,7 +12,8 @@
         "MeenyLatex.Source",
         "MeenyLatex.RenderLatexForExport",
         "MeenyLatex.FastExportToLatex",
-        "MeenyLatex.Differ"
+        "MeenyLatex.Differ",
+        "MeenyLatex.HasMath"
     ],
     "dependencies": {
         "elm-community/list-extra": "6.1.0 <= v < 7.0.0",

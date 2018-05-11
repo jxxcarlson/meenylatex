@@ -1,5 +1,15 @@
 module MeenyLatex.HasMath exposing (hasMath, listHasMath)
 
+{-| This module is for determining whether the Latex
+has mathmode t4ext
+
+
+# API
+
+@docs hasMath, listHasMath
+
+-}
+
 import MeenyLatex.Parser exposing (LatexExpression(..))
 
 

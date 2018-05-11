@@ -1,14 +1,22 @@
-module MeenyLatex.Parser exposing (..)
+module MeenyLatex.Parser
+    exposing
+        ( LatexExpression(..)
+        , macro
+        , parse
+        , endWord
+        , envName
+        , defaultLatexList
+        , latexList
+        )
 
--- exposing
---     ( LatexExpression(..)
---     , defaultLatexList
---     , endWord
---     , envName
---     , latexList
---     , macro
---     , parse
---     )
+{-| This module is for quickly preparing latex for export.
+
+
+# API
+
+@docs LatexExpression, macro, parse, defaultLatexList, latexList, endWord, envName
+
+-}
 
 import Dict
 import MeenyLatex.ParserHelpers exposing (..)
@@ -38,23 +46,27 @@ type LatexExpression
     | LXError Error
 
 
+{-| Transform a string into a list of LatexExpressions
+-}
 parse : String -> List LatexExpression
 parse text =
     let
         expr =
             Parser.run latexList text
     in
-    case expr of
-        Ok (LatexList list) ->
-            list
+        case expr of
+            Ok (LatexList list) ->
+                list
 
-        Err error ->
-            [ LXError error ]
+            Err error ->
+                [ LXError error ]
 
-        _ ->
-            [ LXString "yada!" ]
+            _ ->
+                [ LXString "yada!" ]
 
 
+{-| A default value of type LatexExpression
+-}
 defaultLatexList : LatexExpression
 defaultLatexList =
     LatexList [ LXString "Parse Error" ]
@@ -122,6 +134,9 @@ type alias Macro2 =
     String (List LatexExpression) (List LatexExpression)
 
 
+{-| Parse the macro keyword followed by
+zero or more optional follwed by zero or more more eventual nominnees.
+-}
 macro : Parser () -> Parser LatexExpression
 macro wsParser =
     inContext "macro" <|
@@ -287,6 +302,10 @@ environment =
         lazy (\_ -> envName |> andThen environmentOfType)
 
 
+{-| Capture the name of the environment in
+a \begin{ENV} ... \end{ENV}
+pair
+-}
 envName : Parser String
 envName =
     inContext "envName" <|
@@ -310,9 +329,11 @@ environmentOfType envType =
                 else
                     envType
         in
-        environmentParser envKind endWord envType
+            environmentParser envKind endWord envType
 
 
+{-| Use to parse begin ... end blocks
+-}
 endWord : Parser String
 endWord =
     inContext "endWord" <|

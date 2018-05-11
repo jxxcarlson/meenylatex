@@ -1,8 +1,9 @@
 
-MiniLaTeX
+MeenyLaTeX
 =========
 
-MiniLaTeX is a subset of LaTeX that can be rendered
+MeenyLaTeX is an experimental version of MiniLatex,
+which is in turn a subset of LaTeX that can be rendered
 into pdf by standard tools such as `pdflatex` or
 into HTML by a suitable application, e.g.,
 <a href="https://jxxcarlson.github.io/app/minilatex/src/index.html">MiniLateX Demo</a>
@@ -27,7 +28,7 @@ Second, make these definitions
 ```
 Third, run `MeenyLatex.render`;
 ```
-> MeenyLatex.render marcroDefinitions text
+> MeenyLatex.render macroDefinitions text
 ```
 to get the HTML
 ```

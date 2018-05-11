@@ -1,5 +1,14 @@
 module MeenyLatex.RenderLatexForExport exposing (renderLatexForExport)
 
+{-| This module is for preparing latex for export.
+
+
+# API
+
+@docs renderLatexForExport
+
+-}
+
 import Dict
 import List.Extra
 import MeenyLatex.ErrorMessages as ErrorMessages

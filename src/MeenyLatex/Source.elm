@@ -1,10 +1,25 @@
 module MeenyLatex.Source exposing (..)
 
+{-| This module provides boilerplat eext.
 
+
+# API
+
+@docs foo, texPrefix, texSuffix
+
+-}
+
+
+{-| For testing.
+-}
+foo : String
 foo =
     """ yada """
 
 
+{-| A standarad preamble
+-}
+texPrefix : String
 texPrefix =
     """
 \\documentclass[11pt, oneside]{article}
@@ -96,6 +111,9 @@ texPrefix =
 """
 
 
+{-| Bolerplate for the end of the document.
+-}
+texSuffix : String
 texSuffix =
     """
 

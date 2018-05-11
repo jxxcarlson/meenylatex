@@ -9,6 +9,17 @@ module MeenyLatex.Differ
         , update
         )
 
+{-| This module is used to speed up parsing-rendereing by
+comparing the old and new lists of paragraphs, noting the changes,
+then parsing and rendering the changed paragraphs.
+
+
+# API
+
+@docs EditRecord, emptyEditRecord, isEmpty, createEditRecord, diff, prefixer, update
+
+-}
+
 import MeenyLatex.LatexState exposing (LatexState, emptyLatexState)
 import MeenyLatex.Paragraph as Paragraph
 
@@ -31,6 +42,10 @@ type alias IdListPacket =
     }
 
 
+{-| An EditRecord records a list of (logical) newParagraphs
+correspoing to the text to be rendered as well as corresponding
+list of rendered parapgraphs. We need to reveiw this strucure.
+-}
 type alias EditRecord =
     { paragraphs : List String
     , renderedParagraphs : List String
@@ -41,6 +56,8 @@ type alias EditRecord =
     }
 
 
+{-| An empty EditRecord -- liek the inteer 0 in another context.
+-}
 emptyEditRecord : EditRecord
 emptyEditRecord =
     EditRecord [] [] emptyLatexState [] Nothing Nothing
@@ -60,10 +77,10 @@ commonInitialSegment x y =
             b =
                 List.take 1 y
         in
-        if a == b then
-            a ++ commonInitialSegment (List.drop 1 x) (List.drop 1 y)
-        else
-            []
+            if a == b then
+                a ++ commonInitialSegment (List.drop 1 x) (List.drop 1 y)
+            else
+                []
 
 
 commonTerminalSegment : List String -> List String -> List String
@@ -81,6 +98,11 @@ takeLast k x =
     x |> List.reverse |> List.take k |> List.reverse
 
 
+{-| createEditRecord: Create an edit record by (1)
+breaking the text in to pargraphs, (2) applying
+the transformer to each string in the resulting
+list of strings.
+-}
 createEditRecord : (String -> String) -> String -> EditRecord
 createEditRecord transformer text =
     let
@@ -96,14 +118,26 @@ createEditRecord transformer text =
         renderedParagraphs =
             List.map transformer paragraphs
     in
-    EditRecord paragraphs renderedParagraphs emptyLatexState idList Nothing Nothing
+        EditRecord paragraphs renderedParagraphs emptyLatexState idList Nothing Nothing
 
 
+{-| An EditRecord is considered to be empyt if its list of parapgraphs
+and its list of rendered paraagrahs is empty
+-}
 isEmpty : EditRecord -> Bool
 isEmpty editRecord =
     editRecord.paragraphs == [] && editRecord.renderedParagraphs == []
 
 
+{-| The update function takes an EditRecord and a string, the "text",
+breaks the text into a list of logical paragraphs, diffs it with the list
+of paragraphs held by the EditRecord, uses `differentialRender` to
+render the changed paragraphs while copying the unchanged rendered paragraphsto
+prodduce an updated list of rendered paragraphs. The 'differentialRender'
+accomplishes this using the transformer. The seed is used to produces
+a differential idList. This last step is perhaps unnecessary. To investigate.
+(This was part of an optimization scheme.)
+-}
 update : Int -> (String -> String) -> EditRecord -> String -> EditRecord
 update seed transformer editRecord text =
     let
@@ -119,7 +153,7 @@ update seed transformer editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-    EditRecord newParagraphs newRenderedParagraphs emptyLatexState p.idList p.newIdsStart p.newIdsEnd
+        EditRecord newParagraphs newRenderedParagraphs emptyLatexState p.idList p.newIdsStart p.newIdsEnd
 
 
 {-| Let u and v be two lists of strings. Write them as
@@ -153,9 +187,12 @@ diff u v =
             else
                 b_
     in
-    DiffRecord a b x y
+        DiffRecord a b x y
 
 
+{-| The prefixer is used to generate unique id's "p.1", "p.2", etc.
+for each paragraph.
+-}
 prefixer : Int -> Int -> String
 prefixer b k =
     "p." ++ toString b ++ "." ++ toString k
@@ -200,7 +237,7 @@ differentialRender renderer diffRecord editRecord =
         middleSegmentRendered =
             List.map renderer diffRecord.middleSegmentInTarget
     in
-    initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
+        initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
 
 
 differentialIdList : Int -> DiffRecord -> EditRecord -> IdListPacket
@@ -236,7 +273,7 @@ differentialIdList seed diffRecord editRecord =
             else
                 ( Just ii, Just (ii + nt - 1) )
     in
-    { idList = idList
-    , newIdsStart = newIdsStart
-    , newIdsEnd = newIdsEnd
-    }
+        { idList = idList
+        , newIdsStart = newIdsStart
+        , newIdsEnd = newIdsEnd
+        }

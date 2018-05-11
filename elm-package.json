@@ -12,7 +12,8 @@
         "MeenyLatex.RenderLatexForExport",
         "MeenyLatex.FastExportToLatex",
         "MeenyLatex.Differ",
-        "MeenyLatex.HasMath"
+        "MeenyLatex.HasMath",
+        "MeenyLatex.Parser"
     ],
     "dependencies": {
         "elm-community/list-extra": "6.1.0 <= v < 7.0.0",

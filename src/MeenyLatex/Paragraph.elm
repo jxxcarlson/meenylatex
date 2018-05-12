@@ -1,5 +1,16 @@
 module MeenyLatex.Paragraph exposing (logicalParagraphify)
 
+
+{-| This module exports just one function,
+intende to turn a string into a lisst 
+of logical paragraphs
+
+# API
+
+@docs logicalParagraphify
+
+-}
+
 import MeenyLatex.Parser
 import Parser
 import Regex

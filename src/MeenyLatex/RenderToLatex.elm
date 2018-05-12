@@ -7,6 +7,15 @@ module MeenyLatex.RenderToLatex
         , renderLatexList
         )
 
+{-|
+
+
+# API
+
+@docs render, renderBackToLatex, renderBackToLatexTest, renderBackToLatexTestModSpace, renderLatexList
+
+-}
+
 import List.Extra
 import MeenyLatex.ErrorMessages as ErrorMessages
 import MeenyLatex.JoinStrings as JoinStrings
@@ -27,16 +36,23 @@ renderBackToLatex str =
         |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
 
 
+{-| return true if a string rendered back to latex is the
+original string.
+-}
 renderBackToLatexTest : String -> Bool
 renderBackToLatexTest str =
     str == renderBackToLatex str
 
-
+{-| return true if a string rendered back to latex is the
+original string, but ignore spaces in the compariosn.
+-}
 renderBackToLatexTestModSpace : String -> Bool
 renderBackToLatexTestModSpace str =
     (str |> String.Extra.replace " " "") == (renderBackToLatex str |> String.Extra.replace " " "")
 
 
+{-| Redner a string into LaTeX
+-}
 render : LatexExpression -> String
 render latexExpression =
     case latexExpression of
@@ -70,7 +86,8 @@ render latexExpression =
         LXError error ->
             ErrorMessages.renderError error
 
-
+{-| Render a list of LatexExpressions 
+-}
 renderLatexList : List LatexExpression -> String
 renderLatexList args =
     args |> List.map render |> List.foldl (\item acc -> acc ++ item) ""

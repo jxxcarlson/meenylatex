@@ -27,7 +27,7 @@ import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexL
 import MeenyLatex.Utility as Utility
 import Parser
 import Regex
-import String.Extra
+import String
 
 
 transformText : LatexState -> String -> String
@@ -68,9 +68,9 @@ renderString parser latexState str =
 postProcess : String -> String
 postProcess str =
     str
-        |> String.Extra.replace "---" "&mdash;"
-        |> String.Extra.replace "--" "&ndash;"
-        |> String.Extra.replace "\\&" "&#38"
+        |> String.replace "---" "&mdash;"
+        |> String.replace "--" "&ndash;"
+        |> String.replace "\\&" "&#38"
 
 
 
@@ -234,7 +234,7 @@ renderTheoremLikeEnvironment latexState name args body =
             else
                 " " ++ toString tno
     in
-        "\n<div class=\"environment\">\n<strong>" ++ String.Extra.toSentenceCase name ++ tnoString ++ "</strong>\n<div class=\"italic\">\n" ++ r ++ "\n</div>\n</div>\n"
+        "\n<div class=\"environment\">\n<strong>" ++ String.toSentenceCase name ++ tnoString ++ "</strong>\n<div class=\"italic\">\n" ++ r ++ "\n</div>\n</div>\n"
 
 
 renderDefaultEnvironment2 : LatexState -> String -> List LatexExpression -> LatexExpression -> String
@@ -243,7 +243,7 @@ renderDefaultEnvironment2 latexState name args body =
         r =
             render latexState body
     in
-        "\n<div class=\"environment\">\n<strong>" ++ String.Extra.toSentenceCase name ++ "</strong>\n<div>\n" ++ r ++ "\n</div>\n</div>\n"
+        "\n<div class=\"environment\">\n<strong>" ++ String.toSentenceCase name ++ "</strong>\n<div>\n" ++ r ++ "\n</div>\n</div>\n"
 
 
 renderCenterEnvironment latexState body =
@@ -284,7 +284,7 @@ renderEquationEnvironment latexState body =
 renderAlignEnvironment latexState body =
     let
         r =
-            render latexState body |> String.Extra.replace "\\ \\" "\\\\"
+            render latexState body |> String.replace "\\ \\" "\\\\"
 
         eqno =
             getCounter "eqno" latexState
@@ -373,7 +373,7 @@ renderTableBody body =
 renderVerbatim latexState body =
     let
         body2 =
-            render latexState body |> String.Extra.replace ">" "&gt;" |> String.Extra.replace "<" "&lt;"
+            render latexState body |> String.replace ">" "&gt;" |> String.replace "<" "&lt;"
     in
         "\n<pre class=\"verbatim\">" ++ body2 ++ "</pre>\n"
 
@@ -679,7 +679,7 @@ compress : String -> String -> String
 compress replaceBlank str =
     str
         |> String.toLower
-        |> String.Extra.replace " " replaceBlank
+        |> String.replace " " replaceBlank
         |> Regex.replace Regex.All (Regex.regex "[,;.!?&_]") (\_ -> "")
 
 
@@ -687,7 +687,7 @@ idPhrase : String -> String -> String
 idPhrase prefix name =
     let
         compressedName =
-            name |> String.toLower |> String.Extra.replace " " ":"
+            name |> String.toLower |> String.replace " " ":"
     in
         String.join "" [ "id=\"_", makeId prefix name, "\"" ]
 

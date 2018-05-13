@@ -2,7 +2,7 @@ module MeenyLatex.ErrorMessages exposing (renderError)
 
 import Dict
 import Parser
-import String.Extra
+
 
 
 renderError : Parser.Error -> String
@@ -26,8 +26,8 @@ normalizeError : String -> String
 normalizeError str =
     str
         |> reduceBackslashes
-        |> String.Extra.replace "\"" ""
-        |> String.Extra.softBreak 50
+        |> String.replace "\"" ""
+        |> String.softBreak 50
         |> List.take 5
         |> String.join " "
         |> (\x -> x ++ " ...")
@@ -35,7 +35,7 @@ normalizeError str =
 
 reduceBackslashes : String -> String
 reduceBackslashes str =
-    str |> String.Extra.replace "\\\\" "\\" |> String.Extra.replace "\\n" "\n"
+    str |> String.replace "\\\\" "\\" |> String.replace "\\n" "\n"
 
 
 errorMessage1 error =
@@ -128,14 +128,14 @@ leadErrorDescription error =
 
 
 normalize str =
-    str |> String.Extra.replace "\"" "" |> String.Extra.replace "\\" ""
+    str |> String.replace "\"" "" |> String.replace "\\" ""
 
 
 errorMessage2 error =
     "row: "
-        ++ toString error.row
+        ++ String.fromInt error.row
         ++ "\ncol: "
-        ++ toString error.col
+        ++ String.fromInt  error.col
         ++ "\nProblem: "
         ++ toString error.problem
         ++ "\nContext: "

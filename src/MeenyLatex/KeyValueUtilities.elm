@@ -18,7 +18,7 @@ type alias KeyValuePair =
 keyValuePair : Parser KeyValuePair
 keyValuePair =
     inContext "KeyValuePair" <|
-        succeed (,)
+        succeed Tuple.pair
             |. ignore zeroOrMore (\c -> c == ' ' || c == '\n')
             |= keep oneOrMore (\c -> c /= ' ' && c /= ':')
             |. symbol ":"

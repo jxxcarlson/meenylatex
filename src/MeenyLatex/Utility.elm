@@ -23,4 +23,4 @@ addNumberedLine line data =
 
 numberedLine : Int -> String -> String
 numberedLine k line =
-    String.padLeft 2 ' ' (toString k) ++ " " ++ line
+    String.padLeft 2 ' ' (String.fromInt k) ++ " " ++ line

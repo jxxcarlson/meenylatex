@@ -13,6 +13,7 @@ module MeenyLatex.Parser exposing (..)
 import Dict
 import MeenyLatex.ParserHelpers exposing (..)
 import Parser exposing (..)
+import Set
 
 
 {- ELLIE: https://ellie-app.com/pcB5b3BPfa1/0
@@ -163,25 +164,14 @@ arg =
             |> map LatexList
         )
 
-
 macroName : Parser String
 macroName =
-    inContext "macroName" <|
-        (allOrNothing <|
-            succeed identity
-                |. mustFail reservedWord
-                |= innerMacroName
-        )
-
-
-innerMacroName : Parser String
-innerMacroName =
-    inContext "innerMacroName" <|
-        succeed identity
-            |. spaces
-            |. symbol "\\"
-            |= keep oneOrMore notMacroSpecialCharacter
-
+  variable
+    { start = \c -> c == '\\'
+    , inner = \c -> Char.isAlphaNum c
+    , reserved = Set.fromList [ "\\begin", "\\end", "\\item", "\\bibitem" ]
+    }
+ 
 
 smacro : Parser LatexExpression
 smacro =
@@ -194,13 +184,12 @@ smacro =
 
 smacroName : Parser String
 smacroName =
-    inContext "macroName" <|
-        (allOrNothing <|
-            succeed identity
-                |. mustFail smacroReservedWord
-                |= innerMacroName
-        )
-
+  variable
+    { start = \c -> c == '\\'
+    , inner = \c -> Char.isAlphaNum c
+    , reserved = Set.fromList [ "\\begin", "\\end", "\\item" ]
+    }
+ 
 
 smacroBody : Parser LatexExpression
 smacroBody =

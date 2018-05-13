@@ -13,7 +13,7 @@ import MeenyLatex.JoinStrings as JoinStrings
 import MeenyLatex.Paragraph
 import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Parser
-import String.Extra
+
 
 
 {-| parse a stringg and render it back into Latex
@@ -34,7 +34,7 @@ renderBackToLatexTest str =
 
 renderBackToLatexTestModSpace : String -> Bool
 renderBackToLatexTestModSpace str =
-    (str |> String.Extra.replace " " "") == (renderBackToLatex str |> String.Extra.replace " " "")
+    (str |> String.replace " " "") == (renderBackToLatex str |> String.replace " " "")
 
 
 render : LatexExpression -> String

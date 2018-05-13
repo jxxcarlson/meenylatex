@@ -17,7 +17,7 @@ import MeenyLatex.JoinStrings as JoinStrings
 import MeenyLatex.Paragraph
 import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import MeenyLatex.Utility as Utility
-import String.Extra
+import String
 
 
 {-| parse a string and render it back into Latex
@@ -114,8 +114,8 @@ renderSpecialArgList args =
 fixBadChars : String -> String
 fixBadChars str =
     str
-        |> String.Extra.replace "_" "\\_"
-        |> String.Extra.replace "#" "\\#"
+        |> String.replace "_" "\\_"
+        |> String.replace "#" "\\#"
 
 
 renderOptArgList : List LatexExpression -> String

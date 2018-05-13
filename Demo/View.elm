@@ -6,7 +6,7 @@ import Html.Events as Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
 import Http
 import Demo.Types as Types exposing (..)
-import String.Extra
+import String
 import MeenyLatex.Parser exposing (LatexExpression)
 import MeenyLatex.Driver as MeenyLatex
 import MeenyLatex.RenderToLatex
@@ -175,7 +175,7 @@ prettyPrint : LineViewStyle -> List (List LatexExpression) -> String
 prettyPrint lineViewStyle parseResult =
     case lineViewStyle of
         Vertical ->
-            parseResult |> List.map toString |> List.map (String.Extra.replace " " "\n ") |> String.join "\n\n"
+            parseResult |> List.map toString |> List.map (String.replace " " "\n ") |> String.join "\n\n"
 
         Horizontal ->
             parseResult |> List.map toString |> String.join "\n\n"

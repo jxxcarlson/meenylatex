@@ -30,39 +30,26 @@ parseUntil marker =
     -- inContext "parseUntil" <|
         getChompedString <| chompUntil marker
     
-word_ : Parser String
-word_ =
+word : Parser String
+word =
   getChompedString <|
     succeed ()
+      |. chompIf (\c -> Char.isAlphaNum c)
       |. chompWhile notSpecialCharacter
 
-      
-word : Parser String
-word = 
-  succeed identity 
-    |. spaces 
-    |= word_
-    |. ws
 
-
-
-    
-specialWord_ : Parser String
-specialWord_ =
-  getChompedString <|
-    succeed ()
-      |. chompWhile notSpecialTableOrMacroCharacter
-
+s
 
 {-| Like `word`, but after a word is recognized spaces, not spaces + newlines are consumed
 -}
 specialWord : Parser String
 specialWord =
-    -- inContext "specialWord" <|
-        succeed identity
-            |. spaces
-            |= specialWord_
-            |. spaces
+  getChompedString <|
+    succeed ()
+      |. chompIf (\c -> Char.isAlphaNum c)
+      |. chompWhile notSpecialTableOrMacroCharacter
+
+
 
 
 notSpecialTableOrMacroCharacter : Char -> Bool
@@ -70,20 +57,13 @@ notSpecialTableOrMacroCharacter c =
     not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == ']' || c == '&')
 
 
-macroArgWord_ : Parser String
-macroArgWord_ =
-  getChompedString <|
-    succeed ()
-      |. chompWhile notMacroArgWordCharacter
-
-
 macroArgWord : Parser String
 macroArgWord =
-   --  inContext "specialWord" <|
-        succeed identity
-            |. spaces
-            |= macroArgWord_
-            |. spaces
+  getChompedString <|
+    succeed ()
+      |. chompIf (\c -> Char.isAlphaNum c)
+      |. chompWhile notMacroArgWordCharacter
+
 
 
 notMacroArgWordCharacter : Char -> Bool

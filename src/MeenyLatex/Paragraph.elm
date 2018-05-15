@@ -146,8 +146,8 @@ joinLines a b =
         ( _, "\n" ) ->
             a ++ "\n"
 
-        ( a, b ) ->
-            a ++ "\n" ++ b
+        ( aa, bb ) ->
+            aa ++ "\n" ++ bb
 
 
 fixLine : String -> String

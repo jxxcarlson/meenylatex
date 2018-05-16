@@ -10,7 +10,10 @@ module MeenyLatex.RenderLatexForExport exposing (renderLatexForExport)
 -}
 
 import Dict
-import List.Extra
+
+
+-- import List.Extra
+
 import MeenyLatex.ErrorMessages as ErrorMessages
 import MeenyLatex.Image as Image
 import MeenyLatex.JoinStrings as JoinStrings
@@ -287,4 +290,4 @@ renderArg k args =
 
 getElement : Int -> List LatexExpression -> LatexExpression
 getElement k list =
-    List.Extra.getAt k list |> Maybe.withDefault (LXString "xxx")
+    Utility.getAt k list |> Maybe.withDefault (LXString "xxx")

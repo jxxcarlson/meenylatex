@@ -8,7 +8,10 @@ module MeenyLatex.Render
         )
 
 import Dict
-import List.Extra
+
+
+-- import List.Extra
+
 import MeenyLatex.Configuration as Configuration
 import MeenyLatex.ErrorMessages as ErrorMessages
 import MeenyLatex.Html as Html
@@ -42,7 +45,7 @@ transformText latexState text =
 
 getElement : Int -> List LatexExpression -> LatexExpression
 getElement k list =
-    List.Extra.getAt k list |> Maybe.withDefault (LXString "xxx")
+    Utility.getAt k list |> Maybe.withDefault (LXString "xxx")
 
 
 parseString parser str =
@@ -60,7 +63,7 @@ renderString parser latexState str =
                     render latexState latexExpression |> postProcess
 
                 Err error ->
-                    "Error: " ++ toString error
+                    "Error: " ++ Parser.deadEndsToString error
     in
         renderOutput
 
@@ -101,8 +104,8 @@ render latexState latexExpression =
         SMacro name optArgs args le ->
             renderSMacro latexState name optArgs args le
 
-        Item level latexExpression ->
-            renderItem latexState level latexExpression
+        Item level latexExpr ->
+            renderItem latexState level latexExpr
 
         InlineMath str ->
             "$" ++ str ++ "$"
@@ -120,7 +123,7 @@ render latexState latexExpression =
             str
 
         LXError error ->
-            ErrorMessages.renderError error
+            List.map ErrorMessages.renderError error |> String.join "; "
 
 
 renderLatexList : LatexState -> List LatexExpression -> String
@@ -140,7 +143,7 @@ renderOptArgList latexState args =
 
 itemClass : Int -> String
 itemClass level =
-    "item" ++ toString level
+    "item" ++ String.fromInt level
 
 
 renderItem : LatexState -> Int -> LatexExpression -> String
@@ -230,11 +233,11 @@ renderTheoremLikeEnvironment latexState name args body =
 
         tnoString =
             if s1 > 0 then
-                " " ++ toString s1 ++ "." ++ toString tno
+                " " ++ String.fromInt s1 ++ "." ++ String.fromInt tno
             else
-                " " ++ toString tno
+                " " ++ String.fromInt tno
     in
-        "\n<div class=\"environment\">\n<strong>" ++ String.toSentenceCase name ++ tnoString ++ "</strong>\n<div class=\"italic\">\n" ++ r ++ "\n</div>\n</div>\n"
+        "\n<div class=\"environment\">\n<strong>" ++ name ++ tnoString ++ "</strong>\n<div class=\"italic\">\n" ++ r ++ "\n</div>\n</div>\n"
 
 
 renderDefaultEnvironment2 : LatexState -> String -> List LatexExpression -> LatexExpression -> String
@@ -243,7 +246,7 @@ renderDefaultEnvironment2 latexState name args body =
         r =
             render latexState body
     in
-        "\n<div class=\"environment\">\n<strong>" ++ String.toSentenceCase name ++ "</strong>\n<div>\n" ++ r ++ "\n</div>\n</div>\n"
+        "\n<div class=\"environment\">\n<strong>" ++ name ++ "</strong>\n<div>\n" ++ r ++ "\n</div>\n</div>\n"
 
 
 renderCenterEnvironment latexState body =
@@ -269,9 +272,9 @@ renderEquationEnvironment latexState body =
         addendum =
             if eqno > 0 then
                 if s1 > 0 then
-                    "\\tag{" ++ toString s1 ++ "." ++ toString eqno ++ "}"
+                    "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
                 else
-                    "\\tag{" ++ toString eqno ++ "}"
+                    "\\tag{" ++ String.fromInt eqno ++ "}"
             else
                 ""
 
@@ -295,9 +298,9 @@ renderAlignEnvironment latexState body =
         addendum =
             if eqno > 0 then
                 if s1 > 0 then
-                    "\\tag{" ++ toString s1 ++ "." ++ toString eqno ++ "}"
+                    "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
                 else
-                    "\\tag{" ++ toString eqno ++ "}"
+                    "\\tag{" ++ String.fromInt eqno ++ "}"
             else
                 ""
     in
@@ -353,7 +356,7 @@ renderRow row =
         LatexList row_ ->
             row_
                 |> List.foldl (\cell acc -> acc ++ " " ++ renderCell cell) ""
-                |> (\row -> "<tr> " ++ row ++ " </tr>\n")
+                |> (\row__ -> "<tr> " ++ row__ ++ " </tr>\n")
 
         _ ->
             "<tr>-</tr>"
@@ -364,7 +367,7 @@ renderTableBody body =
         LatexList body_ ->
             body_
                 |> List.foldl (\row acc -> acc ++ " " ++ renderRow row) ""
-                |> (\body -> "<table>\n" ++ body ++ "</table>\n")
+                |> (\bod -> "<table>\n" ++ bod ++ "</table>\n")
 
         _ ->
             "<table>-</table>"
@@ -673,6 +676,16 @@ makeId prefix name =
     String.join ":" [ prefix, compress ":" name ]
 
 
+userReplace : String -> (Regex.Match -> String) -> String -> String
+userReplace userRegex replacer string =
+    case Regex.fromString userRegex of
+        Nothing ->
+            string
+
+        Just regex ->
+            Regex.replace regex replacer string
+
+
 {-| map str to lower case and squeeze out bad characters
 -}
 compress : String -> String -> String
@@ -680,7 +693,7 @@ compress replaceBlank str =
     str
         |> String.toLower
         |> String.replace " " replaceBlank
-        |> Regex.replace Regex.All (Regex.regex "[,;.!?&_]") (\_ -> "")
+        |> userReplace "[,;.!?&_]" (\_ -> "")
 
 
 idPhrase : String -> String -> String
@@ -708,7 +721,7 @@ renderSection latexState args =
 
         label =
             if s1 > 0 then
-                toString s1 ++ " "
+                String.fromInt s1 ++ " "
             else
                 ""
     in
@@ -748,7 +761,7 @@ renderSubsection latexState args =
 
         label =
             if s1 > 0 then
-                toString s1 ++ "." ++ toString s2 ++ " "
+                String.fromInt s1 ++ "." ++ String.fromInt s2 ++ " "
             else
                 ""
     in
@@ -781,7 +794,7 @@ renderSubSubsection latexState args =
 
         label =
             if s1 > 0 then
-                toString s1 ++ "." ++ toString s2 ++ "." ++ toString s3 ++ " "
+                String.fromInt s1 ++ "." ++ String.fromInt s2 ++ "." ++ String.fromInt s3 ++ " "
             else
                 ""
     in
@@ -882,7 +895,7 @@ renderTableOfContents latexState list =
 
 makeTableOfContents : LatexState -> String
 makeTableOfContents latexState =
-    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap (,) latexState.tableOfContents)
+    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)
         |> String.join "\n"
 
 
@@ -896,7 +909,7 @@ makeTocItem tocItem =
             Tuple.second tocItem
 
         classProperty =
-            "class=\"sectionLevel" ++ toString ti.level ++ "\""
+            "class=\"sectionLevel" ++ String.fromInt ti.level ++ "\""
 
         id =
             makeId (sectionPrefix ti.level) ti.name

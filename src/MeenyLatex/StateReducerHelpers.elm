@@ -1,6 +1,7 @@
 module MeenyLatex.StateReducerHelpers exposing (..)
 
-import List.Extra
+-- import List.Extra
+
 import MeenyLatex.LatexState
     exposing
         ( Counters
@@ -17,6 +18,7 @@ import MeenyLatex.Parser as Parser exposing (LatexExpression(..))
 import MeenyLatex.ParserHelpers as ParserHelpers
 import MeenyLatex.ParserTools as PT
 import Parser as P
+import MeenyLatex.Utility as Utility
 
 
 type alias LatexInfo =
@@ -37,68 +39,68 @@ setSectionCounters info latexState =
 
         initialSectionNumber =
             if arg1 == "section" then
-                arg2 |> String.toInt |> Result.withDefault 0
+                arg2 |> String.toInt |> Maybe.withDefault 0
             else
                 -1
     in
-    if initialSectionNumber > -1 then
-        latexState
-            |> updateCounter "s1" (initialSectionNumber - 1)
-            |> updateCounter "s2" 0
-            |> updateCounter "s3" 0
-    else
-        latexState
+        if initialSectionNumber > -1 then
+            latexState
+                |> updateCounter "s1" (initialSectionNumber - 1)
+                |> updateCounter "s2" 0
+                |> updateCounter "s3" 0
+        else
+            latexState
 
 
 updateSectionNumber : LatexInfo -> LatexState -> LatexState
 updateSectionNumber info latexState =
     let
         label =
-            getCounter "s1" latexState |> (\x -> x + 1) |> toString
+            getCounter "s1" latexState |> (\x -> x + 1) |> String.fromInt
     in
-    latexState
-        |> incrementCounter "s1"
-        |> updateCounter "s2" 0
-        |> updateCounter "s3" 0
-        |> addSection (PT.unpackString info.value) label 1
+        latexState
+            |> incrementCounter "s1"
+            |> updateCounter "s2" 0
+            |> updateCounter "s3" 0
+            |> addSection (PT.unpackString info.value) label 1
 
 
 updateSubsectionNumber : LatexInfo -> LatexState -> LatexState
 updateSubsectionNumber info latexState =
     let
         s1 =
-            getCounter "s1" latexState |> toString
+            getCounter "s1" latexState |> String.fromInt
 
         s2 =
-            getCounter "s2" latexState |> (\x -> x + 1) |> toString
+            getCounter "s2" latexState |> (\x -> x + 1) |> String.fromInt
 
         label =
             s1 ++ "." ++ s2
     in
-    latexState
-        |> incrementCounter "s2"
-        |> updateCounter "s3" 0
-        |> addSection (PT.unpackString info.value) label 2
+        latexState
+            |> incrementCounter "s2"
+            |> updateCounter "s3" 0
+            |> addSection (PT.unpackString info.value) label 2
 
 
 updateSubsubsectionNumber : LatexInfo -> LatexState -> LatexState
 updateSubsubsectionNumber info latexState =
     let
         s1 =
-            getCounter "s1" latexState |> toString
+            getCounter "s1" latexState |> String.fromInt
 
         s2 =
-            getCounter "s2" latexState |> toString
+            getCounter "s2" latexState |> String.fromInt
 
         s3 =
-            getCounter "s3" latexState |> (\x -> x + 1) |> toString
+            getCounter "s3" latexState |> (\x -> x + 1) |> String.fromInt
 
         label =
             s1 ++ "." ++ s2 ++ "." ++ s3
     in
-    latexState
-        |> incrementCounter "s3"
-        |> addSection (PT.unpackString info.value) label 2
+        latexState
+            |> incrementCounter "s3"
+            |> addSection (PT.unpackString info.value) label 2
 
 
 setDictionaryItemForMacro : LatexInfo -> LatexState -> LatexState
@@ -107,7 +109,7 @@ setDictionaryItemForMacro latexInfo latexState =
         value =
             PT.unpackString latexInfo.value
     in
-    setDictionaryItem latexInfo.name value latexState
+        setDictionaryItem latexInfo.name value latexState
 
 
 setBibItemXRef : LatexInfo -> LatexState -> LatexState
@@ -122,7 +124,7 @@ setBibItemXRef latexInfo latexState =
             else
                 PT.unpackString latexInfo.options
     in
-    setDictionaryItem ("bibitem:" ++ label) value latexState
+        setDictionaryItem ("bibitem:" ++ label) value latexState
 
 
 setTheoremNumber : LatexInfo -> LatexState -> LatexState
@@ -145,11 +147,11 @@ setTheoremNumber info latexState =
 
         latexState2 =
             if label /= "" then
-                setCrossReference label (toString s1 ++ "." ++ toString tno) latexState1
+                setCrossReference label (String.fromInt s1 ++ "." ++ String.fromInt tno) latexState1
             else
                 latexState1
     in
-    latexState2
+        latexState2
 
 
 setEquationNumber : LatexInfo -> LatexState -> LatexState
@@ -179,11 +181,11 @@ setEquationNumber info latexState =
 
         latexState2 =
             if label /= "" then
-                setCrossReference label (toString s1 ++ "." ++ toString eqno) latexState1
+                setCrossReference label (String.fromInt s1 ++ "." ++ String.fromInt eqno) latexState1
             else
                 latexState1
     in
-    latexState2
+        latexState2
 
 
 
@@ -192,21 +194,21 @@ setEquationNumber info latexState =
 
 getAt : Int -> List String -> String
 getAt k list_ =
-    List.Extra.getAt k list_ |> Maybe.withDefault "xxx"
+    Utility.getAt k list_ |> Maybe.withDefault "xxx"
 
 
 getElement : Int -> List LatexExpression -> String
 getElement k list =
     let
         lxString =
-            List.Extra.getAt k list |> Maybe.withDefault (LXString "xxx")
+            Utility.getAt k list |> Maybe.withDefault (LXString "xxx")
     in
-    case lxString of
-        LXString str ->
-            str
+        case lxString of
+            LXString str ->
+                str
 
-        _ ->
-            "yyy"
+            _ ->
+                "yyy"
 
 
 getLabel str =
@@ -216,9 +218,9 @@ getLabel str =
                 |> String.trim
                 |> P.run (Parser.macro ParserHelpers.ws)
     in
-    case maybeMacro of
-        Ok macro ->
-            macro |> PT.getFirstMacroArg "label"
+        case maybeMacro of
+            Ok macro ->
+                macro |> PT.getFirstMacroArg "label"
 
-        _ ->
-            ""
+            _ ->
+                ""

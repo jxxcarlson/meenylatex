@@ -7,13 +7,12 @@ module MeenyLatex.RenderToLatex
         , renderLatexList
         )
 
-import List.Extra
 import MeenyLatex.ErrorMessages as ErrorMessages
 import MeenyLatex.JoinStrings as JoinStrings
 import MeenyLatex.Paragraph
 import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Parser
-
+import MeenyLaTeX.Utility as Utility
 
 
 {-| parse a stringg and render it back into Latex

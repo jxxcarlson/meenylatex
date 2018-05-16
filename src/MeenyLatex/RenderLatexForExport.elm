@@ -46,8 +46,8 @@ render latexExpression =
         SMacro name optArgs args le ->
             renderSMacro name optArgs args le
 
-        Item level latexExpression ->
-            renderItem level latexExpression
+        Item level latexExpression_ ->
+            renderItem level latexExpression_
 
         InlineMath str ->
             " $" ++ str ++ "$ "
@@ -65,7 +65,7 @@ render latexExpression =
             str
 
         LXError error ->
-            ErrorMessages.renderError error
+            List.map ErrorMessages.renderError error |> String.join "; "
 
 
 renderLatexList : List LatexExpression -> String
@@ -255,7 +255,7 @@ renderImage args =
             imageAttrs.width |> toFloat |> (\x -> 2.5 * x)
 
         width =
-            toString width_ ++ "px"
+            String.fromFloat width_ ++ "px"
     in
         case ( imageAttrs.float, imageAttrs.align ) of
             ( "left", _ ) ->

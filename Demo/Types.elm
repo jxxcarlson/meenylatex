@@ -1,4 +1,4 @@
-module Demo.Types exposing (..)
+module Types exposing (..)
 
 import MeenyLatex.Parser exposing (LatexExpression)
 import MeenyLatex.Differ exposing (EditRecord)
@@ -15,6 +15,8 @@ type alias Model =
     , seed : Int
     , configuration : Configuration
     , lineViewStyle : LineViewStyle
+    , windowHeight : Int
+    , windowWidth : Int
     }
 
 

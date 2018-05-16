@@ -12,7 +12,7 @@ import MeenyLatex.JoinStrings as JoinStrings
 import MeenyLatex.Paragraph
 import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Parser
-import MeenyLaTeX.Utility as Utility
+import MeenyLatex.Utility as Utility
 
 
 {-| parse a stringg and render it back into Latex
@@ -48,8 +48,8 @@ render latexExpression =
         SMacro name optArgs args le ->
             renderSMacro name optArgs args le
 
-        Item level latexExpression ->
-            renderItem level latexExpression
+        Item level latexExpression_ ->
+            renderItem level latexExpression_
 
         InlineMath str ->
             " $" ++ str ++ "$"
@@ -67,7 +67,7 @@ render latexExpression =
             str
 
         LXError error ->
-            ErrorMessages.renderError error
+            List.map ErrorMessages.renderError error |> String.join "; "
 
 
 renderLatexList : List LatexExpression -> String

@@ -1,4 +1,4 @@
-module Demo.Source exposing (..)
+module Source exposing (..)
 
 
 htmlPrefix =

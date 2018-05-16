@@ -3,6 +3,7 @@ port module Main exposing (..)
 {-| Test app for MeenyLatex
 -}
 
+import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
@@ -11,18 +12,24 @@ import MeenyLatex.HasMath
 import MeenyLatex.Driver as MeenyLatex
 import MeenyLatex.Differ exposing (EditRecord)
 import Random
-import Demo.Source as Source
-import Demo.View exposing (..)
-import Demo.Types as Types exposing (..)
+import Source
+import View exposing (..)
+import Types exposing (..)
 import Json.Encode as Encode
 
 
 main =
-    Html.program { view = view, update = update, init = init, subscriptions = subscriptions }
+    Browser.embed { init = init, subscriptions = subscriptions, update = update, view = view }
 
 
-init : ( Model, Cmd Msg )
-init =
+type alias Flags =
+    { width : Int
+    , height : Int
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     let
         parseResult =
             MeenyLatex.parse Source.initialText
@@ -41,6 +48,8 @@ init =
             , seed = 0
             , configuration = StandardView
             , lineViewStyle = Horizontal
+            , windowWidth = flags.width
+            , windowHeight = flags.height
             }
     in
         ( model, Random.generate NewSeed (Random.int 1 10000) )
@@ -75,8 +84,8 @@ update msg model =
                     , hasMathResult = hasMathResult
                   }
                 , Cmd.batch
-                    [ sendToJs <| encodeData "fast" newEditRecord.idList
-                    , Random.generate NewSeed (Random.int 1 10000)
+                    [ -- sendToJs <| encodeData "fast" newEditRecord.idList
+                      Random.generate NewSeed (Random.int 1 10000)
                     ]
                 )
 
@@ -89,7 +98,8 @@ update msg model =
                 , sourceText = ""
                 , editRecord = MeenyLatex.setup model.seed ""
               }
-            , sendToJs <| encodeData "full" []
+            , Cmd.none
+              -- sendToJs <| encodeData "full" []
             )
 
         Restore ->
@@ -98,7 +108,8 @@ update msg model =
                 , sourceText = Source.initialText
                 , editRecord = MeenyLatex.setup model.seed Source.initialText
               }
-            , sendToJs <| encodeData "full" []
+            , Cmd.none
+              -- sendToJs <| encodeData "full" []
             )
 
         GetContent str ->
@@ -160,7 +171,7 @@ useSource text model =
             , parseResult = MeenyLatex.parse text
             , inputString = exportLatex2Html editRecord
           }
-        , sendToJs <| encodeData "full" []
+        , Cmd.none
         )
 
 
@@ -171,25 +182,21 @@ exportLatex2Html editRecord =
         |> \text -> Source.htmlPrefix ++ text ++ Source.htmlSuffix
 
 
-encodeData model idList =
-    let
-        idValueList =
-            Debug.log "idValueList"
-                (List.map Encode.string idList)
-    in
-        [ ( "model", Encode.string model )
-        , ( "idList", Encode.list idValueList )
-        ]
-            |> Encode.object
 
-
-
+{-
+   encodeData : Model -> List String -> Encode.Value
+   encodeData model idList =
+       [ ( "model", Encode.string model )
+       , ( "idList", Encode.list Encode.string idList )
+       ]
+           |> Encode.object
+-}
 {- VIEW FUNCTIONS -}
 
 
 view : Model -> Html Msg
 view model =
-    div [ style [ ( "width", appWidth model.configuration ), ( "margin", "auto" ) ] ]
+    div [ style "width" (appWidth model.configuration), style "margin" "auto" ]
         [ mainView model
         ]
 
@@ -210,7 +217,7 @@ mainView model =
 
 
 standardView model =
-    div [ style [ ( "float", "left" ) ] ]
+    div [ style "float" "left" ]
         [ headerRibbon
         , editor model
         , renderedSource model
@@ -220,7 +227,7 @@ standardView model =
 
 
 renderToLatexView model =
-    div [ style [ ( "float", "left" ) ] ]
+    div [ style "float" "left" ]
         [ headerRibbon
         , editor model
         , renderedSource model
@@ -231,7 +238,7 @@ renderToLatexView model =
 
 
 parseResultsView model =
-    div [ style [ ( "float", "left" ) ] ]
+    div [ style "float" "left" ]
         [ headerRibbon
         , editor model
         , renderedSource model
@@ -242,7 +249,7 @@ parseResultsView model =
 
 
 rawHtmlResultsView model =
-    div [ style [ ( "float", "left" ) ] ]
+    div [ style "float" "left" ]
         [ headerRibbon
         , editor model
         , renderedSource model

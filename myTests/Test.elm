@@ -1,39 +1,9 @@
 -- https://staging.ellie-app.com/fvkGQjXWcra1/1
 
 
-module Main exposing (main)
-
-import Html exposing (Html, div, pre, text)
-
-
--- import Html.Attributes exposing (..)
+module Test exposing (..)
 
 import Parser exposing (..)
-
-
--- import Parser.LanguageKit as Parser exposing (Trailing(..))
-
-import Set
-
-
-line str =
-    text <| str ++ "\n\n"
-
-
-main : Html msg
-main =
-    pre []
-        [ line <| "GOOD CODE"
-        , line <| Debug.toString <| run (inlineMath ws) "$a^2 = b^3$"
-        , line <| Debug.toString <| run latexExpression "$a^2 = b^3$"
-        , line <| Debug.toString <| run environment env1
-        , line <| Debug.toString <| run latexExpression "one two three four"
-        , line <| "HELPER & TESTERS"
-        , line <| Debug.toString <| run (envName |> andThen (\_ -> symbol "xxx")) "\\begin{a}xxx"
-        , line <| Debug.toString <| run (parseTo "xxx") "a b c xxx"
-        , line <| Debug.toString <| run (symbolPair "aaa" "bbb") "aaabbb"
-        , line <| Debug.toString <| run baz "\\begin{a}xxx"
-        ]
 
 
 symbolPair : String -> String -> Parser String
@@ -88,8 +58,8 @@ latexList =
 latexExpression : Parser LatexExpression
 latexExpression =
     oneOf
-        [ lazy (\_ -> environment)
-        , inlineMath ws
+        [ -- lazy (\_ -> environment)
+          inlineMath ws
         , words
         ]
 

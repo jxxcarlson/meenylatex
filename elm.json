@@ -4,7 +4,7 @@
   "repository": "https://github.com/jxxcarlson/meenylatex.git",
   "license": "BSD3",
   "source-directories": [
-      "./src", "./demo"
+      "./src", "./demo", "./myTests"
   ],
   "exposed-modules": [
       "MeenyLatex.Driver",

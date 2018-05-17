@@ -2,7 +2,7 @@ module MeenyLatex.KeyValueUtilities exposing (getKeyValueList, getValue)
 
 import Char
 import Parser exposing (..)
-import MeenyLatex.ParserHelpers exposing(word_, simpleItemList)
+import MeenyLatex.ParserHelpers exposing(word_, itemList)
 
 
 -- type alias KeyValuePair =
@@ -32,7 +32,7 @@ keyValuePairs : Parser (List KeyValuePair)
 keyValuePairs =
     -- inContext "keyValuePairs" <|
         succeed identity
-            |= simpleItemList keyValuePair
+            |= itemList keyValuePair
 
 
 getKeyValueList str =

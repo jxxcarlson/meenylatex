@@ -4601,20 +4601,6 @@ var elm_lang$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
 	});
-var elm_lang$parser$Parser$Expecting = function (a) {
-	return {$: 'Expecting', a: a};
-};
-var elm_lang$parser$Parser$Advanced$Token = F2(
-	function (a, b) {
-		return {$: 'Token', a: a, b: b};
-	});
-var elm_lang$parser$Parser$toToken = function (str) {
-	return A2(
-		elm_lang$parser$Parser$Advanced$Token,
-		str,
-		elm_lang$parser$Parser$Expecting(str));
-};
-var elm_lang$core$Basics$False = {$: 'False'};
 var elm_lang$core$Basics$identity = function (x) {
 	return x;
 };
@@ -4622,10 +4608,12 @@ var elm_lang$core$Basics$lt = _Utils_lt;
 var elm_lang$core$Basics$negate = function (n) {
 	return -n;
 };
-var elm_lang$parser$Parser$Advanced$Bad = F2(
-	function (a, b) {
-		return {$: 'Bad', a: a, b: b};
+var elm_lang$core$String$slice = _String_slice;
+var elm_lang$core$String$dropRight = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(elm_lang$core$String$slice, 0, -n, string);
 	});
+var elm_lang$core$String$length = _String_length;
 var elm_lang$parser$Parser$Advanced$Good = F3(
 	function (a, b, c) {
 		return {$: 'Good', a: a, b: b, c: c};
@@ -4633,51 +4621,30 @@ var elm_lang$parser$Parser$Advanced$Good = F3(
 var elm_lang$parser$Parser$Advanced$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
-var elm_lang$parser$Parser$Advanced$findSubString = _Parser_findSubString;
-var elm_lang$parser$Parser$Advanced$AddRight = F2(
-	function (a, b) {
-		return {$: 'AddRight', a: a, b: b};
-	});
-var elm_lang$parser$Parser$Advanced$Empty = {$: 'Empty'};
-var elm_lang$parser$Parser$Advanced$Problem = F4(
-	function (row, col, problem, contextStack) {
-		return {col: col, contextStack: contextStack, problem: problem, row: row};
-	});
-var elm_lang$parser$Parser$Advanced$fromInfo = F4(
-	function (row, col, x, context) {
-		return A2(
-			elm_lang$parser$Parser$Advanced$AddRight,
-			elm_lang$parser$Parser$Advanced$Empty,
-			A4(elm_lang$parser$Parser$Advanced$Problem, row, col, x, context));
-	});
-var elm_lang$parser$Parser$Advanced$chompUntil = function (_n0) {
-	var str = _n0.a;
-	var expecting = _n0.b;
+var elm_lang$parser$Parser$Advanced$chompUntilEndOr = function (str) {
 	return elm_lang$parser$Parser$Advanced$Parser(
 		function (s) {
-			var _n1 = A5(elm_lang$parser$Parser$Advanced$findSubString, str, s.offset, s.row, s.col, s.src);
-			var newOffset = _n1.a;
-			var newRow = _n1.b;
-			var newCol = _n1.c;
-			return _Utils_eq(newOffset, -1) ? A2(
-				elm_lang$parser$Parser$Advanced$Bad,
-				false,
-				A4(elm_lang$parser$Parser$Advanced$fromInfo, newRow, newCol, expecting, s.context)) : A3(
+			var _n0 = A5(_Parser_findSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _n0.a;
+			var newRow = _n0.b;
+			var newCol = _n0.c;
+			var adjustedOffset = (newOffset < 0) ? elm_lang$core$String$length(s.src) : newOffset;
+			return A3(
 				elm_lang$parser$Parser$Advanced$Good,
-				_Utils_cmp(s.offset, newOffset) < 0,
+				_Utils_cmp(s.offset, adjustedOffset) < 0,
 				_Utils_Tuple0,
-				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+				{col: newCol, context: s.context, indent: s.indent, offset: adjustedOffset, row: newRow, src: s.src});
 		});
 };
-var elm_lang$parser$Parser$chompUntil = function (str) {
-	return elm_lang$parser$Parser$Advanced$chompUntil(
-		elm_lang$parser$Parser$toToken(str));
-};
+var elm_lang$parser$Parser$chompUntilEndOr = elm_lang$parser$Parser$Advanced$chompUntilEndOr;
 var elm_lang$core$Basics$always = F2(
 	function (a, _n0) {
 		return a;
 	});
-var elm_lang$core$String$slice = _String_slice;
+var elm_lang$parser$Parser$Advanced$Bad = F2(
+	function (a, b) {
+		return {$: 'Bad', a: a, b: b};
+	});
 var elm_lang$parser$Parser$Advanced$mapChompedString = F2(
 	function (func, _n0) {
 		var parse = _n0.a;
@@ -4707,9 +4674,150 @@ var elm_lang$parser$Parser$Advanced$getChompedString = function (parser) {
 	return A2(elm_lang$parser$Parser$Advanced$mapChompedString, elm_lang$core$Basics$always, parser);
 };
 var elm_lang$parser$Parser$getChompedString = elm_lang$parser$Parser$Advanced$getChompedString;
-var author$project$MeenyLatex$ParserHelpers$parseUntil = function (marker) {
-	return elm_lang$parser$Parser$getChompedString(
-		elm_lang$parser$Parser$chompUntil(marker));
+var elm_lang$core$Basics$or = _Basics_or;
+var elm_lang$parser$Parser$Advanced$map2 = F3(
+	function (func, _n0, _n1) {
+		var parseA = _n0.a;
+		var parseB = _n1.a;
+		return elm_lang$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n2 = parseA(s0);
+				if (_n2.$ === 'Bad') {
+					var p = _n2.a;
+					var x = _n2.b;
+					return A2(elm_lang$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p1 = _n2.a;
+					var a = _n2.b;
+					var s1 = _n2.c;
+					var _n3 = parseB(s1);
+					if (_n3.$ === 'Bad') {
+						var p2 = _n3.a;
+						var x = _n3.b;
+						return A2(elm_lang$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _n3.a;
+						var b = _n3.b;
+						var s2 = _n3.c;
+						return A3(
+							elm_lang$parser$Parser$Advanced$Good,
+							p1 || p2,
+							A2(func, a, b),
+							s2);
+					}
+				}
+			});
+	});
+var elm_lang$parser$Parser$Advanced$ignorer = F2(
+	function (keepParser, ignoreParser) {
+		return A3(elm_lang$parser$Parser$Advanced$map2, elm_lang$core$Basics$always, keepParser, ignoreParser);
+	});
+var elm_lang$parser$Parser$ignorer = elm_lang$parser$Parser$Advanced$ignorer;
+var elm_lang$parser$Parser$Advanced$keeper = F2(
+	function (parseFunc, parseArg) {
+		return A3(elm_lang$parser$Parser$Advanced$map2, elm_lang$core$Basics$apL, parseFunc, parseArg);
+	});
+var elm_lang$parser$Parser$keeper = elm_lang$parser$Parser$Advanced$keeper;
+var elm_lang$parser$Parser$Advanced$map = F2(
+	function (func, _n0) {
+		var parse = _n0.a;
+		return elm_lang$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n1 = parse(s0);
+				if (_n1.$ === 'Good') {
+					var p = _n1.a;
+					var a = _n1.b;
+					var s1 = _n1.c;
+					return A3(
+						elm_lang$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _n1.a;
+					var x = _n1.b;
+					return A2(elm_lang$parser$Parser$Advanced$Bad, p, x);
+				}
+			});
+	});
+var elm_lang$parser$Parser$map = elm_lang$parser$Parser$Advanced$map;
+var elm_lang$core$Basics$False = {$: 'False'};
+var elm_lang$parser$Parser$Advanced$succeed = function (a) {
+	return elm_lang$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3(elm_lang$parser$Parser$Advanced$Good, false, a, s);
+		});
+};
+var elm_lang$parser$Parser$succeed = elm_lang$parser$Parser$Advanced$succeed;
+var elm_lang$parser$Parser$ExpectingSymbol = function (a) {
+	return {$: 'ExpectingSymbol', a: a};
+};
+var elm_lang$parser$Parser$Advanced$Token = F2(
+	function (a, b) {
+		return {$: 'Token', a: a, b: b};
+	});
+var elm_lang$core$Basics$not = _Basics_not;
+var elm_lang$core$String$isEmpty = function (string) {
+	return string === '';
+};
+var elm_lang$parser$Parser$Advanced$AddRight = F2(
+	function (a, b) {
+		return {$: 'AddRight', a: a, b: b};
+	});
+var elm_lang$parser$Parser$Advanced$Empty = {$: 'Empty'};
+var elm_lang$parser$Parser$Advanced$Problem = F4(
+	function (row, col, problem, contextStack) {
+		return {col: col, contextStack: contextStack, problem: problem, row: row};
+	});
+var elm_lang$parser$Parser$Advanced$fromState = F2(
+	function (s, x) {
+		return A2(
+			elm_lang$parser$Parser$Advanced$AddRight,
+			elm_lang$parser$Parser$Advanced$Empty,
+			A4(elm_lang$parser$Parser$Advanced$Problem, s.row, s.col, x, s.context));
+	});
+var elm_lang$parser$Parser$Advanced$isSubString = _Parser_isSubString;
+var elm_lang$parser$Parser$Advanced$token = function (_n0) {
+	var str = _n0.a;
+	var expecting = _n0.b;
+	var progress = !elm_lang$core$String$isEmpty(str);
+	return elm_lang$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _n1 = A5(elm_lang$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _n1.a;
+			var newRow = _n1.b;
+			var newCol = _n1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				elm_lang$parser$Parser$Advanced$Bad,
+				false,
+				A2(elm_lang$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				elm_lang$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var elm_lang$parser$Parser$Advanced$symbol = elm_lang$parser$Parser$Advanced$token;
+var elm_lang$parser$Parser$symbol = function (str) {
+	return elm_lang$parser$Parser$Advanced$symbol(
+		A2(
+			elm_lang$parser$Parser$Advanced$Token,
+			str,
+			elm_lang$parser$Parser$ExpectingSymbol(str)));
+};
+var author$project$MeenyLatex$ParserHelpers$parseTo = function (marker) {
+	return A2(
+		elm_lang$parser$Parser$map,
+		elm_lang$core$String$dropRight(
+			elm_lang$core$String$length(marker)),
+		elm_lang$parser$Parser$getChompedString(
+			A2(
+				elm_lang$parser$Parser$keeper,
+				elm_lang$parser$Parser$succeed(elm_lang$core$Basics$identity),
+				A2(
+					elm_lang$parser$Parser$ignorer,
+					elm_lang$parser$Parser$chompUntilEndOr(marker),
+					elm_lang$parser$Parser$symbol(marker)))));
 };
 var elm_lang$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
 var elm_lang$parser$Parser$Advanced$chompWhileHelp = F5(
@@ -4765,100 +4873,6 @@ var author$project$MeenyLatex$ParserHelpers$spaces = elm_lang$parser$Parser$chom
 			c,
 			_Utils_chr(' '));
 	});
-var elm_lang$core$Basics$or = _Basics_or;
-var elm_lang$parser$Parser$Advanced$map2 = F3(
-	function (func, _n0, _n1) {
-		var parseA = _n0.a;
-		var parseB = _n1.a;
-		return elm_lang$parser$Parser$Advanced$Parser(
-			function (s0) {
-				var _n2 = parseA(s0);
-				if (_n2.$ === 'Bad') {
-					var p = _n2.a;
-					var x = _n2.b;
-					return A2(elm_lang$parser$Parser$Advanced$Bad, p, x);
-				} else {
-					var p1 = _n2.a;
-					var a = _n2.b;
-					var s1 = _n2.c;
-					var _n3 = parseB(s1);
-					if (_n3.$ === 'Bad') {
-						var p2 = _n3.a;
-						var x = _n3.b;
-						return A2(elm_lang$parser$Parser$Advanced$Bad, p1 || p2, x);
-					} else {
-						var p2 = _n3.a;
-						var b = _n3.b;
-						var s2 = _n3.c;
-						return A3(
-							elm_lang$parser$Parser$Advanced$Good,
-							p1 || p2,
-							A2(func, a, b),
-							s2);
-					}
-				}
-			});
-	});
-var elm_lang$parser$Parser$Advanced$ignorer = F2(
-	function (keepParser, ignoreParser) {
-		return A3(elm_lang$parser$Parser$Advanced$map2, elm_lang$core$Basics$always, keepParser, ignoreParser);
-	});
-var elm_lang$parser$Parser$ignorer = elm_lang$parser$Parser$Advanced$ignorer;
-var elm_lang$parser$Parser$Advanced$keeper = F2(
-	function (parseFunc, parseArg) {
-		return A3(elm_lang$parser$Parser$Advanced$map2, elm_lang$core$Basics$apL, parseFunc, parseArg);
-	});
-var elm_lang$parser$Parser$keeper = elm_lang$parser$Parser$Advanced$keeper;
-var elm_lang$parser$Parser$Advanced$succeed = function (a) {
-	return elm_lang$parser$Parser$Advanced$Parser(
-		function (s) {
-			return A3(elm_lang$parser$Parser$Advanced$Good, false, a, s);
-		});
-};
-var elm_lang$parser$Parser$succeed = elm_lang$parser$Parser$Advanced$succeed;
-var elm_lang$parser$Parser$ExpectingSymbol = function (a) {
-	return {$: 'ExpectingSymbol', a: a};
-};
-var elm_lang$core$Basics$not = _Basics_not;
-var elm_lang$core$String$isEmpty = function (string) {
-	return string === '';
-};
-var elm_lang$parser$Parser$Advanced$fromState = F2(
-	function (s, x) {
-		return A2(
-			elm_lang$parser$Parser$Advanced$AddRight,
-			elm_lang$parser$Parser$Advanced$Empty,
-			A4(elm_lang$parser$Parser$Advanced$Problem, s.row, s.col, x, s.context));
-	});
-var elm_lang$parser$Parser$Advanced$isSubString = _Parser_isSubString;
-var elm_lang$parser$Parser$Advanced$token = function (_n0) {
-	var str = _n0.a;
-	var expecting = _n0.b;
-	var progress = !elm_lang$core$String$isEmpty(str);
-	return elm_lang$parser$Parser$Advanced$Parser(
-		function (s) {
-			var _n1 = A5(elm_lang$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
-			var newOffset = _n1.a;
-			var newRow = _n1.b;
-			var newCol = _n1.c;
-			return _Utils_eq(newOffset, -1) ? A2(
-				elm_lang$parser$Parser$Advanced$Bad,
-				false,
-				A2(elm_lang$parser$Parser$Advanced$fromState, s, expecting)) : A3(
-				elm_lang$parser$Parser$Advanced$Good,
-				progress,
-				_Utils_Tuple0,
-				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
-		});
-};
-var elm_lang$parser$Parser$Advanced$symbol = elm_lang$parser$Parser$Advanced$token;
-var elm_lang$parser$Parser$symbol = function (str) {
-	return elm_lang$parser$Parser$Advanced$symbol(
-		A2(
-			elm_lang$parser$Parser$Advanced$Token,
-			str,
-			elm_lang$parser$Parser$ExpectingSymbol(str)));
-};
 var author$project$MeenyLatex$Parser$envName = A2(
 	elm_lang$parser$Parser$keeper,
 	A2(
@@ -4868,7 +4882,7 @@ var author$project$MeenyLatex$Parser$envName = A2(
 			elm_lang$parser$Parser$succeed(elm_lang$core$Basics$identity),
 			author$project$MeenyLatex$ParserHelpers$spaces),
 		elm_lang$parser$Parser$symbol('\\begin{')),
-	author$project$MeenyLatex$ParserHelpers$parseUntil('}'));
+	author$project$MeenyLatex$ParserHelpers$parseTo('}'));
 var elm_lang$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4965,7 +4979,7 @@ var author$project$MeenyLatex$Parser$endWord = A2(
 		elm_lang$parser$Parser$symbol('\\end{')),
 	A2(
 		elm_lang$parser$Parser$ignorer,
-		author$project$MeenyLatex$ParserHelpers$parseUntil('}'),
+		author$project$MeenyLatex$ParserHelpers$parseTo('}'),
 		author$project$MeenyLatex$ParserHelpers$ws));
 var author$project$MeenyLatex$Paragraph$getEndArg = function (line) {
 	var parseResult = A2(elm_lang$parser$Parser$run, author$project$MeenyLatex$Parser$endWord, line);
@@ -5184,7 +5198,7 @@ var author$project$MeenyLatex$Parser$displayMathBrackets = A2(
 			elm_lang$parser$Parser$succeed(author$project$MeenyLatex$Parser$DisplayMath),
 			author$project$MeenyLatex$ParserHelpers$spaces),
 		elm_lang$parser$Parser$symbol('\\[')),
-	author$project$MeenyLatex$ParserHelpers$parseUntil('\\]'));
+	author$project$MeenyLatex$ParserHelpers$parseTo('\\]'));
 var author$project$MeenyLatex$Parser$displayMathDollar = A2(
 	elm_lang$parser$Parser$keeper,
 	A2(
@@ -5196,7 +5210,7 @@ var author$project$MeenyLatex$Parser$displayMathDollar = A2(
 		elm_lang$parser$Parser$symbol('$$')),
 	A2(
 		elm_lang$parser$Parser$ignorer,
-		author$project$MeenyLatex$ParserHelpers$parseUntil('$$'),
+		author$project$MeenyLatex$ParserHelpers$parseTo('$$'),
 		author$project$MeenyLatex$ParserHelpers$ws));
 var author$project$MeenyLatex$Parser$Environment = F3(
 	function (a, b, c) {
@@ -5218,7 +5232,7 @@ var author$project$MeenyLatex$Parser$inlineMath = function (wsParser) {
 			elm_lang$parser$Parser$symbol('$')),
 		A2(
 			elm_lang$parser$Parser$ignorer,
-			author$project$MeenyLatex$ParserHelpers$parseUntil('$'),
+			author$project$MeenyLatex$ParserHelpers$parseTo('$'),
 			wsParser));
 };
 var author$project$MeenyLatex$Parser$Macro = F3(
@@ -6060,29 +6074,6 @@ var elm_lang$parser$Parser$Done = function (a) {
 var elm_lang$parser$Parser$Loop = function (a) {
 	return {$: 'Loop', a: a};
 };
-var elm_lang$parser$Parser$Advanced$map = F2(
-	function (func, _n0) {
-		var parse = _n0.a;
-		return elm_lang$parser$Parser$Advanced$Parser(
-			function (s0) {
-				var _n1 = parse(s0);
-				if (_n1.$ === 'Good') {
-					var p = _n1.a;
-					var a = _n1.b;
-					var s1 = _n1.c;
-					return A3(
-						elm_lang$parser$Parser$Advanced$Good,
-						p,
-						func(a),
-						s1);
-				} else {
-					var p = _n1.a;
-					var x = _n1.b;
-					return A2(elm_lang$parser$Parser$Advanced$Bad, p, x);
-				}
-			});
-	});
-var elm_lang$parser$Parser$map = elm_lang$parser$Parser$Advanced$map;
 var elm_lang$parser$Parser$Advanced$Append = F2(
 	function (a, b) {
 		return {$: 'Append', a: a, b: b};
@@ -6271,7 +6262,7 @@ var author$project$MeenyLatex$ParserHelpers$specialWord = elm_lang$parser$Parser
 				})),
 		elm_lang$parser$Parser$chompWhile(author$project$MeenyLatex$ParserHelpers$notSpecialTableOrMacroCharacter)));
 var author$project$MeenyLatex$Parser$specialWords = author$project$MeenyLatex$Parser$genericWords(author$project$MeenyLatex$ParserHelpers$specialWord);
-var author$project$MeenyLatex$ParserHelpers$simpleItemListHelper = F2(
+var author$project$MeenyLatex$ParserHelpers$itemListHelper = F2(
 	function (itemParser, revItems) {
 		return elm_lang$parser$Parser$oneOf(
 			_List_fromArray(
@@ -6293,15 +6284,15 @@ var author$project$MeenyLatex$ParserHelpers$simpleItemListHelper = F2(
 					elm_lang$parser$Parser$succeed(_Utils_Tuple0))
 				]));
 	});
-var author$project$MeenyLatex$ParserHelpers$simpleItemList_ = F2(
+var author$project$MeenyLatex$ParserHelpers$itemList_ = F2(
 	function (initialList, itemParser) {
 		return A2(
 			elm_lang$parser$Parser$loop,
 			initialList,
-			author$project$MeenyLatex$ParserHelpers$simpleItemListHelper(itemParser));
+			author$project$MeenyLatex$ParserHelpers$itemListHelper(itemParser));
 	});
-var author$project$MeenyLatex$ParserHelpers$simpleItemList = function (itemParser) {
-	return A2(author$project$MeenyLatex$ParserHelpers$simpleItemList_, _List_Nil, itemParser);
+var author$project$MeenyLatex$ParserHelpers$itemList = function (itemParser) {
+	return A2(author$project$MeenyLatex$ParserHelpers$itemList_, _List_Nil, itemParser);
 };
 var author$project$MeenyLatex$Parser$optionalArg = A2(
 	elm_lang$parser$Parser$map,
@@ -6314,7 +6305,7 @@ var author$project$MeenyLatex$Parser$optionalArg = A2(
 			elm_lang$parser$Parser$symbol('[')),
 		A2(
 			elm_lang$parser$Parser$ignorer,
-			author$project$MeenyLatex$ParserHelpers$simpleItemList(
+			author$project$MeenyLatex$ParserHelpers$itemList(
 				elm_lang$parser$Parser$oneOf(
 					_List_fromArray(
 						[
@@ -6331,10 +6322,10 @@ var author$project$MeenyLatex$Parser$macro = function (wsParser) {
 				elm_lang$parser$Parser$keeper,
 				elm_lang$parser$Parser$succeed(author$project$MeenyLatex$Parser$Macro),
 				author$project$MeenyLatex$Parser$macroName),
-			author$project$MeenyLatex$ParserHelpers$simpleItemList(author$project$MeenyLatex$Parser$optionalArg)),
+			author$project$MeenyLatex$ParserHelpers$itemList(author$project$MeenyLatex$Parser$optionalArg)),
 		A2(
 			elm_lang$parser$Parser$ignorer,
-			author$project$MeenyLatex$ParserHelpers$simpleItemList(
+			author$project$MeenyLatex$ParserHelpers$itemList(
 				author$project$MeenyLatex$Parser$cyclic$arg()),
 			wsParser));
 };
@@ -6386,7 +6377,7 @@ var author$project$MeenyLatex$Parser$item = A2(
 			author$project$MeenyLatex$ParserHelpers$spaces),
 		A2(
 			elm_lang$parser$Parser$ignorer,
-			author$project$MeenyLatex$ParserHelpers$simpleItemList(
+			author$project$MeenyLatex$ParserHelpers$itemList(
 				elm_lang$parser$Parser$oneOf(
 					_List_fromArray(
 						[
@@ -6415,7 +6406,7 @@ var author$project$MeenyLatex$Parser$itemEnvironmentBody = F2(
 							elm_lang$parser$Parser$ignorer,
 							A2(
 								elm_lang$parser$Parser$ignorer,
-								author$project$MeenyLatex$ParserHelpers$simpleItemList(author$project$MeenyLatex$Parser$item),
+								author$project$MeenyLatex$ParserHelpers$itemList(author$project$MeenyLatex$Parser$item),
 								author$project$MeenyLatex$ParserHelpers$ws),
 							elm_lang$parser$Parser$symbol(endWoord)),
 						author$project$MeenyLatex$ParserHelpers$ws))));
@@ -6433,7 +6424,7 @@ var author$project$MeenyLatex$Parser$passThroughBody = F2(
 					elm_lang$parser$Parser$succeed(elm_lang$core$Basics$identity),
 					A2(
 						elm_lang$parser$Parser$ignorer,
-						author$project$MeenyLatex$ParserHelpers$parseUntil(endWoord),
+						author$project$MeenyLatex$ParserHelpers$parseTo(endWoord),
 						author$project$MeenyLatex$ParserHelpers$ws))));
 	});
 var author$project$MeenyLatex$ParserHelpers$notMacroArgWordCharacter = function (c) {
@@ -6478,7 +6469,7 @@ function author$project$MeenyLatex$Parser$cyclic$arg() {
 				elm_lang$parser$Parser$symbol('{')),
 			A2(
 				elm_lang$parser$Parser$ignorer,
-				author$project$MeenyLatex$ParserHelpers$simpleItemList(
+				author$project$MeenyLatex$ParserHelpers$itemList(
 					elm_lang$parser$Parser$oneOf(
 						_List_fromArray(
 							[
@@ -6588,12 +6579,12 @@ var author$project$MeenyLatex$Parser$tableRow = A2(
 						elm_lang$parser$Parser$symbol('\n'),
 						elm_lang$parser$Parser$symbol('\\\\\n')
 					])))));
-var author$project$MeenyLatex$ParserHelpers$simpleItemList1 = function (itemParser) {
+var author$project$MeenyLatex$ParserHelpers$nonEmptyItemList = function (itemParser) {
 	return A2(
 		elm_lang$parser$Parser$andThen,
 		function (x) {
 			return A2(
-				author$project$MeenyLatex$ParserHelpers$simpleItemList_,
+				author$project$MeenyLatex$ParserHelpers$itemList_,
 				_List_fromArray(
 					[x]),
 				itemParser);
@@ -6609,7 +6600,7 @@ var author$project$MeenyLatex$Parser$tableBody = A2(
 			elm_lang$parser$Parser$ignorer,
 			elm_lang$parser$Parser$succeed(elm_lang$core$Basics$identity),
 			author$project$MeenyLatex$ParserHelpers$ws),
-		author$project$MeenyLatex$ParserHelpers$simpleItemList1(author$project$MeenyLatex$Parser$tableRow)));
+		author$project$MeenyLatex$ParserHelpers$nonEmptyItemList(author$project$MeenyLatex$Parser$tableRow)));
 var author$project$MeenyLatex$Parser$tabularEnvironmentBody = F2(
 	function (endWoord, envType) {
 		return A2(
@@ -6621,7 +6612,7 @@ var author$project$MeenyLatex$Parser$tabularEnvironmentBody = F2(
 					elm_lang$parser$Parser$succeed(
 						author$project$MeenyLatex$Parser$Environment(envType)),
 					author$project$MeenyLatex$ParserHelpers$ws),
-				author$project$MeenyLatex$ParserHelpers$simpleItemList(author$project$MeenyLatex$Parser$arg)),
+				author$project$MeenyLatex$ParserHelpers$itemList(author$project$MeenyLatex$Parser$arg)),
 			A2(
 				elm_lang$parser$Parser$ignorer,
 				A2(
@@ -6690,7 +6681,7 @@ var author$project$MeenyLatex$Parser$standardEnvironmentBody = F2(
 							elm_lang$parser$Parser$ignorer,
 							A2(
 								elm_lang$parser$Parser$ignorer,
-								author$project$MeenyLatex$ParserHelpers$simpleItemList(
+								author$project$MeenyLatex$ParserHelpers$itemList(
 									author$project$MeenyLatex$Parser$cyclic$latexExpression()),
 								author$project$MeenyLatex$ParserHelpers$ws),
 							elm_lang$parser$Parser$symbol(endWoord)),
@@ -6761,7 +6752,7 @@ var author$project$MeenyLatex$Parser$smacroBody = A2(
 			author$project$MeenyLatex$ParserHelpers$spaces),
 		A2(
 			elm_lang$parser$Parser$ignorer,
-			author$project$MeenyLatex$ParserHelpers$simpleItemList1(
+			author$project$MeenyLatex$ParserHelpers$nonEmptyItemList(
 				elm_lang$parser$Parser$oneOf(
 					_List_fromArray(
 						[
@@ -6794,11 +6785,55 @@ var author$project$MeenyLatex$Parser$smacro = A2(
 				elm_lang$parser$Parser$keeper,
 				elm_lang$parser$Parser$succeed(author$project$MeenyLatex$Parser$SMacro),
 				author$project$MeenyLatex$Parser$smacroName),
-			author$project$MeenyLatex$ParserHelpers$simpleItemList(author$project$MeenyLatex$Parser$optionalArg)),
-		author$project$MeenyLatex$ParserHelpers$simpleItemList(author$project$MeenyLatex$Parser$arg)),
+			author$project$MeenyLatex$ParserHelpers$itemList(author$project$MeenyLatex$Parser$optionalArg)),
+		author$project$MeenyLatex$ParserHelpers$itemList(author$project$MeenyLatex$Parser$arg)),
 	author$project$MeenyLatex$Parser$smacroBody);
 var author$project$MeenyLatex$Parser$Comment = function (a) {
 	return {$: 'Comment', a: a};
+};
+var elm_lang$parser$Parser$Expecting = function (a) {
+	return {$: 'Expecting', a: a};
+};
+var elm_lang$parser$Parser$toToken = function (str) {
+	return A2(
+		elm_lang$parser$Parser$Advanced$Token,
+		str,
+		elm_lang$parser$Parser$Expecting(str));
+};
+var elm_lang$parser$Parser$Advanced$findSubString = _Parser_findSubString;
+var elm_lang$parser$Parser$Advanced$fromInfo = F4(
+	function (row, col, x, context) {
+		return A2(
+			elm_lang$parser$Parser$Advanced$AddRight,
+			elm_lang$parser$Parser$Advanced$Empty,
+			A4(elm_lang$parser$Parser$Advanced$Problem, row, col, x, context));
+	});
+var elm_lang$parser$Parser$Advanced$chompUntil = function (_n0) {
+	var str = _n0.a;
+	var expecting = _n0.b;
+	return elm_lang$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _n1 = A5(elm_lang$parser$Parser$Advanced$findSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _n1.a;
+			var newRow = _n1.b;
+			var newCol = _n1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				elm_lang$parser$Parser$Advanced$Bad,
+				false,
+				A4(elm_lang$parser$Parser$Advanced$fromInfo, newRow, newCol, expecting, s.context)) : A3(
+				elm_lang$parser$Parser$Advanced$Good,
+				_Utils_cmp(s.offset, newOffset) < 0,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var elm_lang$parser$Parser$chompUntil = function (str) {
+	return elm_lang$parser$Parser$Advanced$chompUntil(
+		elm_lang$parser$Parser$toToken(str));
+};
+var author$project$MeenyLatex$ParserHelpers$parseUntil = function (marker) {
+	return elm_lang$parser$Parser$getChompedString(
+		elm_lang$parser$Parser$chompUntil(marker));
 };
 var author$project$MeenyLatex$ParserHelpers$parseFromTo = F2(
 	function (startString, endString) {
@@ -6857,7 +6892,7 @@ var author$project$MeenyLatex$Parser$latexList = A2(
 			elm_lang$parser$Parser$ignorer,
 			elm_lang$parser$Parser$succeed(elm_lang$core$Basics$identity),
 			author$project$MeenyLatex$ParserHelpers$ws),
-		author$project$MeenyLatex$ParserHelpers$simpleItemList1(author$project$MeenyLatex$Parser$latexExpression)));
+		author$project$MeenyLatex$ParserHelpers$nonEmptyItemList(author$project$MeenyLatex$Parser$latexExpression)));
 var author$project$MeenyLatex$Parser$parse = function (text) {
 	var expr = A2(elm_lang$parser$Parser$run, author$project$MeenyLatex$Parser$latexList, text);
 	if (expr.$ === 'Ok') {
@@ -7506,7 +7541,6 @@ var elm_lang$core$String$left = F2(
 		return (n < 1) ? '' : A3(elm_lang$core$String$slice, 0, n, string);
 	});
 var author$project$MeenyLatex$JoinStrings$firstChar = elm_lang$core$String$left(1);
-var elm_lang$core$String$length = _String_length;
 var elm_lang$core$String$right = F2(
 	function (n, string) {
 		return (n < 1) ? '' : A3(

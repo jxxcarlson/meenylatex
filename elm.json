@@ -23,7 +23,8 @@
         "elm-lang/json" : "1.0.0",
         "elm-lang/random" : "1.0.0",
         "elm-lang/html" : "3.0.0",
-        "elm-lang/browser" : "1.0.0"
+        "elm-lang/browser" : "1.0.0",
+        "elm-community/list-extra" : "9.0.0"
 
     },
     "test-dependencies": {},

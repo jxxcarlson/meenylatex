@@ -1,54 +1,38 @@
-{- TEST 1
-
-   Hi Evan, there is some kind of weird intereaction going on
-   inside of
-
-   ```
-   latexExpression : Parser LatexExpression
-   latexExpression =
-       oneOf
-           [  lazy (\_ -> environment)  -- (1)
-           ,  inlineMath ws             -- (2)
-           ,  words                     -- (3)
-           ]
-   ```
-
-   If 1,2,3 are active, the commands
-
-       > run environment env1
-       > run environtment env2
-
-       where env1 = "\\begin{th}$a^2 = b^3$\\end{th}"
-       and env2 = "\\begin{th}\nIt's all gonna be OK!\n\\end{th}"
-
-   blow the stack. But the commands
-
-       > run latexExpression "$a^2 = b^3$"
-       > run latexExpression "one two three"
-
-
-   succeed. If 1,2 are active, then `run environment env1`
-   command works  -- weird.
-
-   To the extent that I've been able to fix problems,
-   they have all had to do with the diffrence between\
-   chomping _up to_ a string versus chomping _up through_
-   a string.  Here I don't see what is going on.
--}
-
-
 module Test2 exposing (..)
 
 import Parser exposing (..)
+import List.Extra
+
+
+{-
+
+   > run latexList "$1$ $2$\\begin{a}\\begin{b}$11$\\end{b}\\end{a}$3$"
+   Ok (LatexList ([InlineMath "1",InlineMath "2",Environment "a" [] (LatexList ([Environment "b" [] (LatexList ([InlineMath "11"]))])),InlineMath "3"]))
+
+-}
+
+
+getCharAt : Int -> String -> Maybe String
+getCharAt index str =
+    str |> String.split "" |> List.Extra.getAt index
+
+
+latexList : Parser LatexExpression
+latexList =
+    (succeed identity
+        |. ws
+        |= itemList latexExpression
+        |> map LatexList
+    )
 
 
 latexExpression : Parser LatexExpression
 latexExpression =
     oneOf
-        [ lazy (\_ -> environment)
-        , inlineMath ws
+        [ inlineMath ws
+        , lazy (\_ -> environment)
 
-        -- , words
+        --, words
         ]
 
 
@@ -97,12 +81,12 @@ inlineMath wsParser =
 {- WORDS -}
 
 
-word : Parser String
-word =
+word : (Char -> Bool) -> Parser String
+word inWord =
     getChompedString <|
         succeed ()
             |. chompIf (\c -> Char.isAlphaNum c)
-            |. chompWhile notSpecialCharacter
+            |. chompWhile inWord
 
 
 notSpecialCharacter : Char -> Bool
@@ -115,7 +99,7 @@ words =
     ws
         |> andThen
             (\_ ->
-                itemListWithSeparator ws word
+                itemListWithSeparator ws (word notSpecialCharacter)
                     |> map (String.join " ")
                     |> map LXString
             )
@@ -127,7 +111,8 @@ words =
 
 environment : Parser LatexExpression
 environment =
-    lazy (\_ -> envName |> andThen environmentOfType)
+    -- vvv lazy??
+    envName |> andThen environmentOfType
 
 
 envName : Parser String
@@ -180,6 +165,12 @@ parseTo marker =
 
 
 {- ITEM LIST -}
+
+
+nonEmptyItemList : Parser a -> Parser (List a)
+nonEmptyItemList itemParser =
+    itemParser
+        |> andThen (\x -> (itemList_ [ x ] itemParser))
 
 
 itemList : Parser a -> Parser (List a)

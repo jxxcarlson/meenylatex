@@ -72,9 +72,27 @@ defaultLatexExpression =
 
 words : Parser LatexExpression
 words =
-    itemListWithSeparator ws word
+    succeed identity
+        |. ws
+        |= words_
+        |. ws
+
+
+words_ =
+    nonEmptyItemList (word_ notSpaceOrSpecialCharacters)
         |> map (String.join " ")
         |> map LXString
+
+
+
+{-
+   words : Parser LatexExpression
+   words =
+       itemListWithSeparator ws word
+           |> map (String.join " ")
+           |> map LXString
+
+-}
 
 
 {-| Like `words`, but after a word is recognized spaces, not spaces + newlines are consumed

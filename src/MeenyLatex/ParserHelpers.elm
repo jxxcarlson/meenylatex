@@ -13,6 +13,7 @@ module MeenyLatex.ParserHelpers
         , specialWord
         , macroArgWord
         , transformWords
+        , notSpaceOrSpecialCharacters
         )
 
 import Parser exposing (..)
@@ -125,7 +126,7 @@ word =
     getChompedString <|
         succeed ()
             |. chompIf (\c -> Char.isAlphaNum c)
-            |. chompWhile notSpecialCharacter
+            |. chompWhile notSpaceOrSpecialCharacters
 
 
 {-| Like `word`, but after a word is recognized spaces, not spaces + newlines are consumed
@@ -156,8 +157,8 @@ notMacroArgWordCharacter c =
     not (c == '}' || c == ' ' || c == '\n')
 
 
-notSpecialCharacter : Char -> Bool
-notSpecialCharacter c =
+notSpaceOrSpecialCharacters : Char -> Bool
+notSpaceOrSpecialCharacters c =
     not (c == ' ' || c == '\n' || c == '\\' || c == '$')
 
 

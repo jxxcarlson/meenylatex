@@ -6117,8 +6117,8 @@ var elm_lang$parser$Parser$Advanced$oneOf = function (parsers) {
 		});
 };
 var elm_lang$parser$Parser$oneOf = elm_lang$parser$Parser$Advanced$oneOf;
-var author$project$MeenyLatex$Parser$wordListHelp = F2(
-	function (wordParser, revWords) {
+var author$project$MeenyLatex$ParserHelpers$itemListWithSeparatorHelper = F3(
+	function (separatorParser, itemParser, revItems) {
 		return elm_lang$parser$Parser$oneOf(
 			_List_fromArray(
 				[
@@ -6127,14 +6127,14 @@ var author$project$MeenyLatex$Parser$wordListHelp = F2(
 					elm_lang$parser$Parser$succeed(
 						function (w) {
 							return elm_lang$parser$Parser$Loop(
-								A2(elm_lang$core$List$cons, w, revWords));
+								A2(elm_lang$core$List$cons, w, revItems));
 						}),
-					A2(elm_lang$parser$Parser$ignorer, wordParser, author$project$MeenyLatex$ParserHelpers$spaces)),
+					A2(elm_lang$parser$Parser$ignorer, itemParser, separatorParser)),
 					A2(
 					elm_lang$parser$Parser$map,
 					function (_n0) {
 						return elm_lang$parser$Parser$Done(
-							elm_lang$core$List$reverse(revWords));
+							elm_lang$core$List$reverse(revItems));
 					},
 					elm_lang$parser$Parser$succeed(_Utils_Tuple0))
 				]));
@@ -6195,21 +6195,13 @@ var elm_lang$parser$Parser$loop = F2(
 					callback(s));
 			});
 	});
-var author$project$MeenyLatex$Parser$wordList = function (wordParser) {
-	return A2(
-		elm_lang$parser$Parser$loop,
-		_List_Nil,
-		author$project$MeenyLatex$Parser$wordListHelp(wordParser));
-};
-var author$project$MeenyLatex$Parser$genericWords = function (wordParser) {
-	return A2(
-		elm_lang$parser$Parser$map,
-		author$project$MeenyLatex$Parser$LXString,
-		A2(
-			elm_lang$parser$Parser$map,
-			elm_lang$core$String$join(' '),
-			author$project$MeenyLatex$Parser$wordList(wordParser)));
-};
+var author$project$MeenyLatex$ParserHelpers$itemListWithSeparator = F2(
+	function (separatorParser, itemParser) {
+		return A2(
+			elm_lang$parser$Parser$loop,
+			_List_Nil,
+			A2(author$project$MeenyLatex$ParserHelpers$itemListWithSeparatorHelper, separatorParser, itemParser));
+	});
 var author$project$MeenyLatex$ParserHelpers$notSpecialTableOrMacroCharacter = function (c) {
 	return !(_Utils_eq(
 		c,
@@ -6261,7 +6253,13 @@ var author$project$MeenyLatex$ParserHelpers$specialWord = elm_lang$parser$Parser
 					return elm_lang$core$Char$isAlphaNum(c);
 				})),
 		elm_lang$parser$Parser$chompWhile(author$project$MeenyLatex$ParserHelpers$notSpecialTableOrMacroCharacter)));
-var author$project$MeenyLatex$Parser$specialWords = author$project$MeenyLatex$Parser$genericWords(author$project$MeenyLatex$ParserHelpers$specialWord);
+var author$project$MeenyLatex$Parser$specialWords = A2(
+	elm_lang$parser$Parser$map,
+	author$project$MeenyLatex$Parser$LXString,
+	A2(
+		elm_lang$parser$Parser$map,
+		elm_lang$core$String$join(' '),
+		A2(author$project$MeenyLatex$ParserHelpers$itemListWithSeparator, author$project$MeenyLatex$ParserHelpers$ws, author$project$MeenyLatex$ParserHelpers$specialWord)));
 var author$project$MeenyLatex$ParserHelpers$itemListHelper = F2(
 	function (itemParser, revItems) {
 		return elm_lang$parser$Parser$oneOf(
@@ -6329,7 +6327,50 @@ var author$project$MeenyLatex$Parser$macro = function (wsParser) {
 				author$project$MeenyLatex$Parser$cyclic$arg()),
 			wsParser));
 };
-var author$project$MeenyLatex$ParserHelpers$notSpecialCharacter = function (c) {
+var elm_lang$parser$Parser$Advanced$andThen = F2(
+	function (callback, _n0) {
+		var parseA = _n0.a;
+		return elm_lang$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n1 = parseA(s0);
+				if (_n1.$ === 'Bad') {
+					var p = _n1.a;
+					var x = _n1.b;
+					return A2(elm_lang$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p1 = _n1.a;
+					var a = _n1.b;
+					var s1 = _n1.c;
+					var _n2 = callback(a);
+					var parseB = _n2.a;
+					var _n3 = parseB(s1);
+					if (_n3.$ === 'Bad') {
+						var p2 = _n3.a;
+						var x = _n3.b;
+						return A2(elm_lang$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _n3.a;
+						var b = _n3.b;
+						var s2 = _n3.c;
+						return A3(elm_lang$parser$Parser$Advanced$Good, p1 || p2, b, s2);
+					}
+				}
+			});
+	});
+var elm_lang$parser$Parser$andThen = elm_lang$parser$Parser$Advanced$andThen;
+var author$project$MeenyLatex$ParserHelpers$nonEmptyItemList = function (itemParser) {
+	return A2(
+		elm_lang$parser$Parser$andThen,
+		function (x) {
+			return A2(
+				author$project$MeenyLatex$ParserHelpers$itemList_,
+				_List_fromArray(
+					[x]),
+				itemParser);
+		},
+		itemParser);
+};
+var author$project$MeenyLatex$ParserHelpers$notSpaceOrSpecialCharacters = function (c) {
 	return !(_Utils_eq(
 		c,
 		_Utils_chr(' ')) || (_Utils_eq(
@@ -6340,18 +6381,34 @@ var author$project$MeenyLatex$ParserHelpers$notSpecialCharacter = function (c) {
 		c,
 		_Utils_chr('$')))));
 };
-var author$project$MeenyLatex$ParserHelpers$word = elm_lang$parser$Parser$getChompedString(
-	A2(
-		elm_lang$parser$Parser$ignorer,
+var author$project$MeenyLatex$ParserHelpers$word_ = function (inWord) {
+	return elm_lang$parser$Parser$getChompedString(
 		A2(
 			elm_lang$parser$Parser$ignorer,
-			elm_lang$parser$Parser$succeed(_Utils_Tuple0),
-			elm_lang$parser$Parser$chompIf(
-				function (c) {
-					return elm_lang$core$Char$isAlphaNum(c);
-				})),
-		elm_lang$parser$Parser$chompWhile(author$project$MeenyLatex$ParserHelpers$notSpecialCharacter)));
-var author$project$MeenyLatex$Parser$words = author$project$MeenyLatex$Parser$genericWords(author$project$MeenyLatex$ParserHelpers$word);
+			A2(
+				elm_lang$parser$Parser$ignorer,
+				elm_lang$parser$Parser$succeed(_Utils_Tuple0),
+				elm_lang$parser$Parser$chompIf(
+					function (c) {
+						return elm_lang$core$Char$isAlphaNum(c);
+					})),
+			elm_lang$parser$Parser$chompWhile(inWord)));
+};
+var author$project$MeenyLatex$Parser$words_ = A2(
+	elm_lang$parser$Parser$map,
+	author$project$MeenyLatex$Parser$LXString,
+	A2(
+		elm_lang$parser$Parser$map,
+		elm_lang$core$String$join(' '),
+		author$project$MeenyLatex$ParserHelpers$nonEmptyItemList(
+			author$project$MeenyLatex$ParserHelpers$word_(author$project$MeenyLatex$ParserHelpers$notSpaceOrSpecialCharacters))));
+var author$project$MeenyLatex$Parser$words = A2(
+	elm_lang$parser$Parser$keeper,
+	A2(
+		elm_lang$parser$Parser$ignorer,
+		elm_lang$parser$Parser$succeed(elm_lang$core$Basics$identity),
+		author$project$MeenyLatex$ParserHelpers$ws),
+	A2(elm_lang$parser$Parser$ignorer, author$project$MeenyLatex$Parser$words_, author$project$MeenyLatex$ParserHelpers$ws));
 var author$project$MeenyLatex$Parser$item = A2(
 	elm_lang$parser$Parser$map,
 	function (x) {
@@ -6447,7 +6504,13 @@ var author$project$MeenyLatex$ParserHelpers$macroArgWord = elm_lang$parser$Parse
 					return elm_lang$core$Char$isAlphaNum(c);
 				})),
 		elm_lang$parser$Parser$chompWhile(author$project$MeenyLatex$ParserHelpers$notMacroArgWordCharacter)));
-var author$project$MeenyLatex$Parser$macroArgWords = author$project$MeenyLatex$Parser$genericWords(author$project$MeenyLatex$ParserHelpers$macroArgWord);
+var author$project$MeenyLatex$Parser$macroArgWords = A2(
+	elm_lang$parser$Parser$map,
+	author$project$MeenyLatex$Parser$LXString,
+	A2(
+		elm_lang$parser$Parser$map,
+		elm_lang$core$String$join(' '),
+		A2(author$project$MeenyLatex$ParserHelpers$itemListWithSeparator, author$project$MeenyLatex$ParserHelpers$ws, author$project$MeenyLatex$ParserHelpers$macroArgWord)));
 var elm_lang$parser$Parser$Advanced$lazy = function (thunk) {
 	return elm_lang$parser$Parser$Advanced$Parser(
 		function (s) {
@@ -6505,37 +6568,6 @@ var author$project$MeenyLatex$Parser$nextCell = A2(
 			elm_lang$parser$Parser$symbol('&')),
 		author$project$MeenyLatex$ParserHelpers$spaces),
 	author$project$MeenyLatex$Parser$tableCell);
-var elm_lang$parser$Parser$Advanced$andThen = F2(
-	function (callback, _n0) {
-		var parseA = _n0.a;
-		return elm_lang$parser$Parser$Advanced$Parser(
-			function (s0) {
-				var _n1 = parseA(s0);
-				if (_n1.$ === 'Bad') {
-					var p = _n1.a;
-					var x = _n1.b;
-					return A2(elm_lang$parser$Parser$Advanced$Bad, p, x);
-				} else {
-					var p1 = _n1.a;
-					var a = _n1.b;
-					var s1 = _n1.c;
-					var _n2 = callback(a);
-					var parseB = _n2.a;
-					var _n3 = parseB(s1);
-					if (_n3.$ === 'Bad') {
-						var p2 = _n3.a;
-						var x = _n3.b;
-						return A2(elm_lang$parser$Parser$Advanced$Bad, p1 || p2, x);
-					} else {
-						var p2 = _n3.a;
-						var b = _n3.b;
-						var s2 = _n3.c;
-						return A3(elm_lang$parser$Parser$Advanced$Good, p1 || p2, b, s2);
-					}
-				}
-			});
-	});
-var elm_lang$parser$Parser$andThen = elm_lang$parser$Parser$Advanced$andThen;
 var author$project$MeenyLatex$Parser$tableCellHelp = function (revCells) {
 	return elm_lang$parser$Parser$oneOf(
 		_List_fromArray(
@@ -6579,18 +6611,6 @@ var author$project$MeenyLatex$Parser$tableRow = A2(
 						elm_lang$parser$Parser$symbol('\n'),
 						elm_lang$parser$Parser$symbol('\\\\\n')
 					])))));
-var author$project$MeenyLatex$ParserHelpers$nonEmptyItemList = function (itemParser) {
-	return A2(
-		elm_lang$parser$Parser$andThen,
-		function (x) {
-			return A2(
-				author$project$MeenyLatex$ParserHelpers$itemList_,
-				_List_fromArray(
-					[x]),
-				itemParser);
-		},
-		itemParser);
-};
 var author$project$MeenyLatex$Parser$tableBody = A2(
 	elm_lang$parser$Parser$map,
 	author$project$MeenyLatex$Parser$LatexList,

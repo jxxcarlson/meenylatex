@@ -1,13 +1,4 @@
-module MeenyLatex.Parser
-    exposing
-        ( LatexExpression(..)
-        , macro
-        , parse
-        , endWord
-        , envName
-        , defaultLatexList
-        , latexList
-        )
+module MeenyLatex.Parser exposing (..)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -17,6 +8,16 @@ module MeenyLatex.Parser
 @docs LatexExpression, macro, parse, defaultLatexList, latexList, endWord, envName
 
 -}
+
+-- exposing
+--     ( LatexExpression(..)
+--     , macro
+--     , parse
+--     , endWord
+--     , envName
+--     , defaultLatexList
+--     , latexList
+--     )
 
 import Dict
 import MeenyLatex.ParserHelpers as PH exposing (..)
@@ -66,6 +67,35 @@ parse text =
                 [ LXString "yada!" ]
 
 
+{-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
+-}
+latexList : Parser LatexExpression
+latexList =
+    -- inContext "latexList" <|
+    (succeed identity
+        |. ws
+        |= nonEmptyItemList latexExpression
+        |> map LatexList
+    )
+
+
+{-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment\ |\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
+-}
+latexExpression : Parser LatexExpression
+latexExpression =
+    oneOf
+        [ texComment
+        , displayMathDollar
+        , displayMathBrackets
+        , inlineMath ws
+        , macro ws
+
+        -- , smacro
+        , words
+        , lazy (\_ -> environment)
+        ]
+
+
 {-| A default value of type LatexExpression
 -}
 defaultLatexList : LatexExpression
@@ -91,41 +121,36 @@ words =
 
 
 words_ =
-    nonEmptyItemList (word_ notSpaceOrSpecialCharacters)
+    nonEmptyItemList (word notSpaceOrSpecialCharacters)
         |> map (String.join " ")
         |> map LXString
-
-
-
-{-
-   words : Parser LatexExpression
-   words =
-       itemListWithSeparator ws word
-           |> map (String.join " ")
-           |> map LXString
-
--}
 
 
 {-| Like `words`, but after a word is recognized spaces, not spaces + newlines are consumed
 -}
 specialWords : Parser LatexExpression
 specialWords =
-    itemListWithSeparator ws specialWord
+    nonEmptyItemList specialWord
         |> map (String.join " ")
         |> map LXString
 
 
 macroArgWords : Parser LatexExpression
 macroArgWords =
-    itemListWithSeparator ws macroArgWord
+    nonEmptyItemList macroArgWord
         |> map (String.join " ")
         |> map LXString
 
 
 texComment : Parser LatexExpression
 texComment =
-    parseFromTo "%" "\n"
+    (getChompedString <|
+        succeed ()
+            |. chompIf (\c -> c == '%')
+            |. chompWhile (\c -> c /= '\n')
+            |. chompIf (\c -> c == '\n')
+            |. ws
+    )
         |> map Comment
 
 
@@ -172,7 +197,8 @@ arg =
     -- inContext "arg" <|
     (succeed identity
         |. symbol "{"
-        |= itemList (oneOf [ macroArgWords, inlineMath PH.spaces, lazy (\_ -> macro ws) ])
+        |= itemList (oneOf [ macroArgWords, inlineMath PH.spaces ])
+        -- |= itemList (oneOf [ macroArgWords, inlineMath PH.spaces, lazy (\_ -> macro ws) ])
         |. symbol "}"
         |> map LatexList
     )
@@ -218,43 +244,11 @@ smacroBody =
 
 
 {- Latex List and Expression -}
-
-
-{-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
--}
-latexList : Parser LatexExpression
-latexList =
-    -- inContext "latexList" <|
-    (succeed identity
-        |. ws
-        |= nonEmptyItemList latexExpression
-        |> map LatexList
-    )
-
-
-{-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment\ |\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
--}
-latexExpression : Parser LatexExpression
-latexExpression =
-    oneOf
-        [ texComment
-        , lazy (\_ -> environment)
-        , displayMathDollar
-        , displayMathBrackets
-        , inlineMath ws
-        , macro ws
-        , smacro
-        , words
-        ]
-
-
-
 {- MATHEMATICAL TEXT -}
 
 
 inlineMath : Parser () -> Parser LatexExpression
 inlineMath wsParser =
-    -- inContext "inline math" <|
     succeed InlineMath
         |. symbol "$"
         |= parseTo "$"
@@ -280,16 +274,6 @@ displayMathBrackets =
         |= parseTo "\\]"
 
 
-
-{- ENVIRONMENTS -}
-
-
-environment : Parser LatexExpression
-environment =
-    -- inContext "environment" <|
-    lazy (\_ -> envName |> andThen environmentOfType)
-
-
 {-| Capture the name of the environment in
 a \begin{ENV} ... \end{ENV}
 pair
@@ -302,6 +286,29 @@ envName =
         |. symbol "\\begin{"
         |= parseTo "}"
     )
+
+
+{-| Use to parse begin ... end blocks
+-}
+endWord : Parser String
+endWord =
+    (succeed identity
+        |. PH.spaces
+        |. symbol "\\end{"
+        |= parseTo "}"
+        |. ws
+    )
+
+
+
+{- ENVIRONMENTS -}
+
+
+environment : Parser LatexExpression
+environment =
+    -- inContext "environment" <|
+    -- lazy (\_ -> envName |> andThen environmentOfType)
+    envName |> andThen environmentOfType
 
 
 environmentOfType : String -> Parser LatexExpression
@@ -317,34 +324,34 @@ environmentOfType envType =
             else
                 envType
     in
-        environmentParser envKind theEndWord envType
-
-
-{-| Use to parse begin ... end blocks
--}
-endWord : Parser String
-endWord =
-    -- inContext "endWord" <|
-    (succeed identity
-        |. PH.spaces
-        |. symbol "\\end{"
-        |= parseTo "}"
-        |. ws
-    )
+        standardEnvironmentBody theEndWord envType
 
 
 
+--
+-- environmentParser2 : String -> String -> Parser LatexExpression
+-- environmentParser2 endWord_ envType =
+--     (succeed identity
+--         |. ws
+--         |= itemList latexExpression
+--         |. ws
+--         |. symbol endWord_
+--         |. ws
+--         |> map LatexList
+--         |> map (Environment envType [])
+--     )
+--
 {- DISPATCHER AND SUBPARSERS -}
 
 
 environmentParser : String -> String -> String -> Parser LatexExpression
-environmentParser name =
-    case Dict.get name parseEnvironmentDict of
+environmentParser envKind theEndWord envType =
+    case Dict.get envKind parseEnvironmentDict of
         Just p ->
-            p
+            p theEndWord envType
 
         Nothing ->
-            standardEnvironmentBody
+            standardEnvironmentBody theEndWord envType
 
 
 parseEnvironmentDict : Dict.Dict String (String -> String -> Parser LatexExpression)
@@ -359,10 +366,9 @@ parseEnvironmentDict =
 
 standardEnvironmentBody : String -> String -> Parser LatexExpression
 standardEnvironmentBody endWoord envType =
-    --  inContext "standardEnvironmentBody" <|
     (succeed identity
         |. ws
-        |= itemList latexExpression
+        |= nonEmptyItemList latexExpression
         |. ws
         |. symbol endWoord
         |. ws

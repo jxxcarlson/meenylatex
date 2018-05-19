@@ -34,32 +34,47 @@ latexExpression =
 {- SOME TEST DATA -}
 
 
-test1 =
+testWords =
     "This is a test."
 
 
-test2 =
+testInlineMath =
     "$a^2 + b^2 = c^2$"
 
 
-test3 =
+testWordsAndMath =
     "Pythagoras said that $a^2 + b^2 = c^2$.  Yay!"
 
 
-test4 =
+testEnvironmentAndMath =
     "\\begin{th}$a^2 = b^3$\\end{th}"
 
 
-test5 =
+testNestedEnvironmentAndMath =
     "\\begin{A}\\begin{B}$a^2 = b^3$\\end{B}\\end{A}"
 
 
-test6 =
-    "\\begin{A}$y^h = 4$\\begin{B}$a^2 = b^3$\\end{B}\\end{A}"
+testNestedEnvironmentAndWordsWithMath =
+    "\\begin{A}$y^h = 4$\\begin{B}This is a formula: $a^2 = b^3$\\end{B}\\end{A}"
 
 
-test7 =
+testNestedEnvironmentWithWords =
     "\\begin{th}\n\nIt's gonna be OK!\n\n\\end{th}"
+
+
+tests =
+    [ testWords
+    , testInlineMath
+    , testWordsAndMath
+    , testEnvironmentAndMath
+    , testNestedEnvironmentAndMath
+    , testNestedEnvironmentAndWordsWithMath
+    , testNestedEnvironmentWithWords
+    ]
+
+
+runTests tests =
+    tests |> List.map (Parser.run latexList test)
 
 
 

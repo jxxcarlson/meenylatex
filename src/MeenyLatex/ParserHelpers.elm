@@ -1,20 +1,20 @@
-module MeenyLatex.ParserHelpers
-    exposing
-        ( spaces
-        , ws
-        , parseUntil
-        , parseTo
-        , parseFromTo
-        , nonEmptyItemList
-        , itemList
-        , itemListWithSeparator
-        , word_
-        , word
-        , specialWord
-        , macroArgWord
-        , transformWords
-        , notSpaceOrSpecialCharacters
-        )
+module MeenyLatex.ParserHelpers exposing (..)
+
+-- exposing
+--     ( spaces
+--     , ws
+--     , parseUntil
+--     , parseTo
+--     , parseFromTo
+--     , nonEmptyItemList
+--     , itemList
+--     , itemListWithSeparator
+--     , word
+--     , specialWord
+--     , macroArgWord
+--     , transformWords
+--     , notSpaceOrSpecialCharacters
+--     )
 
 import Parser exposing (..)
 
@@ -113,32 +113,20 @@ itemListWithSeparatorHelper separatorParser itemParser revItems =
         ]
 
 
-word_ : (Char -> Bool) -> Parser String
-word_ inWord =
-    getChompedString <|
-        succeed ()
-            |. chompIf (\c -> Char.isAlphaNum c)
-            |. chompWhile inWord
-
-
-word : Parser String
-word =
-    getChompedString <|
-        succeed ()
-            |. chompIf (\c -> Char.isAlphaNum c)
-            |. chompWhile notSpaceOrSpecialCharacters
+word : (Char -> Bool) -> Parser String
+word inWord =
+    succeed String.slice
+        |. ws
+        |= getOffset
+        |. chompIf inWord
+        |. chompWhile inWord
+        |. ws
+        |= getOffset
+        |= getSource
 
 
 {-| Like `word`, but after a word is recognized spaces, not spaces + newlines are consumed
 -}
-specialWord : Parser String
-specialWord =
-    getChompedString <|
-        succeed ()
-            |. chompIf (\c -> Char.isAlphaNum c)
-            |. chompWhile notSpecialTableOrMacroCharacter
-
-
 notSpecialTableOrMacroCharacter : Char -> Bool
 notSpecialTableOrMacroCharacter c =
     not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == ']' || c == '&')
@@ -146,15 +134,17 @@ notSpecialTableOrMacroCharacter c =
 
 macroArgWord : Parser String
 macroArgWord =
-    getChompedString <|
-        succeed ()
-            |. chompIf (\c -> Char.isAlphaNum c)
-            |. chompWhile notMacroArgWordCharacter
+    word notMacroArgWordCharacter
+
+
+specialWord : Parser String
+specialWord =
+    word notSpecialTableOrMacroCharacter
 
 
 notMacroArgWordCharacter : Char -> Bool
 notMacroArgWordCharacter c =
-    not (c == '}' || c == ' ' || c == '\n')
+    not (c == '$' || c == '}' || c == ' ' || c == '\n')
 
 
 notSpaceOrSpecialCharacters : Char -> Bool

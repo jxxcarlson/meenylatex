@@ -6,15 +6,10 @@ import List.Extra
 
 {-
 
-   > run latexList "$1$ $2$\\begin{a}\\begin{b}$11$\\end{b}\\end{a}$3$"
-   Ok (LatexList ([InlineMath "1",InlineMath "2",Environment "a" [] (LatexList ([Environment "b" [] (LatexList ([InlineMath "11"]))])),InlineMath "3"]))
-
+   Below is a simplified version of the MiniLatex parser. The infinite recursion
+   problem was solved by using `nonEmptyItemList` instead of `itemList` in defining
+   the `words` parser.
 -}
-
-
-getCharAt : Int -> String -> Maybe String
-getCharAt index str =
-    str |> String.split "" |> List.Extra.getAt index
 
 
 latexList : Parser LatexExpression
@@ -29,27 +24,42 @@ latexList =
 latexExpression : Parser LatexExpression
 latexExpression =
     oneOf
-        [ inlineMath ws
+        [ words
+        , inlineMath ws
         , lazy (\_ -> environment)
-
-        --, words
         ]
 
 
-env1 =
+
+{- SOME TEST DATA -}
+
+
+test1 =
+    "This is a test."
+
+
+test2 =
+    "$a^2 + b^2 = c^2$"
+
+
+test3 =
+    "Pythagoras said that $a^2 + b^2 = c^2$.  Yay!"
+
+
+test4 =
     "\\begin{th}$a^2 = b^3$\\end{th}"
 
 
-env2 =
+test5 =
     "\\begin{A}\\begin{B}$a^2 = b^3$\\end{B}\\end{A}"
 
 
-env2b =
+test6 =
     "\\begin{A}$y^h = 4$\\begin{B}$a^2 = b^3$\\end{B}\\end{A}"
 
 
-env3 =
-    "\\begin{th}\nIt's all gonna be OK!\n\\end{th}"
+test7 =
+    "\\begin{th}\n\nIt's gonna be OK!\n\n\\end{th}"
 
 
 
@@ -83,26 +93,33 @@ inlineMath wsParser =
 
 word : (Char -> Bool) -> Parser String
 word inWord =
-    getChompedString <|
-        succeed ()
-            |. chompIf (\c -> Char.isAlphaNum c)
-            |. chompWhile inWord
+    succeed String.slice
+        |. ws
+        |= getOffset
+        |. chompIf inWord
+        |. chompWhile inWord
+        |. ws
+        |= getOffset
+        |= getSource
 
 
-notSpecialCharacter : Char -> Bool
-notSpecialCharacter c =
+notSpaceOrSpecialCharacters : Char -> Bool
+notSpaceOrSpecialCharacters c =
     not (c == ' ' || c == '\n' || c == '\\' || c == '$')
 
 
 words : Parser LatexExpression
 words =
-    ws
-        |> andThen
-            (\_ ->
-                itemListWithSeparator ws (word notSpecialCharacter)
-                    |> map (String.join " ")
-                    |> map LXString
-            )
+    succeed identity
+        |. ws
+        |= words_
+        |. ws
+
+
+words_ =
+    nonEmptyItemList (word notSpaceOrSpecialCharacters)
+        |> map (String.join " ")
+        |> map LXString
 
 
 
@@ -164,7 +181,7 @@ parseTo marker =
 
 
 
-{- ITEM LIST -}
+{- ITEM LIST: FOR REPEATED STRUCTURES -}
 
 
 nonEmptyItemList : Parser a -> Parser (List a)
@@ -193,24 +210,8 @@ itemListHelper itemParser revItems =
         ]
 
 
-itemListWithSeparator : Parser () -> Parser a -> Parser (List a)
-itemListWithSeparator separatorParser itemParser =
-    Parser.loop [] (itemListWithSeparatorHelper separatorParser itemParser)
 
-
-itemListWithSeparatorHelper : Parser () -> Parser a -> List a -> Parser (Step (List a) (List a))
-itemListWithSeparatorHelper separatorParser itemParser revItems =
-    oneOf
-        [ succeed (\w -> Loop (w :: revItems))
-            |= itemParser
-            |. separatorParser
-        , succeed ()
-            |> Parser.map (\_ -> Done (List.reverse revItems))
-        ]
-
-
-
-{- Char -> Bool -}
+{- Char -> Bool (WHITE SPACE) -}
 
 
 space : Parser ()
@@ -221,3 +222,12 @@ space =
 ws : Parser ()
 ws =
     chompWhile (\c -> c == ' ' || c == '\n')
+
+
+
+{- For debugging -}
+
+
+getCharAt : Int -> String -> Maybe String
+getCharAt index str =
+    str |> String.split "" |> List.Extra.getAt (index - 1)

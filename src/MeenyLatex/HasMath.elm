@@ -34,8 +34,8 @@ hasMath expr =
         Comment str ->
             False
 
-        Item k expr ->
-            hasMath expr
+        Item k expr_ ->
+            hasMath expr_
 
         InlineMath str ->
             True

@@ -19,8 +19,9 @@ module MeenyLatex.Parser
 -}
 
 import Dict
-import MeenyLatex.ParserHelpers exposing (..)
+import MeenyLatex.ParserHelpers as PH exposing (..)
 import Parser exposing (..)
+import Set
 
 
 {- ELLIE: https://ellie-app.com/pcB5b3BPfa1/0
@@ -43,7 +44,7 @@ type LatexExpression
     | Macro String (List LatexExpression) (List LatexExpression) -- Macro name optArgs args
     | Environment String (List LatexExpression) LatexExpression -- Environment name optArgs body
     | LatexList (List LatexExpression)
-    | LXError Error
+    | LXError (List DeadEnd)
 
 
 {-| Transform a string into a list of LatexExpressions
@@ -83,44 +84,49 @@ defaultLatexExpression =
 
 words : Parser LatexExpression
 words =
-    inContext "words" <|
-        (succeed identity
-            |= repeat oneOrMore word
-            |> map (String.join " ")
-            |> map LXString
-        )
+    succeed identity
+        |. ws
+        |= words_
+        |. ws
+
+
+words_ =
+    nonEmptyItemList (word_ notSpaceOrSpecialCharacters)
+        |> map (String.join " ")
+        |> map LXString
+
+
+
+{-
+   words : Parser LatexExpression
+   words =
+       itemListWithSeparator ws word
+           |> map (String.join " ")
+           |> map LXString
+
+-}
 
 
 {-| Like `words`, but after a word is recognized spaces, not spaces + newlines are consumed
 -}
 specialWords : Parser LatexExpression
 specialWords =
-    inContext "specialWords" <|
-        (succeed identity
-            |= repeat oneOrMore specialWord
-            |> map (String.join " ")
-            |> map LXString
-        )
+    itemListWithSeparator ws specialWord
+        |> map (String.join " ")
+        |> map LXString
 
 
 macroArgWords : Parser LatexExpression
 macroArgWords =
-    inContext "specialWords" <|
-        (succeed identity
-            |= repeat oneOrMore macroArgWord
-            |> map (String.join " ")
-            |> map LXString
-        )
+    itemListWithSeparator ws macroArgWord
+        |> map (String.join " ")
+        |> map LXString
 
 
 texComment : Parser LatexExpression
 texComment =
-    inContext "texComment" <|
-        (symbol "%"
-            |. ignoreUntil "\n"
-            |> source
-            |> map Comment
-        )
+    parseFromTo "%" "\n"
+        |> map Comment
 
 
 
@@ -128,10 +134,8 @@ texComment =
 {- NOTE: macro sequences should be of the form "" followed by alphabetic characterS,
    but not equal to certain reserved words, e.g., "\begin", "\end", "\item"
 -}
-
-
-type alias Macro2 =
-    String (List LatexExpression) (List LatexExpression)
+-- type alias Macro2 =
+--     String (List LatexExpression) (List LatexExpression)
 
 
 {-| Parse the macro keyword followed by
@@ -139,93 +143,77 @@ zero or more optional follwed by zero or more more eventual nominnees.
 -}
 macro : Parser () -> Parser LatexExpression
 macro wsParser =
-    inContext "macro" <|
-        (succeed Macro
-            |= macroName
-            |= repeat zeroOrMore optionalArg
-            |= repeat zeroOrMore arg
-            |. wsParser
-        )
-
-
-joinArgs : Parser (List LatexExpression) -> Parser (List LatexExpression) -> Parser (List LatexExpression)
-joinArgs x y =
-    map2 (++) x y
+    --  "macro" <|
+    (succeed Macro
+        |= macroName
+        |= itemList optionalArg
+        |= itemList arg
+        |. wsParser
+    )
 
 
 {-| Use to parse arguments for macros
 -}
 optionalArg : Parser LatexExpression
 optionalArg =
-    inContext "optionalArg" <|
-        (succeed identity
-            |. symbol "["
-            |= repeat zeroOrMore (oneOf [ specialWords, inlineMath spaces ])
-            |. symbol "]"
-            |> map LatexList
-        )
+    -- inContext "optionalArg" <|
+    (succeed identity
+        |. symbol "["
+        |= itemList (oneOf [ specialWords, inlineMath PH.spaces ])
+        |. symbol "]"
+        |> map LatexList
+    )
 
 
 {-| Use to parse arguments for macros
 -}
 arg : Parser LatexExpression
 arg =
-    inContext "arg" <|
-        (succeed identity
-            |. symbol "{"
-            |= repeat zeroOrMore (oneOf [ macroArgWords, inlineMath spaces, lazy (\_ -> macro ws) ])
-            |. symbol "}"
-            |> map LatexList
-        )
+    -- inContext "arg" <|
+    (succeed identity
+        |. symbol "{"
+        |= itemList (oneOf [ macroArgWords, inlineMath PH.spaces, lazy (\_ -> macro ws) ])
+        |. symbol "}"
+        |> map LatexList
+    )
 
 
 macroName : Parser String
 macroName =
-    inContext "macroName" <|
-        (allOrNothing <|
-            succeed identity
-                |. mustFail reservedWord
-                |= innerMacroName
-        )
-
-
-innerMacroName : Parser String
-innerMacroName =
-    inContext "innerMacroName" <|
-        succeed identity
-            |. spaces
-            |. symbol "\\"
-            |= keep oneOrMore notMacroSpecialCharacter
+    variable
+        { start = \c -> c == '\\'
+        , inner = \c -> Char.isAlphaNum c
+        , reserved = Set.fromList [ "\\begin", "\\end", "\\item", "\\bibitem" ]
+        }
 
 
 smacro : Parser LatexExpression
 smacro =
     succeed SMacro
         |= smacroName
-        |= repeat zeroOrMore optionalArg
-        |= repeat zeroOrMore arg
+        |= itemList optionalArg
+        |= itemList arg
         |= smacroBody
 
 
 smacroName : Parser String
 smacroName =
-    inContext "macroName" <|
-        (allOrNothing <|
-            succeed identity
-                |. mustFail smacroReservedWord
-                |= innerMacroName
-        )
+    variable
+        { start = \c -> c == '\\'
+        , inner = \c -> Char.isAlphaNum c
+        , reserved = Set.fromList [ "\\begin", "\\end", "\\item" ]
+        }
 
 
 smacroBody : Parser LatexExpression
 smacroBody =
-    inContext "smacroBody" <|
-        (succeed identity
-            |. spaces
-            |= repeat oneOrMore (oneOf [ specialWords, inlineMath spaces, macro spaces ])
-            |. symbol "\n\n"
-            |> map (\x -> LatexList x)
-        )
+    --  inContext "smacroBody" <|
+    (succeed identity
+        |. PH.spaces
+        |= nonEmptyItemList (oneOf [ specialWords, inlineMath PH.spaces, macro PH.spaces ])
+        |. symbol "\n\n"
+        |> map (\x -> LatexList x)
+    )
 
 
 
@@ -236,12 +224,12 @@ smacroBody =
 -}
 latexList : Parser LatexExpression
 latexList =
-    inContext "latexList" <|
-        (succeed identity
-            |. ws
-            |= repeat oneOrMore latexExpression
-            |> map LatexList
-        )
+    -- inContext "latexList" <|
+    (succeed identity
+        |. ws
+        |= nonEmptyItemList latexExpression
+        |> map LatexList
+    )
 
 
 {-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment\ |\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
@@ -266,30 +254,30 @@ latexExpression =
 
 inlineMath : Parser () -> Parser LatexExpression
 inlineMath wsParser =
-    inContext "inline math" <|
-        succeed InlineMath
-            |. symbol "$"
-            |= parseUntil "$"
-            |. wsParser
+    -- inContext "inline math" <|
+    succeed InlineMath
+        |. symbol "$"
+        |= parseTo "$"
+        |. wsParser
 
 
 displayMathDollar : Parser LatexExpression
 displayMathDollar =
-    inContext "display math $$" <|
-        succeed DisplayMath
-            |. spaces
-            |. symbol "$$"
-            |= parseUntil "$$"
-            |. ws
+    -- inContext "display math $$" <|
+    succeed DisplayMath
+        |. PH.spaces
+        |. symbol "$$"
+        |= parseTo "$$"
+        |. ws
 
 
 displayMathBrackets : Parser LatexExpression
 displayMathBrackets =
-    inContext "display math brackets" <|
-        succeed DisplayMath
-            |. spaces
-            |. symbol "\\["
-            |= parseUntil "\\]"
+    -- inContext "display math brackets" <|
+    succeed DisplayMath
+        |. PH.spaces
+        |. symbol "\\["
+        |= parseTo "\\]"
 
 
 
@@ -298,8 +286,8 @@ displayMathBrackets =
 
 environment : Parser LatexExpression
 environment =
-    inContext "environment" <|
-        lazy (\_ -> envName |> andThen environmentOfType)
+    -- inContext "environment" <|
+    lazy (\_ -> envName |> andThen environmentOfType)
 
 
 {-| Capture the name of the environment in
@@ -308,41 +296,41 @@ pair
 -}
 envName : Parser String
 envName =
-    inContext "envName" <|
-        (succeed identity
-            |. spaces
-            |. symbol "\\begin{"
-            |= parseUntil "}"
-        )
+    --  inContext "envName" <|
+    (succeed identity
+        |. PH.spaces
+        |. symbol "\\begin{"
+        |= parseTo "}"
+    )
 
 
 environmentOfType : String -> Parser LatexExpression
 environmentOfType envType =
-    inContext "environmentOfType" <|
-        let
-            endWord =
-                "\\end{" ++ envType ++ "}"
+    --- inContext "environmentOfType" <|
+    let
+        theEndWord =
+            "\\end{" ++ envType ++ "}"
 
-            envKind =
-                if List.member envType [ "equation", "align", "eqnarray", "verbatim", "listing", "verse" ] then
-                    "passThrough"
-                else
-                    envType
-        in
-            environmentParser envKind endWord envType
+        envKind =
+            if List.member envType [ "equation", "align", "eqnarray", "verbatim", "listing", "verse" ] then
+                "passThrough"
+            else
+                envType
+    in
+        environmentParser envKind theEndWord envType
 
 
 {-| Use to parse begin ... end blocks
 -}
 endWord : Parser String
 endWord =
-    inContext "endWord" <|
-        (succeed identity
-            |. ignore zeroOrMore ((==) ' ')
-            |. symbol "\\end{"
-            |= parseUntil "}"
-            |. ws
-        )
+    -- inContext "endWord" <|
+    (succeed identity
+        |. PH.spaces
+        |. symbol "\\end{"
+        |= parseTo "}"
+        |. ws
+    )
 
 
 
@@ -362,25 +350,25 @@ environmentParser name =
 parseEnvironmentDict : Dict.Dict String (String -> String -> Parser LatexExpression)
 parseEnvironmentDict =
     Dict.fromList
-        [ ( "enumerate", \endWord envType -> itemEnvironmentBody endWord envType )
-        , ( "itemize", \endWord envType -> itemEnvironmentBody endWord envType )
-        , ( "tabular", \endWord envType -> tabularEnvironmentBody endWord envType )
-        , ( "passThrough", \endWord envType -> passThroughBody endWord envType )
+        [ ( "enumerate", \endWoord envType -> itemEnvironmentBody endWoord envType )
+        , ( "itemize", \endWoord envType -> itemEnvironmentBody endWoord envType )
+        , ( "tabular", \endWoord envType -> tabularEnvironmentBody endWoord envType )
+        , ( "passThrough", \endWoord envType -> passThroughBody endWoord envType )
         ]
 
 
 standardEnvironmentBody : String -> String -> Parser LatexExpression
-standardEnvironmentBody endWord envType =
-    inContext "standardEnvironmentBody" <|
-        (succeed identity
-            |. ws
-            |= repeat zeroOrMore latexExpression
-            |. ws
-            |. symbol endWord
-            |. ws
-            |> map LatexList
-            |> map (Environment envType [])
-        )
+standardEnvironmentBody endWoord envType =
+    --  inContext "standardEnvironmentBody" <|
+    (succeed identity
+        |. ws
+        |= itemList latexExpression
+        |. ws
+        |. symbol endWoord
+        |. ws
+        |> map LatexList
+        |> map (Environment envType [])
+    )
 
 
 {-| The body of the environment is parsed as an LXString.
@@ -389,14 +377,14 @@ passed to MathJax for processing and also for the verbatim
 environment.
 -}
 passThroughBody : String -> String -> Parser LatexExpression
-passThroughBody endWord envType =
-    inContext "passThroughBody" <|
-        (succeed identity
-            |= parseUntil endWord
-            |. ws
-            |> map LXString
-            |> map (Environment envType [])
-        )
+passThroughBody endWoord envType =
+    --  inContext "passThroughBody" <|
+    (succeed identity
+        |= parseTo endWoord
+        |. ws
+        |> map LXString
+        |> map (Environment envType [])
+    )
 
 
 
@@ -404,31 +392,31 @@ passThroughBody endWord envType =
 
 
 itemEnvironmentBody : String -> String -> Parser LatexExpression
-itemEnvironmentBody endWord envType =
-    inContext "itemEnvironmentBody" <|
-        (succeed identity
-            |. ws
-            |= repeat zeroOrMore item
-            |. ws
-            |. symbol endWord
-            |. ws
-            |> map LatexList
-            |> map (Environment envType [])
-        )
+itemEnvironmentBody endWoord envType =
+    ---  inContext "itemEnvironmentBody" <|
+    (succeed identity
+        |. ws
+        |= itemList item
+        |. ws
+        |. symbol endWoord
+        |. ws
+        |> map LatexList
+        |> map (Environment envType [])
+    )
 
 
 item : Parser LatexExpression
 item =
-    inContext "item" <|
-        (succeed identity
-            |. spaces
-            |. symbol "\\item"
-            |. symbol " "
-            |. spaces
-            |= repeat zeroOrMore (oneOf [ words, inlineMath spaces, macro spaces ])
-            |. ws
-            |> map (\x -> Item 1 (LatexList x))
-        )
+    ---  inContext "item" <|
+    (succeed identity
+        |. PH.spaces
+        |. symbol "\\item"
+        |. symbol " "
+        |. PH.spaces
+        |= itemList (oneOf [ words, inlineMath PH.spaces, macro PH.spaces ])
+        |. ws
+        |> map (\x -> Item 1 (LatexList x))
+    )
 
 
 
@@ -436,66 +424,68 @@ item =
 
 
 tabularEnvironmentBody : String -> String -> Parser LatexExpression
-tabularEnvironmentBody endWord envType =
-    inContext "tabularEnvironmentBody" <|
-        (succeed (Environment envType)
-            |. ws
-            |= repeat zeroOrMore arg
-            |= tableBody
-            |. ws
-            |. symbol endWord
-            |. ws
-        )
+tabularEnvironmentBody endWoord envType =
+    -- inContext "tabularEnvironmentBody" <|
+    (succeed (Environment envType)
+        |. ws
+        |= itemList arg
+        |= tableBody
+        |. ws
+        |. symbol endWoord
+        |. ws
+    )
 
 
 tableBody : Parser LatexExpression
 tableBody =
-    inContext "tableBody" <|
-        (succeed identity
-            --|. repeat zeroOrMore arg
-            |. ws
-            |= repeat oneOrMore tableRow
-            |> map LatexList
-        )
+    --  inContext "tableBody" <|
+    (succeed identity
+        --|. repeat zeroOrMore arg
+        |. ws
+        |= nonEmptyItemList tableRow
+        |> map LatexList
+    )
 
 
 tableRow : Parser LatexExpression
 tableRow =
-    inContext "tableRow" <|
-        (succeed identity
-            |. spaces
-            |= andThen (\c -> tableCellHelp [ c ]) tableCell
-            |. spaces
-            |. oneOf [ symbol "\n", symbol "\\\\\n" ]
-            |> map LatexList
-        )
+    --- inContext "tableRow" <|
+    (succeed identity
+        |. PH.spaces
+        |= andThen (\c -> tableCellHelp [ c ]) tableCell
+        |. PH.spaces
+        |. oneOf [ symbol "\n", symbol "\\\\\n" ]
+        |> map LatexList
+    )
 
 
 tableCell : Parser LatexExpression
 tableCell =
-    inContext "tableCell" <|
-        (succeed identity
-            |. spaces
-            |= oneOf [ inlineMath spaces, specialWords ]
-        )
+    -- inContext "tableCell" <|
+    (succeed identity
+        |= oneOf [ inlineMath PH.spaces, specialWords ]
+    )
 
 
 tableCellHelp : List LatexExpression -> Parser (List LatexExpression)
 tableCellHelp revCells =
-    inContext "tableCellHelp" <|
-        oneOf
-            [ nextCell
-                |> andThen (\c -> tableCellHelp (c :: revCells))
-            , succeed (List.reverse revCells)
-            ]
+    --  inContext "tableCellHelp" <|
+    oneOf
+        [ nextCell
+            |> andThen (\c -> tableCellHelp (c :: revCells))
+        , succeed (List.reverse revCells)
+        ]
 
 
 nextCell : Parser LatexExpression
 nextCell =
-    inContext "nextCell" <|
-        (delayedCommit spaces <|
-            succeed identity
-                |. symbol "&"
-                |. spaces
-                |= tableCell
-        )
+    --  inContext "nextCell" <|
+    -- (delayedCommit PH.spaces <|
+    succeed identity
+        |. symbol "&"
+        |. PH.spaces
+        |= tableCell
+
+
+
+--)

@@ -14,7 +14,7 @@ div attributes children =
 
 
 img url imageAttributs =
-    "<img src=\"" ++ url ++ "\" width=" ++ toString imageAttributs.width ++ " >"
+    "<img src=\"" ++ url ++ "\" width=" ++ String.fromInt imageAttributs.width ++ " >"
 
 
 a url label =

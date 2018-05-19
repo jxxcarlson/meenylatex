@@ -1,4 +1,20 @@
-module MeenyLatex.ParserHelpers exposing (..)
+module MeenyLatex.ParserHelpers
+    exposing
+        ( spaces
+        , ws
+        , parseUntil
+        , parseTo
+        , parseFromTo
+        , nonEmptyItemList
+        , itemList
+        , itemListWithSeparator
+        , word_
+        , word
+        , specialWord
+        , macroArgWord
+        , transformWords
+        , notSpaceOrSpecialCharacters
+        )
 
 import Parser exposing (..)
 
@@ -17,68 +33,110 @@ import Parser exposing (..)
 
 spaces : Parser ()
 spaces =
-    ignore zeroOrMore (\c -> c == ' ')
+    chompWhile (\c -> c == ' ')
 
 
 ws : Parser ()
 ws =
-    ignore zeroOrMore (\c -> c == ' ' || c == '\n')
+    chompWhile (\c -> c == ' ' || c == '\n')
 
 
 parseUntil : String -> Parser String
 parseUntil marker =
-    inContext "parseUntil" <|
-        (ignoreUntil marker
-            |> source
-            |> map (String.dropRight <| String.length marker)
-        )
+    getChompedString <| chompUntil marker
 
 
-allOrNothing : Parser a -> Parser a
-allOrNothing parser =
-    inContext "allOrNothing" <|
-        delayedCommitMap always parser (succeed ())
+{-| chomp to end of the marker and return the
+chomped sring minus the makrder.
+-}
+parseTo : String -> Parser String
+parseTo marker =
+    (getChompedString <|
+        succeed identity
+            |= chompUntilEndOr marker
+            |. symbol marker
+    )
+        |> map (String.dropRight (String.length marker))
 
 
-mustFail : Parser a -> Parser ()
-mustFail parser =
-    inContext "mustFail" <|
-        (oneOf
-            [ delayedCommitMap always parser (succeed ()) |> map (always <| Err "I didn't fail")
-            , succeed (Ok ())
-            ]
-            |> andThen
-                (\res ->
-                    case res of
-                        Err e ->
-                            fail e
+parseFromTo : String -> String -> Parser String
+parseFromTo startString endString =
+    succeed identity
+        |. symbol startString
+        |. spaces
+        |= parseUntil endString
 
-                        Ok _ ->
-                            succeed ()
-                )
-        )
+
+
+{- ITEM LIST PARSERS -}
+
+
+nonEmptyItemList : Parser a -> Parser (List a)
+nonEmptyItemList itemParser =
+    itemParser
+        |> andThen (\x -> (itemList_ [ x ] itemParser))
+
+
+itemList : Parser a -> Parser (List a)
+itemList itemParser =
+    itemList_ [] itemParser
+
+
+itemList_ : List a -> Parser a -> Parser (List a)
+itemList_ initialList itemParser =
+    Parser.loop initialList (itemListHelper itemParser)
+
+
+itemListHelper : Parser a -> List a -> Parser (Step (List a) (List a))
+itemListHelper itemParser revItems =
+    oneOf
+        [ succeed (\item -> Loop (item :: revItems))
+            |= itemParser
+        , succeed ()
+            |> Parser.map (\_ -> Done (List.reverse revItems))
+        ]
+
+
+itemListWithSeparator : Parser () -> Parser String -> Parser (List String)
+itemListWithSeparator separatorParser itemParser =
+    Parser.loop [] (itemListWithSeparatorHelper separatorParser itemParser)
+
+
+itemListWithSeparatorHelper : Parser () -> Parser String -> List String -> Parser (Step (List String) (List String))
+itemListWithSeparatorHelper separatorParser itemParser revItems =
+    oneOf
+        [ succeed (\w -> Loop (w :: revItems))
+            |= itemParser
+            |. separatorParser
+        , succeed ()
+            |> Parser.map (\_ -> Done (List.reverse revItems))
+        ]
+
+
+word_ : (Char -> Bool) -> Parser String
+word_ inWord =
+    getChompedString <|
+        succeed ()
+            |. chompIf (\c -> Char.isAlphaNum c)
+            |. chompWhile inWord
 
 
 word : Parser String
 word =
-    (inContext "word" <|
-        succeed identity
-            |. spaces
-            |= keep oneOrMore notSpecialCharacter
-            |. ws
-    )
-        -- |> map transformWords
+    getChompedString <|
+        succeed ()
+            |. chompIf (\c -> Char.isAlphaNum c)
+            |. chompWhile notSpaceOrSpecialCharacters
 
 
 {-| Like `word`, but after a word is recognized spaces, not spaces + newlines are consumed
 -}
 specialWord : Parser String
 specialWord =
-    inContext "specialWord" <|
-        succeed identity
-            |. spaces
-            |= keep oneOrMore notSpecialTableOrMacroCharacter
-            |. spaces
+    getChompedString <|
+        succeed ()
+            |. chompIf (\c -> Char.isAlphaNum c)
+            |. chompWhile notSpecialTableOrMacroCharacter
 
 
 notSpecialTableOrMacroCharacter : Char -> Bool
@@ -88,11 +146,10 @@ notSpecialTableOrMacroCharacter c =
 
 macroArgWord : Parser String
 macroArgWord =
-    inContext "specialWord" <|
-        succeed identity
-            |. spaces
-            |= keep oneOrMore notMacroArgWordCharacter
-            |. spaces
+    getChompedString <|
+        succeed ()
+            |. chompIf (\c -> Char.isAlphaNum c)
+            |. chompWhile notMacroArgWordCharacter
 
 
 notMacroArgWordCharacter : Char -> Bool
@@ -100,24 +157,8 @@ notMacroArgWordCharacter c =
     not (c == '}' || c == ' ' || c == '\n')
 
 
-reservedWord : Parser ()
-reservedWord =
-    inContext "reservedWord" <|
-        (succeed identity
-            |= oneOf [ symbol "\\begin", keyword "\\end", keyword "\\item", keyword "\\bibitem" ]
-        )
-
-
-smacroReservedWord : Parser ()
-smacroReservedWord =
-    inContext "reservedWord" <|
-        (succeed identity
-            |= oneOf [ symbol "\\begin", keyword "\\end", keyword "\\item" ]
-        )
-
-
-notSpecialCharacter : Char -> Bool
-notSpecialCharacter c =
+notSpaceOrSpecialCharacters : Char -> Bool
+notSpaceOrSpecialCharacters c =
     not (c == ' ' || c == '\n' || c == '\\' || c == '$')
 
 
@@ -136,4 +177,3 @@ transformWords str =
         "\\mdash"
     else
         str
-

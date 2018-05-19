@@ -1,24 +1,17 @@
 module MeenyLatex.ErrorMessages exposing (renderError)
 
 import Dict
-import Parser
-import String.Extra
+import Parser exposing(DeadEnd, deadEndsToString)
 
 
-renderError : Parser.Error -> String
+
+renderError : DeadEnd -> String
 renderError error =
-    let
-        source =
-            error.source
-
-        explanation_ =
-            explanation error
-    in
     "<div style=\"color: red\">ERROR: "
-        ++ (source |> normalizeError)
+        ++ deadEndsToString [error]
         ++ "</div>\n"
         ++ "<div style=\"color: blue\">"
-        ++ explanation_
+        ++ "explanation_"
         ++ "</div>"
 
 
@@ -26,21 +19,21 @@ normalizeError : String -> String
 normalizeError str =
     str
         |> reduceBackslashes
-        |> String.Extra.replace "\"" ""
-        |> String.Extra.softBreak 50
-        |> List.take 5
-        |> String.join " "
-        |> (\x -> x ++ " ...")
+        |> String.replace "\"" ""
+        -- |> String.softBreak 50
+        -- |> List.keep 5
+        -- |> String.join " "
+        -- |> (\x -> x ++ " ...")
 
 
 reduceBackslashes : String -> String
 reduceBackslashes str =
-    str |> String.Extra.replace "\\\\" "\\" |> String.Extra.replace "\\n" "\n"
+    str |> String.replace "\\\\" "\\" |> String.replace "\\n" "\n"
 
 
 errorMessage1 error =
     "<div style=\"color: red\">ERROR: "
-        ++ toString error.source
+        ++ error.source
         ++ "</div>\n"
         ++ "<div style=\"color: blue\">"
         ++ explanation error
@@ -59,7 +52,7 @@ errorDict =
 explanation error =
     let
         errorWords =
-            toString error.problem |> String.words
+            error.problem |> String.words
 
         errorHead =
             errorWords |> List.head
@@ -77,7 +70,7 @@ explanation error =
 
 stateProblem error =
     "Problem: "
-        ++ toString error.problem
+        ++ error.problem
         ++ "\nfor: "
         ++ leadErrorDescription error
 
@@ -128,17 +121,17 @@ leadErrorDescription error =
 
 
 normalize str =
-    str |> String.Extra.replace "\"" "" |> String.Extra.replace "\\" ""
+    str |> String.replace "\"" "" |> String.replace "\\" ""
 
 
 errorMessage2 error =
     "row: "
-        ++ toString error.row
+        ++ String.fromInt error.row
         ++ "\ncol: "
-        ++ toString error.col
+        ++ String.fromInt  error.col
         ++ "\nProblem: "
-        ++ toString error.problem
+        ++ error.problem
         ++ "\nContext: "
-        ++ toString error.context
+        ++ error.context
         ++ "\nSource: "
         ++ error.source

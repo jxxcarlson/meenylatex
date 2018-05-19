@@ -10,14 +10,17 @@ module MeenyLatex.RenderLatexForExport exposing (renderLatexForExport)
 -}
 
 import Dict
-import List.Extra
+
+
+-- import List.Extra
+
 import MeenyLatex.ErrorMessages as ErrorMessages
 import MeenyLatex.Image as Image
 import MeenyLatex.JoinStrings as JoinStrings
 import MeenyLatex.Paragraph
 import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import MeenyLatex.Utility as Utility
-import String.Extra
+import String
 
 
 {-| parse a string and render it back into Latex
@@ -43,8 +46,8 @@ render latexExpression =
         SMacro name optArgs args le ->
             renderSMacro name optArgs args le
 
-        Item level latexExpression ->
-            renderItem level latexExpression
+        Item level latexExpression_ ->
+            renderItem level latexExpression_
 
         InlineMath str ->
             " $" ++ str ++ "$ "
@@ -62,7 +65,7 @@ render latexExpression =
             str
 
         LXError error ->
-            ErrorMessages.renderError error
+            List.map ErrorMessages.renderError error |> String.join "; "
 
 
 renderLatexList : List LatexExpression -> String
@@ -114,8 +117,8 @@ renderSpecialArgList args =
 fixBadChars : String -> String
 fixBadChars str =
     str
-        |> String.Extra.replace "_" "\\_"
-        |> String.Extra.replace "#" "\\#"
+        |> String.replace "_" "\\_"
+        |> String.replace "#" "\\#"
 
 
 renderOptArgList : List LatexExpression -> String
@@ -252,7 +255,7 @@ renderImage args =
             imageAttrs.width |> toFloat |> (\x -> 2.5 * x)
 
         width =
-            toString width_ ++ "px"
+            String.fromFloat width_ ++ "px"
     in
         case ( imageAttrs.float, imageAttrs.align ) of
             ( "left", _ ) ->
@@ -287,4 +290,4 @@ renderArg k args =
 
 getElement : Int -> List LatexExpression -> LatexExpression
 getElement k list =
-    List.Extra.getAt k list |> Maybe.withDefault (LXString "xxx")
+    Utility.getAt k list |> Maybe.withDefault (LXString "xxx")

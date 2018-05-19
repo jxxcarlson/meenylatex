@@ -2,6 +2,7 @@ module MeenyLatex.KeyValueUtilities exposing (getKeyValueList, getValue)
 
 import Char
 import Parser exposing (..)
+import MeenyLatex.ParserHelpers exposing(word_, itemList)
 
 
 -- type alias KeyValuePair =
@@ -14,24 +15,24 @@ import Parser exposing (..)
 type alias KeyValuePair =
     ( String, String )
 
-
 keyValuePair : Parser KeyValuePair
 keyValuePair =
-    inContext "KeyValuePair" <|
-        succeed (,)
-            |. ignore zeroOrMore (\c -> c == ' ' || c == '\n')
-            |= keep oneOrMore (\c -> c /= ' ' && c /= ':')
+        succeed Tuple.pair
+            |. spaces
+            |= word_ (\c -> (c /= ':'))
+            |. spaces
             |. symbol ":"
-            |. ignore zeroOrMore (\c -> c == ' ' || c == '\n')
-            |= keep oneOrMore (\c -> c /= ' ' && c /= ',')
-            |. ignore zeroOrMore (\c -> c == ',' || c == ' ' || c == '\n')
+            |. spaces
+            |= word_ (\c -> (c /= ','))
+            |> map (\(a,b) -> (String.trim a, String.trim b))
+
 
 
 keyValuePairs : Parser (List KeyValuePair)
 keyValuePairs =
-    inContext "keyValuePairs" <|
+    -- inContext "keyValuePairs" <|
         succeed identity
-            |= repeat zeroOrMore keyValuePair
+            |= itemList keyValuePair
 
 
 getKeyValueList str =

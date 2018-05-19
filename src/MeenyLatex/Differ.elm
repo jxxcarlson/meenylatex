@@ -195,7 +195,7 @@ for each paragraph.
 -}
 prefixer : Int -> Int -> String
 prefixer b k =
-    "p." ++ toString b ++ "." ++ toString k
+    "p." ++ String.fromInt b ++ "." ++ String.fromInt k
 
 
 {-| Given:

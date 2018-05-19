@@ -157,8 +157,8 @@ joinLines a b =
         ( _, "\n" ) ->
             a ++ "\n"
 
-        ( a, b ) ->
-            a ++ "\n" ++ b
+        ( aa, bb ) ->
+            aa ++ "\n" ++ bb
 
 
 fixLine : String -> String
@@ -228,9 +228,15 @@ logicalParagraphify text =
             |> List.map (\paragraph -> paragraph ++ "\n\n\n")
 
 
+para : Regex.Regex
+para =
+    Maybe.withDefault Regex.never <|
+        Regex.fromString "\\n\\n+"
+
+
 paragraphify : String -> List String
 paragraphify text =
     --String.split "\n\n" text
-    Regex.split Regex.All (Regex.regex "\\n\\n+") text
+    Regex.split para text
         |> List.filter (\x -> String.length x /= 0)
         |> List.map (String.trim >> (\x -> x ++ "\n\n"))

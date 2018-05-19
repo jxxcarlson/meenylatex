@@ -7,46 +7,48 @@ import MeenyLatex.KeyValueUtilities as KeyValueUtilities
 {- IMAGE HELPERS -}
 
 
-imageCenterStyle imageAttributes =
-    "class=\"center\" style=\"width: " ++ toString (imageAttributes.width + 20) ++ "px; margin-left:auto, margin-right:auto; text-align: center;\""
+imageCenterStyle imageAttr =
+    "class=\"center\" style=\"width: " ++ String.fromInt (imageAttr.width + 20) ++ "px; margin-left:auto, margin-right:auto; text-align: center;\""
 
 
-imageFloatRightStyle imageAttributes =
-    "style=\"float: right; width: " ++ toString (imageAttributes.width + 20) ++ "px; margin: 0 0 7.5px 10px; text-align: center;\""
+imageFloatRightStyle imageAttr =
+    "style=\"float: right; width: " ++ String.fromInt (imageAttr.width + 20) ++ "px; margin: 0 0 7.5px 10px; text-align: center;\""
 
 
-imageFloatLeftStyle imageAttributes =
-    "style=\"float: left; width: " ++ toString (imageAttributes.width + 20) ++ "px; margin: 0 10px 7.5px 0; text-align: center;\""
+imageFloatLeftStyle imageAttr =
+    "style=\"float: left; width: " ++ String.fromInt (imageAttr.width + 20) ++ "px; margin: 0 10px 7.5px 0; text-align: center;\""
 
 
-handleCenterImage url label imageAttributes =
+handleCenterImage url label imageAttr =
     let
         width =
-            imageAttributes.width
+            imageAttr.width
     in
-    Html.div [ imageCenterStyle imageAttributes ] [ Html.img url imageAttributes, "<br>", label ]
+        Html.div [ imageCenterStyle imageAttr ] [ Html.img url imageAttr, "<br>", label ]
 
 
-handleFloatedImageRight url label imageAttributes =
+floatImageRightDivLeftPart width =
+    "<div style=\"float: right; width: " ++ String.fromInt (width + 20) ++ "px; margin: 0 0 7.5px 10px; text-align: center;\">"
+
+
+handleFloatedImageRight url label imageAttr =
     let
         width =
-            imageAttributes.width
-
-        imageRightDivLeftPart width =
-            "<div style=\"float: right; width: " ++ toString (width + 20) ++ "px; margin: 0 0 7.5px 10px; text-align: center;\">"
+            imageAttr.width
     in
-    imageRightDivLeftPart width ++ "<img src=\"" ++ url ++ "\" width=" ++ toString width ++ "><br>" ++ label ++ "</div>"
+        floatImageRightDivLeftPart width ++ "<img src=\"" ++ url ++ "\" width=" ++ String.fromInt width ++ "><br>" ++ label ++ "</div>"
 
 
-handleFloatedImageLeft url label imageAttributes =
+floatImageLeftDivLeftPart width =
+    "<div style=\"float: left; width: " ++ String.fromInt (width + 20) ++ "px; margin: 0 10px 7.5px 0; text-align: center;\">"
+
+
+handleFloatedImageLeft url label imageAttr =
     let
         width =
-            imageAttributes.width
-
-        imageLeftDivLeftPart width =
-            "<div style=\"float: left; width: " ++ toString (width + 20) ++ "px; margin: 0 10px 7.5px 0; text-align: center;\">"
+            imageAttr.width
     in
-    imageLeftDivLeftPart width ++ "<img src=\"" ++ url ++ "\" width=" ++ toString width ++ "><br>" ++ label ++ "</div>"
+        floatImageLeftDivLeftPart width ++ "<img src=\"" ++ url ++ "\" width=" ++ String.fromInt width ++ "><br>" ++ label ++ "</div>"
 
 
 type alias ImageAttributes =
@@ -60,7 +62,7 @@ parseImageAttributes attributeString =
             KeyValueUtilities.getKeyValueList attributeString
 
         widthValue =
-            KeyValueUtilities.getValue "width" kvList |> String.toInt |> Result.withDefault 200
+            KeyValueUtilities.getValue "width" kvList |> String.toInt |> Maybe.withDefault 200
 
         floatValue =
             KeyValueUtilities.getValue "float" kvList
@@ -68,14 +70,14 @@ parseImageAttributes attributeString =
         alignValue =
             KeyValueUtilities.getValue "align" kvList
     in
-    ImageAttributes widthValue floatValue alignValue
+        ImageAttributes widthValue floatValue alignValue
 
 
 imageAttributes : ImageAttributes -> String -> String
 imageAttributes imageAttrs attributeString =
     let
         widthValue =
-            imageAttrs.width |> toString
+            imageAttrs.width |> String.fromInt
 
         widthElement =
             if widthValue /= "" then
@@ -83,4 +85,4 @@ imageAttributes imageAttrs attributeString =
             else
                 ""
     in
-    widthElement
+        widthElement

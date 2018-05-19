@@ -120,7 +120,7 @@ parserAccumulatorReducer =
 {-| parserReducerTransformer parse latexStateReducer is a Reducer input acc
 -}
 parserReducerTransformer : ParserReducerTransformer String (List LatexExpression) LatexState
-parserReducerTransformer parse latexStateReducer input acc =
+parserReducerTransformer parse latexStateReducer_ input acc =
     let
         ( outputList, state ) =
             acc
@@ -129,9 +129,9 @@ parserReducerTransformer parse latexStateReducer input acc =
             parse input
 
         newState =
-            latexStateReducer parsedInput state
+            latexStateReducer_ parsedInput state
     in
-    ( outputList ++ [ parsedInput ], newState )
+        ( outputList ++ [ parsedInput ], newState )
 
 
 renderAccumulatorReducer : Reducer (List LatexExpression) ( List String, LatexState )
@@ -148,18 +148,18 @@ renderAccumulator latexState inputList =
 {-| renderTransformer render latexStateReducer is a Reducer input acc
 -}
 renderTransformer : RenderReducerTransformer LatexState (List LatexExpression) String
-renderTransformer render latexStateReducer input acc =
+renderTransformer render latexStateReducer_ input acc =
     let
         ( outputList, state ) =
             acc
 
         newState =
-            latexStateReducer input state
+            latexStateReducer_ input state
 
         renderedInput =
             render newState input
     in
-    ( outputList ++ [ renderedInput ], newState )
+        ( outputList ++ [ renderedInput ], newState )
 
 
 info : LatexExpression -> LatexInfo
@@ -227,7 +227,7 @@ latexStateReducer parsedParagraph latexState =
         he =
             { typ = "macro", name = "setcounter", value = [ LatexList [ LXString "section" ], LatexList [ LXString "7" ] ] }
     in
-    latexStateReducerDispatcher ( headElement.typ, headElement.name ) headElement latexState
+        latexStateReducerDispatcher ( headElement.typ, headElement.name ) headElement latexState
 
 
 

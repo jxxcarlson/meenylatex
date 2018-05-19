@@ -7,7 +7,7 @@ module MeenyLatex.RenderToLatex
         , renderLatexList
         )
 
-{-|
+{-| s
 
 
 # API
@@ -22,7 +22,7 @@ import MeenyLatex.JoinStrings as JoinStrings
 import MeenyLatex.Paragraph
 import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Parser
-import String.Extra
+import MeenyLatex.Utility as Utility
 
 
 {-| parse a stringg and render it back into Latex
@@ -43,12 +43,13 @@ renderBackToLatexTest : String -> Bool
 renderBackToLatexTest str =
     str == renderBackToLatex str
 
+
 {-| return true if a string rendered back to latex is the
 original string, but ignore spaces in the compariosn.
 -}
 renderBackToLatexTestModSpace : String -> Bool
 renderBackToLatexTestModSpace str =
-    (str |> String.Extra.replace " " "") == (renderBackToLatex str |> String.Extra.replace " " "")
+    (str |> String.replace " " "") == (renderBackToLatex str |> String.replace " " "")
 
 
 {-| Redner a string into LaTeX
@@ -65,8 +66,8 @@ render latexExpression =
         SMacro name optArgs args le ->
             renderSMacro name optArgs args le
 
-        Item level latexExpression ->
-            renderItem level latexExpression
+        Item level latexExpression_ ->
+            renderItem level latexExpression_
 
         InlineMath str ->
             " $" ++ str ++ "$"
@@ -84,9 +85,10 @@ render latexExpression =
             str
 
         LXError error ->
-            ErrorMessages.renderError error
+            List.map ErrorMessages.renderError error |> String.join "; "
 
-{-| Render a list of LatexExpressions 
+
+{-| Render a list of LatexExpressions
 -}
 renderLatexList : List LatexExpression -> String
 renderLatexList args =

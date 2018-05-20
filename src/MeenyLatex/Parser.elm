@@ -89,8 +89,7 @@ latexExpression =
         , displayMathBrackets
         , inlineMath ws
         , macro ws
-
-        -- , smacro
+        , smacro
         , words
         , lazy (\_ -> environment)
         ]
@@ -161,7 +160,7 @@ macroArgWord =
 
 inMacroArg : Char -> Bool
 inMacroArg c =
-    not (c == '$' || c == '}' || c == ' ' || c == '\n')
+    not (c == '\\' || c == '$' || c == '}' || c == ' ' || c == '\n')
 
 
 
@@ -182,7 +181,7 @@ optionArgWord =
 
 inOptionArgWord : Char -> Bool
 inOptionArgWord c =
-    not (c == '$' || c == ']' || c == ' ' || c == '\n')
+    not (c == '\\' || c == '$' || c == ']' || c == ' ' || c == '\n')
 
 
 
@@ -262,11 +261,9 @@ optionalArg =
 -}
 arg : Parser LatexExpression
 arg =
-    -- inContext "arg" <|
     (succeed identity
         |. symbol "{"
-        |= itemList (oneOf [ macroArgWords, inlineMath PH.spaces ])
-        -- |= itemList (oneOf [ macroArgWords, inlineMath PH.spaces, lazy (\_ -> macro ws) ])
+        |= itemList (oneOf [ macroArgWords, inlineMath PH.spaces, lazy (\_ -> macro PH.spaces) ])
         |. symbol "}"
         |> map LatexList
     )

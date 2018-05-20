@@ -1,9 +1,9 @@
 {
     "type": "package",
-    "name": "https://github.com/jxxcarlson/meenylatex.git",
+    "name": "jxxcarlson/meenlatex",
     "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
     "license": "BSD-3-Clause",
-    "version": "2.0.0",
+    "version": "1.0.0",
     "exposed-modules": [
         "MeenyLatex.Driver",
         "MeenyLatex.Source",

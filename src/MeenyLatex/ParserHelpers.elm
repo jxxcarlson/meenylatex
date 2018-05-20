@@ -113,48 +113,18 @@ itemListWithSeparatorHelper separatorParser itemParser revItems =
         ]
 
 
-word : (Char -> Bool) -> Parser String
-word inWord =
-    succeed String.slice
-        |. ws
-        |= getOffset
-        |. chompIf inWord
-        |. chompWhile inWord
-        |. ws
-        |= getOffset
-        |= getSource
+
+{-
+   notSpecialTableOrMacroCharacter : Char -> Bool
+   notSpecialTableOrMacroCharacter c =
+       not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == ']' || c == '&')
 
 
-{-| Like `word`, but after a word is recognized spaces, not spaces + newlines are consumed
+   notMacroSpecialCharacter : Char -> Bool
+   notMacroSpecialCharacter c =
+       not (c == '{' || c == '[' || c == ' ' || c == '\n')
+
 -}
-notSpecialTableOrMacroCharacter : Char -> Bool
-notSpecialTableOrMacroCharacter c =
-    not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == ']' || c == '&')
-
-
-macroArgWord : Parser String
-macroArgWord =
-    word notMacroArgWordCharacter
-
-
-specialWord : Parser String
-specialWord =
-    word notSpecialTableOrMacroCharacter
-
-
-notMacroArgWordCharacter : Char -> Bool
-notMacroArgWordCharacter c =
-    not (c == '$' || c == '}' || c == ' ' || c == '\n')
-
-
-notSpaceOrSpecialCharacters : Char -> Bool
-notSpaceOrSpecialCharacters c =
-    not (c == ' ' || c == '\n' || c == '\\' || c == '$')
-
-
-notMacroSpecialCharacter : Char -> Bool
-notMacroSpecialCharacter c =
-    not (c == '{' || c == '[' || c == ' ' || c == '\n')
 
 
 {-| Transform special words

@@ -109,7 +109,7 @@ defaultLatexExpression =
 
 
 
-{- WORDS AND TEXT -}
+{- WORDS -}
 
 
 words : Parser LatexExpression
@@ -126,13 +126,25 @@ words_ =
         |> map LXString
 
 
-{-| Like `words`, but after a word is recognized spaces, not spaces + newlines are consumed
--}
-specialWords : Parser LatexExpression
-specialWords =
-    nonEmptyItemList specialWord
-        |> map (String.join " ")
-        |> map LXString
+notSpaceOrSpecialCharacters : Char -> Bool
+notSpaceOrSpecialCharacters c =
+    not (c == ' ' || c == '\n' || c == '\\' || c == '$')
+
+
+word : (Char -> Bool) -> Parser String
+word inWord =
+    succeed String.slice
+        |. ws
+        |= getOffset
+        |. chompIf inWord
+        |. chompWhile inWord
+        |. ws
+        |= getOffset
+        |= getSource
+
+
+
+{- MACRO WORDS -}
 
 
 macroArgWords : Parser LatexExpression
@@ -140,6 +152,62 @@ macroArgWords =
     nonEmptyItemList macroArgWord
         |> map (String.join " ")
         |> map LXString
+
+
+macroArgWord : Parser String
+macroArgWord =
+    word inMacroArg
+
+
+inMacroArg : Char -> Bool
+inMacroArg c =
+    not (c == '$' || c == '}' || c == ' ' || c == '\n')
+
+
+
+{- OPTION ARG WORDS -}
+
+
+optionArgWords : Parser LatexExpression
+optionArgWords =
+    nonEmptyItemList optionArgWord
+        |> map (String.join " ")
+        |> map LXString
+
+
+optionArgWord : Parser String
+optionArgWord =
+    word inOptionArgWord
+
+
+inOptionArgWord : Char -> Bool
+inOptionArgWord c =
+    not (c == '$' || c == ']' || c == ' ' || c == '\n')
+
+
+
+{- SPECIAL WORDS -}
+
+
+specialWords : Parser LatexExpression
+specialWords =
+    nonEmptyItemList specialWord
+        |> map (String.join " ")
+        |> map LXString
+
+
+specialWord : Parser String
+specialWord =
+    word inSpecialWord
+
+
+inSpecialWord : Char -> Bool
+inSpecialWord c =
+    not (c == ' ' || c == '\n' || c == '\\' || c == '$')
+
+
+
+{- TEX COMMENTS -}
 
 
 texComment : Parser LatexExpression
@@ -184,7 +252,7 @@ optionalArg =
     -- inContext "optionalArg" <|
     (succeed identity
         |. symbol "["
-        |= itemList (oneOf [ specialWords, inlineMath PH.spaces ])
+        |= itemList (oneOf [ optionArgWords, inlineMath PH.spaces ])
         |. symbol "]"
         |> map LatexList
     )

@@ -4,7 +4,6 @@
   "repository": "https://github.com/jxxcarlson/meenylatex.git",
   "license": "BSD-3-Clause",
   "source-directories": [
-      "./src",
       "./demo"
   ],
   "exposed-modules": [

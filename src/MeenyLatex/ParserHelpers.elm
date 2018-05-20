@@ -1,20 +1,15 @@
-module MeenyLatex.ParserHelpers exposing (..)
-
--- exposing
---     ( spaces
---     , ws
---     , parseUntil
---     , parseTo
---     , parseFromTo
---     , nonEmptyItemList
---     , itemList
---     , itemListWithSeparator
---     , word
---     , specialWord
---     , macroArgWord
---     , transformWords
---     , notSpaceOrSpecialCharacters
---     )
+module MeenyLatex.ParserHelpers
+    exposing
+        ( spaces
+        , ws
+        , parseUntil
+        , parseTo
+        , parseFromTo
+        , nonEmptyItemList
+        , itemList
+        , itemListWithSeparator
+        , transformWords
+        )
 
 import Parser exposing (..)
 

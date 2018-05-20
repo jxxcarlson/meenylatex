@@ -1,20 +1,13 @@
-module MeenyLatex.Source exposing (..)
+module MeenyLatex.Source exposing (texPrefix, texSuffix)
 
 {-| This module provides boilerplat eext.
 
 
 # API
 
-@docs foo, texPrefix, texSuffix
+@docs texPrefix, texSuffix
 
 -}
-
-
-{-| For testing.
--}
-foo : String
-foo =
-    """ yada """
 
 
 {-| A standarad preamble

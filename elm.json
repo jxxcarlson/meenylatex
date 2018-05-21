@@ -5,7 +5,7 @@
     "license": "BSD-3-Clause",
     "version": "1.0.0",
     "source-directories": [
-        "./src", "./demo"
+        "./src", "./demo", "./myTests"
     ],
     "exposed-modules": [
         "MeenyLatex.Driver",

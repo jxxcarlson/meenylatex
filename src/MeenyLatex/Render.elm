@@ -1,11 +1,12 @@
-module MeenyLatex.Render
-    exposing
-        ( makeTableOfContents
-        , render
-        , renderLatexList
-        , renderString
-        , transformText
-        )
+module MeenyLatex.Render exposing (..)
+
+-- exposing
+--     ( makeTableOfContents
+--     , render
+--     , renderLatexList
+--     , renderString
+--     , transformText
+--     )
 
 import Dict
 
@@ -52,6 +53,11 @@ parseString parser str =
     Parser.run parser str
 
 
+
+-- renderString latexList latexState text
+
+
+renderString : Parser.Parser LatexExpression -> LatexState -> String -> String
 renderString parser latexState str =
     let
         parserOutput =
@@ -393,8 +399,48 @@ renderListing latexState body =
 {- MACROS: DISPATCHERS AND HELPERS -}
 
 
+boost : (x -> z -> output) -> (x -> y -> z -> output)
+boost f =
+    \x y z -> f x z
+
+
+type alias Renderer =
+    LatexState -> List LatexExpression -> List LatexExpression -> String
+
+
+type alias RenderDict =
+    Dict.Dict String Renderer
+
+
+
+-- evalDict : RenderDict -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Maybe String
+-- evalDict dict str x y z =
+--     case (Dict.get str dict) of
+--         Just g ->
+--             Just (g x z)
+--
+--         Nothing ->
+--             Nothing
+--
+--
+-- renderMacroDict : RenderDict
+-- renderMacroDict =
+--     Dict.fromList
+--         [ ( "bozo", boost renderBozo2 )
+--         ]
+-- renderBozo2 x z =
+--     "Bozo!"
+
+
 renderMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> String)
 renderMacroDict =
+    Dict.fromList
+        [ ( "italic", \x y z -> renderBozo x z )
+        ]
+
+
+renderMacroDict1 : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> String)
+renderMacroDict1 =
     Dict.fromList
         [ ( "bozo", \x y z -> renderBozo x z )
         , ( "bigskip", \x y z -> renderBigSkip x z )
@@ -451,13 +497,18 @@ renderSMacroDict =
 
 
 macroRenderer : String -> (LatexState -> List LatexExpression -> List LatexExpression -> String)
-macroRenderer name =
+macroRenderer name latexState optArgs args =
     case Dict.get name renderMacroDict of
         Just f ->
-            f
+            f latexState optArgs args
 
         Nothing ->
-            reproduceMacro name
+            reproduceMacro name latexState optArgs args
+
+
+macroRenderer2 : String -> (LatexState -> List LatexExpression -> List LatexExpression -> String)
+macroRenderer2 name latexState optArgs args =
+    renderItalic latexState args
 
 
 reproduceMacro : String -> LatexState -> List LatexExpression -> List LatexExpression -> String
@@ -467,7 +518,7 @@ reproduceMacro name latexState optArgs args =
 
 renderMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> String
 renderMacro latexState name optArgs args =
-    macroRenderer name latexState optArgs args
+    (macroRenderer name) latexState optArgs args
 
 
 renderArg : Int -> LatexState -> List LatexExpression -> String

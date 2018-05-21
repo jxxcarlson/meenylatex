@@ -19,7 +19,24 @@ import Json.Encode as Encode
 
 
 main =
-    Browser.embed { init = init, subscriptions = subscriptions, update = update, view = view }
+    Browser.embed
+        { init = init
+
+        --, onNavigation =  Maybe (Url.Parser.Url -> msg)
+        , subscriptions = subscriptions
+        , update = update
+        , view = view
+        }
+
+
+
+--
+-- { init : { flags : flags, url : Url.Parser.Url } -> ( model, Cmd msg )
+-- , onNavigation : Maybe (Url.Parser.Url -> msg)
+-- , subscriptions : model -> Sub msg
+-- , update : msg -> model -> ( model, Cmd msg )
+-- , view : model -> Browser.Page msg
+-- }
 
 
 type alias Flags =

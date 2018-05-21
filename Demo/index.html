@@ -48,6 +48,7 @@
 </head>
 
 <body>
+    <div id="main"></div>
 
     <script type="text/x-mathjax-config">
        MathJax.Hub.Config(
@@ -60,12 +61,9 @@
 <script src="./app.js"></script>
 
   <script>
-    var app = Elm.Main.embed(
-      {
-          width:  1200,
-          height: 900
-      }
-    )
+    var node = document.getElementById('main');
+
+    var app = Elm.Main.embed( node,  { width:  1200, height: 900 })
 
       function typesetNow(){
         console.log("** typesetNow ... ")

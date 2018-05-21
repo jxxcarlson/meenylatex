@@ -13,6 +13,7 @@ import Fuzz exposing (Fuzzer, list, int, string)
 import Test exposing (..)
 
 
+renderString2 : Parser.Parser MeenyLatex.Parser.LatexExpression -> String -> String
 renderString2 parser str =
     renderString parser MeenyLatex.LatexState.emptyLatexState str
 

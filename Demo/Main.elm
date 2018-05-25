@@ -21,8 +21,6 @@ import Json.Encode as Encode
 main =
     Browser.embed
         { init = init
-
-        --, onNavigation =  Maybe (Url.Parser.Url -> msg)
         , subscriptions = subscriptions
         , update = update
         , view = view
@@ -53,6 +51,9 @@ init flags =
 
         editRecord =
             MeenyLatex.setup 0 Source.initialText
+
+        _ =
+            Debug.log "RENDERED TEXT" (MeenyLatex.getRenderedText "" editRecord)
 
         model =
             { counter = 0

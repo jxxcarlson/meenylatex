@@ -1,6 +1,7 @@
 module MacroTest2 exposing (..)
 
 import Dict exposing (Dict)
+import Parser exposing (DeadEnd)
 
 
 {- Lines of code: 39
@@ -45,8 +46,8 @@ type alias MacroDict =
 macroDict : MacroDict
 macroDict =
     Dict.fromList
-        [ ( "wasup", renderWasup )
-        , ( "lol", renderLol )
+        [ ( "\\wasup", renderWasup )
+        , ( "\\lol", renderLol )
         ]
 
 

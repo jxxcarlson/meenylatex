@@ -1,14 +1,4 @@
-module MeenyLatex.Parser
-    exposing
-        ( LatexExpression(..)
-        , macro
-        , parse
-        , endWord
-        , envName
-        , word
-        , defaultLatexList
-        , latexList
-        )
+module MeenyLatex.Parser exposing (..)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -18,6 +8,16 @@ module MeenyLatex.Parser
 @docs LatexExpression, macro, parse, defaultLatexList, latexList, endWord, envName
 
 -}
+
+-- ( LatexExpression(..)
+-- , macro
+-- , parse
+-- , endWord
+-- , envName
+-- , word
+-- , defaultLatexList
+-- , latexList
+-- )
 
 import Dict
 import MeenyLatex.ParserHelpers as PH exposing (..)

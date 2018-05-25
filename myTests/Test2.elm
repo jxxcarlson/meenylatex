@@ -1,9 +1,9 @@
 module Test2 exposing (..)
 
 import Parser exposing (..)
-import List.Extra
 
 
+-- import List.Extra
 {-
 
    Below is a simplified version of the MiniLatex parser. The infinite recursion
@@ -243,6 +243,14 @@ ws =
 {- For debugging -}
 
 
+getAt : Int -> List a -> Maybe a
+getAt idx xs =
+    if idx < 0 then
+        Nothing
+    else
+        List.head <| List.drop idx xs
+
+
 getCharAt : Int -> String -> Maybe String
 getCharAt index str =
-    str |> String.split "" |> List.Extra.getAt (index - 1)
+    str |> String.split "" |> getAt (index - 1)

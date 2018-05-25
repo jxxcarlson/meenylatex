@@ -16,7 +16,6 @@ module MeenyLatex.RenderToLatex
 
 -}
 
-import List.Extra
 import MeenyLatex.ErrorMessages as ErrorMessages
 import MeenyLatex.JoinStrings as JoinStrings
 import MeenyLatex.Paragraph

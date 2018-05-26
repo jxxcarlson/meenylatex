@@ -151,14 +151,42 @@ type Spacing
     | NoSpace
 
 
+lastChar =
+    String.right 1
+
+
+firstChar =
+    String.left 1
+
+
+spaceBefore str =
+    if List.member (lastChar str) [ "(" ] then
+        NoSpace
+    else
+        SpaceBefore
+
+
+spaceAfter str =
+    if List.member (firstChar str) [ ")", ".", ",", "?", "!", ";", ":" ] then
+        NoSpace
+    else
+        SpaceAfter
+
+
 putSpace : LatexExpression -> LatexExpression -> ( LatexExpression, Spacing )
 putSpace le1 le2 =
     case ( le1, le2 ) of
         ( _, LXString "!!END" ) ->
             ( le1, NoSpace )
 
+        ( _, LXString str ) ->
+            ( le1, spaceAfter str )
+
+        ( LXString str, _ ) ->
+            ( le1, spaceBefore str )
+
         ( _, _ ) ->
-            ( le1, SpaceAfter )
+            ( le1, NoSpace )
 
 
 putSpaces : List LatexExpression -> List ( LatexExpression, Spacing )

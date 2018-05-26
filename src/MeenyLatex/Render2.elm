@@ -35,7 +35,7 @@ import MeenyLatex.Utility as Utility
 import Parser
 import Regex
 import String
-import Html.Attributes
+import Html.Attributes as HA
 
 
 {-
@@ -279,7 +279,12 @@ renderMacroDict =
         , ( "smallskip", \x y z -> renderSmallSkip x z )
         , ( "bozo", boost renderBozo )
         , ( "cite", \x y z -> renderCite x z )
+        , ( "code", \x y z -> renderCode x z )
+        , ( "ellie", \x y z -> renderEllie x z )
         , ( "emph", \x y z -> renderItalic x z )
+        , ( "eqref", \x y z -> renderEqRef x z )
+        , ( "href", \x y z -> renderHRef x z )
+        , ( "image", \x y z -> renderImage x z )
         , ( "italic", \x y z -> renderItalic x z )
         , ( "strong", \x y z -> renderStrong x z )
         ]
@@ -293,6 +298,11 @@ renderArgList latexState args =
 enclose : Html msg -> Html msg
 enclose msg =
     Html.span [] [ Html.text "{", msg, Html.text "}" ]
+
+
+oneSpace : Html msg
+oneSpace =
+    Html.text " "
 
 
 
@@ -315,7 +325,7 @@ renderItalic latexState args =
 
 renderStrong : LatexState -> List LatexExpression -> Html msg
 renderStrong latexState args =
-    Html.strong [] [ Html.text " ", renderArg 0 latexState args ]
+    Html.strong [] [ oneSpace, renderArg 0 latexState args ]
 
 
 renderBigSkip : LatexState -> List LatexExpression -> Html msg
@@ -355,7 +365,102 @@ renderCite latexState args =
             ]
 
 
+renderCode : LatexState -> List LatexExpression -> Html msg
+renderCode latexState args =
+    let
+        arg =
+            renderArg 0 latexState args
+    in
+        Html.code [] [ oneSpace, arg ]
 
+
+renderEllie : LatexState -> List LatexExpression -> Html msg
+renderEllie latexState args =
+    let
+        src =
+            "src =\"https://ellie-app.com/embed/" ++ (MeenyLatex.Render.renderArg 0 latexState args ++ "\"")
+
+        url =
+            Debug.log "URL"
+                ("https://ellie-app.com/" ++ (MeenyLatex.Render.renderArg 0 latexState args))
+
+        title_ =
+            MeenyLatex.Render.renderArg 1 latexState args
+
+        title =
+            if title_ == "xxx" then
+                "Link to Ellie"
+            else
+                title_
+    in
+        Html.iframe [ Html.Attributes.href url ] [ Html.text title ]
+
+
+renderEqRef : LatexState -> List LatexExpression -> Html msg
+renderEqRef latexState args =
+    let
+        key =
+            MeenyLatex.Render.renderArg 0 emptyLatexState args
+
+        ref =
+            getCrossReference key latexState
+    in
+        Html.i [] [ Html.text "(", Html.text ref, Html.text ")" ]
+
+
+renderHRef : LatexState -> List LatexExpression -> Html msg
+renderHRef latexState args =
+    let
+        url =
+            MeenyLatex.Render.renderArg 0 emptyLatexState args
+
+        label =
+            MeenyLatex.Render.renderArg 1 emptyLatexState args
+    in
+        Html.a [ Html.Attributes.href url ] [ Html.text label ]
+
+
+renderImage : LatexState -> List LatexExpression -> Html msg
+renderImage latexState args =
+    let
+        url =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        label =
+            MeenyLatex.Render.renderArg 1 latexState args
+
+        attributeString =
+            MeenyLatex.Render.renderArg 2 latexState args
+
+        imageAttrs =
+            parseImageAttributes attributeString
+    in
+        if imageAttrs.float == "left" then
+            Html.img
+                [ HA.src url, HA.alt label, HA.align "left", HA.width imageAttrs.width ]
+                [ Html.caption [] [ Html.text label ] ]
+        else if imageAttrs.float == "right" then
+            Html.img [ HA.src url, HA.alt label, HA.align "right", HA.width imageAttrs.width ]
+                [ Html.caption [] [ Html.text label ] ]
+        else if imageAttrs.align == "center" then
+            Html.img [ HA.src url, HA.alt label, HA.align "center", HA.width imageAttrs.width ]
+                [ Html.caption [] [ Html.text label ] ]
+        else
+            Html.img [ HA.src url, HA.alt label, HA.align "center", HA.width imageAttrs.width ]
+                [ Html.caption [] [ Html.text label ] ]
+
+
+
+--
+-- "<iframe "
+-- ++ src
+-- ++ style
+-- ++ sandbox
+-- ++ " ></iframe>\n<center style=\"margin-top: -10px;\"><a href=\""
+-- ++ url
+-- ++ "\" target=_blank>"
+-- ++ title
+-- ++ "</a></center>"
 {- END RENDER INDIVIDUAL MACROS -}
 -- " <span>[<a href=\"#bib:" ++ label ++ "\">" ++ label ++ "</a>]</span>"
 -- renderOptArgList : LatexState -> List LatexExpression -> String
@@ -640,14 +745,7 @@ renderCite latexState args =
    renderMacroDict =
        Dict.fromList
            [
-           , ( "code", \x y z -> renderCode x z )
-           , ( "comment", \x y z -> renderInlineComment x z )
-           , ( "ellie", \x y z -> renderEllie x z )
 
-           , ( "eqref", \x y z -> renderEqRef x z )
-           , ( "href", \x y z -> renderHRef x z )
-           , ( "iframe", \x y z -> renderIFrame x z )
-           , ( "image", \x y z -> renderImage x z )
            , ( "imageref", \x y z -> renderImageRef x z )
            , ( "index", \x y z -> "" )
 
@@ -736,111 +834,9 @@ renderCite latexState args =
    -}
 
 
-
-   renderCode : LatexState -> List LatexExpression -> String
-   renderCode latexState args =
-       let
-           arg =
-               renderArg 0 latexState args
-       in
-           " <span class=\"code\">" ++ arg ++ "</span>"
-
-
    renderInlineComment : LatexState -> List LatexExpression -> String
    renderInlineComment latexState args =
        ""
-
-
-   renderEllie : LatexState -> List LatexExpression -> String
-   renderEllie latexState args =
-       let
-           src =
-               "src =\"https://ellie-app.com/embed/" ++ renderArg 0 latexState args ++ "\""
-
-           url =
-               "https://ellie-app.com/" ++ renderArg 0 latexState args
-
-           title_ =
-               renderArg 1 latexState args
-
-           foo =
-               27.99
-
-           title =
-               if title_ == "xxx" then
-                   "Link to Ellie"
-               else
-                   title_
-
-           style =
-               " style = \"width:100%; height:400px; border:0; border-radius: 3px; overflow:hidden;\""
-
-           sandbox =
-               " sandbox=\"allow-modals allow-forms allow-popups allow-scripts allow-same-origin\""
-       in
-           "<iframe " ++ src ++ style ++ sandbox ++ " ></iframe>\n<center style=\"margin-top: -10px;\"><a href=\"" ++ url ++ "\" target=_blank>" ++ title ++ "</a></center>"
-
-
-   renderEqRef : LatexState -> List LatexExpression -> String
-   renderEqRef latexState args =
-       let
-           key =
-               renderArg 0 emptyLatexState args
-
-           ref =
-               getCrossReference key latexState
-       in
-           "$(" ++ ref ++ ")$"
-
-
-   renderHRef : LatexState -> List LatexExpression -> String
-   renderHRef latexState args =
-       let
-           url =
-               renderArg 0 emptyLatexState args
-
-           label =
-               renderArg 1 emptyLatexState args
-       in
-           "<a href=\"" ++ url ++ "\" target=_blank>" ++ label ++ "</a>"
-
-
-   renderIFrame : LatexState -> List LatexExpression -> String
-   renderIFrame latexState args =
-       let
-           url =
-               renderArg 0 emptyLatexState args
-
-           src =
-               "src =\"" ++ url ++ "\""
-
-           title_ =
-               renderArg 1 emptyLatexState args
-
-           title =
-               if title_ == "xxx" then
-                   "Link"
-               else
-                   title_
-
-           height_ =
-               renderArg 2 emptyLatexState args
-
-           height =
-               if title_ == "xxx" || height_ == "xxx" then
-                   "400px"
-               else
-                   height_
-
-           sandbox =
-               ""
-
-           style =
-               " style = \"width:100%; height:" ++ height ++ "; border:1; border-radius: 3px; overflow:scroll;\""
-       in
-           "<iframe scrolling=\"yes\" " ++ src ++ sandbox ++ style ++ " ></iframe>\n<center style=\"margin-top: 0px;\"><a href=\"" ++ url ++ "\" target=_blank>" ++ title ++ "</a></center>"
-
-
 
 
 
@@ -1131,29 +1127,6 @@ renderCite latexState args =
                "asection"
 
 
-   renderImage : LatexState -> List LatexExpression -> String
-   renderImage latexState args =
-       let
-           url =
-               renderArg 0 latexState args
-
-           label =
-               renderArg 1 latexState args
-
-           attributeString =
-               renderArg 2 latexState args
-
-           imageAttrs =
-               parseImageAttributes attributeString
-       in
-           if imageAttrs.float == "left" then
-               Html.div [ imageFloatLeftStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
-           else if imageAttrs.float == "right" then
-               Html.div [ imageFloatRightStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
-           else if imageAttrs.align == "center" then
-               Html.div [ imageCenterStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
-           else
-               "<image src=\"" ++ url ++ "\" " ++ imageAttributes imageAttrs attributeString ++ " >"
 
 
    renderImageRef : LatexState -> List LatexExpression -> String

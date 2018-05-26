@@ -60,9 +60,12 @@ view model =
         , example <| InlineMath "a^2 + b^2 = c^2"
         , example <| DisplayMath "a^2 + b^2 = c^2"
         , example <| LatexList [ LXString "Well,", LXString "he", LXString "said to the lady", LXString ". Howdy!" ]
-        , example <| LatexList [ LXString "He said", Macro "italic" [] ([ LatexList ([ LXString "Justice!" ]) ]) ]
         , example <| LatexList [ Macro "bozo" [] ([ arg1, arg2 ]) ]
         , example <| LatexList [ Macro "yada" [] ([ arg1, arg2 ]) ]
+        , example <| LatexList [ LXString "He cried", Macro "italic" [] ([ LatexList ([ LXString "Justice!" ]) ]) ]
+        , example <| LatexList [ LXString "He cried", Macro "strong" [] ([ LatexList ([ LXString "Justice!" ]) ]) ]
+        , example <| LatexList [ LXString "one", Macro "bigskip" [] [], LXString "two" ]
+        , example <| LatexList [ Macro "cite" [] ([ LatexList ([ LXString "Foo" ]) ]) ]
         ]
 
 

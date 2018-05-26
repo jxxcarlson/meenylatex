@@ -16,6 +16,7 @@ import Json.Encode
 
 -- import List.Extra
 
+import MeenyLatex.Render
 import MeenyLatex.Configuration as Configuration
 import MeenyLatex.ErrorMessages as ErrorMessages
 import MeenyLatex.Image as Image exposing (..)
@@ -34,6 +35,7 @@ import MeenyLatex.Utility as Utility
 import Parser
 import Regex
 import String
+import Html.Attributes
 
 
 {-
@@ -272,13 +274,29 @@ boost f =
 renderMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
 renderMacroDict =
     Dict.fromList
-        [ ( "bozo", boost renderBozo )
+        [ ( "bigskip", \x y z -> renderBigSkip x z )
+        , ( "medskip", \x y z -> renderMedSkip x z )
+        , ( "smallskip", \x y z -> renderSmallSkip x z )
+        , ( "bozo", boost renderBozo )
+        , ( "cite", \x y z -> renderCite x z )
+        , ( "emph", \x y z -> renderItalic x z )
+        , ( "italic", \x y z -> renderItalic x z )
+        , ( "strong", \x y z -> renderStrong x z )
         ]
+
+
+renderArgList : LatexState -> List LatexExpression -> List (Html msg)
+renderArgList latexState args =
+    args |> List.map (render latexState)
 
 
 enclose : Html msg -> Html msg
 enclose msg =
     Html.span [] [ Html.text "{", msg, Html.text "}" ]
+
+
+
+{- RENDER INDIVIDUAL MACROS -}
 
 
 renderBozo : LatexState -> List LatexExpression -> Html msg
@@ -290,16 +308,59 @@ renderBozo latexState args =
         ]
 
 
-renderArgList : LatexState -> List LatexExpression -> List (Html msg)
-renderArgList latexState args =
-    args |> List.map (render latexState)
+renderItalic : LatexState -> List LatexExpression -> Html msg
+renderItalic latexState args =
+    Html.i [] [ Html.text " ", renderArg 0 latexState args ]
+
+
+renderStrong : LatexState -> List LatexExpression -> Html msg
+renderStrong latexState args =
+    Html.strong [] [ Html.text " ", renderArg 0 latexState args ]
+
+
+renderBigSkip : LatexState -> List LatexExpression -> Html msg
+renderBigSkip latexState args =
+    Html.div [] [ Html.br [] [] ]
+
+
+renderMedSkip : LatexState -> List LatexExpression -> Html msg
+renderMedSkip latexState args =
+    Html.div [] [ Html.br [] [] ]
+
+
+renderSmallSkip : LatexState -> List LatexExpression -> Html msg
+renderSmallSkip latexState args =
+    Html.div [] [ Html.br [] [] ]
+
+
+renderCite : LatexState -> List LatexExpression -> Html msg
+renderCite latexState args =
+    let
+        label_ =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        ref =
+            getDictionaryItem ("bibitem:" ++ label_) latexState
+
+        label =
+            if ref /= "" then
+                ref
+            else
+                label_
+    in
+        Html.span []
+            [ Html.span [] [ Html.text "[" ]
+            , Html.a [ Html.Attributes.href label ] [ Html.text label ]
+            , Html.span [] [ Html.text "]" ]
+            ]
 
 
 
+{- END RENDER INDIVIDUAL MACROS -}
+-- " <span>[<a href=\"#bib:" ++ label ++ "\">" ++ label ++ "</a>]</span>"
 -- renderOptArgList : LatexState -> List LatexExpression -> String
 -- renderOptArgList latexState args =
 --     args |> List.map (render latexState) |> List.map (\x -> "[" ++ x ++ "]") |> String.join ""
-{- END RENDER MACRO -}
 {-
    renderLatexList : LatexState -> List LatexExpression -> String
    renderLatexList latexState args =
@@ -573,30 +634,23 @@ renderArgList latexState args =
 
 
 
-   renderMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> String)
-   renderMacroDict =
-       Dict.fromList
-           [ ( "italic", \x y z -> renderBozo x z )
-           ]
 
 
    renderMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> String)
    renderMacroDict =
        Dict.fromList
-           [ ( "bozo", \x y z -> renderBozo x z )
-           , ( "bigskip", \x y z -> renderBigSkip x z )
-           , ( "cite", \x y z -> renderCite x z )
+           [
            , ( "code", \x y z -> renderCode x z )
            , ( "comment", \x y z -> renderInlineComment x z )
            , ( "ellie", \x y z -> renderEllie x z )
-           , ( "emph", \x y z -> renderItalic x z )
+
            , ( "eqref", \x y z -> renderEqRef x z )
            , ( "href", \x y z -> renderHRef x z )
            , ( "iframe", \x y z -> renderIFrame x z )
            , ( "image", \x y z -> renderImage x z )
            , ( "imageref", \x y z -> renderImageRef x z )
            , ( "index", \x y z -> "" )
-           , ( "italic", \x y z -> renderItalic x z )
+
            , ( "label", \x y z -> "" )
            , ( "tableofcontents", \x y z -> renderTableOfContents x z )
            , ( "maketitle", \x y z -> renderTitle x z )
@@ -609,7 +663,7 @@ renderArgList latexState args =
            , ( "setcounter", \x y z -> "" )
            , ( "medskip", \x y z -> renderMedSkip x z )
            , ( "smallskip", \x y z -> renderSmallSkip x z )
-           , ( "strong", \x y z -> renderStrong x z )
+
            , ( "subheading", \x y z -> renderSubheading x z )
            , ( "subsection", \x y z -> renderSubsection x z )
            , ( "subsection*", \x y z -> renderSubsectionStar x z )
@@ -675,39 +729,12 @@ renderArgList latexState args =
            " <p id=\"bib:" ++ label ++ "\">[" ++ label ++ "] " ++ render latexState body ++ "</p>\n"
 
 
-   renderBigSkip : LatexState -> List LatexExpression -> Html msg
-   renderBigSkip latexState args =
-       Html.br [] []
 
-
-   renderMedSkip : LatexState -> List LatexExpression -> Html msg
-   renderMedSkip latexState args =
-       Html.br [] []
-
-
-   renderSmallSkip : LatexState -> List LatexExpression -> Html msg
-   renderSmallSkip latexState args =
-       Html.br [] []
 
 
    {-| Needs work
    -}
-   renderCite : LatexState -> List LatexExpression -> String
-   renderCite latexState args =
-       let
-           label_ =
-               renderArg 0 latexState args
 
-           ref =
-               getDictionaryItem ("bibitem:" ++ label_) latexState
-
-           label =
-               if ref /= "" then
-                   ref
-               else
-                   label_
-       in
-           " <span>[<a href=\"#bib:" ++ label ++ "\">" ++ label ++ "</a>]</span>"
 
 
    renderCode : LatexState -> List LatexExpression -> String
@@ -814,9 +841,7 @@ renderArgList latexState args =
            "<iframe scrolling=\"yes\" " ++ src ++ sandbox ++ style ++ " ></iframe>\n<center style=\"margin-top: 0px;\"><a href=\"" ++ url ++ "\" target=_blank>" ++ title ++ "</a></center>"
 
 
-   renderItalic : LatexState -> List LatexExpression -> String
-   renderItalic latexState args =
-       " <span class=italic>" ++ renderArg 0 latexState args ++ "</span>"
+
 
 
    renderNewCommand : LatexState -> List LatexExpression -> String
@@ -906,9 +931,7 @@ renderArgList latexState args =
            tag "h2" (idPhrase "section" sectionName) sectionName
 
 
-   renderStrong : LatexState -> List LatexExpression -> String
-   renderStrong latexState args =
-       " <span class=\"strong\">" ++ renderArg 0 latexState args ++ "</span> "
+
 
 
    renderSubheading : LatexState -> List LatexExpression -> String

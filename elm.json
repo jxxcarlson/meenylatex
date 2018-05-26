@@ -10,6 +10,7 @@
     "exposed-modules": [
         "MeenyLatex.Driver",
         "MeenyLatex.Source",
+        "MeenyLatex.Render2",
         "MeenyLatex.RenderLatexForExport",
         "MeenyLatex.FastExportToLatex",
         "MeenyLatex.Differ"

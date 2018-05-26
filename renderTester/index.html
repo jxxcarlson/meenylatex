@@ -1,0 +1,36 @@
+<html>
+<head>
+   <meta charset="utf-8" />
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.1.1/custom-elements.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+   <script src="./app.js"></script>
+  <style>
+    /* you can style your program here */
+  </style>
+</head>
+<body>
+  <main></main>
+
+  <script>
+    var app = Elm.Main.embed(document.querySelector('main'))
+    // you can use ports and stuff here
+    // you can use ports and stuff here
+
+    customElements.define('math-text', class extends HTMLElement {
+      get content() {
+        return this._content;
+      }
+      set content(value) {
+        this._content = value;
+        this.textContent = this._content
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this])
+      }
+
+      connectedCallback() {
+        this.textContent = this._content
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this])
+      }
+    })
+  </script>
+</body>
+</html>

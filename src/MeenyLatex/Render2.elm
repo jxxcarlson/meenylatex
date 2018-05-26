@@ -285,7 +285,14 @@ renderMacroDict =
         , ( "eqref", \x y z -> renderEqRef x z )
         , ( "href", \x y z -> renderHRef x z )
         , ( "image", \x y z -> renderImage x z )
+        , ( "index", \x y z -> renderIndex x z )
         , ( "italic", \x y z -> renderItalic x z )
+        , ( "label", \x y z -> renderLabel x z )
+        , ( "maketitle", \x y z -> renderTitle x z )
+        , ( "mdash", \x y z -> renderMdash x z )
+        , ( "ndash", \x y z -> renderNdash x z )
+        , ( "newcommand", \x y z -> renderNewCommand x z )
+        , ( "tableofcontents", \x y z -> renderTableOfContents x z )
         , ( "strong", \x y z -> renderStrong x z )
         ]
 
@@ -448,6 +455,161 @@ renderImage latexState args =
         else
             Html.img [ HA.src url, HA.alt label, HA.align "center", HA.width imageAttrs.width ]
                 [ Html.caption [] [ Html.text label ] ]
+
+
+renderIndex : LatexState -> List LatexExpression -> Html msg
+renderIndex x z =
+    Html.span [] []
+
+
+renderLabel : LatexState -> List LatexExpression -> Html msg
+renderLabel x z =
+    Html.span [] []
+
+
+
+{- RENDER TABLE CONTENTS -}
+
+
+renderTableOfContents : LatexState -> List LatexExpression -> Html msg
+renderTableOfContents latexState list =
+    let
+        innerPart =
+            makeTableOfContents latexState
+    in
+        Html.div []
+            [ Html.h3 [] [ Html.text "Table of Contents" ]
+            , Html.ul [] innerPart
+            ]
+
+
+makeTableOfContents : LatexState -> List (Html msg)
+makeTableOfContents latexState =
+    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)
+
+
+makeTocItem : ( Int, TocEntry ) -> Html msg
+makeTocItem tocItem =
+    let
+        i =
+            Tuple.first tocItem
+
+        ti =
+            Tuple.second tocItem
+
+        classProperty =
+            "class=\"sectionLevel" ++ String.fromInt ti.level ++ "\""
+
+        id =
+            makeId (sectionPrefix ti.level) ti.name
+
+        href =
+            "href=\"#_" ++ id ++ "\""
+    in
+        Html.li [] [ Html.a [ Html.Attributes.href href ] [ Html.text ti.name ] ]
+
+
+makeId : String -> String -> String
+makeId prefix name =
+    String.join ":" [ prefix, compress ":" name ]
+
+
+compress : String -> String -> String
+compress replaceBlank str =
+    str
+        |> String.toLower
+        |> String.replace " " replaceBlank
+        |> userReplace "[,;.!?&_]" (\_ -> "")
+
+
+userReplace : String -> (Regex.Match -> String) -> String -> String
+userReplace userRegex replacer string =
+    case Regex.fromString userRegex of
+        Nothing ->
+            string
+
+        Just regex ->
+            Regex.replace regex replacer string
+
+
+sectionPrefix : Int -> String
+sectionPrefix level =
+    case level of
+        1 ->
+            "section"
+
+        2 ->
+            "subsection"
+
+        3 ->
+            "subsubsection"
+
+        _ ->
+            "asection"
+
+
+
+{- END TABLE OF CONTENTS -}
+
+
+renderMdash : LatexState -> List LatexExpression -> Html msg
+renderMdash latexState args =
+    Html.span [] [ Html.text "---" ]
+
+
+renderNdash : LatexState -> List LatexExpression -> Html msg
+renderNdash latexState args =
+    Html.span [] [ Html.text "--" ]
+
+
+renderNewCommand : LatexState -> List LatexExpression -> Html msg
+renderNewCommand latexState args =
+    let
+        command =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        definition =
+            MeenyLatex.Render.renderArg 1 latexState args
+    in
+        Html.span [] [ Html.text <| "\\newcommand{" ++ command ++ "}{" ++ definition ++ "}" ]
+
+
+renderTitle : LatexState -> List LatexExpression -> Html msg
+renderTitle latexState list =
+    let
+        title =
+            getDictionaryItem "title" latexState
+
+        author =
+            getDictionaryItem "author" latexState
+
+        date =
+            getDictionaryItem "date" latexState
+
+        email =
+            getDictionaryItem "email" latexState
+
+        revision =
+            getDictionaryItem "revision" latexState
+
+        revisionText =
+            if revision /= "" then
+                "Last revised " ++ revision
+            else
+                ""
+
+        titlePart =
+            Html.div [ HA.class "title" ] [ Html.text title ]
+
+        bodyParts =
+            [ author, email, date, revisionText ]
+                |> List.filter (\x -> x /= "")
+                |> List.map (\x -> Html.li [] [ Html.text x ])
+
+        bodyPart =
+            Html.ul [] bodyParts
+    in
+        Html.div [] [ titlePart, bodyPart ]
 
 
 
@@ -745,16 +907,7 @@ renderImage latexState args =
    renderMacroDict =
        Dict.fromList
            [
-
            , ( "imageref", \x y z -> renderImageRef x z )
-           , ( "index", \x y z -> "" )
-
-           , ( "label", \x y z -> "" )
-           , ( "tableofcontents", \x y z -> renderTableOfContents x z )
-           , ( "maketitle", \x y z -> renderTitle x z )
-           , ( "mdash", \x y z -> "&mdash;" )
-           , ( "ndash", \x y z -> "&ndash;" )
-           , ( "newcommand", \x y z -> renderNewCommand x z )
            , ( "ref", \x y z -> renderRef x z )
            , ( "section", \x y z -> renderSection x z )
            , ( "section*", \x y z -> renderSectionStar x z )
@@ -840,16 +993,7 @@ renderImage latexState args =
 
 
 
-   renderNewCommand : LatexState -> List LatexExpression -> String
-   renderNewCommand latexState args =
-       let
-           command =
-               renderArg 0 latexState args
 
-           definition =
-               renderArg 1 latexState args
-       in
-           "\\newcommand{" ++ command ++ "}{" ++ definition ++ "}"
 
 
    renderRef : LatexState -> List LatexExpression -> String
@@ -861,29 +1005,13 @@ renderImage latexState args =
            getCrossReference key latexState
 
 
-   makeId : String -> String -> String
-   makeId prefix name =
-       String.join ":" [ prefix, compress ":" name ]
 
 
-   userReplace : String -> (Regex.Match -> String) -> String -> String
-   userReplace userRegex replacer string =
-       case Regex.fromString userRegex of
-           Nothing ->
-               string
-
-           Just regex ->
-               Regex.replace regex replacer string
 
 
    {-| map str to lower case and squeeze out bad characters
    -}
-   compress : String -> String -> String
-   compress replaceBlank str =
-       str
-           |> String.toLower
-           |> String.replace " " replaceBlank
-           |> userReplace "[,;.!?&_]" (\_ -> "")
+
 
 
    idPhrase : String -> String -> String
@@ -895,9 +1023,6 @@ renderImage latexState args =
            String.join "" [ "id=\"_", makeId prefix name, "\"" ]
 
 
-   tag : String -> String -> String -> String
-   tag tagName tagProperties content =
-       String.join "" [ "<", tagName, " ", tagProperties, " ", ">", content, "</", tagName, ">" ]
 
 
    renderSection : LatexState -> List LatexExpression -> String
@@ -1035,96 +1160,7 @@ renderImage latexState args =
    {- TABLE OF CONTENTS -}
 
 
-   renderTitle : LatexState -> List LatexExpression -> String
-   renderTitle latexState list =
-       let
-           title =
-               getDictionaryItem "title" latexState
 
-           author =
-               getDictionaryItem "author" latexState
-
-           date =
-               getDictionaryItem "date" latexState
-
-           email =
-               getDictionaryItem "email" latexState
-
-           revision =
-               getDictionaryItem "revision" latexState
-
-           revisionText =
-               if revision /= "" then
-                   "Last revised " ++ revision
-               else
-                   ""
-
-           titlePart =
-               "\n<div class=\"title\">" ++ title ++ "</div>"
-
-           bodyParts =
-               [ "<div class=\"authorinfo\">", author, email, date, revisionText, "</div>\n" ]
-                   |> List.filter (\x -> x /= "")
-
-           bodyPart =
-               String.join "\n" bodyParts
-       in
-           String.join "\n" [ titlePart, bodyPart ]
-
-
-   renderTableOfContents : LatexState -> List LatexExpression -> String
-   renderTableOfContents latexState list =
-       let
-           innerPart =
-               makeTableOfContents latexState
-       in
-           "\n<p class=\"tocTitle\">Table of Contents</p>\n<ul class=\"ListEnvironment\">\n" ++ innerPart ++ "\n</ul>\n"
-
-
-   makeTableOfContents : LatexState -> String
-   makeTableOfContents latexState =
-       List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)
-           |> String.join "\n"
-
-
-   makeTocItem : ( Int, TocEntry ) -> String
-   makeTocItem tocItem =
-       let
-           i =
-               Tuple.first tocItem
-
-           ti =
-               Tuple.second tocItem
-
-           classProperty =
-               "class=\"sectionLevel" ++ String.fromInt ti.level ++ "\""
-
-           id =
-               makeId (sectionPrefix ti.level) ti.name
-
-           href =
-               "href=\"#_" ++ id ++ "\""
-
-           innerTag =
-               ti.label ++ " " ++ tag "a" href ti.name
-       in
-           tag "li" classProperty innerTag
-
-
-   sectionPrefix : Int -> String
-   sectionPrefix level =
-       case level of
-           1 ->
-               "section"
-
-           2 ->
-               "subsection"
-
-           3 ->
-               "subsubsection"
-
-           _ ->
-               "asection"
 
 
 

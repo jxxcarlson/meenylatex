@@ -69,8 +69,8 @@ view model =
         , example <| LatexList [ LXString "Use", Macro "code" [] ([ LatexList ([ LXString "return x" ]) ]), LXString "." ]
         , example <| LatexList [ Macro "href" [] ([ LatexList ([ LXString "https://ellie-app.com/krQCWKwv2Ta1" ]), LatexList ([ LXString "Ellie" ]) ]) ]
         , example <| LatexList [ Macro "image" [] ([ LatexList ([ LXString "http://cooldigital.photography/wp-content/uploads/2015/09/Rosy-Butterfly-620x412.jpg" ]), LatexList ([ LXString "Butterfly" ]), LatexList ([ LXString "width: 300, float: left" ]) ]) ]
+        , example <| LatexList [ Macro "index" [] ([ LatexList ([ LXString "foo" ]) ]) ]
         , example <| LatexList [ Macro "ellie" [] ([ LatexList ([ LXString "krQCWKwv2Ta1" ]), LatexList ([ LXString "Ellie" ]) ]) ]
-        , Html.iframe [ Html.Attributes.href "https://ellie-app.com/krQCWKwv2Ta1" ] [ Html.text "Ellie" ]
         ]
 
 

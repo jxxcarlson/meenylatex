@@ -55,12 +55,23 @@ example expr =
 view model =
     Html.div []
         [ line <| "Rendering experiment"
-        , example <| LXString "foo"
-        , example <| Comment "foo, bar !!"
+        , example <| LXString "This is a string"
+        , example <| Comment "This is a comment"
         , example <| InlineMath "a^2 + b^2 = c^2"
         , example <| DisplayMath "a^2 + b^2 = c^2"
-        , example <| LatexList [ LXString "aaa,", LXString "bbb", LXString "ccc", LXString ". ddd" ]
+        , example <| LatexList [ LXString "Well,", LXString "he", LXString "said to the lady", LXString ". Howdy!" ]
+        , example <| LatexList [ LXString "He said", Macro "italic" [] ([ LatexList ([ LXString "Justice!" ]) ]) ]
+        , example <| LatexList [ Macro "bozo" [] ([ arg1, arg2 ]) ]
+        , example <| LatexList [ Macro "yada" [] ([ arg1, arg2 ]) ]
         ]
+
+
+arg1 =
+    LatexList ([ LXString "Foo" ])
+
+
+arg2 =
+    LatexList ([ LXString "Bar" ])
 
 
 subscriptions model =

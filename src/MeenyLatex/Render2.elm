@@ -113,16 +113,15 @@ render latexState latexExpression =
             Html.p [] [ Html.text <| "((" ++ str ++ "))" ]
 
         Macro name optArgs args ->
-            -- renderMacro latexState name optArgs args
-            Html.p [] [ Html.text <| "((MACRO))" ]
+            renderMacro latexState name optArgs args
 
         SMacro name optArgs args le ->
             -- renderSMacro latexState name optArgs args le
-            Html.p [] [ Html.text <| "((SMACRO))" ]
+            Html.span [] [ Html.text <| " ((SMACRO)) " ]
 
         Item level latexExpr ->
             -- renderItem latexState level latexExpr
-            Html.p [] [ Html.text <| "((ITEM))" ]
+            Html.span [] [ Html.text <| " ((ITEM)) " ]
 
         InlineMath str ->
             mathText <| "\\(" ++ str ++ "\\)"
@@ -132,7 +131,7 @@ render latexState latexExpression =
 
         Environment name args body ->
             -- renderEnvironment latexState name args body
-            Html.p [] [ Html.text <| "((ENVIRONMENT))" ]
+            Html.p [] [ Html.text <| " ((ENVIRONMENT)) " ]
 
         LatexList latexList ->
             renderLatexList latexState latexList
@@ -143,6 +142,10 @@ render latexState latexExpression =
         LXError error ->
             -- List.map ErrorMessages.renderError error |> String.join "; "
             Html.p [] [ Html.text <| "((ERROR))" ]
+
+
+
+{- PROCESS SPACES BETWEEN ELEMENTS -}
 
 
 type Spacing
@@ -224,24 +227,84 @@ renderLatexList latexState latexList =
     latexList
         |> putSpaces
         |> processLatexListWithSpacing
-        |> (\list -> Html.div [] (List.map (render latexState) list))
+        |> (\list -> Html.span [] (List.map (render latexState) list))
 
 
 
+{- RENDER MACRO -}
+
+
+renderMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
+renderMacro latexState name optArgs args =
+    (macroRenderer name) latexState optArgs args
+
+
+renderArg : Int -> LatexState -> List LatexExpression -> Html msg
+renderArg k latexState args =
+    render latexState (getElement k args)
+
+
+macroRenderer : String -> (LatexState -> List LatexExpression -> List LatexExpression -> Html msg)
+macroRenderer name latexState optArgs args =
+    case Dict.get name renderMacroDict of
+        Just f ->
+            f latexState optArgs args
+
+        Nothing ->
+            reproduceMacro name latexState optArgs args
+
+
+reproduceMacro : String -> LatexState -> List LatexExpression -> List LatexExpression -> Html msg
+reproduceMacro name latexState optArgs args =
+    let
+        renderedArgs =
+            renderArgList latexState args |> List.map enclose
+    in
+        Html.span []
+            ([ Html.text <| "\\" ++ name ] ++ renderedArgs)
+
+
+boost : (x -> z -> output) -> (x -> y -> z -> output)
+boost f =
+    \x y z -> f x z
+
+
+renderMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
+renderMacroDict =
+    Dict.fromList
+        [ ( "bozo", boost renderBozo )
+        ]
+
+
+enclose : Html msg -> Html msg
+enclose msg =
+    Html.span [] [ Html.text "{", msg, Html.text "}" ]
+
+
+renderBozo : LatexState -> List LatexExpression -> Html msg
+renderBozo latexState args =
+    Html.span []
+        [ Html.text <| "\\bozo"
+        , enclose <| renderArg 0 latexState args
+        , enclose <| renderArg 1 latexState args
+        ]
+
+
+renderArgList : LatexState -> List LatexExpression -> List (Html msg)
+renderArgList latexState args =
+    args |> List.map (render latexState)
+
+
+
+-- renderOptArgList : LatexState -> List LatexExpression -> String
+-- renderOptArgList latexState args =
+--     args |> List.map (render latexState) |> List.map (\x -> "[" ++ x ++ "]") |> String.join ""
+{- END RENDER MACRO -}
 {-
    renderLatexList : LatexState -> List LatexExpression -> String
    renderLatexList latexState args =
        args |> List.map (render latexState) |> JoinStrings.joinList |> postProcess
 
-
-   renderArgList : LatexState -> List LatexExpression -> String
-   renderArgList latexState args =
-       args |> List.map (render latexState) |> List.map (\x -> "{" ++ x ++ "}") |> String.join ""
-
-
-   renderOptArgList : LatexState -> List LatexExpression -> String
-   renderOptArgList latexState args =
-       args |> List.map (render latexState) |> List.map (\x -> "[" ++ x ++ "]") |> String.join ""
 
 
    itemClass : Int -> String
@@ -491,17 +554,9 @@ renderLatexList latexState latexList =
    {- MACROS: DISPATCHERS AND HELPERS -}
 
 
-   boost : (x -> z -> output) -> (x -> y -> z -> output)
-   boost f =
-       \x y z -> f x z
 
 
-   type alias Renderer =
-       LatexState -> List LatexExpression -> List LatexExpression -> String
 
-
-   type alias RenderDict =
-       Dict.Dict String Renderer
 
 
 
@@ -515,13 +570,7 @@ renderLatexList latexState latexList =
    --             Nothing
    --
    --
-   -- renderMacroDict : RenderDict
-   -- renderMacroDict =
-   --     Dict.fromList
-   --         [ ( "bozo", boost renderBozo2 )
-   --         ]
-   -- renderBozo2 x z =
-   --     "Bozo!"
+
 
 
    renderMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> String)
@@ -531,8 +580,8 @@ renderLatexList latexState latexList =
            ]
 
 
-   renderMacroDict1 : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> String)
-   renderMacroDict1 =
+   renderMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> String)
+   renderMacroDict =
        Dict.fromList
            [ ( "bozo", \x y z -> renderBozo x z )
            , ( "bigskip", \x y z -> renderBigSkip x z )
@@ -588,34 +637,11 @@ renderLatexList latexState latexList =
    -- SMacro String (List LatexExpression) (List LatexExpression) LatexExpression
 
 
-   macroRenderer : String -> (LatexState -> List LatexExpression -> List LatexExpression -> String)
-   macroRenderer name latexState optArgs args =
-       case Dict.get name renderMacroDict of
-           Just f ->
-               f latexState optArgs args
-
-           Nothing ->
-               reproduceMacro name latexState optArgs args
 
 
-   macroRenderer2 : String -> (LatexState -> List LatexExpression -> List LatexExpression -> String)
-   macroRenderer2 name latexState optArgs args =
-       renderItalic latexState args
 
 
-   reproduceMacro : String -> LatexState -> List LatexExpression -> List LatexExpression -> String
-   reproduceMacro name latexState optArgs args =
-       "<span style=\"color: red;\">\\" ++ name ++ renderOptArgList emptyLatexState optArgs ++ renderArgList emptyLatexState args ++ "</span>"
 
-
-   renderMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
-   renderMacro latexState name optArgs args =
-       (macroRenderer name) latexState optArgs args
-
-
-   renderArg : Int -> LatexState -> List LatexExpression -> Html msg
-   renderArg k latexState args =
-       render latexState (getElement k args)
 
 
    renderSMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg

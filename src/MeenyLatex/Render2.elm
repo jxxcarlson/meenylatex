@@ -297,19 +297,15 @@ renderMacroDict =
         , ( "smallskip", \x y z -> renderSmallSkip x z )
         , ( "section", \x y z -> renderSection x z )
         , ( "section*", \x y z -> renderSectionStar x z )
+        , ( "subsection", \x y z -> renderSubsection x z )
+        , ( "subsection*", \x y z -> renderSubsectionStar x z )
+        , ( "subsubsection", \x y z -> renderSubSubsection x z )
+        , ( "subsubsection*", \x y z -> renderSubSubsectionStar x z )
+        , ( "setcounter", \x y z -> renderSetCounter x z )
+        , ( "subheading", \x y z -> renderSubheading x z )
         , ( "tableofcontents", \x y z -> renderTableOfContents x z )
         , ( "strong", \x y z -> renderStrong x z )
         ]
-
-
-
---
--- , ( "setcounter", \x y z -> "" )
--- , ( "subheading", \x y z -> renderSubheading x z )
--- , ( "subsection", \x y z -> renderSubsection x z )
--- , ( "subsection*", \x y z -> renderSubsectionStar x z )
--- , ( "subsubsection", \x y z -> renderSubSubsection x z )
--- , ( "subsubsection*", \x y z -> renderSubSubsectionStar x z )
 
 
 renderArgList : LatexState -> List LatexExpression -> List (Html msg)
@@ -640,6 +636,81 @@ renderSectionStar latexState args =
         Html.h2 [ HA.id ref ] [ Html.text <| sectionName ]
 
 
+renderSubsection : LatexState -> List LatexExpression -> Html msg
+renderSubsection latexState args =
+    let
+        sectionName =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        s1 =
+            getCounter "s1" latexState
+
+        s2 =
+            getCounter "s2" latexState
+
+        label =
+            if s1 > 0 then
+                String.fromInt s1 ++ "." ++ String.fromInt s2 ++ " "
+            else
+                ""
+
+        ref =
+            idPhrase "subsection" sectionName
+    in
+        Html.h3 [ HA.id ref ] [ Html.text <| label ++ sectionName ]
+
+
+renderSubsectionStar : LatexState -> List LatexExpression -> Html msg
+renderSubsectionStar latexState args =
+    let
+        sectionName =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        ref =
+            idPhrase "subsection" sectionName
+    in
+        Html.h3 [ HA.id ref ] [ Html.text <| sectionName ]
+
+
+renderSubSubsection : LatexState -> List LatexExpression -> Html msg
+renderSubSubsection latexState args =
+    let
+        sectionName =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        s1 =
+            getCounter "s1" latexState
+
+        s2 =
+            getCounter "s2" latexState
+
+        s3 =
+            getCounter "s3" latexState
+
+        label =
+            if s1 > 0 then
+                String.fromInt s1 ++ "." ++ String.fromInt s2 ++ "." ++ String.fromInt s3 ++ " "
+            else
+                ""
+
+        ref =
+            idPhrase "subsubsection" sectionName
+    in
+        Html.h4 [ HA.id ref ] [ Html.text <| label ++ sectionName ]
+
+
+renderSubSubsectionStar : LatexState -> List LatexExpression -> Html msg
+renderSubSubsectionStar latexState args =
+    let
+        sectionName =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        ref =
+            idPhrase "subsubsection" sectionName
+    in
+        Html.h4 [ HA.id ref ] [ Html.text <| sectionName ]
+
+
 renderTitle : LatexState -> List LatexExpression -> Html msg
 renderTitle latexState list =
     let
@@ -676,6 +747,20 @@ renderTitle latexState list =
             Html.ul [] bodyParts
     in
         Html.div [] [ titlePart, bodyPart ]
+
+
+renderSetCounter : LatexState -> List LatexExpression -> Html msg
+renderSetCounter latexState list =
+    Html.span [] []
+
+
+renderSubheading : LatexState -> List LatexExpression -> Html msg
+renderSubheading latexState args =
+    let
+        title =
+            MeenyLatex.Render.renderArg 0 latexState args
+    in
+        Html.div [ HA.class "subheading" ] [ Html.text <| title ]
 
 
 
@@ -1050,94 +1135,9 @@ renderTitle latexState list =
 
 
 
-
-
-
-
-
-
-
-
-
    {-| map str to lower case and squeeze out bad characters
    -}
 
-
-
-
-
-
-
-
-
-
-
-   renderSubheading : LatexState -> List LatexExpression -> String
-   renderSubheading latexState args =
-       "<div class=\"subheading\">" ++ renderArg 0 latexState args ++ "</div>"
-
-
-   renderSubsection : LatexState -> List LatexExpression -> String
-   renderSubsection latexState args =
-       let
-           sectionName =
-               renderArg 0 latexState args
-
-           s1 =
-               getCounter "s1" latexState
-
-           s2 =
-               getCounter "s2" latexState
-
-           label =
-               if s1 > 0 then
-                   String.fromInt s1 ++ "." ++ String.fromInt s2 ++ " "
-               else
-                   ""
-       in
-           tag "h3" (idPhrase "subsection" sectionName) (label ++ sectionName)
-
-
-   renderSubsectionStar : LatexState -> List LatexExpression -> String
-   renderSubsectionStar latexState args =
-       let
-           sectionName =
-               renderArg 0 latexState args
-       in
-           tag "h3" (idPhrase "subsection" sectionName) sectionName
-
-
-   renderSubSubsection : LatexState -> List LatexExpression -> String
-   renderSubSubsection latexState args =
-       let
-           sectionName =
-               renderArg 0 latexState args
-
-           s1 =
-               getCounter "s1" latexState
-
-           s2 =
-               getCounter "s2" latexState
-
-           s3 =
-               getCounter "s3" latexState
-
-           label =
-               if s1 > 0 then
-                   String.fromInt s1 ++ "." ++ String.fromInt s2 ++ "." ++ String.fromInt s3 ++ " "
-               else
-                   ""
-       in
-           tag "h4" (idPhrase "subsubsection" sectionName) (label ++ sectionName)
-
-
-   renderSubSubsectionStar : LatexState -> List LatexExpression -> String
-   renderSubSubsectionStar latexState args =
-       let
-           sectionName =
-               renderArg 0 latexState args
-       in
-           tag "h4" (idPhrase "subsubsection" sectionName) sectionName
 
 
    renderTerm : LatexState -> List LatexExpression -> String

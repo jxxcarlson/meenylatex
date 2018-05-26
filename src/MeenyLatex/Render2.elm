@@ -292,9 +292,24 @@ renderMacroDict =
         , ( "mdash", \x y z -> renderMdash x z )
         , ( "ndash", \x y z -> renderNdash x z )
         , ( "newcommand", \x y z -> renderNewCommand x z )
+        , ( "ref", \x y z -> renderRef x z )
+        , ( "medskip", \x y z -> renderMedSkip x z )
+        , ( "smallskip", \x y z -> renderSmallSkip x z )
+        , ( "section", \x y z -> renderSection x z )
+        , ( "section*", \x y z -> renderSectionStar x z )
         , ( "tableofcontents", \x y z -> renderTableOfContents x z )
         , ( "strong", \x y z -> renderStrong x z )
         ]
+
+
+
+--
+-- , ( "setcounter", \x y z -> "" )
+-- , ( "subheading", \x y z -> renderSubheading x z )
+-- , ( "subsection", \x y z -> renderSubsection x z )
+-- , ( "subsection*", \x y z -> renderSubsectionStar x z )
+-- , ( "subsubsection", \x y z -> renderSubSubsection x z )
+-- , ( "subsubsection*", \x y z -> renderSubSubsectionStar x z )
 
 
 renderArgList : LatexState -> List LatexExpression -> List (Html msg)
@@ -572,6 +587,57 @@ renderNewCommand latexState args =
             MeenyLatex.Render.renderArg 1 latexState args
     in
         Html.span [] [ Html.text <| "\\newcommand{" ++ command ++ "}{" ++ definition ++ "}" ]
+
+
+renderRef : LatexState -> List LatexExpression -> Html msg
+renderRef latexState args =
+    let
+        key =
+            MeenyLatex.Render.renderArg 0 latexState args
+    in
+        Html.span [] [ Html.text <| getCrossReference key latexState ]
+
+
+idPhrase : String -> String -> String
+idPhrase prefix name =
+    let
+        compressedName =
+            name |> String.toLower |> String.replace " " ":"
+    in
+        String.join "" [ "id=\"_", makeId prefix name, "\"" ]
+
+
+renderSection : LatexState -> List LatexExpression -> Html msg
+renderSection latexState args =
+    let
+        sectionName =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        s1 =
+            getCounter "s1" latexState
+
+        label =
+            if s1 > 0 then
+                String.fromInt s1 ++ " "
+            else
+                ""
+
+        ref =
+            idPhrase "section" sectionName
+    in
+        Html.h2 [ HA.id ref ] [ Html.text <| label ++ sectionName ]
+
+
+renderSectionStar : LatexState -> List LatexExpression -> Html msg
+renderSectionStar latexState args =
+    let
+        sectionName =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        ref =
+            idPhrase "section" sectionName
+    in
+        Html.h2 [ HA.id ref ] [ Html.text <| sectionName ]
 
 
 renderTitle : LatexState -> List LatexExpression -> Html msg
@@ -908,18 +974,8 @@ renderTitle latexState list =
        Dict.fromList
            [
            , ( "imageref", \x y z -> renderImageRef x z )
-           , ( "ref", \x y z -> renderRef x z )
-           , ( "section", \x y z -> renderSection x z )
-           , ( "section*", \x y z -> renderSectionStar x z )
-           , ( "setcounter", \x y z -> "" )
-           , ( "medskip", \x y z -> renderMedSkip x z )
-           , ( "smallskip", \x y z -> renderSmallSkip x z )
 
-           , ( "subheading", \x y z -> renderSubheading x z )
-           , ( "subsection", \x y z -> renderSubsection x z )
-           , ( "subsection*", \x y z -> renderSubsectionStar x z )
-           , ( "subsubsection", \x y z -> renderSubSubsection x z )
-           , ( "subsubsection*", \x y z -> renderSubSubsectionStar x z )
+
            , ( "title", \x y z -> "" )
            , ( "author", \x y z -> "" )
            , ( "date", \x y z -> "" )
@@ -996,13 +1052,7 @@ renderTitle latexState list =
 
 
 
-   renderRef : LatexState -> List LatexExpression -> String
-   renderRef latexState args =
-       let
-           key =
-               renderArg 0 latexState args
-       in
-           getCrossReference key latexState
+
 
 
 
@@ -1014,42 +1064,9 @@ renderTitle latexState list =
 
 
 
-   idPhrase : String -> String -> String
-   idPhrase prefix name =
-       let
-           compressedName =
-               name |> String.toLower |> String.replace " " ":"
-       in
-           String.join "" [ "id=\"_", makeId prefix name, "\"" ]
 
 
 
-
-   renderSection : LatexState -> List LatexExpression -> String
-   renderSection latexState args =
-       let
-           sectionName =
-               renderArg 0 latexState args
-
-           s1 =
-               getCounter "s1" latexState
-
-           label =
-               if s1 > 0 then
-                   String.fromInt s1 ++ " "
-               else
-                   ""
-       in
-           tag "h2" (idPhrase "section" sectionName) (label ++ sectionName)
-
-
-   renderSectionStar : LatexState -> List LatexExpression -> String
-   renderSectionStar latexState args =
-       let
-           sectionName =
-               renderArg 0 latexState args
-       in
-           tag "h2" (idPhrase "section" sectionName) sectionName
 
 
 

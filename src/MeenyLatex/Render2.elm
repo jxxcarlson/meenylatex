@@ -1017,7 +1017,24 @@ renderDefaultEnvironment2 latexState name args body =
 renderEnvironmentDict : Dict.Dict String (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 renderEnvironmentDict =
     Dict.fromList
-        [ ( "align", \x a y -> renderAlignEnvironment x y ) ]
+        [ ( "align", \x a y -> renderAlignEnvironment x y )
+        , ( "center", \x a y -> renderCenterEnvironment x y )
+        , ( "comment", \x a y -> renderCommentEnvironment x y )
+        , ( "enumerate", \x a y -> renderEnumerate x y )
+        , ( "eqnarray", \x a y -> renderEqnArray x y )
+        , ( "equation", \x a y -> renderEquationEnvironment x y )
+        , ( "indent", \x a y -> renderIndentEnvironment x y )
+        , ( "itemize", \x a y -> renderItemize x y )
+        , ( "listing", \x a y -> renderListing x y )
+        , ( "macros", \x a y -> renderMacros x y )
+        , ( "maskforweb", \x a y -> renderCommentEnvironment x y )
+        , ( "quotation", \x a y -> renderQuotation x y )
+        , ( "tabular", \x a y -> renderTabular x y )
+        , ( "thebibliography", \x a y -> renderTheBibliography x y )
+        , ( "useforweb", \x a y -> renderUseForWeb x y )
+        , ( "verbatim", \x a y -> renderVerbatim x y )
+        , ( "verse", \x a y -> renderVerse x y )
+        ]
 
 
 renderAlignEnvironment : LatexState -> LatexExpression -> Html msg
@@ -1047,228 +1064,145 @@ renderAlignEnvironment latexState body =
         displayMathText content
 
 
+renderCenterEnvironment : LatexState -> LatexExpression -> Html msg
+renderCenterEnvironment latexState body =
+    let
+        r =
+            render latexState body
+    in
+        Html.div [ HA.class "center" ] [ r ]
 
-{-
 
+renderCommentEnvironment : LatexState -> LatexExpression -> Html msg
+renderCommentEnvironment latexState body =
+    Html.div [] []
 
-   {- ENVIROMENTS -}
 
+renderEnumerate : LatexState -> LatexExpression -> Html msg
+renderEnumerate latexState body =
+    Html.ol [] [ render latexState body ]
 
-   renderEnvironmentDict : Dict.Dict String (LatexState -> List LatexExpression -> LatexExpression -> String)
-   renderEnvironmentDict =
-       Dict.fromList
-           [ ( "align", \x a y -> renderAlignEnvironment x y )
-           , ( "center", \x a y -> renderCenterEnvironment x y )
-           , ( "comment", \x a y -> renderCommentEnvironment x y )
-           , ( "indent", \x a y -> renderIndentEnvironment x y )
-           , ( "enumerate", \x a y -> renderEnumerate x y )
-           , ( "eqnarray", \x a y -> renderEqnArray x y )
-           , ( "equation", \x a y -> renderEquationEnvironment x y )
-           , ( "itemize", \x a y -> renderItemize x y )
-           , ( "listing", \x a y -> renderListing x y )
-           , ( "macros", \x a y -> renderMacros x y )
-           , ( "quotation", \x a y -> renderQuotation x y )
-           , ( "tabular", \x a y -> renderTabular x y )
-           , ( "thebibliography", \x a y -> renderTheBibliography x y )
-           , ( "maskforweb", \x a y -> renderCommentEnvironment x y )
-           , ( "useforweb", \x a y -> renderUseForWeb x y )
-           , ( "verbatim", \x a y -> renderVerbatim x y )
-           , ( "verse", \x a y -> renderVerse x y )
-           ]
 
-
-
-
-
-
-
-
-   renderIndentEnvironment : LatexState -> LatexExpression -> String
-   renderIndentEnvironment latexState body =
-       Html.div [ "style=\"margin-left:2em\"" ] [ render latexState body ]
-
-
-   renderTheBibliography : LatexState -> LatexExpression -> String
-   renderTheBibliography latexState body =
-       Html.div [ "style=\"\"" ] [ render latexState body ]
-
-
-
-   renderCenterEnvironment latexState body =
-       let
-           r =
-               render latexState body
-       in
-           "\n<div class=\"center\" >\n" ++ r ++ "\n</div>\n"
-
-
-   renderCommentEnvironment latexState body =
-       ""
-
-
-   renderEquationEnvironment latexState body =
-       let
-           eqno =
-               getCounter "eqno" latexState
-
-           s1 =
-               getCounter "s1" latexState
-
-           addendum =
-               if eqno > 0 then
-                   if s1 > 0 then
-                       "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
-                   else
-                       "\\tag{" ++ String.fromInt eqno ++ "}"
-               else
-                   ""
-
-           r =
-               render latexState body
-       in
-           "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
-
-
-
-   renderEqnArray latexState body =
-       "\n$$\n" ++ render latexState body ++ "\n$$\n"
-
-
-   renderEnumerate latexState body =
-       "\n<ol>\n" ++ render latexState body ++ "\n</ol>\n"
-
-
-   renderItemize latexState body =
-       "\n<ul>\n" ++ render latexState body ++ "\n</ul>\n"
-
-
-   renderMacros latexState body =
-       "\n$$\n" ++ render latexState body ++ "\n$$\n"
-
-
-   renderQuotation latexState body =
-       Html.div [ "class=\"quotation\"" ] [ render latexState body ]
-
-
-   renderVerse latexState body =
-       Html.div [ "class=\"verse\"" ] [ String.trim <| render latexState body ]
-
-
-   renderUseForWeb latexState body =
-       "\n$$\n" ++ render latexState body ++ "\n$$\n"
-
-
-   renderTabular latexState body =
-       renderTableBody body
-
-
-   renderCell cell =
-       case cell of
-           LXString s ->
-               "<td>" ++ s ++ "</td>"
-
-           InlineMath s ->
-               "<td>$" ++ s ++ "$</td>"
-
-           _ ->
-               "<td>-</td>"
-
-
-   renderRow row =
-       case row of
-           LatexList row_ ->
-               row_
-                   |> List.foldl (\cell acc -> acc ++ " " ++ renderCell cell) ""
-                   |> (\row__ -> "<tr> " ++ row__ ++ " </tr>\n")
-
-           _ ->
-               "<tr>-</tr>"
-
-
-   renderTableBody body =
-       case body of
-           LatexList body_ ->
-               body_
-                   |> List.foldl (\row acc -> acc ++ " " ++ renderRow row) ""
-                   |> (\bod -> "<table>\n" ++ bod ++ "</table>\n")
-
-           _ ->
-               "<table>-</table>"
-
-
-   renderVerbatim latexState body =
-       let
-           body2 =
-               render latexState body |> String.replace ">" "&gt;" |> String.replace "<" "&lt;"
-       in
-           "\n<pre class=\"verbatim\">" ++ body2 ++ "</pre>\n"
-
-
-   renderListing latexState body =
-       let
-           text =
-               render latexState body
-       in
-           "\n<pre class=\"verbatim\">" ++ Utility.addLineNumbers text ++ "</pre>\n"
-
-
-
-   {- MACROS: DISPATCHERS AND HELPERS -}
-
-
-   -- evalDict : RenderDict -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Maybe String
-   -- evalDict dict str x y z =
-   --     case (Dict.get str dict) of
-   --         Just g ->
-   --             Just (g x z)
-   --
-   --         Nothing ->
-   --             Nothing
-   --
-   --
-
-
-
-
-
-
-   -- SMacro String (List LatexExpression) (List LatexExpression) LatexExpression
-
-
-
-
-
-
-
-
-
-
-
-
-   {- INDIVIDUAL MACRO RENDERERS -}
-
-
-   renderBozo : LatexState -> List LatexExpression -> Html msg
-   renderBozo latexState args =
-       "bozo{" ++ renderArg 0 latexState args ++ "}{" ++ renderArg 1 latexState args ++ "}"
-
-
-
-
-
-
-   {-| Needs work
-   -}
-
-
-   renderInlineComment : LatexState -> List LatexExpression -> String
-   renderInlineComment latexState args =
-       ""
-
-
-
-
-
-
-
+{-| XXX
 -}
+renderEqnArray : LatexState -> LatexExpression -> Html msg
+renderEqnArray latexState body =
+    displayMathText (MeenyLatex.Render.render latexState body)
+
+
+renderEquationEnvironment : LatexState -> LatexExpression -> Html msg
+renderEquationEnvironment latexState body =
+    let
+        eqno =
+            getCounter "eqno" latexState
+
+        s1 =
+            getCounter "s1" latexState
+
+        addendum =
+            if eqno > 0 then
+                if s1 > 0 then
+                    "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
+                else
+                    "\\tag{" ++ String.fromInt eqno ++ "}"
+            else
+                ""
+
+        r =
+            MeenyLatex.Render.render latexState body
+    in
+        displayMathText <| "\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}"
+
+
+renderIndentEnvironment : LatexState -> LatexExpression -> Html msg
+renderIndentEnvironment latexState body =
+    Html.div [ HA.style "margin-left" "2em" ] [ render latexState body ]
+
+
+renderItemize : LatexState -> LatexExpression -> Html msg
+renderItemize latexState body =
+    Html.ul [] [ render latexState body ]
+
+
+renderListing : LatexState -> LatexExpression -> Html msg
+renderListing latexState body =
+    let
+        text =
+            MeenyLatex.Render.render latexState body
+
+        lines =
+            Utility.addLineNumbers text
+    in
+        Html.pre [ HA.class "verbatim" ] [ Html.text lines ]
+
+
+renderMacros : LatexState -> LatexExpression -> Html msg
+renderMacros latexState body =
+    displayMathText (MeenyLatex.Render.render latexState body)
+
+
+renderQuotation : LatexState -> LatexExpression -> Html msg
+renderQuotation latexState body =
+    Html.div [ HA.class "quotation" ] [ render latexState body ]
+
+
+renderTabular : LatexState -> LatexExpression -> Html msg
+renderTabular latexState body =
+    Html.table [] [ renderTableBody body ]
+
+
+renderCell : LatexExpression -> Html msg
+renderCell cell =
+    case cell of
+        LXString s ->
+            Html.td [] [ Html.text s ]
+
+        InlineMath s ->
+            Html.td [] [ inlineMathText s ]
+
+        _ ->
+            Html.td [] []
+
+
+renderRow : LatexExpression -> Html msg
+renderRow row =
+    case row of
+        LatexList row_ ->
+            Html.tr [] (row_ |> List.map renderCell)
+
+        _ ->
+            Html.tr [] []
+
+
+renderTableBody : LatexExpression -> Html msg
+renderTableBody body =
+    case body of
+        LatexList body_ ->
+            Html.tbody [] (body_ |> List.map renderRow)
+
+        _ ->
+            Html.tbody [] []
+
+
+renderTheBibliography : LatexState -> LatexExpression -> Html msg
+renderTheBibliography latexState body =
+    Html.div [] [ render latexState body ]
+
+
+renderUseForWeb : LatexState -> LatexExpression -> Html msg
+renderUseForWeb latexState body =
+    displayMathText (MeenyLatex.Render.render latexState body)
+
+
+renderVerbatim : LatexState -> LatexExpression -> Html msg
+renderVerbatim latexState body =
+    let
+        body2 =
+            MeenyLatex.Render.render latexState body |> String.replace ">" "&gt;" |> String.replace "<" "&lt;"
+    in
+        Html.pre [ HA.class "verbatim" ] [ Html.text body2 ]
+
+
+renderVerse : LatexState -> LatexExpression -> Html msg
+renderVerse latexState body =
+    Html.div [ HA.class "verse" ] [ Html.text (String.trim <| MeenyLatex.Render.render latexState body) ]

@@ -1,4 +1,4 @@
-module MeenyLatex.Utility exposing (addLineNumbers, getAt)
+module MeenyLatex.Utility exposing (addLineNumbers, addLineNumbers_, getAt)
 
 {-| From List.Extra
 -}
@@ -23,6 +23,16 @@ addLineNumbers text =
         |> Tuple.second
         |> List.reverse
         |> String.join "\n"
+
+
+addLineNumbers_ : String -> List String
+addLineNumbers_ text =
+    text
+        |> String.trim
+        |> String.split "\n"
+        |> List.foldl addNumberedLine ( 0, [] )
+        |> Tuple.second
+        |> List.reverse
 
 
 addNumberedLine : String -> ( Int, List String ) -> ( Int, List String )

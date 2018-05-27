@@ -118,9 +118,9 @@ render latexState latexExpression =
             renderMacro latexState name optArgs args
 
         SMacro name optArgs args le ->
-            -- renderSMacro latexState name optArgs args le
-            Html.span [] [ Html.text <| " ((SMACRO)) " ]
+            renderSMacro latexState name optArgs args le
 
+        -- Html.span [] [ Html.text <| " ((SMACRO)) " ]
         Item level latexExpr ->
             -- renderItem latexState level latexExpr
             Html.span [] [ Html.text <| " ((ITEM)) " ]
@@ -869,21 +869,60 @@ renderXLinkPublic latexState args =
 
 
 
---
--- "<iframe "
--- ++ src
--- ++ style
--- ++ sandbox
--- ++ " ></iframe>\n<center style=\"margin-top: -10px;\"><a href=\""
--- ++ url
--- ++ "\" target=_blank>"
--- ++ title
--- ++ "</a></center>"
+{- END OF INDIVIDUAL MACROS -}
+{- SMACROS -}
+
+
+renderSMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg)
+renderSMacroDict =
+    Dict.fromList
+        [ ( "bibitem", \latexState optArgs args body -> renderBibItem latexState optArgs args body )
+        ]
+
+
+renderSMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderSMacro latexState name optArgs args le =
+    case Dict.get name renderSMacroDict of
+        Just f ->
+            f latexState optArgs args le
+
+        Nothing ->
+            reproduceSMacro name latexState optArgs args le
+
+
+reproduceSMacro : String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+reproduceSMacro name latexState optArgs args le =
+    let
+        renderedOptArgs =
+            renderArgList latexState optArgs |> List.map enclose
+
+        renderedArgs =
+            renderArgList latexState args |> List.map enclose
+
+        renderedLe =
+            render latexState le |> enclose
+    in
+        Html.span []
+            ([ Html.text <| "\\" ++ name ] ++ renderedOptArgs ++ renderedArgs ++ [ renderedLe ])
+
+
+renderBibItem : LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderBibItem latexState optArgs args body =
+    let
+        label =
+            if List.length optArgs == 1 then
+                MeenyLatex.Render.renderArg 0 latexState optArgs
+            else
+                MeenyLatex.Render.renderArg 0 latexState args
+
+        id =
+            "\"bib:" ++ label ++ "\""
+    in
+        Html.p [ HA.id id ] [ Html.text <| "[" ++ label ++ "] " ++ (MeenyLatex.Render.render latexState body) ]
+
+
+
 {- END RENDER INDIVIDUAL MACROS -}
--- " <span>[<a href=\"#bib:" ++ label ++ "\">" ++ label ++ "</a>]</span>"
--- renderOptArgList : LatexState -> List LatexExpression -> String
--- renderOptArgList latexState args =
---     args |> List.map (render latexState) |> List.map (\x -> "[" ++ x ++ "]") |> String.join ""
 {-
    renderLatexList : LatexState -> List LatexExpression -> String
    renderLatexList latexState args =
@@ -1150,11 +1189,7 @@ renderXLinkPublic latexState args =
    --
 
 
-   renderSMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> String)
-   renderSMacroDict =
-       Dict.fromList
-           [ ( "bibitem", \latexState optArgs args body -> renderBibItem latexState optArgs args body )
-           ]
+
 
 
 
@@ -1168,14 +1203,6 @@ renderXLinkPublic latexState args =
 
 
 
-   renderSMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-   renderSMacro latexState name optArgs args le =
-       case Dict.get name renderSMacroDict of
-           Just f ->
-               f latexState optArgs args le
-
-           Nothing ->
-               "<span style=\"color: red;\">\\" ++ name ++ renderArgList emptyLatexState args ++ " " ++ render latexState le ++ "</span>"
 
 
 
@@ -1186,17 +1213,6 @@ renderXLinkPublic latexState args =
    renderBozo latexState args =
        "bozo{" ++ renderArg 0 latexState args ++ "}{" ++ renderArg 1 latexState args ++ "}"
 
-
-   renderBibItem : LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-   renderBibItem latexState optArgs args body =
-       let
-           label =
-               if List.length optArgs == 1 then
-                   renderArg 0 latexState optArgs
-               else
-                   renderArg 0 latexState args
-       in
-           " <p id=\"bib:" ++ label ++ "\">[" ++ label ++ "] " ++ render latexState body ++ "</p>\n"
 
 
 

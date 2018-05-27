@@ -5,10 +5,11 @@ import MeenyLatex.Differ as Differ exposing (EditRecord)
 import MeenyLatex.LatexState exposing (LatexState, emptyLatexState)
 import MeenyLatex.Paragraph as Paragraph
 import MeenyLatex.Render2 as Render exposing (render, renderLatexList)
+import MeenyLatex.Parser exposing (LatexExpression)
 
 
-createEditRecord : LatexState -> String -> EditRecord
-createEditRecord latexState text =
+createEditRecord : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
+createEditRecord renderer latexState text =
     let
         paragraphs =
             text
@@ -27,7 +28,7 @@ createEditRecord latexState text =
 
         ( renderedParagraphs, _ ) =
             latexExpressionList
-                |> Accumulator.renderParagraphs latexState2
+                |> (Accumulator.renderParagraphs renderer) latexState2
 
         idList =
             makeIdList paragraphs
@@ -40,15 +41,15 @@ makeIdList paragraphs =
     List.range 1 (List.length paragraphs) |> List.map (Differ.prefixer 0)
 
 
-update_ : Int -> EditRecord -> String -> EditRecord
-update_ seed editorRecord text =
+update_ : Int -> (LatexState -> String -> a) -> EditRecord a -> String -> EditRecord a
+update_ seed renderer editorRecord text =
     text
-        |> Differ.update seed (Render.transformText editorRecord.latexState) editorRecord
+        |> Differ.update seed (renderer editorRecord.latexState) editorRecord
 
 
-update : Int -> EditRecord -> String -> EditRecord
-update seed editRecord content =
+update : Int -> (LatexState -> List LatexExpression -> a) -> (LatexState -> String -> a) -> EditRecord a -> String -> EditRecord a
+update seed renderLatexExpression renderString editRecord content =
     if Differ.isEmpty editRecord then
-        createEditRecord emptyLatexState content
+        (createEditRecord renderLatexExpression) emptyLatexState content
     else
-        update_ seed editRecord content
+        update_ seed renderString editRecord content

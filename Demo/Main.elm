@@ -43,7 +43,7 @@ type alias Flags =
     }
 
 
-init : Flags -> ( Model, Cmd Msg )
+init : Flags -> ( Model (Html msg), Cmd Msg )
 init flags =
     let
         parseResult =
@@ -76,12 +76,12 @@ init flags =
 port sendToJs : Encode.Value -> Cmd msg
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model (Html msg) -> Sub Msg
 subscriptions model =
     Sub.none
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
 update msg model =
     case msg of
         FastRender ->
@@ -176,7 +176,7 @@ update msg model =
             ( { model | inputString = s }, Cmd.none )
 
 
-useSource : String -> Model -> ( Model, Cmd Msg )
+useSource : String -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
 useSource text model =
     let
         editRecord =
@@ -193,7 +193,7 @@ useSource text model =
         )
 
 
-exportLatex2Html : EditRecord -> String
+exportLatex2Html : EditRecord (Html msg) -> String
 exportLatex2Html editRecord =
     editRecord
         |> MeenyLatex.getRenderedText ""
@@ -210,9 +210,9 @@ exportLatex2Html editRecord =
            |> Encode.object
 -}
 {- VIEW FUNCTIONS -}
+-- view : Model (Html msg) -> Html msg
 
 
-view : Model -> Html Msg
 view model =
     div [ style "width" (appWidth model.configuration), style "margin" "auto" ]
         [ mainView model
@@ -234,6 +234,7 @@ mainView model =
             renderToLatexView model
 
 
+standardView : Model (Html msg) -> Html msg
 standardView model =
     div [ style "float" "left" ]
         [ headerRibbon

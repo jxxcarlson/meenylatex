@@ -4,7 +4,7 @@ import Browser
 import Html exposing (Html, text)
 import Html.Attributes
 import Json.Encode
-import MeenyLatex.Render2 exposing (render, transformText)
+import MeenyLatex.Render2 exposing (render, renderString)
 import MeenyLatex.LatexState exposing (emptyLatexState)
 import MeenyLatex.Parser exposing (LatexExpression(..))
 
@@ -71,8 +71,8 @@ view model =
         , example <| LatexList [ Macro "image" [] ([ LatexList ([ LXString "http://cooldigital.photography/wp-content/uploads/2015/09/Rosy-Butterfly-620x412.jpg" ]), LatexList ([ LXString "Butterfly" ]), LatexList ([ LXString "width: 300, float: left" ]) ]) ]
         , example <| LatexList [ Macro "index" [] ([ LatexList ([ LXString "foo" ]) ]) ]
         , example <| LatexList [ Macro "ellie" [] ([ LatexList ([ LXString "krQCWKwv2Ta1" ]), LatexList ([ LXString "Ellie" ]) ]) ]
-        , transformText emptyLatexState "He said that \\strong{it is true!}"
-        , transformText emptyLatexState "He said that \\italic{it is true!}"
+        , renderString emptyLatexState "He said that \\strong{it is true!}"
+        , renderString emptyLatexState "He said that \\italic{it is true!}"
         ]
 
 

@@ -2,16 +2,17 @@ module Types exposing (..)
 
 import MeenyLatex.Parser exposing (LatexExpression)
 import MeenyLatex.Differ exposing (EditRecord)
+import Html exposing (Html)
 
 
-type alias Model =
+type alias Model msg =
     { counter : Int
     , sourceText : String
     , sourceText2 : String
     , parseResult : List (List LatexExpression)
     , inputString : String
     , hasMathResult : List Bool
-    , editRecord : EditRecord
+    , editRecord : EditRecord (Html msg)
     , seed : Int
     , configuration : Configuration
     , lineViewStyle : LineViewStyle

@@ -17,11 +17,17 @@ module MeenyLatex.Driver
 
 -}
 
+import Html exposing (Html)
 import MeenyLatex.Differ as Differ exposing (EditRecord)
 import MeenyLatex.LatexDiffer as MiniLatexDiffer
 import MeenyLatex.LatexState exposing (emptyLatexState)
 import MeenyLatex.Paragraph as Paragraph
 import MeenyLatex.Parser as MiniLatexParser exposing (LatexExpression)
+import MeenyLatex.LatexState exposing (LatexState)
+import MeenyLatex.Render2 as Render
+
+
+-- exposing (render, renderString)
 
 
 {-| The function call `render macros sourceTest` produces
@@ -47,9 +53,11 @@ then `render macros source` yields the HTML text
     </p>
 
 -}
-render : String -> String -> String
+render : String -> String -> Html msg
 render macroDefinitions text =
-    MiniLatexDiffer.createEditRecord emptyLatexState text |> getRenderedText macroDefinitions
+    MiniLatexDiffer.createEditRecord Render.renderLatexList emptyLatexState text
+        |> getRenderedText macroDefinitions
+        |> Html.div []
 
 
 {-| Parse the given text and return an AST represeting it.
@@ -61,7 +69,7 @@ parse text =
         |> List.map MiniLatexParser.parse
 
 
-pTags : EditRecord -> List String
+pTags : EditRecord (Html msg) -> List String
 pTags editRecord =
     editRecord.idList |> List.map (\x -> "<p id=\"" ++ x ++ "\">")
 
@@ -71,18 +79,23 @@ return a string representing the HTML of the paragraph list
 of the editRecord. Append the macroDefinitions for use
 by MathJax.
 -}
-getRenderedText : String -> EditRecord -> String
+getRenderedText : String -> EditRecord (Html msg) -> List (Html msg)
 getRenderedText macroDefinitions editRecord =
-    let
-        paragraphs =
-            editRecord.renderedParagraphs
+    editRecord.renderedParagraphs
 
-        pTagList =
-            pTags editRecord
-    in
-        List.map2 (\para pTag -> pTag ++ "\n" ++ para ++ "\n</p>") paragraphs pTagList
-            |> String.join "\n\n"
-            |> (\x -> x ++ "\n\n" ++ macroDefinitions)
+
+
+-- let
+--     paragraphs =
+--         editRecord.renderedParagraphs
+--
+--     pTagList =
+--         pTags editRecord
+-- in
+--     List.map2 (\para pTag -> pTag ++ "\n" ++ para ++ "\n</p>") paragraphs pTagList
+--         |> String.join "\n\n"
+--         |> (\x -> x ++ "\n\n" ++ macroDefinitions)
+--
 
 
 {-| Create an EditRecord from a string of MiniLaTeX text:
@@ -115,9 +128,9 @@ getRenderedText macroDefinitions editRecord =
         } : MeenyLatex.Differ.EditRecord
 
 -}
-setup : Int -> String -> EditRecord
+setup : Int -> String -> EditRecord (Html msg)
 setup seed text =
-    MiniLatexDiffer.update seed Differ.emptyEditRecord text
+    MiniLatexDiffer.update seed Render.renderLatexList Render.renderString Differ.emptyEditRecordHtmlMsg text
 
 
 {-| Return an empty EditRecord
@@ -140,9 +153,9 @@ setup seed text =
         }
 
 -}
-emptyEditRecord : EditRecord
+emptyEditRecord : EditRecord (Html msg)
 emptyEditRecord =
-    Differ.emptyEditRecord
+    Differ.emptyEditRecordHtmlMsg
 
 
 {-| Update the given edit record with modified text.
@@ -160,6 +173,6 @@ but its efficiency depends on the nature of the edit. This is
 because the "differ" used to detect changes is rather crude.
 
 -}
-update : Int -> EditRecord -> String -> EditRecord
+update : Int -> EditRecord (Html msg) -> String -> EditRecord (Html msg)
 update seed editRecord text =
-    MiniLatexDiffer.update seed editRecord text
+    MiniLatexDiffer.update seed Render.renderLatexList Render.renderString editRecord text

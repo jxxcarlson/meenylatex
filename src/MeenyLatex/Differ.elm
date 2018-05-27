@@ -4,6 +4,7 @@ module MeenyLatex.Differ
         , createEditRecord
         , diff
         , emptyEditRecord
+        , emptyEditRecordHtmlMsg
         , isEmpty
         , prefixer
         , update
@@ -22,6 +23,7 @@ then parsing and rendering the changed paragraphs.
 
 import MeenyLatex.LatexState exposing (LatexState, emptyLatexState)
 import MeenyLatex.Paragraph as Paragraph
+import Html exposing (Html)
 
 
 {- TYPES -}
@@ -46,9 +48,9 @@ type alias IdListPacket =
 correspoing to the text to be rendered as well as corresponding
 list of rendered parapgraphs. We need to reveiw this strucure.
 -}
-type alias EditRecord =
+type alias EditRecord a =
     { paragraphs : List String
-    , renderedParagraphs : List String
+    , renderedParagraphs : List a
     , latexState : LatexState
     , idList : List String
     , newIdsStart : Maybe Int
@@ -58,9 +60,14 @@ type alias EditRecord =
 
 {-| An empty EditRecord -- liek the inteer 0 in another context.
 -}
-emptyEditRecord : EditRecord
+emptyEditRecord : EditRecord String
 emptyEditRecord =
-    EditRecord [] [] emptyLatexState [] Nothing Nothing
+    (EditRecord) [] [] emptyLatexState [] Nothing Nothing
+
+
+emptyEditRecordHtmlMsg : EditRecord (Html msg)
+emptyEditRecordHtmlMsg =
+    (EditRecord) [] [] emptyLatexState [] Nothing Nothing
 
 
 commonInitialSegment : List String -> List String -> List String
@@ -88,12 +95,12 @@ commonTerminalSegment x y =
     commonInitialSegment (List.reverse x) (List.reverse y) |> List.reverse
 
 
-dropLast : Int -> List String -> List String
+dropLast : Int -> List a -> List a
 dropLast k x =
     x |> List.reverse |> List.drop k |> List.reverse
 
 
-takeLast : Int -> List String -> List String
+takeLast : Int -> List a -> List a
 takeLast k x =
     x |> List.reverse |> List.take k |> List.reverse
 
@@ -103,7 +110,7 @@ breaking the text in to pargraphs, (2) applying
 the transformer to each string in the resulting
 list of strings.
 -}
-createEditRecord : (String -> String) -> String -> EditRecord
+createEditRecord : (String -> a) -> String -> EditRecord a
 createEditRecord transformer text =
     let
         paragraphs =
@@ -124,7 +131,7 @@ createEditRecord transformer text =
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
 and its list of rendered paraagrahs is empty
 -}
-isEmpty : EditRecord -> Bool
+isEmpty : EditRecord a -> Bool
 isEmpty editRecord =
     editRecord.paragraphs == [] && editRecord.renderedParagraphs == []
 
@@ -138,7 +145,7 @@ accomplishes this using the transformer. The seed is used to produces
 a differential idList. This last step is perhaps unnecessary. To investigate.
 (This was part of an optimization scheme.)
 -}
-update : Int -> (String -> String) -> EditRecord -> String -> EditRecord
+update : Int -> (String -> a) -> EditRecord a -> String -> EditRecord a
 update seed transformer editRecord text =
     let
         newParagraphs =
@@ -219,7 +226,7 @@ prefixer b k =
 Among other things, generate a fresh id list for the changed elements.
 
 -}
-differentialRender : (String -> String) -> DiffRecord -> EditRecord -> List String
+differentialRender : (String -> a) -> DiffRecord -> EditRecord a -> List a
 differentialRender renderer diffRecord editRecord =
     let
         ii =
@@ -240,7 +247,7 @@ differentialRender renderer diffRecord editRecord =
         initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
 
 
-differentialIdList : Int -> DiffRecord -> EditRecord -> IdListPacket
+differentialIdList : Int -> DiffRecord -> EditRecord a -> IdListPacket
 differentialIdList seed diffRecord editRecord =
     let
         ii =

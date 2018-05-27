@@ -96,6 +96,7 @@ editorPane model =
     Keyed.node "textarea" (editorStyle ++ [ onInput GetContent, value model.sourceText ]) [ ( String.fromInt model.counter, text model.sourceText ) ]
 
 
+renderedSource : Model msg -> Html msg
 renderedSource model =
     div [ style "float" "left" ]
         [ spacer 20
@@ -208,7 +209,7 @@ rawRenderedSourcePane model =
     in
         pre
             parseResultsStyle
-            [ text renderedText ]
+            [ Html.text "Not currently available" ]
 
 
 renderToLatexPane model =
@@ -231,18 +232,10 @@ exportLatexPane model =
         [ text model.textToExport ]
 
 
+renderedSourcePane : Model (Html msg) -> Html msg
 renderedSourcePane model =
-    let
-        renderedText =
-            MeenyLatex.getRenderedText "" model.editRecord
-    in
-        div
-            (renderedSourceStyle
-                ++ [ id "renderedText"
-                   , property "innerHTML" (Encode.string renderedText)
-                   ]
-            )
-            []
+    MeenyLatex.getRenderedText "" model.editRecord
+        |> Html.div []
 
 
 

@@ -38,12 +38,6 @@ import String
 import Html.Attributes as HA
 
 
-transformText : LatexState -> String -> Html msg
-transformText latexState text =
-    renderString latexList latexState text
-
-
-
 -- |> \str -> "\n<p>" ++ str ++ "</p>\n"
 {- FUNCTIONS FOR TESTING THINGS -}
 
@@ -61,21 +55,28 @@ parseString parser str =
 -- renderString latexList latexState text
 
 
-renderString : Parser.Parser LatexExpression -> LatexState -> String -> Html msg
-renderString parser latexState str =
-    let
-        parserOutput =
-            Parser.run parser str
+renderString : LatexState -> String -> Html msg
+renderString latexState str =
+    str
+        |> MeenyLatex.Parser.parse
+        |> List.map (render latexState)
+        |> Html.div []
 
-        renderOutput =
-            case parserOutput of
-                Ok latexExpression ->
-                    render latexState latexExpression
 
-                Err error ->
-                    Html.div [] [ Html.text "Error in renderString" ]
-    in
-        renderOutput
+
+-- let
+--     parserOutput =
+--         MeenyLatex.Parser.parse str
+--
+--     renderOutput =
+--         case parserOutput of
+--             Ok latexExpression ->
+--                 render latexState latexExpression
+--
+--             _ ->
+--                 Html.div [] [ Html.text "Error in renderString" ]
+-- in
+--     renderOutput
 
 
 postProcess : String -> String

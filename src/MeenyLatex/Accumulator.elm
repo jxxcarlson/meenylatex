@@ -18,7 +18,7 @@ import MeenyLatex.LatexState
         , updateCounter
         )
 import MeenyLatex.Parser as Parser exposing (LatexExpression(..), macro, parse)
-import MeenyLatex.Render as Render exposing (renderLatexList)
+import MeenyLatex.Render2 as Render exposing (renderLatexList)
 import MeenyLatex.StateReducerHelpers as SRH
 
 
@@ -96,9 +96,9 @@ and a LatexState and rehder the list into a list of strings.
 renderParagraphs : LatexState -> List (List LatexExpression) -> ( List String, LatexState )
 
 -}
-renderParagraphs : Accumulator LatexState (List LatexExpression) String
-renderParagraphs latexState paragraphs =
-    renderAccumulator latexState paragraphs
+renderParagraphs : (LatexState -> List LatexExpression -> a) -> Accumulator LatexState (List LatexExpression) a
+renderParagraphs renderer latexState paragraphs =
+    (renderAccumulator renderer) latexState paragraphs
 
 
 
@@ -134,20 +134,20 @@ parserReducerTransformer parse latexStateReducer_ input acc =
         ( outputList ++ [ parsedInput ], newState )
 
 
-renderAccumulatorReducer : Reducer (List LatexExpression) ( List String, LatexState )
-renderAccumulatorReducer =
-    renderTransformer renderLatexList latexStateReducer
+renderAccumulatorReducer : (LatexState -> List LatexExpression -> a) -> Reducer (List LatexExpression) ( List a, LatexState )
+renderAccumulatorReducer renderer =
+    renderTransformer renderer latexStateReducer
 
 
-renderAccumulator : Accumulator LatexState (List LatexExpression) String
-renderAccumulator latexState inputList =
+renderAccumulator : (LatexState -> List LatexExpression -> a) -> Accumulator LatexState (List LatexExpression) a
+renderAccumulator renderer latexState inputList =
     inputList
-        |> List.foldl renderAccumulatorReducer ( [], latexState )
+        |> List.foldl (renderAccumulatorReducer renderer) ( [], latexState )
 
 
 {-| renderTransformer render latexStateReducer is a Reducer input acc
 -}
-renderTransformer : RenderReducerTransformer LatexState (List LatexExpression) String
+renderTransformer : RenderReducerTransformer LatexState (List LatexExpression) a
 renderTransformer render latexStateReducer_ input acc =
     let
         ( outputList, state ) =

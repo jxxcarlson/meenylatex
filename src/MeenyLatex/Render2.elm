@@ -285,6 +285,7 @@ renderMacroDict =
         , ( "eqref", \x y z -> renderEqRef x z )
         , ( "href", \x y z -> renderHRef x z )
         , ( "image", \x y z -> renderImage x z )
+        , ( "imageref", \x y z -> renderImageRef x z )
         , ( "index", \x y z -> renderIndex x z )
         , ( "italic", \x y z -> renderItalic x z )
         , ( "label", \x y z -> renderLabel x z )
@@ -304,6 +305,15 @@ renderMacroDict =
         , ( "setcounter", \x y z -> renderSetCounter x z )
         , ( "subheading", \x y z -> renderSubheading x z )
         , ( "tableofcontents", \x y z -> renderTableOfContents x z )
+        , ( "term", \x y z -> renderTerm x z )
+        , ( "xlink", \x y z -> renderXLink x z )
+        , ( "xlinkPublic", \x y z -> renderXLinkPublic x z )
+        , ( "documentTitle", \x y z -> renderDocumentTitle x z )
+        , ( "title", \x y z -> renderTitle x z )
+        , ( "author", \x y z -> renderAuthor x z )
+        , ( "date", \x y z -> renderDate x z )
+        , ( "revision", \x y z -> renderRevision x z )
+        , ( "email", \x y z -> renderEmail x z )
         , ( "strong", \x y z -> renderStrong x z )
         ]
 
@@ -454,8 +464,7 @@ renderImage latexState args =
             parseImageAttributes attributeString
     in
         if imageAttrs.float == "left" then
-            Html.img
-                [ HA.src url, HA.alt label, HA.align "left", HA.width imageAttrs.width ]
+            Html.img [ HA.src url, HA.alt label, HA.align "left", HA.width imageAttrs.width ]
                 [ Html.caption [] [ Html.text label ] ]
         else if imageAttrs.float == "right" then
             Html.img [ HA.src url, HA.alt label, HA.align "right", HA.width imageAttrs.width ]
@@ -466,6 +475,38 @@ renderImage latexState args =
         else
             Html.img [ HA.src url, HA.alt label, HA.align "center", HA.width imageAttrs.width ]
                 [ Html.caption [] [ Html.text label ] ]
+
+
+renderImageRef : LatexState -> List LatexExpression -> Html msg
+renderImageRef latexState args =
+    let
+        url =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        imageUrl =
+            MeenyLatex.Render.renderArg 1 latexState args
+
+        attributeString =
+            MeenyLatex.Render.renderArg 2 latexState args
+
+        imageAttrs =
+            parseImageAttributes attributeString
+
+        theImage =
+            if imageAttrs.float == "left" then
+                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.align "left", HA.width imageAttrs.width ]
+                    []
+            else if imageAttrs.float == "right" then
+                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.align "right", HA.width imageAttrs.width ]
+                    []
+            else if imageAttrs.align == "center" then
+                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.align "center", HA.width imageAttrs.width ]
+                    []
+            else
+                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.align "center", HA.width imageAttrs.width ]
+                    []
+    in
+        Html.a [ Html.Attributes.href url ] [ theImage ]
 
 
 renderIndex : LatexState -> List LatexExpression -> Html msg
@@ -711,8 +752,8 @@ renderSubSubsectionStar latexState args =
         Html.h4 [ HA.id ref ] [ Html.text <| sectionName ]
 
 
-renderTitle : LatexState -> List LatexExpression -> Html msg
-renderTitle latexState list =
+renderDocumentTitle : LatexState -> List LatexExpression -> Html msg
+renderDocumentTitle latexState list =
     let
         title =
             getDictionaryItem "title" latexState
@@ -761,6 +802,70 @@ renderSubheading latexState args =
             MeenyLatex.Render.renderArg 0 latexState args
     in
         Html.div [ HA.class "subheading" ] [ Html.text <| title ]
+
+
+renderTitle : LatexState -> List LatexExpression -> Html msg
+renderTitle latexState args =
+    Html.span [] []
+
+
+renderAuthor : LatexState -> List LatexExpression -> Html msg
+renderAuthor latexState args =
+    Html.span [] []
+
+
+renderDate : LatexState -> List LatexExpression -> Html msg
+renderDate latexState args =
+    Html.span [] []
+
+
+renderRevision : LatexState -> List LatexExpression -> Html msg
+renderRevision latexState args =
+    Html.span [] []
+
+
+renderEmail : LatexState -> List LatexExpression -> Html msg
+renderEmail latexState args =
+    Html.span [] []
+
+
+renderTerm : LatexState -> List LatexExpression -> Html msg
+renderTerm latexState args =
+    let
+        arg =
+            MeenyLatex.Render.renderArg 0 latexState args
+    in
+        Html.i [] [ Html.text <| arg ]
+
+
+renderXLink : LatexState -> List LatexExpression -> Html msg
+renderXLink latexState args =
+    let
+        id =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        ref =
+            Configuration.client ++ "##document/" ++ id
+
+        label =
+            MeenyLatex.Render.renderArg 1 latexState args
+    in
+        Html.a [ Html.Attributes.href ref ] [ Html.text label ]
+
+
+renderXLinkPublic : LatexState -> List LatexExpression -> Html msg
+renderXLinkPublic latexState args =
+    let
+        id =
+            MeenyLatex.Render.renderArg 0 latexState args
+
+        ref =
+            Configuration.client ++ "##public/" ++ id
+
+        label =
+            MeenyLatex.Render.renderArg 1 latexState args
+    in
+        Html.a [ Html.Attributes.href ref ] [ Html.text label ]
 
 
 
@@ -1033,12 +1138,6 @@ renderSubheading latexState args =
    {- MACROS: DISPATCHERS AND HELPERS -}
 
 
-
-
-
-
-
-
    -- evalDict : RenderDict -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Maybe String
    -- evalDict dict str x y z =
    --     case (Dict.get str dict) of
@@ -1049,27 +1148,6 @@ renderSubheading latexState args =
    --             Nothing
    --
    --
-
-
-
-
-
-   renderMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> String)
-   renderMacroDict =
-       Dict.fromList
-           [
-           , ( "imageref", \x y z -> renderImageRef x z )
-
-
-           , ( "title", \x y z -> "" )
-           , ( "author", \x y z -> "" )
-           , ( "date", \x y z -> "" )
-           , ( "revision", \x y z -> "" )
-           , ( "email", \x y z -> "" )
-           , ( "term", \x y z -> renderTerm x z )
-           , ( "xlink", \x y z -> renderXLink x z )
-           , ( "xlinkPublic", \x y z -> renderXLinkPublic x z )
-           ]
 
 
    renderSMacroDict : Dict.Dict String (LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> String)
@@ -1135,75 +1213,7 @@ renderSubheading latexState args =
 
 
 
-   {-| map str to lower case and squeeze out bad characters
-   -}
 
 
-
-   renderTerm : LatexState -> List LatexExpression -> String
-   renderTerm latexState args =
-       let
-           arg =
-               renderArg 0 latexState args
-       in
-           " <span class=italic>" ++ arg ++ "</span>"
-
-
-   renderXLink : LatexState -> List LatexExpression -> String
-   renderXLink latexState args =
-       let
-           id =
-               renderArg 0 latexState args
-
-           label =
-               renderArg 1 latexState args
-       in
-           " <a href=\"" ++ Configuration.client ++ "##document/" ++ id ++ "\">" ++ label ++ "</a>"
-
-
-   renderXLinkPublic : LatexState -> List LatexExpression -> String
-   renderXLinkPublic latexState args =
-       let
-           id =
-               renderArg 0 latexState args
-
-           label =
-               renderArg 1 latexState args
-       in
-           " <a href=\"" ++ Configuration.client ++ "##public/" ++ id ++ "\">" ++ label ++ "</a>"
-
-
-
-   {- TABLE OF CONTENTS -}
-
-
-
-
-
-
-
-   renderImageRef : LatexState -> List LatexExpression -> String
-   renderImageRef latexState args =
-       let
-           url =
-               renderArg 0 latexState args
-
-           imageUrl =
-               renderArg 1 latexState args
-
-           attributeString =
-               renderArg 2 latexState args
-
-           imageAttrs =
-               parseImageAttributes attributeString
-       in
-           if imageAttrs.float == "left" then
-               Html.a url (Html.div [ imageFloatLeftStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
-           else if imageAttrs.float == "right" then
-               Html.a url (Html.div [ imageFloatRightStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
-           else if imageAttrs.align == "center" then
-               Html.a url (Html.div [ imageCenterStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
-           else
-               Html.a url (Html.div [ imageCenterStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
 
 -}

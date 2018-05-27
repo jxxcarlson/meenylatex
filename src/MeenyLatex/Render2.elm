@@ -38,12 +38,12 @@ import String
 import Html.Attributes as HA
 
 
-{-
-   transformText : LatexState -> String -> String
-   transformText latexState text =
-       renderString latexList latexState text
+transformText : LatexState -> String -> Html msg
+transformText latexState text =
+    renderString latexList latexState text
 
--}
+
+
 -- |> \str -> "\n<p>" ++ str ++ "</p>\n"
 {- FUNCTIONS FOR TESTING THINGS -}
 
@@ -59,33 +59,34 @@ parseString parser str =
 
 
 -- renderString latexList latexState text
-{-
-   renderString : Parser.Parser LatexExpression -> LatexState -> String -> String
-   renderString parser latexState str =
-       let
-           parserOutput =
-               Parser.run parser str
-
-           renderOutput =
-               case parserOutput of
-                   Ok latexExpression ->
-                       render latexState latexExpression |> postProcess
-
-                   Err error ->
-                       "Error: " ++ Parser.deadEndsToString error
-       in
-           renderOutput
 
 
-   postProcess : String -> String
-   postProcess str =
-       str
-           |> String.replace "---" "&mdash;"
-           |> String.replace "--" "&ndash;"
-           |> String.replace "\\&" "&#38"
+renderString : Parser.Parser LatexExpression -> LatexState -> String -> Html msg
+renderString parser latexState str =
+    let
+        parserOutput =
+            Parser.run parser str
+
+        renderOutput =
+            case parserOutput of
+                Ok latexExpression ->
+                    render latexState latexExpression
+
+                Err error ->
+                    Html.div [] [ Html.text "Error in renderString" ]
+    in
+        renderOutput
 
 
--}
+postProcess : String -> String
+postProcess str =
+    str
+        |> String.replace "---" "&mdash;"
+        |> String.replace "--" "&ndash;"
+        |> String.replace "\\&" "&#38"
+
+
+
 {- TYPES AND DEFAULT VALJUES -}
 
 

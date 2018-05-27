@@ -4,7 +4,7 @@ import MeenyLatex.Accumulator as Accumulator
 import MeenyLatex.Differ as Differ exposing (EditRecord)
 import MeenyLatex.LatexState exposing (LatexState, emptyLatexState)
 import MeenyLatex.Paragraph as Paragraph
-import MeenyLatex.Render as Render exposing (render, renderLatexList)
+import MeenyLatex.Render2 as Render exposing (render, renderLatexList)
 
 
 createEditRecord : LatexState -> String -> EditRecord
@@ -32,7 +32,7 @@ createEditRecord latexState text =
         idList =
             makeIdList paragraphs
     in
-    EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
+        EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
 
 
 makeIdList : List String -> List String

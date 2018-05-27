@@ -80,9 +80,9 @@ getRenderedText macroDefinitions editRecord =
         pTagList =
             pTags editRecord
     in
-    List.map2 (\para pTag -> pTag ++ "\n" ++ para ++ "\n</p>") paragraphs pTagList
-        |> String.join "\n\n"
-        |> (\x -> x ++ "\n\n" ++ macroDefinitions)
+        List.map2 (\para pTag -> pTag ++ "\n" ++ para ++ "\n</p>") paragraphs pTagList
+            |> String.join "\n\n"
+            |> (\x -> x ++ "\n\n" ++ macroDefinitions)
 
 
 {-| Create an EditRecord from a string of MiniLaTeX text:

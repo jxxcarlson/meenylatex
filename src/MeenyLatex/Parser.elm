@@ -271,11 +271,13 @@ arg =
 
 macroName : Parser String
 macroName =
-    variable
+    (variable
         { start = \c -> c == '\\'
         , inner = \c -> Char.isAlphaNum c
         , reserved = Set.fromList [ "\\begin", "\\end", "\\item", "\\bibitem" ]
         }
+    )
+        |> map (String.dropLeft 1)
 
 
 smacro : Parser LatexExpression

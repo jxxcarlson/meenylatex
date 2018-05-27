@@ -120,20 +120,17 @@ render latexState latexExpression =
         SMacro name optArgs args le ->
             renderSMacro latexState name optArgs args le
 
-        -- Html.span [] [ Html.text <| " ((SMACRO)) " ]
         Item level latexExpr ->
-            -- renderItem latexState level latexExpr
-            Html.span [] [ Html.text <| " ((ITEM)) " ]
+            renderItem latexState level latexExpr
 
         InlineMath str ->
-            mathText <| "\\(" ++ str ++ "\\)"
+            inlineMathText str
 
         DisplayMath str ->
-            mathText <| "\\[" ++ str ++ "\\]"
+            displayMathText str
 
         Environment name args body ->
-            -- renderEnvironment latexState name args body
-            Html.p [] [ Html.text <| " ((ENVIRONMENT)) " ]
+            renderEnvironment latexState name args body
 
         LatexList latexList ->
             renderLatexList latexState latexList
@@ -144,6 +141,16 @@ render latexState latexExpression =
         LXError error ->
             -- List.map ErrorMessages.renderError error |> String.join "; "
             Html.p [] [ Html.text <| "((ERROR))" ]
+
+
+inlineMathText : String -> Html msg
+inlineMathText str =
+    mathText <| "\\(" ++ str ++ "\\)"
+
+
+displayMathText : String -> Html msg
+displayMathText str =
+    mathText <| "\\[" ++ str ++ "\\]"
 
 
 
@@ -922,23 +929,126 @@ renderBibItem latexState optArgs args body =
 
 
 
-{- END RENDER INDIVIDUAL MACROS -}
+{- END RENDER INDIVIDUAL SMACROS -}
+{- LISTS -}
+
+
+itemClass : Int -> String
+itemClass level =
+    "item" ++ String.fromInt level
+
+
+renderItem : LatexState -> Int -> LatexExpression -> Html msg
+renderItem latexState level latexExpression =
+    Html.li [ HA.class (itemClass level) ] [ render latexState latexExpression ]
+
+
+
+{- END LISTS -}
+{- BEGIN ENVIRONMENTS -}
+
+
+renderEnvironment : LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderEnvironment latexState name args body =
+    environmentRenderer name latexState args body
+
+
+environmentRenderer : String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+environmentRenderer name =
+    case Dict.get name renderEnvironmentDict of
+        Just f ->
+            f
+
+        Nothing ->
+            renderDefaultEnvironment name
+
+
+renderDefaultEnvironment : String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment name latexState args body =
+    if List.member name [ "theorem", "proposition", "corollary", "lemma", "definition" ] then
+        renderTheoremLikeEnvironment latexState name args body
+    else
+        renderDefaultEnvironment2 latexState name args body
+
+
+renderTheoremLikeEnvironment : LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderTheoremLikeEnvironment latexState name args body =
+    let
+        r =
+            render latexState body
+
+        eqno =
+            getCounter "eqno" latexState
+
+        s1 =
+            getCounter "s1" latexState
+
+        tno =
+            getCounter "tno" latexState
+
+        tnoString =
+            if s1 > 0 then
+                " " ++ String.fromInt s1 ++ "." ++ String.fromInt tno
+            else
+                " " ++ String.fromInt tno
+    in
+        Html.div [ HA.class "environment" ]
+            [ Html.strong [] [ Html.text (name ++ tnoString) ]
+            , Html.div [ HA.class "italic" ] [ r ]
+            ]
+
+
+renderDefaultEnvironment2 : LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment2 latexState name args body =
+    let
+        r =
+            render latexState body
+    in
+        Html.div [ HA.class "environment" ]
+            [ Html.strong [] [ Html.text name ]
+            , Html.div [] [ r ]
+            ]
+
+
+
+{- INDIVIDUAL ENVIRONMENT RENDERERS -}
+
+
+renderEnvironmentDict : Dict.Dict String (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+renderEnvironmentDict =
+    Dict.fromList
+        [ ( "align", \x a y -> renderAlignEnvironment x y ) ]
+
+
+renderAlignEnvironment : LatexState -> LatexExpression -> Html msg
+renderAlignEnvironment latexState body =
+    let
+        r =
+            MeenyLatex.Render.render latexState body
+
+        eqno =
+            getCounter "eqno" latexState
+
+        s1 =
+            getCounter "s1" latexState
+
+        addendum =
+            if eqno > 0 then
+                if s1 > 0 then
+                    "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
+                else
+                    "\\tag{" ++ String.fromInt eqno ++ "}"
+            else
+                ""
+
+        content =
+            "\n\\begin{align}\n" ++ addendum ++ r ++ "\n\\end{align}\n"
+    in
+        displayMathText content
+
+
+
 {-
-   renderLatexList : LatexState -> List LatexExpression -> String
-   renderLatexList latexState args =
-       args |> List.map (render latexState) |> JoinStrings.joinList |> postProcess
-
-
-
-   itemClass : Int -> String
-   itemClass level =
-       "item" ++ String.fromInt level
-
-
-   renderItem : LatexState -> Int -> LatexExpression -> String
-   renderItem latexState level latexExpression =
-       "<li class=\"" ++ itemClass level ++ "\">" ++ render latexState latexExpression ++ "</li>\n"
-
 
 
    {- ENVIROMENTS -}
@@ -967,27 +1077,10 @@ renderBibItem latexState optArgs args body =
            ]
 
 
-   environmentRenderer : String -> (LatexState -> List LatexExpression -> LatexExpression -> String)
-   environmentRenderer name =
-       case Dict.get name renderEnvironmentDict of
-           Just f ->
-               f
-
-           Nothing ->
-               renderDefaultEnvironment name
 
 
-   renderEnvironment : LatexState -> String -> List LatexExpression -> LatexExpression -> String
-   renderEnvironment latexState name args body =
-       environmentRenderer name latexState args body
 
 
-   renderDefaultEnvironment : String -> LatexState -> List LatexExpression -> LatexExpression -> String
-   renderDefaultEnvironment name latexState args body =
-       if List.member name [ "theorem", "proposition", "corollary", "lemma", "definition" ] then
-           renderTheoremLikeEnvironment latexState name args body
-       else
-           renderDefaultEnvironment2 latexState name args body
 
 
    renderIndentEnvironment : LatexState -> LatexExpression -> String
@@ -999,38 +1092,6 @@ renderBibItem latexState optArgs args body =
    renderTheBibliography latexState body =
        Html.div [ "style=\"\"" ] [ render latexState body ]
 
-
-   renderTheoremLikeEnvironment : LatexState -> String -> List LatexExpression -> LatexExpression -> String
-   renderTheoremLikeEnvironment latexState name args body =
-       let
-           r =
-               render latexState body
-
-           eqno =
-               getCounter "eqno" latexState
-
-           s1 =
-               getCounter "s1" latexState
-
-           tno =
-               getCounter "tno" latexState
-
-           tnoString =
-               if s1 > 0 then
-                   " " ++ String.fromInt s1 ++ "." ++ String.fromInt tno
-               else
-                   " " ++ String.fromInt tno
-       in
-           "\n<div class=\"environment\">\n<strong>" ++ name ++ tnoString ++ "</strong>\n<div class=\"italic\">\n" ++ r ++ "\n</div>\n</div>\n"
-
-
-   renderDefaultEnvironment2 : LatexState -> String -> List LatexExpression -> LatexExpression -> String
-   renderDefaultEnvironment2 latexState name args body =
-       let
-           r =
-               render latexState body
-       in
-           "\n<div class=\"environment\">\n<strong>" ++ name ++ "</strong>\n<div>\n" ++ r ++ "\n</div>\n</div>\n"
 
 
    renderCenterEnvironment latexState body =
@@ -1067,28 +1128,6 @@ renderBibItem latexState optArgs args body =
        in
            "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
 
-
-   renderAlignEnvironment latexState body =
-       let
-           r =
-               render latexState body |> String.replace "\\ \\" "\\\\"
-
-           eqno =
-               getCounter "eqno" latexState
-
-           s1 =
-               getCounter "s1" latexState
-
-           addendum =
-               if eqno > 0 then
-                   if s1 > 0 then
-                       "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
-                   else
-                       "\\tag{" ++ String.fromInt eqno ++ "}"
-               else
-                   ""
-       in
-           "\n$$\n\\begin{align}\n" ++ addendum ++ r ++ "\n\\end{align}\n$$\n"
 
 
    renderEqnArray latexState body =

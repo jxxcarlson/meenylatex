@@ -27,16 +27,6 @@ main =
         }
 
 
-
---
--- { init : { flags : flags, url : Url.Parser.Url } -> ( model, Cmd msg )
--- , onNavigation : Maybe (Url.Parser.Url -> msg)
--- , subscriptions : model -> Sub msg
--- , update : msg -> model -> ( model, Cmd msg )
--- , view : model -> Browser.Page msg
--- }
-
-
 type alias Flags =
     { width : Int
     , height : Int
@@ -195,12 +185,15 @@ useSource text model =
 
 exportLatex2Html : EditRecord (Html msg) -> String
 exportLatex2Html editRecord =
-    editRecord
-        |> MeenyLatex.getRenderedText ""
-        |> \text -> Source.htmlPrefix ++ text ++ Source.htmlSuffix
+    "NOT IMPLEMENTED"
 
 
 
+{-
+   editRecord
+       |> MeenyLatex.getRenderedText ""
+       |> \text -> Source.htmlPrefix ++ text ++ Source.htmlSuffix
+-}
 {-
    encodeData : Model -> List String -> Encode.Value
    encodeData model idList =
@@ -234,15 +227,25 @@ mainView model =
             renderToLatexView model
 
 
-standardView : Model (Html msg) -> Html msg
+standardView : Model (Html Msg) -> Html Msg
 standardView model =
     div [ style "float" "left" ]
         [ headerRibbon
         , editor model
-        , renderedSource model
+        , div renderedLatexStyle [ renderedSource model ]
         , spacer 5
         , footerRibbon model
         ]
+
+
+
+--
+-- standardView : Model (Html Msg) -> Html Msg
+-- standardView model =
+--     div []
+--         [ renderedSource model
+--         ]
+--
 
 
 renderToLatexView model =

@@ -99,6 +99,10 @@ initialText =
 
 \\section{Introduction}
 
+$$
+  \\int_0^1 x^n dx = \\frac{1}{n+1}
+$$
+
 MiniLaTeX is a subset of LaTeX which can be displayed in a web browser \\cite{hakernews}. One applies a parser-renderer toolchain to convert MiniLaTeX into HTML, then uses MathJax to render formulas and equations. This document is written in MeenyLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
 
 Feel free to edit and re-render the text on the left and to experiment with the buttons above. To export a rendered LaTeX file, simply click on the "Export" button above. Your file will be downloaded as "file.html".

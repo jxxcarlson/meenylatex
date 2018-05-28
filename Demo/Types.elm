@@ -5,14 +5,14 @@ import MeenyLatex.Differ exposing (EditRecord)
 import Html exposing (Html)
 
 
-type alias Model msg =
+type alias Model a =
     { counter : Int
     , sourceText : String
     , sourceText2 : String
     , parseResult : List (List LatexExpression)
     , inputString : String
     , hasMathResult : List Bool
-    , editRecord : EditRecord (Html msg)
+    , editRecord : EditRecord a
     , seed : Int
     , configuration : Configuration
     , lineViewStyle : LineViewStyle

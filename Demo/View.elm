@@ -96,16 +96,21 @@ editorPane model =
     Keyed.node "textarea" (editorStyle ++ [ onInput GetContent, value model.sourceText ]) [ ( String.fromInt model.counter, text model.sourceText ) ]
 
 
-renderedSource : Model msg -> Html msg
+renderedSource : Model (Html msg) -> Html msg
 renderedSource model =
-    div [ style "float" "left" ]
-        [ spacer 20
-        , buttonBarRight model
-        , spacer 5
-        , renderedSourcePane model
-        , spacer 5
-        , buttonBarBottomRight model
-        ]
+    renderedSourcePane model
+
+
+
+-- div [ style "float" "left" ]
+--     [ spacer 20
+--     , buttonBarRight model
+--     , spacer 5
+--     , renderedSourcePane model
+--     , spacer 5
+--     , buttonBarBottomRight model
+--     ]
+--
 
 
 renderToLatex model =
@@ -484,6 +489,10 @@ reRenderedLatexStyle =
     textStyle3 "400px" "600px" "20px" "#eee"
 
 
+renderedLatexStyle =
+    textStyle3 "420px" "670px" "40px" "#eee"
+
+
 textStyle width height offset color =
     [ style "width" width
     , style "height" height
@@ -509,9 +518,10 @@ textStyle3 width height offset color =
     [ style "width" width
     , style "height" height
     , style "padding" "15px"
-    , style "margin-top" "0"
+    , style "margin-top" "20px"
     , style "margin-left" offset
     , style "background-color" color
     , style "overflow" "scroll"
-    , style "white-space" "pre-line"
+
+    --, style "white-space" "pre-line"
     ]

@@ -1194,6 +1194,650 @@ url model =
 
 nongeodesic =
     """
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+
+  \\section{Basic examples}
+
+  Pythagoras said that $a^2 + b^2 = c^2$.
+
+  Newton said that
+  $$
+    \\int_0^1 x^n dx = \\frac{1}{n+1}
+  $$
+  Wow!
+"""
+
+
+nongeodesic2 =
+    """
 
 
 

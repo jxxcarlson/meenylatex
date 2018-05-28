@@ -42,9 +42,6 @@ init flags =
         editRecord =
             MeenyLatex.setup 0 Source.initialText
 
-        _ =
-            Debug.log "RENDERED TEXT" (MeenyLatex.getRenderedText "" editRecord)
-
         model =
             { counter = 0
             , sourceText = Source.initialText
@@ -52,7 +49,7 @@ init flags =
             , editRecord = editRecord
             , inputString = exportLatex2Html editRecord
             , parseResult = parseResult
-            , hasMathResult = Debug.log "hasMathResult" (List.map MeenyLatex.HasMath.listHasMath parseResult)
+            , hasMathResult = (List.map MeenyLatex.HasMath.listHasMath parseResult)
             , seed = 0
             , configuration = StandardView
             , lineViewStyle = Horizontal
@@ -83,7 +80,7 @@ update msg model =
                     MeenyLatex.parse model.sourceText
 
                 hasMathResult =
-                    Debug.log "hasMathResult" (List.map MeenyLatex.HasMath.listHasMath parseResult)
+                    (List.map MeenyLatex.HasMath.listHasMath parseResult)
             in
                 ( { model
                     | counter = model.counter + 1

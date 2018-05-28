@@ -238,7 +238,7 @@ renderLatexList latexState latexList =
     latexList
         |> putSpaces
         |> processLatexListWithSpacing
-        |> (\list -> Html.span [] (List.map (render latexState) list))
+        |> (\list -> Html.div [ HA.style "margin-bottom" "10px" ] (List.map (render latexState) list))
 
 
 
@@ -418,8 +418,7 @@ renderEllie latexState args =
             "src =\"https://ellie-app.com/embed/" ++ (MeenyLatex.Render.renderArg 0 latexState args ++ "\"")
 
         url =
-            Debug.log "URL"
-                ("https://ellie-app.com/" ++ (MeenyLatex.Render.renderArg 0 latexState args))
+            ("https://ellie-app.com/" ++ (MeenyLatex.Render.renderArg 0 latexState args))
 
         title_ =
             MeenyLatex.Render.renderArg 1 latexState args

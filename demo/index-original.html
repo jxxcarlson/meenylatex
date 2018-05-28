@@ -3,8 +3,8 @@
 
   <meta charset="utf-8" />
 
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.1.1/custom-elements.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.1.1/custom-elements.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
   <style>
@@ -65,24 +65,58 @@
 
     var app = Elm.Main.embed( node,  { width:  1200, height: 900 })
 
-    customElements.define('math-text', class extends HTMLElement {
-      get content() {
-        return this._content;
-      }
-      set content(value) {
-        console.log("A");
-        this._content = value;
-        this.textContent = this._content
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this])
+      function typesetNow(){
+        console.log("** typesetNow ... ")
+        MathJax.Hub.Queue([
+          "Typeset",
+          MathJax.Hub]);
       }
 
-      connectedCallback() {
-        console.log("B");
-        this.textContent = this._content
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this])
-      }
-    })
+     function idList2Elements(idList) {
+         var elementList = []
+         for (var i = 0; i < idList.length; i++ ) {
+           var element = document.getElementById(idList[i])
+           elementList.push(element);
+         }
+         return elementList
+     }
 
+     function typesetIdList(idList){
+         console.log("** typesetIdList ... " + idList)
+         var elements = idList2Elements(idList)
+         for(var i = 0; i < idList.length; i++) {
+           MathJax.Hub.Queue( ["Typeset", MathJax.Hub, elements[i]])
+         }
+         MathJax.Hub.Queue(["resetEquationNumbers",MathJax.InputJax.TeX],
+           ["PreProcess",MathJax.Hub],
+           ["Reprocess",MathJax.Hub]
+           );
+     }
+
+     function typesetFull() {
+       MathJax.Hub.Queue(["Typeset", MathJax.Hub, "renderedText"],
+         ["resetEquationNumbers",MathJax.InputJax.TeX],
+         ["PreProcess",MathJax.Hub],
+         ["Reprocess",MathJax.Hub]
+         );
+     }
+
+    // This function is called by the Elm app when the user
+    // press the "Render" button
+    app.ports.sendToJs.subscribe(function(data) {
+      if (data.model == "full") {
+        typesetFull()
+      } else {
+        typesetIdList(data.idList)
+      }
+     })
+
+    // For startup:
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, "renderedText"],
+      ["resetEquationNumbers",MathJax.InputJax.TeX],
+      ["PreProcess",MathJax.Hub],
+      ["Reprocess",MathJax.Hub]
+      );
 
   </script>
 

@@ -3,10 +3,7 @@
     "name": "jxxcarlson/meenylatex",
     "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
     "license": "BSD-3-Clause",
-    "version": "1.0.0",
-    "source-directories": [
-        "./src", "./myTests"
-    ],
+    "version": "1.0.1",
     "exposed-modules": [
         "MeenyLatex.Driver",
         "MeenyLatex.Source",
@@ -24,14 +21,6 @@
         "elm/parser": "1.0.0 <= v < 2.0.0",
         "elm/random": "1.0.0 <= v < 2.0.0",
         "elm/regex": "1.0.0 <= v < 2.0.0"
-
     },
-    "do-not-edit-this-by-hand": {
-       "transitive-dependencies": {
-           "elm/url": "1.0.0",
-           "elm/virtual-dom": "1.0.0",
-           "elm/time": "1.0.0"
-       }
-     },
     "test-dependencies": {}
 }

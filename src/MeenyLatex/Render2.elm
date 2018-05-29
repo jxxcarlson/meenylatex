@@ -63,22 +63,6 @@ renderString latexState str =
         |> Html.div []
 
 
-
--- let
---     parserOutput =
---         MeenyLatex.Parser.parse str
---
---     renderOutput =
---         case parserOutput of
---             Ok latexExpression ->
---                 render latexState latexExpression
---
---             _ ->
---                 Html.div [] [ Html.text "Error in renderString" ]
--- in
---     renderOutput
-
-
 postProcess : String -> String
 postProcess str =
     str
@@ -126,7 +110,7 @@ render latexState latexExpression =
             renderItem latexState level latexExpr
 
         InlineMath str ->
-            inlineMathText str
+            Html.span [] [ oneSpace, inlineMathText str ]
 
         DisplayMath str ->
             displayMathText str
@@ -147,12 +131,12 @@ render latexState latexExpression =
 
 inlineMathText : String -> Html msg
 inlineMathText str =
-    mathText <| "\\(" ++ str ++ "\\)"
+    mathText <| "$ " ++ String.trim str ++ " $"
 
 
 displayMathText : String -> Html msg
 displayMathText str =
-    mathText <| "\\[" ++ str ++ "\\]"
+    mathText <| "$$\n" ++ String.trim str ++ "\n$$"
 
 
 
@@ -238,7 +222,7 @@ renderLatexList latexState latexList =
     latexList
         |> putSpaces
         |> processLatexListWithSpacing
-        |> (\list -> Html.div [ HA.style "margin-bottom" "10px" ] (List.map (render latexState) list))
+        |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] (List.map (render latexState) list))
 
 
 
@@ -1110,9 +1094,13 @@ renderEquationEnvironment latexState body =
                 ""
 
         r =
-            MeenyLatex.Render.render latexState body
+            (MeenyLatex.Render.render latexState body)
     in
-        displayMathText <| "\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}"
+        displayMathText <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
+
+
+
+-- "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
 
 
 renderIndentEnvironment : LatexState -> LatexExpression -> Html msg

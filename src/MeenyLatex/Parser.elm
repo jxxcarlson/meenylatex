@@ -373,14 +373,11 @@ endWord =
 
 environment : Parser LatexExpression
 environment =
-    -- inContext "environment" <|
-    -- lazy (\_ -> envName |> andThen environmentOfType)
     envName |> andThen environmentOfType
 
 
 environmentOfType : String -> Parser LatexExpression
 environmentOfType envType =
-    --- inContext "environmentOfType" <|
     let
         theEndWord =
             "\\end{" ++ envType ++ "}"
@@ -391,23 +388,10 @@ environmentOfType envType =
             else
                 envType
     in
-        standardEnvironmentBody theEndWord envType
+        environmentParser envKind theEndWord envType
 
 
 
---
--- environmentParser2 : String -> String -> Parser LatexExpression
--- environmentParser2 endWord_ envType =
---     (succeed identity
---         |. ws
---         |= itemList latexExpression
---         |. ws
---         |. symbol endWord_
---         |. ws
---         |> map LatexList
---         |> map (Environment envType [])
---     )
---
 {- DISPATCHER AND SUBPARSERS -}
 
 

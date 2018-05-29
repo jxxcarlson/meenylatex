@@ -207,6 +207,10 @@ parseResultPane model =
         [ text "NOT IMPLEMENTED" ]
 
 
+
+-- rawRenderedSourcePane : Model -> Html msg
+
+
 rawRenderedSourcePane model =
     let
         renderedText =
@@ -240,6 +244,7 @@ exportLatexPane model =
 renderedSourcePane : Model (Html msg) -> Html msg
 renderedSourcePane model =
     MeenyLatex.getRenderedText "" model.editRecord
+        |> List.map (\x -> Html.div [ Attr.style "margin-bottom" "0.65em" ] [ x ])
         |> Html.div []
 
 

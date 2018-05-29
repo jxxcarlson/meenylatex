@@ -73,6 +73,10 @@ view model =
         , example <| LatexList [ Macro "ellie" [] ([ LatexList ([ LXString "krQCWKwv2Ta1" ]), LatexList ([ LXString "Ellie" ]) ]) ]
         , renderString emptyLatexState "He said that \\strong{it is true!}"
         , renderString emptyLatexState "He said that \\italic{it is true!}"
+        , renderString emptyLatexState "\\begin{equation}\n \\int_0^1 x^n dx = \\frac{1}{n+1}\n\\end{equation}\n"
+        , renderString emptyLatexState "\\begin{theorem}This is a test.\\end{theorem}\n"
+        , example <| LatexList [ Environment "equation" [] (LXString "\n  \\int_0^1 x^n dx = \\frac{1}{n+1}\n  ") ]
+        , line (Debug.toString <| MeenyLatex.Parser.parse "\\begin{equation}\n \\int_0^1 x^n dx = \\frac{1}{n+1}\n\\end{equation}\n")
         ]
 
 

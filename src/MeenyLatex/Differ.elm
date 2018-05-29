@@ -17,7 +17,7 @@ then parsing and rendering the changed paragraphs.
 
 # API
 
-@docs EditRecord, emptyEditRecord, isEmpty, createEditRecord, diff, prefixer, update
+@docs EditRecord, emptyEditRecord, emptyEditRecordHtmlMsg, isEmpty, createEditRecord, diff, prefixer, update
 
 -}
 
@@ -58,13 +58,16 @@ type alias EditRecord a =
     }
 
 
-{-| An empty EditRecord -- liek the inteer 0 in another context.
+{-| An empty EditRecord -- like the intefer 0 in another context.
 -}
 emptyEditRecord : EditRecord String
 emptyEditRecord =
     (EditRecord) [] [] emptyLatexState [] Nothing Nothing
 
 
+{-| An empty EditRecord -- like the integer 0 in another context. For
+renderers with `Html a` as target.
+-}
 emptyEditRecordHtmlMsg : EditRecord (Html msg)
 emptyEditRecordHtmlMsg =
     (EditRecord) [] [] emptyLatexState [] Nothing Nothing

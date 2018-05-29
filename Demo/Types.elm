@@ -3,6 +3,7 @@ module Types exposing (..)
 import MeenyLatex.Parser exposing (LatexExpression)
 import MeenyLatex.Differ exposing (EditRecord)
 import Html exposing (Html)
+import Time exposing (Posix)
 
 
 type alias Model a =
@@ -18,6 +19,9 @@ type alias Model a =
     , lineViewStyle : LineViewStyle
     , windowHeight : Int
     , windowWidth : Int
+    , startTime : Posix
+    , stopTime : Posix
+    , message : String
     }
 
 
@@ -41,6 +45,10 @@ type Msg
     | MathPaper
     | Grammar
     | Input String
+    | RequestStartTime
+    | RequestStopTime
+    | ReceiveStartTime Posix
+    | ReceiveStopTime Posix
 
 
 type LineViewStyle

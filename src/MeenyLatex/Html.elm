@@ -1,4 +1,4 @@
-module MeenyLatex.Html exposing (..)
+module MeenyLatex.Html exposing (div, img, a, h1, h2, h3)
 
 
 div : List String -> List String -> String
@@ -10,7 +10,7 @@ div attributes children =
         childrenString =
             children |> String.join "\n"
     in
-    "<div " ++ attributeString ++ " >\n" ++ childrenString ++ "\n</div>"
+        "<div " ++ attributeString ++ " >\n" ++ childrenString ++ "\n</div>"
 
 
 img url imageAttributs =

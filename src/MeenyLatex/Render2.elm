@@ -1,12 +1,19 @@
-module MeenyLatex.Render2 exposing (..)
+module MeenyLatex.Render2
+    exposing
+        ( makeTableOfContents
+        , render
+        , renderLatexList
+        , renderString
+        )
 
--- exposing
---     ( makeTableOfContents
---     , render
---     , renderLatexList
---     , renderString
---     , transformText
---     )
+{-| This module is for quickly preparing latex for export.
+
+
+# API
+
+@docs makeTableOfContents, render, renderLatexList, renderString
+
+-}
 
 import Dict
 import Html exposing (Html)
@@ -55,6 +62,8 @@ parseString parser str =
 -- renderString latexList latexState text
 
 
+{-| Parse a string, then render it.
+-}
 renderString : LatexState -> String -> Html msg
 renderString latexState str =
     str
@@ -94,6 +103,9 @@ mathText content =
         []
 
 
+{-| The main rendering funcction. Compute an Html msg value
+from the current LatexState and a LatexExpresssion.
+-}
 render : LatexState -> LatexExpression -> Html msg
 render latexState latexExpression =
     case latexExpression of
@@ -217,6 +229,9 @@ processLatexExpressionWithSpacing ( expr, spacing ) =
             expr
 
 
+{-| Like `render`, but renders a list of LatexExpressions
+to Html mgs
+-}
 renderLatexList : LatexState -> List LatexExpression -> Html msg
 renderLatexList latexState latexList =
     latexList
@@ -402,8 +417,7 @@ renderEllie latexState args =
             MeenyLatex.Render.renderArg 0 latexState args
 
         url =
-            Debug.log "ELLIE URL"
-                ("https://ellie-app.com/embed/" ++ id)
+            ("https://ellie-app.com/embed/" ++ id)
 
         title_ =
             MeenyLatex.Render.renderArg 1 latexState args
@@ -528,6 +542,9 @@ renderTableOfContents latexState list =
             ]
 
 
+{-| Build a table of contents from the
+cucrrent LatexState
+-}
 makeTableOfContents : LatexState -> List (Html msg)
 makeTableOfContents latexState =
     List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)

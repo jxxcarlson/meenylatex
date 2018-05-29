@@ -16,6 +16,8 @@ import Source
 import View exposing (..)
 import Types exposing (..)
 import Json.Encode as Encode
+import Time exposing (Posix)
+import Task
 
 
 main =
@@ -55,6 +57,9 @@ init flags =
             , lineViewStyle = Horizontal
             , windowWidth = flags.width
             , windowHeight = flags.height
+            , startTime = Time.millisToPosix 0
+            , stopTime = Time.millisToPosix 0
+            , message = ""
             }
     in
         ( model, Random.generate NewSeed (Random.int 1 10000) )
@@ -162,6 +167,41 @@ update msg model =
         Types.Input s ->
             ( { model | inputString = s }, Cmd.none )
 
+        RequestStartTime ->
+            ( model, Task.perform ReceiveStartTime Time.now )
+
+        RequestStopTime ->
+            ( model, Task.perform ReceiveStopTime Time.now )
+
+        ReceiveStartTime startTime ->
+            let
+                start =
+                    toFloat
+                        (Time.toMillis Time.utc startTime)
+
+                message =
+                    "Start: " ++ String.fromFloat start
+            in
+                ( { model | startTime = startTime, message = message }, Cmd.none )
+
+        ReceiveStopTime stopTime ->
+            let
+                start =
+                    toFloat
+                        (Time.toMillis Time.utc model.startTime)
+
+                stop =
+                    toFloat
+                        (Time.toMillis Time.utc stopTime)
+
+                elapsedMilliseconds =
+                    (stop - start)
+
+                message =
+                    "Elapsed: " ++ String.fromFloat elapsedMilliseconds
+            in
+                ( { model | stopTime = stopTime, message = message }, Cmd.none )
+
 
 useSource : String -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
 useSource text model =
@@ -176,8 +216,16 @@ useSource text model =
             , parseResult = MeenyLatex.parse text
             , inputString = exportLatex2Html editRecord
           }
-        , Cmd.none
+        , getStartTime
         )
+
+
+getStopTime =
+    Task.perform ReceiveStopTime Time.now
+
+
+getStartTime =
+    Task.perform ReceiveStartTime Time.now
 
 
 exportLatex2Html : EditRecord (Html msg) -> String

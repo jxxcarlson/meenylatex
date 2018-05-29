@@ -18,14 +18,16 @@
         "elm/json": "1.0.0",
         "elm/parser": "1.0.0",
         "elm/random": "1.0.0",
-        "elm/regex": "1.0.0"
+        "elm/regex": "1.0.0",
+        "elm/time": "1.0.0"
+
 
     },
     "do-not-edit-this-by-hand": {
        "transitive-dependencies": {
            "elm/url": "1.0.0",
-           "elm/virtual-dom": "1.0.0",
-           "elm/time": "1.0.0"
+           "elm/virtual-dom": "1.0.0"
+
        }
      },
     "test-dependencies": {}

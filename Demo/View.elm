@@ -77,6 +77,7 @@ footerRibbon model =
     div
         (ribbonStyle "#777")
         [ text <| textInfo model
+        , span [ Attr.style "margin-left" "4em" ] [ text <| model.message ]
         , link "http://jxxcarlson.github.io" "jxxcarlson.github.io"
         ]
 

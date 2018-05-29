@@ -683,13 +683,43 @@ Most of the macro and environment renderers are in final or close to final form.
 
 
 wavePackets =
+    wavePacketsHead ++ wavePacketsBody32
+
+
+wavePacketsBody32 =
+    wavePacketsBody16 ++ wavePacketsBody16
+
+
+wavePacketsBody16 =
+    wavePacketsBody8 ++ wavePacketsBody8
+
+
+wavePacketsBody8 =
+    wavePacketsBody4 ++ wavePacketsBody4
+
+
+wavePacketsBody4 =
+    wavePacketsBody2 ++ wavePacketsBody2
+
+
+wavePacketsBody2 =
+    wavePacketsBody ++ wavePacketsBody
+
+
+wavePacketsHead =
     """
 
-\\title{Wave packets and the dispersion relation}
+  \\title{Wave packets and the dispersion relation}
 
-\\maketitle
+  \\maketitle
 
-\\tableofcontents
+  \\tableofcontents
+
+"""
+
+
+wavePacketsBody =
+    """
 
 \\image{http://psurl.s3.amazonaws.com/images/jc/sinc2-bcbf.png}{Wave packet}{width: 250, float: right}
 

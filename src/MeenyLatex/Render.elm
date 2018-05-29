@@ -1,12 +1,12 @@
-module MeenyLatex.Render exposing (..)
-
--- exposing
---     ( makeTableOfContents
---     , render
---     , renderLatexList
---     , renderString
---     , transformText
---     )
+module MeenyLatex.Render
+    exposing
+        ( makeTableOfContents
+        , render
+        , renderLatexList
+        , renderString
+        , transformText
+        , renderArg
+        )
 
 import Dict
 

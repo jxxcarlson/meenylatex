@@ -2,27 +2,30 @@
 MeenyLaTeX
 =========
 
-MeenyLaTeX is an experimental version of MiniLatex,
-which is in turn a subset of LaTeX that can be rendered
-into pdf by standard tools such as `pdflatex` or
-into HTML by a suitable application, e.g.,
+MeenyLaTeX is an experimental version of the MiniLatex
+package.
+
+
+MiniLatex (the language) is a subset of LaTeX that can be rendered
+into pdf by standard tools such as `pdflatex`.  MiniLatex source
+text can be live-rendered in a web browser using a suitable application, e.g.,
 [MiniLatex Demo](https://jxxcarlson.github.io/app/minilatex/src/index.html)
 or [www.knode.io](http://www.knode.io)  For a technical discussion,
 see the Hackernoon article, [Towards LaTeX in the Browser](https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08).
 
-You can also experiment with the old MiniLaTeX using this
+You can experiment with the old MiniLaTeX using this
 [Ellie](https://ellie-app.com/jNN8tyQdh2a1)  I will have an
 Ellie version of MeenyLatex up soon.  For now, the best way
-to test this package is with the demo app in `./demo`.
+to test this package is by running the demo app in `./demo`.
 Better docs soon!
 
-This new version renders LaTeX source text into `Html a` rather than
-`String` representing Html.  The new
-`Driver` module uses this renderer as does the demo app.  There is
-also a major change in the way MathJax is called to render formulas.
-Rather than use ports, one now uses custom elements courtesy of @luke.
+*Changes:* (1) MeenyLatex renders LaTeX source text into `Html a` rather than
+`String` representing Html.  (2) The
+`Driver` module uses the `Html a` renderer as does the demo app.  (3)
+MathJax is called to render formulas using custom elements (courtesy of @luke),
+rather than using ports.
 
-I will also re-expose a `Driver` module which uses the `String` renderer.
+I plan to re-expose a `Driver` module which uses the `String` renderer.
 This is needed for printing.
 
 Note:  Since this is the experimental version,

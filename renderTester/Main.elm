@@ -55,28 +55,8 @@ example expr =
 view model =
     Html.div []
         [ line <| "Rendering experiment"
-        , example <| LXString "This is a string"
-        , example <| Comment "This is a comment"
-        , example <| InlineMath "a^2 + b^2 = c^2"
-        , example <| DisplayMath "a^2 + b^2 = c^2"
-        , example <| LatexList [ LXString "Well,", LXString "he", LXString "said to the lady", LXString ". Howdy!" ]
-        , example <| LatexList [ Macro "bozo" [] ([ arg1, arg2 ]) ]
-        , example <| LatexList [ Macro "yada" [] ([ arg1, arg2 ]) ]
-        , example <| LatexList [ LXString "He cried", Macro "italic" [] ([ LatexList ([ LXString "Justice!" ]) ]) ]
-        , example <| LatexList [ LXString "He cried", Macro "strong" [] ([ LatexList ([ LXString "Justice!" ]) ]) ]
-        , example <| LatexList [ LXString "one", Macro "bigskip" [] [], LXString "two" ]
-        , example <| LatexList [ Macro "cite" [] ([ LatexList ([ LXString "Foo" ]) ]) ]
-        , example <| LatexList [ LXString "Use", Macro "code" [] ([ LatexList ([ LXString "return x" ]) ]), LXString "." ]
-        , example <| LatexList [ Macro "href" [] ([ LatexList ([ LXString "https://ellie-app.com/krQCWKwv2Ta1" ]), LatexList ([ LXString "Ellie" ]) ]) ]
-        , example <| LatexList [ Macro "image" [] ([ LatexList ([ LXString "http://cooldigital.photography/wp-content/uploads/2015/09/Rosy-Butterfly-620x412.jpg" ]), LatexList ([ LXString "Butterfly" ]), LatexList ([ LXString "width: 300, float: left" ]) ]) ]
-        , example <| LatexList [ Macro "index" [] ([ LatexList ([ LXString "foo" ]) ]) ]
         , example <| LatexList [ Macro "ellie" [] ([ LatexList ([ LXString "krQCWKwv2Ta1" ]), LatexList ([ LXString "Ellie" ]) ]) ]
-        , renderString emptyLatexState "He said that \\strong{it is true!}"
-        , renderString emptyLatexState "He said that \\italic{it is true!}"
-        , renderString emptyLatexState "\\begin{equation}\n \\int_0^1 x^n dx = \\frac{1}{n+1}\n\\end{equation}\n"
-        , renderString emptyLatexState "\\begin{theorem}This is a test.\\end{theorem}\n"
-        , example <| LatexList [ Environment "equation" [] (LXString "\n  \\int_0^1 x^n dx = \\frac{1}{n+1}\n  ") ]
-        , line (Debug.toString <| MeenyLatex.Parser.parse "\\begin{equation}\n \\int_0^1 x^n dx = \\frac{1}{n+1}\n\\end{equation}\n")
+        , Html.iframe [ Html.Attributes.src "http://nytimes.com/embed" ] [ text "NYT" ]
         ]
 
 

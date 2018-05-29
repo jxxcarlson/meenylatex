@@ -398,11 +398,12 @@ renderCode latexState args =
 renderEllie : LatexState -> List LatexExpression -> Html msg
 renderEllie latexState args =
     let
-        src =
-            "src =\"https://ellie-app.com/embed/" ++ (MeenyLatex.Render.renderArg 0 latexState args ++ "\"")
+        id =
+            MeenyLatex.Render.renderArg 0 latexState args
 
         url =
-            ("https://ellie-app.com/" ++ (MeenyLatex.Render.renderArg 0 latexState args))
+            Debug.log "ELLIE URL"
+                ("https://ellie-app.com/embed/" ++ id)
 
         title_ =
             MeenyLatex.Render.renderArg 1 latexState args
@@ -413,7 +414,7 @@ renderEllie latexState args =
             else
                 title_
     in
-        Html.iframe [ Html.Attributes.href url ] [ Html.text title ]
+        Html.iframe [ Html.Attributes.src url, Html.Attributes.width 500, Html.Attributes.height 600 ] [ Html.text title ]
 
 
 renderEqRef : LatexState -> List LatexExpression -> Html msg

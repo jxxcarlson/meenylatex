@@ -683,27 +683,29 @@ Most of the macro and environment renderers are in final or close to final form.
 
 
 wavePackets =
-    wavePacketsHead ++ wavePacketsBody32
+    wavePacketsHead ++ wavePacketsBody
 
 
-wavePacketsBody32 =
-    wavePacketsBody16 ++ wavePacketsBody16
 
-
-wavePacketsBody16 =
-    wavePacketsBody8 ++ wavePacketsBody8
-
-
-wavePacketsBody8 =
-    wavePacketsBody4 ++ wavePacketsBody4
-
-
-wavePacketsBody4 =
-    wavePacketsBody2 ++ wavePacketsBody2
-
-
-wavePacketsBody2 =
-    wavePacketsBody ++ wavePacketsBody
+--
+-- wavePacketsBody32 =
+--     wavePacketsBody16 ++ wavePacketsBody16
+--
+--
+-- wavePacketsBody16 =
+--     wavePacketsBody8 ++ wavePacketsBody8
+--
+--
+-- wavePacketsBody8 =
+--     wavePacketsBody4 ++ wavePacketsBody4
+--
+--
+-- wavePacketsBody4 =
+--     wavePacketsBody2 ++ wavePacketsBody2
+--
+--
+-- wavePacketsBody2 =
+--     wavePacketsBody ++ wavePacketsBody
 
 
 wavePacketsHead =

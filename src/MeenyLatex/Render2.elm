@@ -164,7 +164,16 @@ outputValue internalState =
   in  
     case (a,b,c) of
         (Macro _ _ _,  LXString str, _) ->
-            (LXString (" " ++ str))
+            if List.member (firstChar str) [ ".", ",", "?", "!", ";", ":" ] then
+                (LXString str)
+            else
+                (LXString (" " ++ str))
+
+        (InlineMath _,  LXString str, _) ->
+            if List.member (firstChar str) [ ".", ",", "?", "!", ";", ":" ] then
+                (LXString str)
+            else
+                (LXString (" " ++ str))
 
         (_, LXString str, _) ->
             if List.member (lastChar str) [ ")", ".", ",", "?", "!", ";", ":" ] then 

@@ -43,6 +43,7 @@ import Parser
 import Regex
 import String
 import Html.Attributes as HA
+import MeenyLatex.ListMachine as ListMachine  
 
 
 -- |> \str -> "\n<p>" ++ str ++ "</p>\n"
@@ -152,13 +153,26 @@ displayMathText str =
 
 
 
-{- PROCESS SPACES BETWEEN ELEMENTS -}
+{- PROCESS SPACES BETWEEN ELEMENTS  V2 -}
 
+outputValue : ListMachine.InternalState LatexExpression -> LatexExpression 
+outputValue internalState = 
+  let
+    a = internalState.before  |> Maybe.withDefault (LXString "") 
+    b = internalState.current |> Maybe.withDefault (LXString "")  
+    c = internalState.after   |> Maybe.withDefault (LXString "")  
+  in  
+    case (a,b,c) of
+        (Macro _ _ _,  LXString str, _) ->
+            (LXString (" " ++ str))
 
-type Spacing
-    = SpaceAfter
-    | SpaceBefore
-    | NoSpace
+        (_, LXString str, _) ->
+            if List.member (lastChar str) [ ")", ".", ",", "?", "!", ";", ":" ] then 
+                (LXString (str ++ " "))
+            else 
+                (LXString str)
+         
+        (_, _, _) -> b
 
 
 lastChar =
@@ -169,65 +183,6 @@ firstChar =
     String.left 1
 
 
-spaceBefore str =
-    if List.member (lastChar str) [ "(" ] then
-        NoSpace
-    else
-        SpaceBefore
-
-
-spaceAfter str =
-    if List.member (firstChar str) [ ")", ".", ",", "?", "!", ";", ":" ] then
-        NoSpace
-    else
-        SpaceAfter
-
-
-putSpace : LatexExpression -> LatexExpression -> ( LatexExpression, Spacing )
-putSpace le1 le2 =
-    case ( le1, le2 ) of
-        ( _, LXString "!!END" ) ->
-            ( le1, NoSpace )
-
-        ( _, LXString str ) ->
-            ( le1, spaceAfter str )
-
-        ( LXString str, _ ) ->
-            ( le1, spaceBefore str )
-
-        ( _, _ ) ->
-            ( le1, NoSpace )
-
-
-putSpaces : List LatexExpression -> List ( LatexExpression, Spacing )
-putSpaces latexList =
-    let
-        latexList2 =
-            (List.drop 1 latexList) ++ [ LXString "!!END" ]
-    in
-        List.map2 putSpace latexList latexList2
-
-
-processLatexListWithSpacing : List ( LatexExpression, Spacing ) -> List LatexExpression
-processLatexListWithSpacing latexListWithSpacing =
-    List.map processLatexExpressionWithSpacing latexListWithSpacing
-
-
-processLatexExpressionWithSpacing : ( LatexExpression, Spacing ) -> LatexExpression
-processLatexExpressionWithSpacing ( expr, spacing ) =
-    case ( expr, spacing ) of
-        ( _, NoSpace ) ->
-            expr
-
-        ( LXString str, SpaceAfter ) ->
-            LXString (str ++ " ")
-
-        ( LXString str, SpaceBefore ) ->
-            LXString (" " ++ str)
-
-        ( _, _ ) ->
-            expr
-
 
 {-| Like `render`, but renders a list of LatexExpressions
 to Html mgs
@@ -235,8 +190,9 @@ to Html mgs
 renderLatexList : LatexState -> List LatexExpression -> Html msg
 renderLatexList latexState latexList =
     latexList
-        |> putSpaces
-        |> processLatexListWithSpacing
+        -- |> putSpaces
+        -- |> processLatexListWithSpacing
+        |> ListMachine.runMachine outputValue
         |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] (List.map (render latexState) list))
 
 

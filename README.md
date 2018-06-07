@@ -10,14 +10,16 @@ MiniLatex (the language) is a subset of LaTeX that can be rendered
 into pdf by standard tools such as `pdflatex`.  MiniLatex source
 text can be live-rendered in a web browser using a suitable application, e.g.,
 [MiniLatex Demo](https://jxxcarlson.github.io/app/minilatex/src/index.html)
-or [www.knode.io](http://www.knode.io)  For a technical discussion,
+or [www.knode.io](http://www.knode.io).  For a technical discussion,
 see the Hackernoon article, [Towards LaTeX in the Browser](https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08).
 
 You can experiment with the old MiniLaTeX using this
-[Ellie](https://ellie-app.com/jNN8tyQdh2a1)  I will have an
+[Ellie](https://ellie-app.com/jNN8tyQdh2a1).  I will have an
 Ellie version of MeenyLatex up soon.  For now, the best way
 to test this package is by running the demo app in `./demo`.
 Better docs coming soon!
+
+[Ellie, WIP](https://19.ellie-app.com/mQ3XxVWw3Ba1)
 
 Changes
 -------

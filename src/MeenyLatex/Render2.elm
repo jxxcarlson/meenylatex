@@ -996,7 +996,7 @@ renderTheoremLikeEnvironment latexState name args body =
                 " " ++ String.fromInt tno
     in
         Html.div [ HA.class "environment" ]
-            [ Html.strong [] [ Html.text (name ++ tnoString) ]
+            [ Html.strong [] [ Html.text ((Utility.capitalize name) ++ tnoString) ]
             , Html.div [ HA.class "italic" ] [ r ]
             ]
 

@@ -155,8 +155,8 @@ displayMathText str =
 
 {- PROCESS SPACES BETWEEN ELEMENTS  V2 -}
 
-outputValue : ListMachine.InternalState LatexExpression -> LatexExpression 
-outputValue internalState = 
+addSpace : ListMachine.InternalState LatexExpression -> LatexExpression 
+addSpace internalState = 
   let
     a = internalState.before  |> Maybe.withDefault (LXString "") 
     b = internalState.current |> Maybe.withDefault (LXString "")  
@@ -199,9 +199,7 @@ to Html mgs
 renderLatexList : LatexState -> List LatexExpression -> Html msg
 renderLatexList latexState latexList =
     latexList
-        -- |> putSpaces
-        -- |> processLatexListWithSpacing
-        |> ListMachine.runMachine outputValue
+        |> ListMachine.runMachine addSpace
         |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] (List.map (render latexState) list))
 
 

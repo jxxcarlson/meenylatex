@@ -3,7 +3,7 @@
     "name": "jxxcarlson/meenylatex",
     "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
     "license": "BSD-3-Clause",
-    "version": "1.0.5",
+    "version": "1.0.0",
     "exposed-modules": [
         "MeenyLatex.Driver",
         "MeenyLatex.Source",

@@ -153,6 +153,7 @@ displayMathText str =
 
 
 
+
 {- PROCESS SPACES BETWEEN ELEMENTS  V2 -}
 
 addSpace : ListMachine.InternalState LatexExpression -> LatexExpression 

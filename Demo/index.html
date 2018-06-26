@@ -57,7 +57,7 @@
          }
        });
 
-
+     // 
     </script> -->
 
     <script type="text/x-mathjax-config">
@@ -67,14 +67,20 @@
           TeX: { equationNumbers: {autoNumber: "AMS"}}
           }
     );
+
+   
+
    </script>
 
 <script src="./app.js"></script>
 
 <script>
-   var node = document.getElementById('main');
+   var root = document.getElementById('main');
+   var app =Elm.Main.init({node: root, flags:  { width:  1200, height: 900 }}) 
+   
+    //Elm.Main.embed( node,  { width:  1200, height: 900 })
 
-   var app = Elm.Main.embed( node,  { width:  1200, height: 900 })
+
 
    var typesetTimeout = null
    var typesetQueue = []

@@ -40,7 +40,8 @@ may be empty. Thus, if
 macros = ""
 source = "\italic{Test:}\n\n$$a^2 + b^2 = c^2$$\n\n\strong{Q.E.D.}"
 
-then `render macros source` yields the HTML text
+then `render macros source` yields an HTML msg value 
+representing the HTML text
 
     <p>
     <span class=italic>Test:</span></p>
@@ -107,7 +108,7 @@ getRenderedText macroDefinitions editRecord =
             , "$$a^2 + b^2 = c^2$$\n\n"
             , "\\strong{Q.E.D.}\n\n"
             ]
-        , renderedParagraphs =
+        , renderedParagraphs = ((an Html msg value representing))
             [ "  <span class=italic>Test:</span>"
             , " $$a^2 + b^2 = c^2$$"
             , "  <span class=\"strong\">Q.E.D.</span> "

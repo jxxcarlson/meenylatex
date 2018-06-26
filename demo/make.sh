@@ -1,1 +1,1 @@
-/Users/carlson/Downloads/elm make Main.elm --output=app.js
+/Users/carlson/Downloads/2/elm make src/Main.elm --output=app.js

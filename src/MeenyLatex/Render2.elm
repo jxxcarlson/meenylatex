@@ -507,7 +507,7 @@ renderTableOfContents latexState list =
 
 
 {-| Build a table of contents from the
-cucrrent LatexState
+current LatexState
 -}
 makeTableOfContents : LatexState -> List (Html msg)
 makeTableOfContents latexState =

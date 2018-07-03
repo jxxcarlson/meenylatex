@@ -8,6 +8,15 @@ module MeenyLatex.Render
         , renderArg
         )
 
+{-| This module is for quickly preparing latex for export.
+
+
+# API
+
+@docs makeTableOfContents, render, renderLatexList, renderString, renderArg, transformText
+
+-}
+
 import Dict
 
 
@@ -34,6 +43,9 @@ import Regex
 import String
 
 
+{-| render a string representing Latex text into a string representing Html text
+given a LatexState
+-}
 transformText : LatexState -> String -> String
 transformText latexState text =
     renderString latexList latexState text
@@ -54,9 +66,8 @@ parseString parser str =
 
 
 
--- renderString latexList latexState text
-
-
+{-| Parse a string, then render it.
+-}
 renderString : Parser.Parser LatexExpression -> LatexState -> String -> String
 renderString parser latexState str =
     let
@@ -96,7 +107,8 @@ extractList latexExpression =
             []
 
 
-{-| THE MAIN RENDERING FUNCTION
+{-| The main rendering funcction. Compute an Html msg value
+from the current LatexState and a LatexExpresssion.
 -}
 render : LatexState -> LatexExpression -> String
 render latexState latexExpression =
@@ -132,6 +144,9 @@ render latexState latexExpression =
             List.map ErrorMessages.renderError error |> String.join "; "
 
 
+{-| Like `render`, but renders a list of LatexExpressions
+to Html mgs
+-}
 renderLatexList : LatexState -> List LatexExpression -> String
 renderLatexList latexState args =
     args |> List.map (render latexState) |> JoinStrings.joinList |> postProcess
@@ -520,7 +535,7 @@ renderMacro : LatexState -> String -> List LatexExpression -> List LatexExpressi
 renderMacro latexState name optArgs args =
     (macroRenderer name) latexState optArgs args
 
-
+{-| render an argument -}
 renderArg : Int -> LatexState -> List LatexExpression -> String
 renderArg k latexState args =
     render latexState (getElement k args) |> String.trim
@@ -943,7 +958,9 @@ renderTableOfContents latexState list =
     in
         "\n<p class=\"tocTitle\">Table of Contents</p>\n<ul class=\"ListEnvironment\">\n" ++ innerPart ++ "\n</ul>\n"
 
-
+{-| Build a table of contents from the
+current LatexState
+-}
 makeTableOfContents : LatexState -> String
 makeTableOfContents latexState =
     List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)

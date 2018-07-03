@@ -1,137 +1,130 @@
+<!DOCTYPE html>
 <html>
-<head>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>MeenyLatex Demo</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.1.1/custom-elements.min.js"></script>
+		
+		<script type="text/x-mathjax-config">
+			MathJax.Hub.Config(
+				{ tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+				processEscapes: true,
+				TeX: { equationNumbers: {autoNumber: "AMS"}}
+				}
+	        );
+		</script>
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+		<script src="Main.js" charset="utf-8"></script>
+		<style>
+.code {font-family: "Courier New", Courier, monospace; background-color: #f5f5f5; font-weight: 300;}
+.center {margin-left: auto; margin-right: auto;}
+.indent {margin-left: 2em!important}
+.italic {font-style: oblique!important}
+.environment {margin-top: 1em; margin-bottom: 1em;}
+.strong {font-weight: bold}
+.subheading {margin-top: 0.75em; margin-bottom: 0.5em; font-weight: bold}
+.verbatim {margin-top: 1em; margin-bottom: 1em; font-size: 10pt;}
+td {padding-right: 10px;}
 
-  <meta charset="utf-8" />
+a.linkback:link { color: white;}
+a.linkback:visited { color: white;}
+a.hover:visited { color: red;}
+a.hover:visited { color: blue;}
+a:hover { color: red;}
+a:active { color: blue;}
 
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.1.1/custom-elements.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+.errormessage {white-space: pre-wrap;}
 
+.title { font-weight: bold; font-size: 1.7em; margin-bottom: 0px; padding-bottom: 0px;}
+.smallskip {margin-top:0; margin-bottom: -12px;}
 
-  <style>
-   .code {font-family: "Courier New", Courier, monospace; background-color: #f5f5f5; font-weight: 300;}
-   .center {margin-left: auto; margin-right: auto;}
-   .indent {margin-left: 2em!important}
-   .italic {font-style: oblique!important}
-   .environment {margin-top: 1em; margin-bottom: 1em;}
-   .strong {font-weight: bold}
-   .subheading {margin-top: 0.75em; margin-bottom: 0.5em; font-weight: bold}
-   .verbatim {margin-top: 1em; margin-bottom: 1em; font-size: 10pt;}
-   td {padding-right: 10px;}
+.item1 {margin-bottom: 6px;}
 
-   a.linkback:link { color: white;}
-   a.linkback:visited { color: white;}
-   a.hover:visited { color: red;}
-   a.hover:visited { color: blue;}
-   a:hover { color: red;}
-   a:active { color: blue;}
+.verse { white-space: pre-line; margin-top:0}
+.authorinfo { white-space: pre-line; margin-top:-8px}
 
-   .errormessage {white-space: pre-wrap;}
+.ListEnvironment { list-style-type: none; margin-left:8px; padding-left: 8px; margin-top: 0;margin-bottom:12px;}
+.tocTitle { margin-bottom: 0; margin-top:12px; font-weight: bold;}
+.sectionLevel1 {padding-left: 0; margin-left: 0; }
+.sectionLevel2 {padding-left: 8px; margin-left: 8px; }
+.sectionLevel3 {padding-left: 22px; margin-left: 22px; }
 
-   .title { font-weight: bold; font-size: 1.7em; margin-bottom: 0px; padding-bottom: 0px;}
-   .smallskip {margin-top:0; margin-bottom: -12px;}
+		</style>
+	</head>
 
-   .item1 {margin-bottom: 6px;}
-
-   .verse { white-space: pre-line; margin-top:0}
-   .authorinfo { white-space: pre-line; margin-top:-8px}
-
-   .ListEnvironment { list-style-type: none; margin-left:8px; padding-left: 8px; margin-top: 0;margin-bottom:12px;}
-   .tocTitle { margin-bottom: 0; margin-top:12px; font-weight: bold;}
-   .sectionLevel1 {padding-left: 0; margin-left: 0; }
-   .sectionLevel2 {padding-left: 8px; margin-left: 8px; }
-   .sectionLevel3 {padding-left: 22px; margin-left: 22px; }
-
-  </style>
-
-  <title>MiniLaTeX Demo</title>
-
-</head>
-
-<body>
-    <div id="main"></div>
-<!--
-    <script type="text/x-mathjax-config">
-
-       MathJax.Hub.Config({tex2jax: {
-         TeX: { equationNumbers: {autoNumber: "AMS"}}
-         }
-       });
-
-     // 
-    </script> -->
-
-    <script type="text/x-mathjax-config">
-       MathJax.Hub.Config(
-         { tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
-          processEscapes: true,
-          TeX: { equationNumbers: {autoNumber: "AMS"}}
-          }
-    );
-
-   
-
-   </script>
-
-<script src="./app.js"></script>
-
-<script>
-   var root = document.getElementById('main');
-   var app =Elm.Main.init({node: root, flags:  { width:  1200, height: 900 }}) 
-   
-    //Elm.Main.embed( node,  { width:  1200, height: 900 })
+	<body>
+		<div id="main"></div>
 
 
+	
 
-   var typesetTimeout = null
-   var typesetQueue = []
-   function enqueueTypeset(el) {
-     typesetQueue.push(el)
-     clearTimeout(typesetTimeout)
-     typesetTimeout = setTimeout(function () {
-       var toTypeset = typesetQueue
-       MathJax.Hub.Queue(['Typeset', MathJax.Hub, typesetQueue], function (arg) {
-         toTypeset.forEach(function (el) { el.style.opacity = 1 })
-       })
-       typesetQueue = []
-     }, 1)
-   }
+ 	<script>
 
-   var updateQueue = []
-   var updateTimeout = null
-   function enqueueUpdate(el) {
-     updateQueue.push(el)
-     clearTimeout(updateTimeout)
-     updateTimeout = setTimeout(function () {
-       MathJax.Hub.Queue(['Update', MathJax.Hub, updateQueue])
-       updateQueue = []
-     }, 0)
-   }
+		var root = document.getElementById('main');
+		var app = Elm.Main.init({node: root, flags:  { width:  1200, height: 900 }});
+		
+		var typesetTimeout = null
+		var typesetQueue = []
+		function enqueueTypeset(el) {
+			console.log("enqueueTypeset: " + el)
+			typesetQueue.push(el)
+			clearTimeout(typesetTimeout)
+			typesetTimeout = setTimeout(function () {
+				var toTypeset = typesetQueue
+				MathJax.Hub.Queue(["resetEquationNumbers", MathJax.InputJax.TeX]);
+				MathJax.Hub.Queue(['Typeset', MathJax.Hub, typesetQueue], function (arg) {
+					toTypeset.forEach(function (el) { el.style.opacity = 1 })
+				})
+				typesetQueue = []
+			}, 1)
+		}
+		
+		var updateQueue = []
+		var updateTimeout = null
+		function enqueueUpdate(el) {
+			console.log("enqueueUpdate: " + el)
+			updateQueue.push(el)
+			clearTimeout(updateTimeout)
+			updateTimeout = setTimeout(function () {
+				MathJax.Hub.Queue(['Update', MathJax.Hub, updateQueue])
+				updateQueue = []
+			}, 0)
+		}
+		
+		customElements.define('math-text', class extends HTMLElement {
+		  constructor() {
+			super()
+			this._content = this.content
+		  }
+		  
+			get content() {
+				console.log("get content: " + this._content)
+				return this._content
+			}
+		
+			set content(value) {
+				console.log("set content: " + value)
+				if (this._content === value) return
+				this._content = value
+				var jaxScript = this.querySelector('script')
+				if (!jaxScript) return
+				jaxScript.textContent = this._content
+				enqueueUpdate(this)
+			}
+		
+			connectedCallback() {
+				console.log("connectedCallback: " + this._content )
+				this.textContent = this._content
+				this._connected = true
+				this.style.opacity = 1
+				this.style.display = 'inline'
+				enqueueTypeset(this)
+			}
+		})
+	 </script>
 
-   customElements.define('math-text', class extends HTMLElement {
-     get content() {
-       return this._content
-     }
 
-     set content(value) {
-       if (this._content === value) return
-       this._content = value
-       var jaxScript = this.querySelector('script')
-       if (!jaxScript) return
-       jaxScript.textContent = this._content
-       enqueueUpdate(this)
-     }
-
-     connectedCallback() {
-       this.textContent = this._content
-       this._connected = true
-       this.style.opacity = 0
-       this.style.display = 'inline'
-       enqueueTypeset(this)
-     }
-   })
-
-
-  </script>
-
-</body>
+	</body>
 </html>

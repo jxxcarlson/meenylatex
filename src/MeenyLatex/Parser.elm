@@ -15,7 +15,8 @@ module MeenyLatex.Parser
 
 # API
 
-@docs LatexExpression, macro, parse, defaultLatexList, latexList, endWord, envName
+@docs LatexExpression, macro, parse, defaultLatexList, 
+  latexList, endWord, envName, word
 
 -}
 
@@ -129,7 +130,7 @@ notSpaceOrSpecialCharacters : Char -> Bool
 notSpaceOrSpecialCharacters c =
     not (c == ' ' || c == '\n' || c == '\\' || c == '$')
 
-
+{-| Use `inWord` to parse a word. -}
 word : (Char -> Bool) -> Parser String
 word inWord =
     succeed String.slice

@@ -278,7 +278,7 @@ standardView model =
     div [ style "float" "left" ]
         [ headerRibbon
         , editor model
-        , div renderedLatexStyle [ renderedSource model ]
+        , Keyed.node "div" renderedLatexStyle [ ((String.fromInt model.counter), renderedSource model) ]
         , spacer 5
         , footerRibbon model
         ]

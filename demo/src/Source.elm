@@ -2058,6 +2058,9 @@ Scorekeeper Ellie:
 
 \\section{Familiar formulas}
 
+Below are some familiar and perhaps unfamiliar 
+formulas, e.g., equation \\eqref{fourier}.
+
 Pythagoras says: $a^2 + b^2 = c^2$.
 
 From your calculus class:
@@ -2069,9 +2072,9 @@ $$
 A Fourier integral:
 
 \\begin{equation}
+\\label{fourier}
    \\int_{k_0 - \\Delta k/2}^{k_0 + \\Delta k/2}  a(k_0)e^{i((k_0 + (k - k_0)x - (\\omega_0t + \\omega_0'(k - k_0)t))}dk,
 \\end{equation}
-
 
 
 

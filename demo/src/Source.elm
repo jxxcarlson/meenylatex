@@ -403,7 +403,7 @@ parse : Parser LatexExpression
 parse =
     oneOf
         [ texComment
-        , lazy (\\_ -> environment)
+        , lazy (\\_ ⟶ environment)
         , displayMathDollar
         , displayMathBrackets
         , inlineMath
@@ -419,25 +419,25 @@ matches the input text.  The \\code{environment} parser is the most interesting.
 \\begin{verbatim}
 environment : Parser LatexExpression
 environment =
-    lazy (\\_ -> beginWord |> andThen environmentOfType)
+    lazy (\\_ ⟶ beginWord |˃ andThen environmentOfType)
 \\end{verbatim}
 
 The \\code{environmentOfType}
 function acts as a switching yard, routing the action of the parser to the correct function. The \\italic{enumurate} and \\italic{itemize} environments need special handling, while others are handled by \\code{standardEnvironmentBody}.
 
 \\begin{verbatim}
-environmentOfType : String -> Parser LatexExpression
+environmentOfType : String ⟶ Parser LatexExpression
 environmentOfType envType =
     let
         endWord =
             "\\\\end{" ++ envType ++ "}"
     in
     case envType of
-        "enumerate" ->
+        "enumerate" ⟶
             itemEnvironmentBody endWord envType
-        "itemize" ->
+        "itemize" ⟶
             itemEnvironmentBody endWord envType
-        _ ->
+        _ ⟶
             standardEnvironmentBody endWord envType
 \\end{verbatim}
 
@@ -451,8 +451,8 @@ standardEnvironmentBody endWord envType =
         |. ws
         |. symbol endWord
         |. ws
-        |> map LatexList
-        |> map (Environment envType)
+        |˃ map LatexList
+        |˃ map (Environment envType)
 \\end{verbatim}
 
 Note the repeated calls to \\code{parse} in the body of \\code{standardEnvironmentBody}.  Thus an environment can contain a nested sequence of environments, or even a tree thereof..
@@ -471,14 +471,14 @@ $$
 Code for the second step is housed in the module \\code{MeenyLatex.Render}. The primary function is
 
 \\begin{verbatim}
-render : LatexState -> LatexExpression -> String
+render : LatexState ⟶ LatexExpression ⟶ String
 render latexState latexExpression =
     case latexExpression of
-        Comment str ->
+        Comment str ⟶
             renderComment str
-        Macro name args ->
+        Macro name args ⟶
             renderMacro latexState name args
-        Item level latexExpression ->
+        Item level latexExpression ⟶
             renderItem latexState level latexExpression
         ETC...
 \\end{verbatim}
@@ -496,14 +496,15 @@ The \\code{accumulator} uses \\code{List.foldl} to build up the final list of re
 
 \\begin{verbatim}
 accumulator :
-    (String -> List LatexExpression)
-    -> (List LatexExpression -> LatexState -> String)
-    -> (List LatexExpression -> LatexState -> LatexState)
-    -> List String
-    -> ( List String, LatexState )
+    (String ⟶ List LatexExpression)
+    ⟶ (List LatexExpression ⟶ LatexState ⟶ String)
+    ⟶ (List LatexExpression ⟶ LatexState ⟶ LatexState)
+    ⟶ List String
+    ⟶ ( List String, LatexState )
 accumulator parse render updateState inputList =
     inputList
-        |> List.foldl (transformer parse render updateState) ( [], Render.emptyLatexState )
+        |˃ List.foldl (transformer parse render updateState) 
+           ( [], Render.emptyLatexState )
 \\end{verbatim}
 
 The role of the \\code{transformer} function is to carry forward the current \\code{latexState}, updating it, and transforming \\code{LatexExpressions} into HTML. A kind of transducer, the \\code{transformer} is a function of five variables:
@@ -517,20 +518,17 @@ Here is the code:
 
 \\begin{verbatim}
 transformer :
-    (input -> parsedInput)
-    -> (parsedInput -> state -> renderedInput)
-    -> (parsedInput -> state -> state)
-    -> input
-    -> ( List renderedInput, state )
-    -> ( List renderedInput, state )
+    (input ⟶ parsedInput)
+    ⟶ (parsedInput ⟶ state ⟶ renderedInput)
+    ⟶ (parsedInput ⟶ state ⟶ state)
+    ⟶ input
+    ⟶ ( List renderedInput, state )
+    ⟶ ( List renderedInput, state )
 transformer parse render updateState input acc =
     let
-        ( outputList, state ) =
-            acc
-        parsedInput =
-            parse input
-        newState =
-            updateState parsedInput state
+        ( outputList, state ) = acc
+        parsedInput = parse input
+        newState = updateState parsedInput state
     in
         ( outputList ++ [ render parsedInput newState ], newState )
 \\end{verbatim}
@@ -544,11 +542,11 @@ $$
 that maps a  list of paragraphs of MeenyLatex source text to its rendition as list of HTML strings.  The \\code{transformParagraphs} function is defined in terms of the \\code{accumulator}:
 
 \\begin{verbatim}
-transformParagraphs : List String -> List String
+transformParagraphs : List String ⟶ List String
 transformParagraphs paragraphs =
     paragraphs
-        |> accumulator Render.parseParagraph renderParagraph updateState
-        |> Tuple.first
+        |˃ accumulator Render.parseParagraph renderParagraph updateState
+        |˃ Tuple.first
 \\end{verbatim}
 
 
@@ -570,7 +568,7 @@ type alias EditRecord =
 To set up this structure when an author begins editing, we make use of the general \\code{initialize} function in module \\code{MeenyLatex.Differ}:
 
 \\begin{verbatim}
-initialize : (List String -> List String) -> String -> EditRecord
+initialize : (List String ⟶ List String) ⟶ String ⟶ EditRecord
 initialize transformParagraphs text =
     let
         paragraphs =
@@ -607,15 +605,15 @@ $\\gamma = \\text{commonTerminalSegment}$, and $\\beta' = \\text{middleSegmentIn
 These are computed using the function \\code{diff}:
 
 \\begin{verbatim}
-diff : List String -> List String -> DiffRecord
+diff : List String ⟶ List String ⟶ DiffRecord
 diff u v =
     let
         a = commonInitialSegment u v
         b = commonTerminalSegment u v
         la = List.length a
         lb = List.length b
-        x =  u |> List.drop la |> dropLast lb
-        y = v |> List.drop la |> dropLast lb
+        x =  u |˃ List.drop la |˃ dropLast lb
+        y = v |˃ List.drop la |˃ dropLast lb
     in
         DiffRecord a b x y
 \\end{verbatim}
@@ -629,7 +627,7 @@ $$
 The \\code{Diff.update} function defined below breaks the \\code{text} into paragraphs, computes the \\code{diffRecord}, and returns an updated version of \\code{editRecord} by applying \\code{transformer} to $\\beta'$.
 
 \\begin{verbatim}
-update : (String -> String) -> EditRecord -> String -> EditRecord
+update : (String ⟶ String) ⟶ EditRecord ⟶ String ⟶ EditRecord
 update transformer editorRecord text =
     let
         newParagraphs =
@@ -645,7 +643,7 @@ update transformer editorRecord text =
 Here is how \\code{renderDiff}, which is used to update the \\code{editRecord}, is defined:
 
 \\begin{verbatim}
-renderDiff : (String -> String) -> DiffRecord -> List String -> List String
+renderDiff : (String ⟶ String) ⟶ DiffRecord ⟶ List String ⟶ List String
 renderDiff renderer diffRecord renderedStringList =
   let
     ii = List.length diffRecord.commonInitialSegment
@@ -2024,81 +2022,110 @@ grammar =
 
 
 basicExample =
-    """
+  """
+
+
 \\tableofcontents
 
+\\section{MiniLatex}
 
+MiniLatex is a technology for bringing a
+defined subset of LaTeX to the browser: a way to live-edit, render, and distribute class notes, etc.
+You can write simple and complex formulas, as in equations \\eqref{integral} and \\eqref{fourier}.
 
-
-
-\\section{Introduction}
-
-We will give examples of some formulas, 
-and also some theorems,
-
-
-
-
-
-\\section{Images}
-
-
-Two-frequency beats:
-
-\\image{http://psurl.s3.amazonaws.com/images/jc/beats-eca1.png}{Two-frequency beats}{width: 350, float: right}
-
-
-Scorekeeper Ellie:
-
-\\ellie{cYbhH5mjqa1/2}
-
-
-
-
-
-\\section{Familiar formulas}
-
-Below are some familiar and perhaps unfamiliar 
-formulas, e.g., equation \\eqref{fourier}.
-
-Pythagoras says: $a^2 + b^2 = c^2$.
-
-From your calculus class:
-
-$$
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-$$
-
-A Fourier integral:
 
 \\begin{equation}
-\\label{fourier}
-   \\int_{k_0 - \\Delta k/2}^{k_0 + \\Delta k/2}  a(k_0)e^{i((k_0 + (k - k_0)x - (\\omega_0t + \\omega_0'(k - k_0)t))}dk,
+\\label{integral}
+\\int_0^1 x^n dx = \\frac{1}{n+1}
 \\end{equation}
 
 
+\\begin{equation}
+\\label{fourier}
+\\psi(x,t) = \\int_{-\\infty}^\\infty  \\left[ \\
+\\frac{1}{2\\pi}  \\int_{-\\infty}^\\infty e^{ipx} e^{ -ip^2t/2m \\hbar} e^{-ipx'} dp \\right] \\phi(x')  dx'
+\\end{equation}
 
 
-\\section{Theorems}
+\\subsection{Images}
 
-\\begin{theorem}
-\\label{th:primes}
-There are a infinitely many prime numbers.
+Displaying images is a simple matter -- just use the \\code{image} macro, which looks like
+
+\\begin{verbatim}
+  \\image{URL}{LABEL}{width 350, float: right}
+\\end{verbatim}
+
+where \\code{URL} is the image url.
+
+\\image{http://psurl.s3.amazonaws.com/images/jc/beats-eca1.png}{Two-frequency beats}{width: 350, float: right}
+
+One can also display Ellies:
+
+\\ellie{qqVYtKvBxJa1}{Button App}
+
+Here is the source text:
+
+\\begin{verbatim}
+    \\ellie{qqVYtKvBxJa1}{Button App}
+\\end{verbatim}
+
+\\section{Other features}
+Hyperlinks: \\href{http://lambdajam.yowconference.com.au/archive-2018/profile/?id=xavier-ho}{Generative art with Elm}
+
+\\begin{theorem} 
+There are infinitely many primes.
 \\end{theorem}
 
-\\begin{theorem}
-\\label{th:primes2}
-There are infinitely many prime numbers
-$p \\equiv 1\\ mod\\ 4$.
+\\begin{theorem} 
+There are infinitely many primes $p$
+such that $p \\equiv 1\\ mod\\ 4$.
 \\end{theorem}
 
 
+\\subsection{Poetry}
 
+\\begin{verse}
+’Twas brillig, and the slithy toves
+      Did gyre and gimble in the wabe:
+All mimsy were the borogoves,
+      And the mome raths outgrabe.
 
+“Beware the Jabberwock, my son!
+      The jaws that bite, the claws that catch!
+Beware the Jubjub bird, and shun
+      The frumious Bandersnatch!”
+
+He took his vorpal sword in hand;
+      Long time the manxome foe he sought—
+So rested he by the Tumtum tree
+      And stood awhile in thought.
+
+And, as in uffish thought he stood,
+      The Jabberwock, with eyes of flame,
+Came whiffling through the tulgey wood,
+      And burbled as it came!
+
+One, two! One, two! And through and through
+      The vorpal blade went snicker-snack!
+He left it dead, and with its head
+      He went galumphing back.
+
+“And hast thou slain the Jabberwock?
+      Come to my arms, my beamish boy!
+O frabjous day! Callooh! Callay!”
+      He chortled in his joy.
+
+’Twas brillig, and the slithy toves
+      Did gyre and gimble in the wabe:
+All mimsy were the borogoves,
+      And the mome raths outgrabe.
+\\end{verse}
 
 \\section{Verbatim}
 
-  \\begin{verbatim}
+Below is the type definition for MiniLatex:
+
+\\begin{verbatim}
   type LatexExpression
       = LXString String
       | Comment String
@@ -2108,5 +2135,7 @@ $p \\equiv 1\\ mod\\ 4$.
       | Macro String (List LatexExpression)
       | Environment String LatexExpression
       | LatexList (List LatexExpression)
-  \\end{verbatim}
-  """    
+\\end{verbatim}
+
+\\bigskip
+"""  

@@ -105,7 +105,7 @@ a:active { color: blue;}
 			}
 		
 			set content(value) {
-				console.log("set content: " + value)
+				console.log("set content: [" + value + 	"]")
 				if (this._content === value) return
 				this._content = value
 				var jaxScript = this.querySelector('script')

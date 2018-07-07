@@ -18,6 +18,7 @@ module MeenyLatex.Driver
 -}
 
 import Html exposing (Html)
+import Html.Attributes as HA
 import MeenyLatex.Differ as Differ exposing (EditRecord)
 import MeenyLatex.LatexDiffer as MiniLatexDiffer
 import MeenyLatex.LatexState exposing (emptyLatexState)
@@ -70,9 +71,11 @@ parse text =
         |> List.map MiniLatexParser.parse
 
 
-pTags : EditRecord (Html msg) -> List String
+-- pTags : EditRecord (Html msg) -> List (Html msg)
 pTags editRecord =
-    editRecord.idList |> List.map (\x -> "<p id=\"" ++ x ++ "\">")
+    -- editRecord.idList |> List.map (\x -> "<p id=\"" ++ x ++ "\">")
+    editRecord.idList |> List.map (\x -> HA.id x)
+
 
 
 {-| Using the renderedParagraph list of the editRecord,
@@ -80,9 +83,22 @@ return a string representing the HTML of the paragraph list
 of the editRecord. Append the macroDefinitions for use
 by MathJax.
 -}
+getRenderedText1 : String -> EditRecord (Html msg) -> List (Html msg)
+getRenderedText1 macroDefinitions editRecord =
+    editRecord.renderedParagraphs
+
+
 getRenderedText : String -> EditRecord (Html msg) -> List (Html msg)
 getRenderedText macroDefinitions editRecord =
-    editRecord.renderedParagraphs
+  let 
+    paragraphs = editRecord.renderedParagraphs
+    
+    pTagList =
+            pTags editRecord
+  in 
+    List.map2 (\para pTag -> Html.p [pTag] [para]) paragraphs pTagList
+        -- |> String.join "\n\n"
+        -- |> (\x -> x ++ "\n\n" ++ macroDefinitions)
 
 
 

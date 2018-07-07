@@ -83,11 +83,6 @@ return a string representing the HTML of the paragraph list
 of the editRecord. Append the macroDefinitions for use
 by MathJax.
 -}
-getRenderedText1 : String -> EditRecord (Html msg) -> List (Html msg)
-getRenderedText1 macroDefinitions editRecord =
-    editRecord.renderedParagraphs
-
-
 getRenderedText : String -> EditRecord (Html msg) -> List (Html msg)
 getRenderedText macroDefinitions editRecord =
   let 
@@ -101,6 +96,11 @@ getRenderedText macroDefinitions editRecord =
         -- |> (\x -> x ++ "\n\n" ++ macroDefinitions)
 
 
+{-
+getRenderedText1 : String -> EditRecord (Html msg) -> List (Html msg)
+getRenderedText1 macroDefinitions editRecord =
+    editRecord.renderedParagraphs
+-}
 
 -- let
 --     paragraphs =

@@ -82,7 +82,7 @@ getRenderedText macroDefinitions editRecord =
   let 
     paragraphs = editRecord.renderedParagraphs
 
-    ids = editRecord.idList
+    ids = Debug.log "ids" editRecord.idList
     
   in 
     List.map2 (\para id -> Keyed.node "p" [HA.id id]  [(id,para)]) paragraphs ids 

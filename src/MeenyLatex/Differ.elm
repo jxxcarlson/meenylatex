@@ -1,16 +1,16 @@
-module MeenyLatex.Differ
-    exposing
-        ( EditRecord
-        , createEditRecord
-        , diff
-        , emptyEditRecord
-        , emptyEditRecordHtmlMsg
-        , isEmpty
-        , prefixer
-        , update
-        )
+module MeenyLatex.Differ exposing(..    )
+    -- exposing
+    --     ( EditRecord
+    --     , createEditRecord
+    --     , diff
+    --     , emptyEditRecord
+    --     , emptyEditRecordHtmlMsg
+    --     , isEmpty
+    --     , prefixer
+    --     , update
+    --     )
 
-{-| This module is used to speed up parsing-rendereing by
+{-| This module is used to speed up parsing-rendering by
 comparing the old and new lists of paragraphs, noting the changes,
 then parsing and rendering the changed paragraphs.
 
@@ -72,40 +72,6 @@ emptyEditRecordHtmlMsg : EditRecord (Html msg)
 emptyEditRecordHtmlMsg =
     (EditRecord) [] [] emptyLatexState [] Nothing Nothing
 
-
-commonInitialSegment : List String -> List String -> List String
-commonInitialSegment x y =
-    if x == [] then
-        []
-    else if y == [] then
-        []
-    else
-        let
-            a =
-                List.take 1 x
-
-            b =
-                List.take 1 y
-        in
-            if a == b then
-                a ++ commonInitialSegment (List.drop 1 x) (List.drop 1 y)
-            else
-                []
-
-
-commonTerminalSegment : List String -> List String -> List String
-commonTerminalSegment x y =
-    commonInitialSegment (List.reverse x) (List.reverse y) |> List.reverse
-
-
-dropLast : Int -> List a -> List a
-dropLast k x =
-    x |> List.reverse |> List.drop k |> List.reverse
-
-
-takeLast : Int -> List a -> List a
-takeLast k x =
-    x |> List.reverse |> List.take k |> List.reverse
 
 
 {-| createEditRecord: Create an edit record by (1)
@@ -173,11 +139,11 @@ and b is the greatest common suffix. Return DiffRecord a b x y
 diff : List String -> List String -> DiffRecord
 diff u v =
     let
-        a =
+        a = 
             commonInitialSegment u v
 
         b_ =
-            commonTerminalSegment u v
+            commonTerminalSegmentAux a u v
 
         la =
             List.length a
@@ -198,6 +164,59 @@ diff u v =
                 b_
     in
         DiffRecord a b x y
+
+
+commonInitialSegment : List String -> List String -> List String
+commonInitialSegment x y =
+    if x == [] then
+        []
+    else if y == [] then
+        []
+    else
+        let
+            a =
+                List.take 1 x
+
+            b =
+                List.take 1 y
+        in
+            if a == b then
+                a ++ commonInitialSegment (List.drop 1 x) (List.drop 1 y)
+            else
+                []
+
+
+-- commonTerminalSegment1 : List String -> List String -> List String
+-- commonTerminalSegment1 x y =
+--     commonInitialSegment (List.reverse x) (List.reverse y) |> List.reverse
+
+
+commonTerminalSegment : List String -> List String -> List String
+commonTerminalSegment x y =
+  let 
+    cis = commonInitialSegment x y 
+  in 
+    commonTerminalSegmentAux cis x y 
+
+
+commonTerminalSegmentAux :  List String -> List String -> List String -> List String
+commonTerminalSegmentAux cis x y =
+  let 
+    n = List.length cis 
+    xx = List.drop n x |> List.reverse
+    yy = List.drop n y |> List.reverse
+  in
+    (commonInitialSegment xx yy) |> List.reverse
+
+
+dropLast : Int -> List a -> List a
+dropLast k x =
+    x |> List.reverse |> List.drop k |> List.reverse
+
+
+takeLast : Int -> List a -> List a
+takeLast k x =
+    x |> List.reverse |> List.take k |> List.reverse
 
 
 {-| The prefixer is used to generate unique id's "p.1", "p.2", etc.

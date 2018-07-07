@@ -182,17 +182,6 @@ dataUrl data =
     "data:text/plain;charset=utf-8," ++ "FOO"
 
 
-
---
--- prettyPrint : LineViewStyle -> List (List LatexExpression) -> String
--- prettyPrint lineViewStyle parseResult =
---     case lineViewStyle of
---         Vertical ->
---             parseResult |> List.map Debug.toString |> List.map (String.replace " " "\n ") |> String.join "\n\n"
---
---         Horizontal ->
---             parseResult |> List.map Debug.toString |> String.join "\n\n"
---
 {-
    ertical ->
        parseResult |> List.map String.fromInt |> List.map (String.replace " " "\n ") |> String.join "\n\n"

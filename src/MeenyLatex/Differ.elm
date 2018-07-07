@@ -1,14 +1,13 @@
-module MeenyLatex.Differ exposing(..    )
-    -- exposing
-    --     ( EditRecord
-    --     , createEditRecord
-    --     , diff
-    --     , emptyEditRecord
-    --     , emptyEditRecordHtmlMsg
-    --     , isEmpty
-    --     , prefixer
-    --     , update
-    --     )
+module MeenyLatex.Differ exposing
+        ( EditRecord
+        , createEditRecord
+        , diff
+        , emptyEditRecord
+        , emptyEditRecordHtmlMsg
+        , isEmpty
+        , prefixer
+        , update
+        )
 
 {-| This module is used to speed up parsing-rendering by
 comparing the old and new lists of paragraphs, noting the changes,

@@ -85,7 +85,7 @@ getRenderedText macroDefinitions editRecord =
     ids = editRecord.idList
     
   in 
-    List.map2 (\para id -> Keyed.node "p" [HA.id id]  [(id,para)]) paragraphs ids 
+    List.map2 (\para id -> Keyed.node "p" [HA.id id, HA.style "width" "500px"]  [(id,para)]) paragraphs ids 
     
 
  

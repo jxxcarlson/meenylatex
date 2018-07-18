@@ -58,9 +58,12 @@ representing the HTML text
 -}
 render : String -> String -> Html msg
 render macroDefinitions text =
-    MiniLatexDiffer.createEditRecord Render.renderLatexList emptyLatexState text
-        |> getRenderedText macroDefinitions
+    MiniLatexDiffer.createEditRecord Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
+        |> getRenderedText 
         |> Html.div []
+
+prependMacros macros_ sourceText = 
+  "$$\n" ++ (String.trim macros_) ++ "\n$$\n\n" ++ sourceText 
 
 
 {-| Parse the given text and return an AST represeting it.
@@ -77,16 +80,17 @@ return a string representing the HTML of the paragraph list
 of the editRecord. Append the macroDefinitions for use
 by MathJax.
 -}
-getRenderedText : String -> EditRecord (Html msg) -> List (Html msg)
-getRenderedText macroDefinitions editRecord =
+getRenderedText : EditRecord (Html msg) -> List (Html msg)
+getRenderedText editRecord =
   let 
     paragraphs = editRecord.renderedParagraphs
 
     ids = editRecord.idList
     
   in 
-    List.map2 (\para id -> Keyed.node "p" [HA.id id, HA.style "width" "500px"]  [(id,para)]) paragraphs ids 
+    List.map2 (\para id -> Keyed.node "p" [HA.id id]  [(id,para)]) paragraphs ids 
     
+--     List.map2 (\para id -> Keyed.node "p" [HA.id id, HA.style "width" "500px"]  [(id,para)]) paragraphs ids 
 
  
 

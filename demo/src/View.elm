@@ -8,11 +8,11 @@ import Http
 import Types exposing (..)
 import String
 import MeenyLatex.Parser exposing (LatexExpression)
-import MeenyLatex.Driver as MeenyLatex
-import MeenyLatex.RenderToLatex
+import MeenyLatex.MiniLatex as MiniLatex
+import MeenyLatex.RenderToLatex as RenderToLatex
 import Json.Encode as Encode
 import MeenyLatex.Paragraph
-import MeenyLatex.RenderLatexForExport
+import MeenyLatex.RenderLatexForExport as RenderLatexForExport
 
 
 {- Word count -}
@@ -57,7 +57,7 @@ appWidth configuration =
 headerRibbon =
     div
         (ribbonStyle "#555")
-        [ span [ style "margin-left" "5px" ] [ text "MeenyLatex Demo II" ]
+        [ span [ style "margin-left" "5px" ] [ text "MiniLatex Demo II" ]
         , link "http://www.knode.io" "www.knode.io"
         ]
 
@@ -204,7 +204,7 @@ parseResultPane model =
 rawRenderedSourcePane model =
     let
         renderedText =
-            MeenyLatex.getRenderedText "" model.editRecord
+            MiniLatex.getRenderedText model.editRecord
     in
         pre
             parseResultsStyle
@@ -214,11 +214,11 @@ rawRenderedSourcePane model =
 renderToLatexPane model =
     let
         -- rerenderedText =
-        --     MeenyLatex.RenderToLatex.renderBackToLatex model.sourceText
+        --     MiniLatex.RenderToLatex.renderBackToLatex model.sourceText
         rerenderedText =
-            MeenyLatex.RenderLatexForExport.renderLatexForExport model.sourceText
+           RenderLatexForExport.renderLatexForExport model.sourceText
 
-        --|> MeenyLatex.RenderToLatex.eval
+        --|> MiniLatex.RenderToLatex.eval
     in
         pre
             reRenderedLatexStyle
@@ -233,7 +233,7 @@ exportLatexPane model =
 
 renderedSourcePane : Model (Html msg) -> Html msg
 renderedSourcePane model =
-    MeenyLatex.getRenderedText "" model.editRecord
+    MiniLatex.getRenderedText model.editRecord
         |> List.map (\x -> Html.div [ Attr.style "margin-bottom" "0.65em" ] [ x ])
         |> Html.div []
 

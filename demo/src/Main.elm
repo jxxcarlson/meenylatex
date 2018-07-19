@@ -235,23 +235,6 @@ exportLatex2Html editRecord =
 
 
 
-{-
-   editRecord
-       |> MiniLatex.getRenderedText ""
-       |> \text -> Source.htmlPrefix ++ text ++ Source.htmlSuffix
--}
-{-
-   encodeData : Model -> List String -> Encode.Value
-   encodeData model idList =
-       [ ( "model", Encode.string model )
-       , ( "idList", Encode.list Encode.string idList )
-       ]
-           |> Encode.object
--}
-{- VIEW FUNCTIONS -}
--- view : Model (Html msg) -> Html msg
-
-
 view model =
     div [ style "width" (appWidth model.configuration), style "margin" "auto" ]
         [ mainView model

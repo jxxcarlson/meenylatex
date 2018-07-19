@@ -83,6 +83,8 @@ htmlSuffix =
 initialText =
     """
 
+
+
 \\title{MiniLaTeX Demo}
 
 \\author{James Carlson}
@@ -223,16 +225,17 @@ We are working to fix known issues and to expand the scope of MeenyLatex.
 
 \\strong{Bibliography}
 
-\\begin{thebibliography}
+\\begin{enumerate}
 
-\\bibitem[HN]{hackernews} \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
+\\item [HN] \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
 
-\\bibitem[GR]{grammar} \\href{http://www.knode.io/#@public/628}{MeenyLatex Grammar}
+\\item [GR] \\href{http://www.knode.io/#@public/628}{MeenyLatex Grammar}
 
-\\bibitem[TR]{techreport} \\href{http://www.knode.io/#@public/525}{MeenyLatex Technical Report}
+\\item [TR] \\href{http://www.knode.io/#@public/525}{MeenyLatex Technical Report}
 
 
-\\end{thebibliography}
+\\end{enumerate}
+
 
 \\bigskip
 
@@ -243,6 +246,23 @@ We are working to fix known issues and to expand the scope of MeenyLatex.
 This text
 
 should not appear
+
+\\end{comment}
+
+
+\\begin{comment}
+\\strong{Bibliography}
+
+\\begin{thebibliography}
+
+\\bibitem[HN]{hackernews} \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
+
+\\bibitem[GR]{grammar} \\href{http://www.knode.io/#@public/628}{MeenyLatex Grammar}
+
+\\bibitem[TR]{techreport} \\href{http://www.knode.io/#@public/525}{MeenyLatex Technical Report}
+
+
+\\end{thebibliography}
 
 \\end{comment}
 

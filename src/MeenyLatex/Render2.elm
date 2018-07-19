@@ -111,7 +111,7 @@ render : LatexState -> LatexExpression -> Html msg
 render latexState latexExpression =
     case latexExpression of
         Comment str ->
-            Html.p [] [ Html.text <| "((" ++ str ++ "))" ]
+            Html.p [] [ Html.text <| "" ]
 
         Macro name optArgs args ->
             renderMacro latexState name optArgs args
@@ -935,7 +935,7 @@ renderDefaultEnvironment name latexState args body =
     if List.member name [ "theorem", "proposition", "corollary", "lemma", "definition" ] then
         renderTheoremLikeEnvironment latexState name args body
     else
-        renderDefaultEnvironment2 latexState name args body
+        renderDefaultEnvironment2 latexState (Utility.capitalize name) args body
 
 
 renderTheoremLikeEnvironment : LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg

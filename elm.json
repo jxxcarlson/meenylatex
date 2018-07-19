@@ -3,9 +3,9 @@
     "name": "jxxcarlson/meenylatex",
     "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
     "license": "BSD-3-Clause",
-    "version": "1.2.4",
+    "version": "2.0.0",
     "exposed-modules": [
-        "MeenyLatex.Driver",
+        "MeenyLatex.MiniLatex",
         "MeenyLatex.HasMath",
         "MeenyLatex.Parser",
         "MeenyLatex.Source",

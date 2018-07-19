@@ -13,7 +13,7 @@ module MeenyLatex.MiniLatex
 
 # API
 
-@docs render, setup, getRenderedText, parse, update, emptyEditRecord
+@docs render, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyEditRecord
 
 -}
 

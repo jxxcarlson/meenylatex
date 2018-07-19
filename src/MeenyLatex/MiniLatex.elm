@@ -4,8 +4,8 @@ module MeenyLatex.MiniLatex
         , getRenderedText
         , parse
         , render
-        , setup
-        , update
+        , initializeEditRecord
+        , updateEditRecord
         )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
@@ -33,9 +33,9 @@ import MeenyLatex.Render2 as Render
 
 
 {-| The function call `render macros sourceTest` produces
-an HTML string corresponding to the MeenyLatex source text
+an HTML element corresponding to the MeenyLatex source text
 `sourceText`. The macro definitions in `macros`
-are appended to this string and are used by MathJax
+are prepended to this string and are used by MathJax
 to render purely mathematical text. The `macros` string
 may be empty. Thus, if
 
@@ -67,6 +67,13 @@ prependMacros macros_ sourceText =
 
 
 {-| Parse the given text and return an AST represeting it.
+
+Example: 
+
+> import MeenyLatex.MiniLatex exposing(parse)
+> parse  "This \\strong{is a test!}"
+[[LXString ("This "),Macro "strong" [] [LatexList [LXString ("is  a  test!")]]]]
+
 -}
 parse : String -> List (List LatexExpression)
 parse text =
@@ -76,9 +83,8 @@ parse text =
 
 
 {-| Using the renderedParagraph list of the editRecord,
-return a string representing the HTML of the paragraph list
-of the editRecord. Append the macroDefinitions for use
-by MathJax.
+return an HTML element represeing the paragraph list
+of the editRecord.
 -}
 getRenderedText : EditRecord (Html msg) -> List (Html msg)
 getRenderedText editRecord =
@@ -89,21 +95,14 @@ getRenderedText editRecord =
     
   in 
     List.map2 (\para id -> Keyed.node "p" [HA.id id]  [(id,para)]) paragraphs ids 
-    
---     List.map2 (\para id -> Keyed.node "p" [HA.id id, HA.style "width" "500px"]  [(id,para)]) paragraphs ids 
+     
 
- 
+{-| Create an EditRecord from a string of MiniLaTeX text.
+The `seed` is used for creating id's for rendered paragraphs
+in order to help Elm's runtime optimize diffing for rendering 
+text.
 
-{-
-getRenderedText1 : String -> EditRecord (Html msg) -> List (Html msg)
-getRenderedText1 macroDefinitions editRecord =
-    editRecord.renderedParagraphs
--}
-
-
-{-| Create an EditRecord from a string of MiniLaTeX text:
-
-> editRecord = setup 0 source
+> editRecord = MiniLatex.initialize source
 
         { paragraphs =
             [ "\\italic{Test:}\n\n"
@@ -131,8 +130,8 @@ getRenderedText1 macroDefinitions editRecord =
         } : MeenyLatex.Differ.EditRecord
 
 -}
-setup : Int -> String -> EditRecord (Html msg)
-setup seed text =
+initializeEditRecord : Int -> String -> EditRecord (Html msg)
+initializeEditRecord seed text =
     MiniLatexDiffer.update seed Render.renderLatexList Render.renderString Differ.emptyEditRecordHtmlMsg text
 
 
@@ -168,14 +167,14 @@ Thus, if
 
 then we can say
 
-editRecord2 = update 0 source2 editRecord
+editRecord2 = updateEditRecord 0 source2 editRecord
 
-The `update` function attempts to re-render only the paragraph
+The `updateEditRecord` function attempts to re-render only the (logical) aragraphs
 which have been changed. It will always update the text correctly,
 but its efficiency depends on the nature of the edit. This is
 because the "differ" used to detect changes is rather crude.
 
 -}
-update : Int -> EditRecord (Html msg) -> String -> EditRecord (Html msg)
-update seed editRecord text =
+updateEditRecord : Int -> EditRecord (Html msg) -> String -> EditRecord (Html msg)
+updateEditRecord seed editRecord text =
     MiniLatexDiffer.update seed Render.renderLatexList Render.renderString editRecord text

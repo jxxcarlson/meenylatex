@@ -42,7 +42,7 @@ init flags =
             MiniLatex.parse Source.initialText
 
         editRecord =
-            MiniLatex.setup 0 Source.initialText
+            MiniLatex.initializeEditRecord 0 Source.initialText
 
         model =
             { counter = 0
@@ -79,7 +79,7 @@ update msg model =
         FastRender ->
             let
                 newEditRecord =
-                    MiniLatex.update model.seed model.editRecord model.sourceText
+                    MiniLatex.updateEditRecord model.seed model.editRecord model.sourceText
 
                 parseResult =
                     MiniLatex.parse model.sourceText
@@ -106,7 +106,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = ""
-                , editRecord = MiniLatex.setup model.seed ""
+                , editRecord = MiniLatex.initializeEditRecord model.seed ""
               }
             , Cmd.none
               -- sendToJs <| encodeData "full" []
@@ -116,7 +116,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = Source.initialText
-                , editRecord = MiniLatex.setup model.seed Source.initialText
+                , editRecord = MiniLatex.initializeEditRecord model.seed Source.initialText
               }
             , Cmd.none
               -- sendToJs <| encodeData "full" []
@@ -208,7 +208,7 @@ useSource : String -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
 useSource text model =
     let
         editRecord =
-            MiniLatex.setup model.seed text
+            MiniLatex.initializeEditRecord model.seed text
     in
         ( { model
             | counter = model.counter + 1

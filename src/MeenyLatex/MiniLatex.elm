@@ -1,16 +1,22 @@
 module MeenyLatex.MiniLatex
     exposing
         ( emptyEditRecord
-        , getRenderedText
-        , parse
-        , render
         , initializeEditRecord
         , updateEditRecord
+        , getRenderedText
+        , parse
+        , render   
         )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
 Most users will need only (1) the functions exposed in the `MiniLatex` module
-and (2) `EditRecord`, which is exposd in the `Differ` module.
+and (2) `EditRecord`, which is exposed in the `Differ` module. 
+
+See [MiniLatex Live](https://jxxcarlson.github.io/app/miniLatexLive/index.html)
+for a no-login demo of the MiniLatex technology.  [Source code](https://github.com/jxxcarlson/MiniLatexLive)
+
+See this [Hackernoon article](https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08)
+for an explanation of the theory behind the MiniLatex package.
 
 
 # API

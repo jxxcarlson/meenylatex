@@ -84,6 +84,8 @@ initialText =
     """
 
 
+% NOTE: the \\maketitlestuff is not working
+% right now
 
 \\title{MiniLaTeX Demo}
 
@@ -222,6 +224,10 @@ e.g., theorem.
 \\end{restrictions}
 
 We are working to fix known issues and to expand the scope of MeenyLatex.
+
+% NOTE. The real bibliography machinery
+% has not been wired up yet.
+
 
 \\strong{Bibliography}
 

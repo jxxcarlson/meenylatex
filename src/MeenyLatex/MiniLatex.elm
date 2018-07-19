@@ -9,6 +9,8 @@ module MeenyLatex.MiniLatex
         )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
+Most users will need only (1) the functions exposed in the `MiniLatex` module
+and (2) `EditRecord`, which is exposd in the `Differ` module.
 
 
 # API

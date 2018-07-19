@@ -203,7 +203,7 @@ specialWord =
 
 inSpecialWord : Char -> Bool
 inSpecialWord c =
-    not (c == ' ' || c == '\n' || c == '\\' || c == '$')
+    not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '&')
 
 
 
@@ -471,7 +471,7 @@ item =
         |. symbol "\\item"
         |. symbol " "
         |. PH.spaces
-        |= itemList (oneOf [ words, inlineMath PH.spaces, macro PH.spaces ])
+        |= itemList (oneOf [ words, inlineMath PH.ws, macro PH.ws ])
         |. ws
         |> map (\x -> Item 1 (LatexList x))
     )
@@ -521,7 +521,7 @@ tableCell : Parser LatexExpression
 tableCell =
     -- inContext "tableCell" <|
     (succeed identity
-        |= oneOf [ inlineMath PH.spaces, specialWords ]
+        |= oneOf [ inlineMath PH.ws, specialWords ]
     )
 
 

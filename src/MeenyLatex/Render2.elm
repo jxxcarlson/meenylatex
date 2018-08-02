@@ -276,6 +276,7 @@ renderMacroDict =
         , ( "setcounter", \x y z -> renderSetCounter x z )
         , ( "subheading", \x y z -> renderSubheading x z )
         , ( "tableofcontents", \x y z -> renderTableOfContents x z )
+        , ( "innertableofcontents", \x y z -> renderInnerTableOfContents x z )
         , ( "term", \x y z -> renderTerm x z )
         , ( "xlink", \x y z -> renderXLink x z )
         , ( "xlinkPublic", \x y z -> renderXLinkPublic x z )
@@ -506,9 +507,20 @@ renderTableOfContents latexState list =
             , Html.ul [] innerPart
             ]
 
+renderInnerTableOfContents : LatexState -> List LatexExpression -> Html msg
+renderInnerTableOfContents latexState list =
+    let
+        innerPart =
+            makeInnerTableOfContents latexState
+    in
+        Html.div []
+            [ Html.h3 [] [ Html.text "Table of Contents" ]
+            , Html.ul [] innerPart
+            ]
+
 
 {-| Build a table of contents from the
-current LatexState
+current LatexState; use only level 1 items
 -}
 makeTableOfContents : LatexState -> List (Html msg)
 makeTableOfContents latexState =
@@ -517,6 +529,17 @@ makeTableOfContents latexState =
   in
     List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair toc)
 
+
+
+{-| Build a table of contents from the
+current LatexState; use only level 2 items
+-}
+makeInnerTableOfContents : LatexState -> List (Html msg)
+makeInnerTableOfContents latexState =
+  let 
+    toc = List.filter (\item -> item.level == 2) latexState.tableOfContents
+  in
+    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair toc)
 
 makeTocItem : ( Int, TocEntry ) -> Html msg
 makeTocItem tocItem =

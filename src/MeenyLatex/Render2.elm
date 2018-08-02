@@ -835,7 +835,7 @@ renderXLink latexState args =
             MeenyLatex.Render.renderArg 0 latexState args
 
         ref =
-            Configuration.client ++ "/" ++ id
+            (getDictionaryItem "setclient" latexState) ++ "/" ++ id
 
         label =
             MeenyLatex.Render.renderArg 1 latexState args
@@ -850,7 +850,7 @@ renderXLinkPublic latexState args =
             MeenyLatex.Render.renderArg 0 latexState args
 
         ref =
-            Configuration.client ++ "/" ++ id
+            (getDictionaryItem "setclient" latexState) ++ "/" ++ id
 
         label =
             MeenyLatex.Render.renderArg 1 latexState args

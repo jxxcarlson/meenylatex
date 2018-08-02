@@ -138,7 +138,6 @@ render latexState latexExpression =
             Html.span [] [ Html.text str ]
 
         LXError error ->
-            -- List.map ErrorMessages.renderError error |> String.join "; "
             Html.p [] [ Html.text <| "((ERROR))" ]
 
 

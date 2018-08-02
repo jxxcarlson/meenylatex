@@ -531,10 +531,11 @@ makeTocItem tocItem =
             makeId (sectionPrefix ti.level) ti.name
 
         href =
-            "#" ++ id ++ "\""
+            "#" ++ id
     in
-        Html.li [] [ Html.a [ Html.Attributes.href href ] [ Html.text ti.name ] ]
+         Html.li [] [ Html.a [ Html.Attributes.href href ] [ Html.text ti.name ] ]
 
+-- <a href="https://knode.io/423#_section_trajectoriesanduncertainty&quot;">Trajectories  and  Uncertainty</a>
 
 makeId : String -> String -> String
 makeId prefix name =

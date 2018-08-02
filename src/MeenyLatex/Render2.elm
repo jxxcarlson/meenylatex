@@ -534,14 +534,14 @@ makeTocItem url tocItem =
             makeId (sectionPrefix ti.level) ti.name
 
         href =
-            url ++ "#_" ++ id ++ "\""
+            url ++ "#" ++ id ++ "\""
     in
         Html.li [] [ Html.a [ Html.Attributes.href href ] [ Html.text ti.name ] ]
 
 
 makeId : String -> String -> String
 makeId prefix name =
-    String.join "_" [ prefix, compress "_" name ]
+    String.join "_" [ "", prefix, compress "_" name ]
 
 
 compress : String -> String -> String

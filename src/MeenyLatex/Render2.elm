@@ -627,8 +627,7 @@ idPhrase prefix name =
         compressedName =
             name |> String.toLower |> String.replace " " "_"
     in
-        String.join "_" [ "id=\"_", makeId prefix name, "\"" ]
-
+        makeId prefix name
 
 renderSection : LatexState -> List LatexExpression -> Html msg
 renderSection latexState args =

@@ -512,14 +512,11 @@ current LatexState
 -}
 makeTableOfContents : LatexState -> List (Html msg)
 makeTableOfContents latexState =
-  let 
-    url = docUrl latexState 
-  in
-    List.foldl (\tocItem acc -> acc ++ [ makeTocItem url tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)
+    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)
 
 
-makeTocItem : String -> ( Int, TocEntry ) -> Html msg
-makeTocItem url tocItem =
+makeTocItem : ( Int, TocEntry ) -> Html msg
+makeTocItem tocItem =
     let
         i =
             Tuple.first tocItem
@@ -534,7 +531,7 @@ makeTocItem url tocItem =
             makeId (sectionPrefix ti.level) ti.name
 
         href =
-            url ++ "#" ++ id ++ "\""
+            "#" ++ id ++ "\""
     in
         Html.li [] [ Html.a [ Html.Attributes.href href ] [ Html.text ti.name ] ]
 

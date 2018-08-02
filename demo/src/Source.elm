@@ -104,7 +104,7 @@ initialText =
 \\section{Introduction}
 
 
-MiniLaTeX is a subset of LaTeX which can be displayed in a web browser \\cite{hakernews}. One applies a parser-renderer toolchain to convert MiniLaTeX into HTML, then uses MathJax to render formulas and equations. This document is written in MeenyLatex; for additional examples, try the buttons on the lower left, or go to \\href{http://www.knode.io}{www.knode.io}.
+MiniLaTeX is a subset of LaTeX which can be displayed in a web browser \\cite{hakernews}. One applies a parser-renderer toolchain to convert MiniLaTeX into HTML, then uses MathJax to render formulas and equations. This document is written in MeenyLatex; for additional examples, try the buttons on the lower left, or go to \\href{https://knode.io}{knode.io}.
 
 Feel free to edit and re-render the text on the left and to experiment with the buttons above. To export a rendered LaTeX file, simply click on the "Export" button above. Your file will be downloaded as "file.html".
 
@@ -143,7 +143,7 @@ Beryllium& Be& 4& 9.012 \\\\
 
 An Image ....
 
-\\image{http://psurl.s3.amazonaws.com/images/jc/propagator_t=2-6feb.png}{Free particle propagator}{width: 300, align: center}
+\\image{https://psurl.s3.amazonaws.com/images/jc/propagator_t=2-6feb.png}{Free particle propagator}{width: 300, align: center}
 
 A listing.  Note that in the \\italic{source}of the listing, there are no line numbers.
 
@@ -198,11 +198,11 @@ Articles and code:
 \\end{itemize}
 
 
-To try out MeenyLatex for real, sign up for a free account at \\href{http://www.knode.io}{www.knode.io}. The app is still under development &mdash; we need people to test it and give feedback. Contributions to help improve the open-source MeenyLatex Parser-Renderer are most welcome. Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}. The MeenyLatex Demo as well as the app at knode.io are written in \\href{http://elm-lang.org/}{Elm}. We also plan a Haskell version.
+To try out MeenyLatex for real, sign up for a free account at \\href{https://knode.io}{knode.io}. The app is still under development &mdash; we need people to test it and give feedback. Contributions to help improve the open-source MeenyLatex Parser-Renderer are most welcome. Here is the \\href{https://github.com/jxxcarlson/minilatex}{GitHub repository}. The MeenyLatex Demo as well as the app at knode.io are written in \\href{http://elm-lang.org/}{Elm}. We also plan a Haskell version.
 
 Please send comments, bug reports, etc. to jxxcarlson at gmail.
 
-\\section{Technical Note}There is a \\italic{very rough} \\href{http://www.knode.io/#@public/628}{draft grammar}for MiniLaTeX, written mostly in EBNF. However, there are a few productions, notably for environments, which are not context-free. Recall that in a context-free grammar, all productions are of the form $A \\Rightarrow \\beta$, where $A$is a non-terminal symbol and $\\beta$is a sequence of terminals and nonterminals. There are some productions of the form $A\\beta \\Rightarrow \\gamma$, where $\\beta$is a terminal symbol. These are context-sensitive productions, with $\\beta$providing the context.
+\\section{Technical Note}There is a \\italic{very rough } \\href{https://knode.io/628}{draft grammar}for MiniLaTeX, written mostly in EBNF. However, there are a few productions, notably for environments, which are not context-free. Recall that in a context-free grammar, all productions are of the form $A \\Rightarrow \\beta$, where $A$is a non-terminal symbol and $\\beta$is a sequence of terminals and nonterminals. There are some productions of the form $A\\beta \\Rightarrow \\gamma$, where $\\beta$is a terminal symbol. These are context-sensitive productions, with $\\beta$providing the context.
 
 \\section{Restrictions, Limitations, and Todos}
 
@@ -223,7 +223,7 @@ e.g., theorem.
 \\end{enumerate}
 \\end{restrictions}
 
-We are working to fix known issues and to expand the scope of MeenyLatex.
+We are working to fix known issues and to expand the scope of MiniLatex.
 
 % NOTE. The real bibliography machinery
 % has not been wired up yet.
@@ -235,9 +235,9 @@ We are working to fix known issues and to expand the scope of MeenyLatex.
 
 \\item [HN] \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
 
-\\item [GR] \\href{http://www.knode.io/#@public/628}{MeenyLatex Grammar}
+\\item [GR] \\href{https://knode.io/628}{MiniLatex Grammar}
 
-\\item [TR] \\href{http://www.knode.io/#@public/525}{MeenyLatex Technical Report}
+\\item [TR] \\href{https://knode.io/525}{MiniLatex Technical Report}
 
 
 \\end{enumerate}
@@ -267,9 +267,9 @@ should not appear
 
 \\bibitem[HN]{hackernews} \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}
 
-\\bibitem[GR]{grammar} \\href{http://www.knode.io/#@public/628}{MeenyLatex Grammar}
+\\bibitem[GR]{grammar} \\href{https://knode.io/628}{MiniLatex Grammar}
 
-\\bibitem[TR]{techreport} \\href{http://www.knode.io/#@public/525}{MeenyLatex Technical Report}
+\\bibitem[TR]{techreport} \\href{https://knode.io/525}{MiniLatex Technical Report}
 
 
 \\end{thebibliography}
@@ -296,7 +296,7 @@ report =
 
 \\begin{abstract}
 The aims of the MiniLaTeX project are (1) to establish a subset
-of LaTeX which can be rendered either as HTML (for the browser) or as PDF (for print and display), (2) to implement a reference parser and renderer for MiniLaTeX, (3) to provide an online editor/reader for MiniLaTeX documents using the parser/renderer.  As proof of concept, this document is written in MiniLaTeX  and is distributed via \\href{http://www.knode.io}{www.knode.io}, an implementation of (3).
+of LaTeX which can be rendered either as HTML (for the browser) or as PDF (for print and display), (2) to implement a reference parser and renderer for MiniLaTeX, (3) to provide an online editor/reader for MiniLaTeX documents using the parser/renderer.  As proof of concept, this document is written in MiniLaTeX  and is distributed via \\href{https://knode.io}{knode.io}, an implementation of (3).
 To experiment with MiniLaTeX, take a look at the \\href{https://jxxcarlson.github.io/app/minilatex/src/index.html}{Demo App}.
 \\end{abstract}
 
@@ -334,13 +334,13 @@ There remains the rest: macros like \\code{emph}, \\code{section}, \\code{label}
 
  It is the aim of this project is to develop a subset of LaTeX, which we call \\italic{MiniLaTeX}, that can be displayed in the browser by a suitable parser-renderer and which can also be run through standard LaTeX tools such as \\code{pdflatex}.
 
-An experimental web app for using MiniLaTeX in the browser can be found at \\href{http://www.knode.io}{www.knode.io}.  For proof-of-concept examples,  see  the document \\xlinkPublic{445}{MiniLaTeX} on that site.
+An experimental web app for using MiniLaTeX in the browser can be found at \\href{https://knode.io}{knode.io}.  For proof-of-concept examples,  see  the document \\xlinkPublic{445}{MiniLaTeX} on that site.
 
 \\strong{Note.} This document is written in a simplified version of MiniLaTeX (version 0.5).  Below, we describes the current state of the version under development for the planned 1.0 release.  Much of the discussion applies to version 0.5 as well.
 
 \\section{Technology}
 
-The MiniLaTeX parser/renderer is written in Elm, the functional language with Haskell-like syntax created by Evan Czaplicki.  Elm is best known as language for building robust front-end apps for the web.  The fact that it also has powerful parser tools makes it an excellent choice for a project like MeenyLatex, for which an editor/reader app is needed to make real-world use of the parser/renderer.  The app at \\href{http://www.knode.io}{www.knode.io} talks to a back-end app written using the Phoenix web framework for Elixir  (see \\href{https://elixir-lang.org/}{elixir-lang.org}).  Elixir is the functional programming language based on Erlang created by José Valim.
+The MiniLaTeX parser/renderer is written in Elm, the functional language with Haskell-like syntax created by Evan Czaplicki.  Elm is best known as language for building robust front-end apps for the web.  The fact that it also has powerful parser tools makes it an excellent choice for a project like MeenyLatex, for which an editor/reader app is needed to make real-world use of the parser/renderer.  The app at \\href{https://knode.io}{knode.io} talks to a back-end app written using the Phoenix web framework for Elixir  (see \\href{https://elixir-lang.org/}{elixir-lang.org}).  Elixir is the functional programming language based on Erlang created by José Valim.
 
 \\section{Components and Strategy}
 
@@ -749,7 +749,7 @@ As we have seen with the sinc packet, wave packets can be localized in space.  A
 
 \\section{A two-frequency packet: beats}
 
-\\image{http://psurl.s3.amazonaws.com/images/jc/beats-eca1.png}{Two-frequency beats}{width: 350, float: right}
+\\image{https://psurl.s3.amazonaws.com/images/jc/beats-eca1.png}{Two-frequency beats}{width: 350, float: right}
 
 Consider a wave
 $\\psi = \\psi_1 + \\psi_2$ which is the sum of two terms with slightly different frequencies.  If the waves are sound waves, then then what one will hear is a pitch that corresponding to the average of the two frequencies modulated in such a way that the volume goes up and down at a frequency corresponding to their difference.
@@ -995,7 +995,7 @@ weatherApp =
     """
 \\section{Weather App}
 
-\\image{http://noteimages.s3.amazonaws.com/jim_images/weatherAppColumbus.png}{}{float: right, width: 250}
+\\image{https://noteimages.s3.amazonaws.com/jim_images/weatherAppColumbus.png}{}{float: right, width: 250}
 
 In this section we will learn how to write an app that displays information about the weather  in any city on planet earth.   The data comes from a web server at \\href{http://openweathermap.org/}{openweathermap.org}; to access it, you will need a free API key, which is a long string of letters and numbers  that looks like \\code{a23b...ef5d4} and which functions as a kind password. To get an API key, follow this \\href{http://openweathermap.org/price}{link}.  Once you have an API key, you can try out a working copy of the app at \\href{https://jxxcarlson.github.io/app/weather.html}{jxxcarlson.github.io}.
 
@@ -1132,7 +1132,7 @@ Later, the case statment will be more complex, with one
 
 \\subheading{View}
 
-\\image{http://noteimages.s3.amazonaws.com/jim_images/weatheApp-0.png}{}{float: right, width: 150}
+\\image{https://noteimages.s3.amazonaws.com/jim_images/weatheApp-0.png}{}{float: right, width: 150}
 
 The \\code{view} function represents the state of the \\code{Model}
 to the outside world.  In the case at hand, it just displays a grey box
@@ -1166,7 +1166,7 @@ innerStyle =
 \\end{verbatim}
 
 
-\\image{http://noteimages.s3.amazonaws.com/jim_images/weatherApp-2.png}{}{float: right, width: 200}
+\\image{https://noteimages.s3.amazonaws.com/jim_images/weatherApp-2.png}{}{float: right, width: 200}
 
 
 \\subsection{Getting the weather}
@@ -1230,7 +1230,7 @@ url model =
 
 \\section{IIIIIII}
 
-\\image{http://noteimages.s3.amazonaws.com/jim_images/weatherApp-1a.png}{}{float: right, width: 250}
+\\image{https://noteimages.s3.amazonaws.com/jim_images/weatherApp-1a.png}{}{float: right, width: 250}
 
 
 \\ellie{8Wrq8PbCDa1/1}
@@ -1263,7 +1263,7 @@ mathTestStuff =
 
   \\section{Images}
 
-  \\image{http://psurl.s3.amazonaws.com/images/jc/sinc2-bcbf.png}{Wave packet}{width: 250, float: right}
+  \\image{https://psurl.s3.amazonaws.com/images/jc/sinc2-bcbf.png}{Wave packet}{width: 250, float: right}
 """
 
 
@@ -1864,12 +1864,12 @@ grammar =
 
   The code for the MiniLaTeX parser-renderer is open source, available on  \\href{https://github.com/jxxcarlson/minilatex}{GitHub}
   and also as an Elm package at \\href{http://package.elm-lang.org/packages/jxxcarlson/minilatex/latest}{package.elm-lang.org} --- search for \\code{jxxcarlson/minilatex}.
-  To experiment with MiniLaTeX, try the \\href{https://jxxcarlson.github.io/app/minilatex/src/index.html}{Demo App}.  To use MiniLaTeX to create documents, try \\href{http://www.knode.io}{www.knode.io}
+  To experiment with MiniLaTeX, try the \\href{https://jxxcarlson.github.io/app/minilatex/src/index.html}{Demo App}.  To use MiniLaTeX to create documents, try \\href{https://knode.io}{knode.io}
 
   I am indebted to Ilias van Peer for thoughtful suggestions and specific technical help through the entire course of this project.  I would also like to thank Evan Czaplicki, who brought Elm's \\href{https://github.com/elm-tools/parser}{elm-tools/parser} package to my attention; its role is fundamental.
 
   This document is written in MiniLaTeX and is available on the web at
-  \\href{http://www.knode.io/#@public/628}{www.knode.io/#@public/628}.
+  \\href{https://knode.io/628}{knode.io/628}.
 
 
 
@@ -2084,7 +2084,7 @@ Displaying images is a simple matter -- just use the \\code{image} macro, which 
 
 where \\code{URL} is the image url.
 
-\\image{http://psurl.s3.amazonaws.com/images/jc/beats-eca1.png}{Two-frequency beats}{width: 350, float: right}
+\\image{https://psurl.s3.amazonaws.com/images/jc/beats-eca1.png}{Two-frequency beats}{width: 350, float: right}
 
 One can also display Ellies:
 

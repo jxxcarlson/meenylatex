@@ -1185,7 +1185,7 @@ renderVerbatim : LatexState -> LatexExpression -> Html msg
 renderVerbatim latexState body =
     let
         body2 =
-            MeenyLatex.Render.render latexState body |> String.replace ">" "&gt;" |> String.replace "<" "&lt;"
+            MeenyLatex.Render.render latexState body 
     in
         Html.pre [ HA.class "verbatim" ] [ Html.text body2 ]
 

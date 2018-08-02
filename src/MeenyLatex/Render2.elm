@@ -512,7 +512,10 @@ current LatexState
 -}
 makeTableOfContents : LatexState -> List (Html msg)
 makeTableOfContents latexState =
-    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)
+  let 
+    toc = List.filter (\item -> item.level == 1) latexState.tableOfContents
+  in
+    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair toc)
 
 
 makeTocItem : ( Int, TocEntry ) -> Html msg
@@ -524,8 +527,11 @@ makeTocItem tocItem =
         ti =
             Tuple.second tocItem
 
+        number = (String.fromInt (i+1)) ++ ". "
+
         classProperty =
             "class=\"sectionLevel" ++ String.fromInt ti.level ++ "\""
+
 
         id =
             makeId (sectionPrefix ti.level) ti.name
@@ -533,9 +539,18 @@ makeTocItem tocItem =
         href =
             "#" ++ id
     in
-         Html.li [] [ Html.a [ Html.Attributes.href href ] [ Html.text ti.name ] ]
+         Html.p [
+                      Html.Attributes.style "font-size" "14px"
+                     ,  Html.Attributes.style "padding-bottom" "0px"
+                     , Html.Attributes.style "margin-bottom" "0px"
+                     ,  Html.Attributes.style "padding-top" "0px"
+                     , Html.Attributes.style "margin-top" "0px"
+                      , Html.Attributes.style "line-height" "20px"
+                ] [ 
+                      Html.text number
+                    , Html.a [ Html.Attributes.href href ] [ Html.text ti.name ] 
+                ]
 
--- <a href="https://knode.io/423#_section_trajectoriesanduncertainty&quot;">Trajectories  and  Uncertainty</a>
 
 makeId : String -> String -> String
 makeId prefix name =

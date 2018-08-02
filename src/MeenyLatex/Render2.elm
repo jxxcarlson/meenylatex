@@ -286,6 +286,8 @@ renderMacroDict =
         , ( "date", \x y z -> renderDate x z )
         , ( "revision", \x y z -> renderRevision x z )
         , ( "email", \x y z -> renderEmail x z )
+        , ( "setdocid", \x y z -> renderSetDocId x z )
+        , ( "setclient", \x y z -> renderSetClient x z )
         , ( "strong", \x y z -> renderStrong x z )
         ]
 
@@ -511,11 +513,14 @@ current LatexState
 -}
 makeTableOfContents : LatexState -> List (Html msg)
 makeTableOfContents latexState =
-    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)
+  let 
+    url = docUrl latexState 
+  in
+    List.foldl (\tocItem acc -> acc ++ [ makeTocItem url tocItem ]) [] (List.indexedMap Tuple.pair latexState.tableOfContents)
 
 
-makeTocItem : ( Int, TocEntry ) -> Html msg
-makeTocItem tocItem =
+makeTocItem : String -> ( Int, TocEntry ) -> Html msg
+makeTocItem url tocItem =
     let
         i =
             Tuple.first tocItem
@@ -530,14 +535,14 @@ makeTocItem tocItem =
             makeId (sectionPrefix ti.level) ti.name
 
         href =
-            "href=\"#_" ++ id ++ "\""
+            url ++ "#_" ++ id ++ "\""
     in
         Html.li [] [ Html.a [ Html.Attributes.href href ] [ Html.text ti.name ] ]
 
 
 makeId : String -> String -> String
 makeId prefix name =
-    String.join ":" [ prefix, compress ":" name ]
+    String.join "_" [ prefix, compress "_" name ]
 
 
 compress : String -> String -> String
@@ -609,11 +614,19 @@ renderRef latexState args =
         Html.span [] [ Html.text <| getCrossReference key latexState ]
 
 
+docUrl : LatexState -> String 
+docUrl latexState = 
+  let 
+      client = getDictionaryItem "setclient" latexState
+      docId = getDictionaryItem "setdocid" latexState 
+  in
+      client ++ "/" ++ docId
+
 idPhrase : String -> String -> String
 idPhrase prefix name =
     let
         compressedName =
-            name |> String.toLower |> String.replace " " ":"
+            name |> String.toLower |> String.replace " " "_"
     in
         String.join "" [ "id=\"_", makeId prefix name, "\"" ]
 
@@ -632,7 +645,7 @@ renderSection latexState args =
                 String.fromInt s1 ++ " "
             else
                 ""
-
+        
         ref =
             idPhrase "section" sectionName
     in
@@ -785,8 +798,15 @@ renderTitle latexState args =
 
 renderAuthor : LatexState -> List LatexExpression -> Html msg
 renderAuthor latexState args =
+    Html.span [] []   
+
+renderSetDocId : LatexState -> List LatexExpression -> Html msg
+renderSetDocId latexState args =
     Html.span [] []
 
+renderSetClient : LatexState -> List LatexExpression -> Html msg
+renderSetClient latexState args =
+    Html.span [] []
 
 renderDate : LatexState -> List LatexExpression -> Html msg
 renderDate latexState args =
@@ -819,7 +839,7 @@ renderXLink latexState args =
             MeenyLatex.Render.renderArg 0 latexState args
 
         ref =
-            Configuration.client ++ "##document/" ++ id
+            Configuration.client ++ "/" ++ id
 
         label =
             MeenyLatex.Render.renderArg 1 latexState args
@@ -834,7 +854,7 @@ renderXLinkPublic latexState args =
             MeenyLatex.Render.renderArg 0 latexState args
 
         ref =
-            Configuration.client ++ "##public/" ++ id
+            Configuration.client ++ "/" ++ id
 
         label =
             MeenyLatex.Render.renderArg 1 latexState args

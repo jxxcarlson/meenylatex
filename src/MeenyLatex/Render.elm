@@ -494,6 +494,7 @@ renderMacroDict1 =
         , ( "date", \x y z -> "" )
         , ( "revision", \x y z -> "" )
         , ( "email", \x y z -> "" )
+        , ( "host", \x y z -> "" )
         , ( "term", \x y z -> renderTerm x z )
         , ( "xlink", \x y z -> renderXLink x z )
         , ( "xlinkPublic", \x y z -> renderXLinkPublic x z )
@@ -739,7 +740,7 @@ renderRef latexState args =
 
 makeId : String -> String -> String
 makeId prefix name =
-    String.join ":" [ prefix, compress ":" name ]
+    String.join "_" [ prefix, compress "_" name ]
 
 
 userReplace : String -> (Regex.Match -> String) -> String -> String
@@ -766,7 +767,7 @@ idPhrase : String -> String -> String
 idPhrase prefix name =
     let
         compressedName =
-            name |> String.toLower |> String.replace " " ":"
+            name |> String.toLower |> String.replace " " "_"
     in
         String.join "" [ "id=\"_", makeId prefix name, "\"" ]
 

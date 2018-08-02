@@ -80,6 +80,17 @@ getDictionaryItem key latexState =
         Nothing ->
             ""
 
+setDictionaryItem : String -> String -> LatexState -> LatexState
+setDictionaryItem key value latexState =
+    let
+        dictionary =
+            latexState.dictionary
+
+        newDictionary =
+            Dict.insert key value dictionary
+    in
+    { latexState | dictionary = newDictionary }
+
 
 incrementCounter : String -> LatexState -> LatexState
 incrementCounter name latexState =
@@ -115,18 +126,6 @@ setCrossReference label value latexState =
             Dict.insert label value crossReferences
     in
     { latexState | crossReferences = newCrossReferences }
-
-
-setDictionaryItem : String -> String -> LatexState -> LatexState
-setDictionaryItem key value latexState =
-    let
-        dictionary =
-            latexState.dictionary
-
-        newDictionary =
-            Dict.insert key value dictionary
-    in
-    { latexState | dictionary = newDictionary }
 
 
 initialCounters : Dict.Dict String number

@@ -44,6 +44,7 @@ import Regex
 import String
 import Html.Attributes as HA
 import MeenyLatex.ListMachine as ListMachine  
+import MeenyLatex.ParserTools as PT
 
 
 -- |> \str -> "\n<p>" ++ str ++ "</p>\n"
@@ -508,10 +509,17 @@ renderTableOfContents latexState list =
             ]
 
 renderInnerTableOfContents : LatexState -> List LatexExpression -> Html msg
-renderInnerTableOfContents latexState list =
+renderInnerTableOfContents latexState args =
     let
+        prefix =  getElement 0 args 
+                    |> PT.valueOfLatexList 
+                    |> List.map PT.valueOfLXString 
+                    |> List.head
+                    |> Maybe.withDefault ""
+
+
         innerPart =
-            makeInnerTableOfContents latexState
+            makeInnerTableOfContents prefix latexState
     in
         Html.div []
             [ Html.h3 [] [ Html.text "Table of Contents" ]
@@ -527,22 +535,22 @@ makeTableOfContents latexState =
   let 
     toc = List.filter (\item -> item.level == 1) latexState.tableOfContents
   in
-    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair toc)
+    List.foldl (\tocItem acc -> acc ++ [ (makeTocItem "") tocItem ]) [] (List.indexedMap Tuple.pair toc)
 
 
 
 {-| Build a table of contents from the
 current LatexState; use only level 2 items
 -}
-makeInnerTableOfContents : LatexState -> List (Html msg)
-makeInnerTableOfContents latexState =
+makeInnerTableOfContents : String -> LatexState -> List (Html msg)
+makeInnerTableOfContents prefix latexState =
   let 
     toc = List.filter (\item -> item.level == 2) latexState.tableOfContents
   in
-    List.foldl (\tocItem acc -> acc ++ [ makeTocItem tocItem ]) [] (List.indexedMap Tuple.pair toc)
+    List.foldl (\tocItem acc -> acc ++ [ (makeTocItem prefix) tocItem ]) [] (List.indexedMap Tuple.pair toc)
 
-makeTocItem : ( Int, TocEntry ) -> Html msg
-makeTocItem tocItem =
+makeTocItem : String -> ( Int, TocEntry ) -> Html msg
+makeTocItem prefix tocItem =
     let
         i =
             Tuple.first tocItem
@@ -550,7 +558,7 @@ makeTocItem tocItem =
         ti =
             Tuple.second tocItem
 
-        number = (String.fromInt (i+1)) ++ ". "
+        number = prefix ++ (String.fromInt (i+1)) ++ ". "
 
         classProperty =
             "class=\"sectionLevel" ++ String.fromInt ti.level ++ "\""

@@ -1187,7 +1187,7 @@ renderVerbatim latexState body =
         body2 =
             MeenyLatex.Render.render latexState body 
     in
-        Html.pre [ HA.class "verbatim" ] [ Html.text body2 ]
+        Html.pre [ HA.style "margin-top" "-13px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 renderVerse : LatexState -> LatexExpression -> Html msg

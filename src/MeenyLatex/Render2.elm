@@ -438,16 +438,16 @@ renderImage latexState args =
             parseImageAttributes attributeString
     in
         if imageAttrs.float == "left" then
-            Html.img [ HA.src url, HA.alt label, HA.align "left", HA.width imageAttrs.width ]
+            Html.img [ HA.src url, HA.alt label, HA.attribute "float" "left", HA.width imageAttrs.width ]
                 [ Html.caption [] [ Html.text label ] ]
         else if imageAttrs.float == "right" then
-            Html.img [ HA.src url, HA.alt label, HA.align "right", HA.width imageAttrs.width ]
+            Html.img [ HA.src url, HA.alt label, HA.attribute "float" "right", HA.width imageAttrs.width ]
                 [ Html.caption [] [ Html.text label ] ]
         else if imageAttrs.align == "center" then
-            Html.img [ HA.src url, HA.alt label, HA.align "center", HA.width imageAttrs.width ]
+            Html.img [ HA.src url, HA.alt label, HA.attribute "align" "middle", HA.width imageAttrs.width ]
                 [ Html.caption [] [ Html.text label ] ]
         else
-            Html.img [ HA.src url, HA.alt label, HA.align "center", HA.width imageAttrs.width ]
+            Html.img [ HA.src url, HA.alt label, HA.attribute "align" "middle", HA.width imageAttrs.width ]
                 [ Html.caption [] [ Html.text label ] ]
 
 

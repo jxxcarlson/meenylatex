@@ -1,13 +1,13 @@
-module MeenyLatex.Parser exposing(..)
-        -- ( LatexExpression(..)
-        -- , macro
-        -- , parse
-        -- , endWord
-        -- , envName
-        -- , word
-        -- , defaultLatexList
-        -- , latexList
-        -- )
+module MeenyLatex.Parser exposing
+        ( LatexExpression(..)
+        , macro
+        , parse
+        , endWord
+        , envName
+        , word
+        , defaultLatexList
+        , latexList
+        )
 
 {-| This module is for quickly preparing latex for export.
 

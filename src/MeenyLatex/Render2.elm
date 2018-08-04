@@ -436,19 +436,33 @@ renderImage latexState args =
 
         imageAttrs =
             parseImageAttributes attributeString
+
+        width = (String.fromInt imageAttrs.width) ++ "px"
     in
         if imageAttrs.float == "left" then
-            Html.img [ HA.src url, HA.alt label, HA.attribute "float" "left", HA.width imageAttrs.width ]
-                [ Html.caption [] [ Html.text label ] ]
+            Html.div [HA.style "float" "left"] [
+                Html.img [ HA.src url, HA.alt label, HA.style "width" width, HA.style "margin-right" "12px"] [ ]
+                , Html.br [] []
+                , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block"] [Html.text label]
+            ]
         else if imageAttrs.float == "right" then
-            Html.img [ HA.src url, HA.alt label, HA.attribute "float" "right", HA.width imageAttrs.width ]
-                [ Html.caption [] [ Html.text label ] ]
+             Html.div [HA.style "float" "right"] [
+                Html.img [ HA.src url, HA.alt label, HA.style "width" width, HA.style "margin-left" "12px"] [ ]
+                , Html.br [] []
+                , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block"] [Html.text label]
+            ]
         else if imageAttrs.align == "center" then
-            Html.img [ HA.src url, HA.alt label, HA.attribute "align" "middle", HA.width imageAttrs.width ]
-                [ Html.caption [] [ Html.text label ] ]
+              Html.div [HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width] [
+                Html.img [ HA.src url, HA.alt label, HA.style "width" width] [ ]
+                , Html.br [] []
+                , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block"] [Html.text label]
+            ]
         else
-            Html.img [ HA.src url, HA.alt label, HA.attribute "align" "middle", HA.width imageAttrs.width ]
-                [ Html.caption [] [ Html.text label ] ]
+            Html.div [HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width] [
+                Html.img [ HA.src url, HA.alt label, HA.style "width" width] [ ]
+                , Html.br [] []
+                , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block"] [Html.text label]
+            ]
 
 
 renderImageRef : LatexState -> List LatexExpression -> Html msg
@@ -466,18 +480,22 @@ renderImageRef latexState args =
         imageAttrs =
             parseImageAttributes attributeString
 
+        width_ = (String.fromInt imageAttrs.width) ++ "px"
+
         theImage =
             if imageAttrs.float == "left" then
-                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.align "left", HA.width imageAttrs.width ]
+                Html.img [ HA.src imageUrl, HA.alt "imagref", 
+                  HA.style "float" "left", HA.style "width" width_, HA.style "margin-right" "12px"]
                     []
             else if imageAttrs.float == "right" then
-                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.align "right", HA.width imageAttrs.width ]
+                Html.img [ HA.src imageUrl, HA.alt "imagref", 
+                   HA.style "float" "right", HA.style "width" width_, HA.style "margin-left" "12px" ]
                     []
             else if imageAttrs.align == "center" then
-                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.align "center", HA.width imageAttrs.width ]
+                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.style "align" "middle", HA.style "width" width_ ]
                     []
             else
-                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.align "center", HA.width imageAttrs.width ]
+                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.style "align" "middle", HA.style "width" width_ ]
                     []
     in
         Html.a [ Html.Attributes.href url ] [ theImage ]

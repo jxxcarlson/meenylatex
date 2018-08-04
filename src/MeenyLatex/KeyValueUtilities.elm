@@ -1,4 +1,6 @@
-module MeenyLatex.KeyValueUtilities exposing (getKeyValueList, getValue)
+module MeenyLatex.KeyValueUtilities exposing(..)
+
+-- exposing (getKeyValueList, getValue)
 
 import Char
 import Parser exposing (..)
@@ -26,6 +28,7 @@ keyValuePair =
         |. symbol ":"
         |. spaces
         |= word (\c -> (c /= ','))
+        |. oneOf [symbol ",", spaces]
         |> map (\( a, b ) -> ( String.trim a, String.trim b ))
 
 

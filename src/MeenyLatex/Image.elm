@@ -58,11 +58,11 @@ type alias ImageAttributes =
 parseImageAttributes : String -> ImageAttributes
 parseImageAttributes attributeString =
     let
-        kvList =
-            KeyValueUtilities.getKeyValueList attributeString
+        kvList = Debug.log "kvList" (
+            KeyValueUtilities.getKeyValueList (Debug.log "attributeString" attributeString))
 
-        widthValue =
-            KeyValueUtilities.getValue "width" kvList |> String.toInt |> Maybe.withDefault 200
+        widthValue = Debug.log "widthValue" (
+            KeyValueUtilities.getValue "width" kvList) |> String.toInt |> Maybe.withDefault 200
 
         floatValue =
             KeyValueUtilities.getValue "float" kvList

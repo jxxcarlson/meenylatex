@@ -1,5 +1,4 @@
-module MeenyLatex.Parser
-    exposing
+module MeenyLatex.Parser exposing
         ( LatexExpression(..)
         , macro
         , parse
@@ -415,18 +414,20 @@ parseEnvironmentDict =
         , ( "passThrough", \endWoord envType -> passThroughBody endWoord envType )
         ]
 
+-- Environment String (List LatexExpression) LatexExpression -- Environment name optArgs body
 
 standardEnvironmentBody : String -> String -> Parser LatexExpression
 standardEnvironmentBody endWoord envType =
-    (succeed identity
+   succeed (Environment envType)
         |. ws
-        |= nonEmptyItemList latexExpression
+        |= itemList optionalArg 
+        |. ws
+        |= (nonEmptyItemList latexExpression |> map LatexList)
         |. ws
         |. symbol endWoord
         |. ws
-        |> map LatexList
-        |> map (Environment envType [])
-    )
+        
+    
 
 
 {-| The body of the environment is parsed as an LXString.

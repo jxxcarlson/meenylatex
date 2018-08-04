@@ -570,7 +570,7 @@ renderBibItem latexState optArgs args body =
             else
                 renderArg 0 latexState args
     in
-        " <p id=\"bib:" ++ label ++ "\">[" ++ label ++ "] " ++ render latexState body ++ "</p>\n"
+        " <p id=bibitem:" ++ label ++ ">[" ++ label ++ "] " ++ render latexState body ++ "</p>\n"
 
 
 renderBigSkip : LatexState -> List LatexExpression -> String
@@ -605,7 +605,7 @@ renderCite latexState args =
             else
                 label_
     in
-        " <span>[<a href=\"#bib:" ++ label ++ "\">" ++ label ++ "</a>]</span>"
+        " <span>[<a href=#bibitem:" ++ label ++ ">" ++ label ++ "</a>]</span>"
 
 
 renderCode : LatexState -> List LatexExpression -> String

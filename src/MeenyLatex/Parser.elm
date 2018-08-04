@@ -286,16 +286,17 @@ smacro =
         |= smacroName
         |= itemList optionalArg
         |= itemList arg
-        |= (parseTo "\n\n" |> map LXString)
+        |= (parseTo "\n\n" |> map String.trim |> map LXString)
 
 
 smacroName : Parser String
 smacroName =
-    variable
+    (variable
         { start = \c -> c == '\\'
         , inner = \c -> Char.isAlphaNum c
         , reserved = Set.fromList [ "\\begin", "\\end", "\\item" ]
         }
+    ) |> map (String.dropLeft 1)
 
 
 smacroBody : Parser LatexExpression

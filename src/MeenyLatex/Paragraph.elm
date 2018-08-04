@@ -225,7 +225,7 @@ logicalParagraphify text =
         lastState.paragraphList
             ++ [ lastState.currentParagraph ]
             |> List.filter (\x -> x /= "")
-            |> List.map (\paragraph -> paragraph ++ "\n\n\n")
+            |> List.map (\paragraph -> (String.trim paragraph) ++ "\n\n")
 
 
 para : Regex.Regex

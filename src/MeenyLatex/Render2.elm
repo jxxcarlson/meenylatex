@@ -39,7 +39,7 @@ import MeenyLatex.LatexState
         )
 import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import MeenyLatex.Utility as Utility
-import Parser
+import Parser exposing(DeadEnd, Problem(..))
 import Regex
 import String
 import Html.Attributes as HA
@@ -139,8 +139,28 @@ render latexState latexExpression =
             Html.span [] [ Html.text str ]
 
         LXError error ->
-            Html.p [] [ Html.text <| "((ERROR))" ]
+            Html.p [] [ Html.text <| (String.join "\n---\n\n" (List.map errorReport error))]
 
+
+errorReport : DeadEnd -> String 
+errorReport deadEnd = 
+  "Error at row " ++ String.fromInt deadEnd.row ++ ", column " ++ String.fromInt deadEnd.col ++ "\n: " ++ (reportProblem deadEnd.problem)
+
+
+reportProblem : Problem -> String 
+reportProblem problem = 
+  case problem of 
+    Expecting str -> "Expecting string: " ++ str 
+    ExpectingInt -> "Expecting int"
+    ExpectingSymbol str -> "Expecting symbol: " ++ str
+    ExpectingKeyword str -> "Expecting keyword: " ++ str
+    ExpectingEnd -> "Expecting end"
+    UnexpectedChar -> "Unexpected char"
+    BadRepeat -> "Bad repeat"
+    _ -> "Other problem"
+
+
+ 
 
 inlineMathText : String -> Html msg
 inlineMathText str =
@@ -366,7 +386,7 @@ renderCite latexState args =
     in
         Html.span []
             [ Html.span [] [ Html.text "[" ]
-            , Html.a [ Html.Attributes.href label ] [ Html.text label ]
+            , Html.a [ Html.Attributes.href ("#bibitem:" ++ label) ] [ Html.text label ]
             , Html.span [] [ Html.text "]" ]
             ]
 
@@ -996,7 +1016,7 @@ renderBibItem latexState optArgs args body =
                 MeenyLatex.Render.renderArg 0 latexState args
 
         id =
-            "\"bib:" ++ label ++ "\""
+            "bibitem:" ++ label
     in
         Html.p [ HA.id id ] [ Html.text <| "[" ++ label ++ "] " ++ (MeenyLatex.Render.render latexState body) ]
 

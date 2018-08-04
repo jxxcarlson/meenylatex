@@ -1093,6 +1093,7 @@ renderEnvironmentDict =
         [ ( "align", \x a y -> renderAlignEnvironment x y )
         , ( "center", \x a y -> renderCenterEnvironment x y )
         , ( "comment", \x a y -> renderCommentEnvironment x y )
+        , ( "defitem", \x a y -> renderDefItemEnvironment x a y )
         , ( "enumerate", \x a y -> renderEnumerate x y )
         , ( "eqnarray", \x a y -> renderEqnArray x y )
         , ( "equation", \x a y -> renderEquationEnvironment x y )
@@ -1155,6 +1156,12 @@ renderEnumerate : LatexState -> LatexExpression -> Html msg
 renderEnumerate latexState body =
     Html.ol [] [ render latexState body ]
 
+renderDefItemEnvironment : LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefItemEnvironment latexState optArgs body =
+  Html.div []
+    [   Html.strong [] [Html.text <| MeenyLatex.Render.renderArg 0 latexState optArgs]
+      , Html.div [HA.style "margin-left" "25px", HA.style "margin-top" "15px"] [render latexState body]
+    ]
 
 {-| XXX
 -}

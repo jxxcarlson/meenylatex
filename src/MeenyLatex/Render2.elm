@@ -264,6 +264,9 @@ renderMacroDict =
         , ( "maketitle", \x y z -> renderTitle x z )
         , ( "mdash", \x y z -> renderMdash x z )
         , ( "ndash", \x y z -> renderNdash x z )
+        , ( "underscore", \x y z -> renderUnderscore x z )
+        , ( "backslash", \x y z -> renderBackslash x z )
+        , ( "texarg", \x y z -> renderTexArg x z )
         , ( "newcommand", \x y z -> renderNewCommand x z )
         , ( "ref", \x y z -> renderRef x z )
         , ( "medskip", \x y z -> renderMedSkip x z )
@@ -656,12 +659,25 @@ sectionPrefix level =
 
 renderMdash : LatexState -> List LatexExpression -> Html msg
 renderMdash latexState args =
-    Html.span [] [ Html.text "---" ]
+    Html.span [] [ Html.text "— " ]  
 
 
 renderNdash : LatexState -> List LatexExpression -> Html msg
 renderNdash latexState args =
-    Html.span [] [ Html.text "--" ]
+    Html.span [] [ Html.text "– " ]
+
+
+renderUnderscore : LatexState -> List LatexExpression -> Html msg
+renderUnderscore latexState args =
+    Html.span [] [ Html.text "_" ]   
+
+renderBackslash : LatexState -> List LatexExpression -> Html msg
+renderBackslash latexState args =
+    Html.span [] [ Html.text "\\", renderArg 0 latexState args ]    
+ 
+renderTexArg : LatexState -> List LatexExpression -> Html msg
+renderTexArg latexState args =
+    Html.span [] [ Html.text "{", renderArg 0 latexState args, Html.text "}" ]    
 
 
 renderNewCommand : LatexState -> List LatexExpression -> Html msg

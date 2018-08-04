@@ -480,23 +480,33 @@ renderImageRef latexState args =
         imageAttrs =
             parseImageAttributes attributeString
 
-        width_ = (String.fromInt imageAttrs.width) ++ "px"
+        width = (String.fromInt imageAttrs.width) ++ "px"
 
         theImage =
             if imageAttrs.float == "left" then
-                Html.img [ HA.src imageUrl, HA.alt "imagref", 
-                  HA.style "float" "left", HA.style "width" width_, HA.style "margin-right" "12px"]
-                    []
+                Html.div [HA.style "float" "left"] [
+                        Html.img [ HA.src imageUrl, HA.alt "image link", HA.style "width" width, HA.style "margin-right" "12px"] [ ]
+                        , Html.br [] []
+                        , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block"] []
+                    ]
             else if imageAttrs.float == "right" then
-                Html.img [ HA.src imageUrl, HA.alt "imagref", 
-                   HA.style "float" "right", HA.style "width" width_, HA.style "margin-left" "12px" ]
-                    []
+                Html.div [HA.style "float" "right"] [
+                    Html.img [ HA.src imageUrl, HA.alt "image link", HA.style "width" width, HA.style "margin-left" "12px"] [ ]
+                    , Html.br [] []
+                    , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block"] []
+                ]
             else if imageAttrs.align == "center" then
-                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.style "align" "middle", HA.style "width" width_ ]
-                    []
+                Html.div [HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width] [
+                    Html.img [ HA.src imageUrl, HA.alt "image link", HA.style "width" width] [ ]
+                    , Html.br [] []
+                    , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block"] []
+                ]
             else
-                Html.img [ HA.src imageUrl, HA.alt "imagref", HA.style "align" "middle", HA.style "width" width_ ]
-                    []
+                Html.div [HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width] [
+                    Html.img [ HA.src imageUrl, HA.alt "image link", HA.style "width" width] [ ]
+                    , Html.br [] []
+                    , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block"] []
+                ]
     in
         Html.a [ Html.Attributes.href url ] [ theImage ]
 

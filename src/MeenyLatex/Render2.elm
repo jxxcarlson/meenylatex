@@ -274,6 +274,7 @@ renderMacroDict =
         , ( "dollar", \x y z -> renderDollar x z )
         , ( "texbegin", \x y z -> renderBegin x z )
         , ( "texend", \x y z -> renderEnd x z )
+        , ( "percent", \x y z -> renderPercent x z )
         , ( "code", \x y z -> renderCode x z )
         , ( "ellie", \x y z -> renderEllie x z )
         , ( "emph", \x y z -> renderItalic x z )
@@ -329,6 +330,10 @@ renderBegin latexState args =
 renderEnd : LatexState -> List LatexExpression -> Html msg
 renderEnd latexState args = 
   Html.span [] [Html.text "\\end"]  
+
+renderPercent : LatexState -> List LatexExpression -> Html msg
+renderPercent latexState args = 
+  Html.span [] [Html.text "%"]  
 
 renderArgList : LatexState -> List LatexExpression -> List (Html msg)
 renderArgList latexState args =

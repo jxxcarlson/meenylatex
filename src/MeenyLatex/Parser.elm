@@ -273,7 +273,7 @@ macroName : Parser String
 macroName =
     (variable
         { start = \c -> c == '\\'
-        , inner = \c -> Char.isAlphaNum c
+        , inner = \c -> (Char.isAlphaNum c || c == '*')
         , reserved = Set.fromList [ "\\begin", "\\end", "\\item", "\\bibitem" ]
         }
     )

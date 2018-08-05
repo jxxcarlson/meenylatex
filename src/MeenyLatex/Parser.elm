@@ -1,4 +1,4 @@
-module MeenyLatex.Parser exposing
+module MeenyLatex.Parser exposing 
         ( LatexExpression(..)
         , macro
         , parse
@@ -280,13 +280,18 @@ macroName =
         |> map (String.dropLeft 1)
 
 
+
+
+
+{-| The smacro parser assumes that the texxt to be 
+parsed forms a single paragraph -}
 smacro : Parser LatexExpression
 smacro =
     succeed SMacro
         |= smacroName
         |= itemList optionalArg
         |= itemList arg
-        |= (parseTo "\n\n" |> map String.trim |> map LXString)
+        |= lazy (\_ -> latexList)
 
 
 smacroName : Parser String
@@ -297,17 +302,6 @@ smacroName =
         , reserved = Set.fromList [ "\\begin", "\\end", "\\item" ]
         }
     ) |> map (String.dropLeft 1)
-
-
-smacroBody : Parser LatexExpression
-smacroBody =
-    --  inContext "smacroBody" <|
-    (succeed identity
-        |. PH.spaces
-        |= nonEmptyItemList (oneOf [ specialWords, inlineMath PH.spaces, macro PH.spaces ])
-        |. symbol "\n\n"
-        |> map (\x -> LatexList x)
-    )
 
 
 

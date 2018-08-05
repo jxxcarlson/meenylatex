@@ -281,7 +281,7 @@ renderMacroDict =
         , ( "index", \x y z -> renderIndex x z )
         , ( "italic", \x y z -> renderItalic x z )
         , ( "label", \x y z -> renderLabel x z )
-        , ( "maketitle", \x y z -> renderTitle x z )
+        , ( "maketitle", \x y z -> renderMakeTitle x z )
         , ( "mdash", \x y z -> renderMdash x z )
         , ( "ndash", \x y z -> renderNdash x z )
         , ( "underscore", \x y z -> renderUnderscore x z )
@@ -384,10 +384,10 @@ renderCite latexState args =
             else
                 label_
     in
-        Html.span []
+        Html.strong []
             [ Html.span [] [ Html.text "[" ]
             , Html.a [ Html.Attributes.href ("#bibitem:" ++ label) ] [ Html.text label ]
-            , Html.span [] [ Html.text "]" ]
+            , Html.span [] [ Html.text "] " ]
             ]
 
 
@@ -896,6 +896,40 @@ renderSubheading latexState args =
     in
         Html.div [ HA.class "subheading" ] [ Html.text <| title ]
 
+renderMakeTitle : LatexState -> List LatexExpression -> Html msg
+renderMakeTitle latexState list =
+    let
+        title =
+            getDictionaryItem "title" latexState
+
+        author =
+            getDictionaryItem "author" latexState
+
+        date =
+            getDictionaryItem "date" latexState
+
+        email =
+            getDictionaryItem "email" latexState
+
+        revision =
+            getDictionaryItem "revision" latexState
+
+        revisionText =
+            if revision /= "" then
+                "Last revised " ++ revision
+            else
+                ""
+
+        titlePart =
+           Html.div [HA.style "font-size" "36px"] [Html.text <| title]
+
+        bodyParts =
+            [  author, email, date, revisionText ]
+                |> List.filter (\x -> x /= "")
+                |> List.map (\x -> Html.div [] [Html.text x])
+    in
+        Html.div []
+           ([titlePart] ++ bodyParts)
 
 renderTitle : LatexState -> List LatexExpression -> Html msg
 renderTitle latexState args =
@@ -1018,7 +1052,11 @@ renderBibItem latexState optArgs args body =
         id =
             "bibitem:" ++ label
     in
-        Html.p [ HA.id id ] [ Html.text <| "[" ++ label ++ "] " ++ (MeenyLatex.Render.render latexState body) ]
+        Html.div [] [
+              Html.strong [ HA.id id, HA.style "margin-right" "10px"] [ Html.text <| "[" ++ label ++ "]"]
+             , Html.span [] [render latexState body]
+
+        ]
 
 
 

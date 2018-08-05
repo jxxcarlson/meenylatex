@@ -271,6 +271,9 @@ renderMacroDict =
         , ( "smallskip", \x y z -> renderSmallSkip x z )
         , ( "bozo", boost renderBozo )
         , ( "cite", \x y z -> renderCite x z )
+        , ( "dollar", \x y z -> renderDollar x z )
+        , ( "texbegin", \x y z -> renderBegin x z )
+        , ( "texend", \x y z -> renderEnd x z )
         , ( "code", \x y z -> renderCode x z )
         , ( "ellie", \x y z -> renderEllie x z )
         , ( "emph", \x y z -> renderItalic x z )
@@ -315,6 +318,17 @@ renderMacroDict =
         , ( "strong", \x y z -> renderStrong x z )
         ]
 
+renderDollar : LatexState -> List LatexExpression -> Html msg
+renderDollar latexState args = 
+  Html.span [] [Html.text "$"]
+
+renderBegin : LatexState -> List LatexExpression -> Html msg
+renderBegin latexState args = 
+  Html.span [] [Html.text "\\begin"]
+
+renderEnd : LatexState -> List LatexExpression -> Html msg
+renderEnd latexState args = 
+  Html.span [] [Html.text "\\end"]  
 
 renderArgList : LatexState -> List LatexExpression -> List (Html msg)
 renderArgList latexState args =

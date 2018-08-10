@@ -139,7 +139,7 @@ render latexState latexExpression =
             Html.span [] [ Html.text str ]
 
         LXError error ->
-            Html.p [] [ Html.text <| (String.join "\n---\n\n" (List.map errorReport error))]
+            Html.p [Html.Attributes.style "color" "red"] [ Html.text <| (String.join "\n---\n\n" (List.map errorReport error))]
 
 
 errorReport : DeadEnd -> String 

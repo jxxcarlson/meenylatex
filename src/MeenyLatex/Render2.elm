@@ -461,7 +461,7 @@ renderHRef latexState args =
         label =
             MeenyLatex.Render.renderArg 1 emptyLatexState args
     in
-        Html.a [ Html.Attributes.href url ] [ Html.text label ]
+        Html.a [ Html.Attributes.href url, Html.Attributes.target "_blank" ] [ Html.text label ]
 
 
 renderImage : LatexState -> List LatexExpression -> Html msg

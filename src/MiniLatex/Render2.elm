@@ -581,12 +581,16 @@ renderTableOfContents latexState list =
 renderInnerTableOfContents : LatexState -> List LatexExpression -> Html msg
 renderInnerTableOfContents latexState args =
     let
-        prefix =  getElement 0 args 
-                    |> PT.valueOfLatexList 
-                    |> List.map PT.valueOfLXString 
-                    |> List.head
-                    |> Maybe.withDefault ""
+        -- prefix_ =  getElement 0 args 
+        --             |> PT.valueOfLatexList 
+        --             |> List.map PT.valueOfLXString 
+        --             |> List.head
+        --             |> Maybe.withDefault ""
 
+        s1 =
+            getCounter "s1" latexState
+
+        prefix = (String.fromInt s1) ++ "."
 
         innerPart =
             makeInnerTableOfContents prefix latexState

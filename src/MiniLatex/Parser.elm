@@ -1,4 +1,4 @@
-module MeenyLatex.Parser exposing 
+module MiniLatex.Parser exposing 
         ( LatexExpression(..)
         , macro
         , parse
@@ -20,7 +20,7 @@ module MeenyLatex.Parser exposing
 -}
 
 import Dict
-import MeenyLatex.ParserHelpers as PH exposing (..)
+import MiniLatex.ParserHelpers as PH exposing (..)
 import Parser exposing (..)
 import Set
 

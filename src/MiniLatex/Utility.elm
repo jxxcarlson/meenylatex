@@ -1,4 +1,4 @@
-module MeenyLatex.Utility exposing (addLineNumbers, addLineNumbers_, getAt, capitalize)
+module MiniLatex.Utility exposing (addLineNumbers, addLineNumbers_, getAt, capitalize)
 
 {-| From List.Extra
 -}

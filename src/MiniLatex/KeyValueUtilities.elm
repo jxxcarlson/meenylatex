@@ -1,11 +1,11 @@
-module MeenyLatex.KeyValueUtilities exposing(..)
+module MiniLatex.KeyValueUtilities exposing(..)
 
 -- exposing (getKeyValueList, getValue)
 
 import Char
 import Parser exposing (..)
-import MeenyLatex.ParserHelpers exposing (itemList)
-import MeenyLatex.Parser exposing (word)
+import MiniLatex.ParserHelpers exposing (itemList)
+import MiniLatex.Parser exposing (word)
 
 
 -- type alias KeyValuePair =

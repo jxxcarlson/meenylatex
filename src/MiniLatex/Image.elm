@@ -1,7 +1,7 @@
-module MeenyLatex.Image exposing (..)
+module MiniLatex.Image exposing (..)
 
-import MeenyLatex.Html as Html
-import MeenyLatex.KeyValueUtilities as KeyValueUtilities
+import MiniLatex.Html as Html
+import MiniLatex.KeyValueUtilities as KeyValueUtilities
 
 
 {- IMAGE HELPERS -}

@@ -1,4 +1,4 @@
-module MeenyLatex.Source exposing (texPrefix, texSuffix)
+module MiniLatex.Source exposing (texPrefix, texSuffix)
 
 {-| This module provides boilerplat eext.
 

@@ -1,4 +1,4 @@
-module MeenyLatex.FastExportToLatex exposing (export)
+module MiniLatex.FastExportToLatex exposing (export)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -9,9 +9,9 @@ module MeenyLatex.FastExportToLatex exposing (export)
 
 -}
 
-import MeenyLatex.JoinStrings as JoinStrings
-import MeenyLatex.Paragraph as Paragraph
-import MeenyLatex.RenderLatexForExport as RLE
+import MiniLatex.JoinStrings as JoinStrings
+import MiniLatex.Paragraph as Paragraph
+import MiniLatex.RenderLatexForExport as RLE
 
 
 {-| Tranform MiniLatex text into Latex text.

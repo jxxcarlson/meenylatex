@@ -1,5 +1,5 @@
  
-module MeenyLatex.ListMachine exposing(runMachine, InternalState)  
+module MiniLatex.ListMachine exposing(runMachine, InternalState)  
 
 {-| 
 

@@ -1,8 +1,8 @@
 module RenderTest exposing (..)
 
-import MeenyLatex.Parser exposing (..)
-import MeenyLatex.Render exposing (..)
-import MeenyLatex.LatexState
+import MiniLatex.Parser exposing (..)
+import MiniLatex.Render exposing (..)
+import MiniLatex.LatexState
 import Parser exposing (run)
 
 
@@ -13,14 +13,14 @@ import Fuzz exposing (Fuzzer, list, int, string)
 import Test exposing (..)
 
 
-renderString2 : Parser.Parser MeenyLatex.Parser.LatexExpression -> String -> String
+renderString2 : Parser.Parser MiniLatex.Parser.LatexExpression -> String -> String
 renderString2 parser str =
-    renderString parser MeenyLatex.LatexState.emptyLatexState str
+    renderString parser MiniLatex.LatexState.emptyLatexState str
 
 
 suite : Test
 suite =
-    describe "MeenyLatex Render"
+    describe "MiniLatex Render"
         -- Nest as many descriptions as you like.
         [ test "(1) Words (plain text)" <|
             \_ ->

@@ -1,8 +1,8 @@
-module MeenyLatex.StateReducerHelpers exposing (..)
+module MiniLatex.StateReducerHelpers exposing (..)
 
 -- import List.Extra
 
-import MeenyLatex.LatexState
+import MiniLatex.LatexState
     exposing
         ( Counters
         , CrossReferences
@@ -14,11 +14,11 @@ import MeenyLatex.LatexState
         , setDictionaryItem
         , updateCounter
         )
-import MeenyLatex.Parser as Parser exposing (LatexExpression(..))
-import MeenyLatex.ParserHelpers as ParserHelpers
-import MeenyLatex.ParserTools as PT
+import MiniLatex.Parser as Parser exposing (LatexExpression(..))
+import MiniLatex.ParserHelpers as ParserHelpers
+import MiniLatex.ParserTools as PT
 import Parser as P
-import MeenyLatex.Utility as Utility
+import MiniLatex.Utility as Utility
 
 
 type alias LatexInfo =

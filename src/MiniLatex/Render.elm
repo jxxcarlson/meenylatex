@@ -1,4 +1,4 @@
-module MeenyLatex.Render
+module MiniLatex.Render
     exposing
         ( makeTableOfContents
         , render
@@ -22,12 +22,12 @@ import Dict
 
 -- import List.Extra
 
-import MeenyLatex.Configuration as Configuration
-import MeenyLatex.ErrorMessages as ErrorMessages
-import MeenyLatex.Html as Html
-import MeenyLatex.Image as Image exposing (..)
-import MeenyLatex.JoinStrings as JoinStrings
-import MeenyLatex.LatexState
+import MiniLatex.Configuration as Configuration
+import MiniLatex.ErrorMessages as ErrorMessages
+import MiniLatex.Html as Html
+import MiniLatex.Image as Image exposing (..)
+import MiniLatex.JoinStrings as JoinStrings
+import MiniLatex.LatexState
     exposing
         ( LatexState
         , TocEntry
@@ -36,8 +36,8 @@ import MeenyLatex.LatexState
         , getCrossReference
         , getDictionaryItem
         )
-import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import MeenyLatex.Utility as Utility
+import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import MiniLatex.Utility as Utility
 import Parser
 import Regex
 import String

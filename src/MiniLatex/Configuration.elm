@@ -1,4 +1,4 @@
-module MeenyLatex.Configuration exposing (client)
+module MiniLatex.Configuration exposing (client)
 
 
 client : String

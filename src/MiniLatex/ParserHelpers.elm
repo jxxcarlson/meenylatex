@@ -1,4 +1,4 @@
-module MeenyLatex.ParserHelpers exposing(..)
+module MiniLatex.ParserHelpers exposing(..)
     -- exposing
     --     ( spaces
     --     , ws

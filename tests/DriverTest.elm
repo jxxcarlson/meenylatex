@@ -4,13 +4,13 @@ module DriverTest exposing (..)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import MeenyLatex.Driver exposing (..)
+import MiniLatex.Driver exposing (..)
 import Test exposing (..)
 
 
 suite : Test
 suite =
-    describe "MeenyLatex Driver"
+    describe "MiniLatex Driver"
         -- Nest as many descriptions as you like.
         [ test "(E.1) Render equation" <|
             \_ ->

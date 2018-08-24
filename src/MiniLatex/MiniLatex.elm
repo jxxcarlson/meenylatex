@@ -1,4 +1,4 @@
-module MeenyLatex.MiniLatex
+module MiniLatex.MiniLatex
     exposing
         ( emptyEditRecord
         , initializeEditRecord
@@ -28,20 +28,20 @@ for an explanation of the theory behind the MiniLatex package.
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Keyed as Keyed
-import MeenyLatex.Differ as Differ exposing (EditRecord)
-import MeenyLatex.LatexDiffer as MiniLatexDiffer
-import MeenyLatex.LatexState exposing (emptyLatexState)
-import MeenyLatex.Paragraph as Paragraph
-import MeenyLatex.Parser as MiniLatexParser exposing (LatexExpression)
-import MeenyLatex.LatexState exposing (LatexState)
-import MeenyLatex.Render2 as Render
+import MiniLatex.Differ as Differ exposing (EditRecord)
+import MiniLatex.LatexDiffer as MiniLatexDiffer
+import MiniLatex.LatexState exposing (emptyLatexState)
+import MiniLatex.Paragraph as Paragraph
+import MiniLatex.Parser as MiniLatexParser exposing (LatexExpression)
+import MiniLatex.LatexState exposing (LatexState)
+import MiniLatex.Render2 as Render
 
 
 -- exposing (render, renderString)
 
 
 {-| The function call `render macros sourceTest` produces
-an HTML element corresponding to the MeenyLatex source text
+an HTML element corresponding to the MiniLatex source text
 `sourceText`. The macro definitions in `macros`
 are prepended to this string and are used by MathJax
 to render purely mathematical text. The `macros` string
@@ -78,7 +78,7 @@ prependMacros macros_ sourceText =
 
 Example: 
 
-> import MeenyLatex.MiniLatex exposing(parse)
+> import MiniLatex.MiniLatex exposing(parse)
 > parse  "This \\strong{is a test!}"
 [[LXString ("This "),Macro "strong" [] [LatexList [LXString ("is  a  test!")]]]]
 
@@ -135,7 +135,7 @@ text.
             }
         , idList = []
         , idListStart = 0
-        } : MeenyLatex.Differ.EditRecord
+        } : MiniLatex.Differ.EditRecord
 
 -}
 initializeEditRecord : Int -> String -> EditRecord (Html msg)

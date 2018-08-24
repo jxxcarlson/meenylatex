@@ -1,8 +1,8 @@
-module MeenyLatex.ParserTools exposing (..)
+module MiniLatex.ParserTools exposing (..)
 
-{- Some of these functoins are used by MeenyLatex.Accumulator -}
+{- Some of these functoins are used by MiniLatex.Accumulator -}
 
-import MeenyLatex.Parser exposing (LatexExpression(..))
+import MiniLatex.Parser exposing (LatexExpression(..))
 
 
 isMacro : String -> LatexExpression -> Bool

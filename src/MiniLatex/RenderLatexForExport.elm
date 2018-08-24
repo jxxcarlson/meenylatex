@@ -1,4 +1,4 @@
-module MeenyLatex.RenderLatexForExport exposing (renderLatexForExport)
+module MiniLatex.RenderLatexForExport exposing (renderLatexForExport)
 
 {-| This module is for preparing latex for export.
 
@@ -14,12 +14,12 @@ import Dict
 
 -- import List.Extra
 
-import MeenyLatex.ErrorMessages as ErrorMessages
-import MeenyLatex.Image as Image
-import MeenyLatex.JoinStrings as JoinStrings
-import MeenyLatex.Paragraph
-import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import MeenyLatex.Utility as Utility
+import MiniLatex.ErrorMessages as ErrorMessages
+import MiniLatex.Image as Image
+import MiniLatex.JoinStrings as JoinStrings
+import MiniLatex.Paragraph
+import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import MiniLatex.Utility as Utility
 import String
 
 
@@ -28,8 +28,8 @@ import String
 renderLatexForExport : String -> String
 renderLatexForExport str =
     str
-        |> MeenyLatex.Paragraph.logicalParagraphify
-        |> List.map MeenyLatex.Parser.parse
+        |> MiniLatex.Paragraph.logicalParagraphify
+        |> List.map MiniLatex.Parser.parse
         |> List.map renderLatexList
         |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
 

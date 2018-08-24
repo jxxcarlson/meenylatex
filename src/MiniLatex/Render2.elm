@@ -1,4 +1,4 @@
-module MeenyLatex.Render2
+module MiniLatex.Render2
     exposing
         ( makeTableOfContents
         , render
@@ -23,12 +23,12 @@ import Json.Encode
 
 -- import List.Extra
 
-import MeenyLatex.Render
-import MeenyLatex.Configuration as Configuration
-import MeenyLatex.ErrorMessages as ErrorMessages
-import MeenyLatex.Image as Image exposing (..)
-import MeenyLatex.JoinStrings as JoinStrings
-import MeenyLatex.LatexState
+import MiniLatex.Render
+import MiniLatex.Configuration as Configuration
+import MiniLatex.ErrorMessages as ErrorMessages
+import MiniLatex.Image as Image exposing (..)
+import MiniLatex.JoinStrings as JoinStrings
+import MiniLatex.LatexState
     exposing
         ( LatexState
         , TocEntry
@@ -37,14 +37,14 @@ import MeenyLatex.LatexState
         , getCrossReference
         , getDictionaryItem
         )
-import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import MeenyLatex.Utility as Utility
+import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import MiniLatex.Utility as Utility
 import Parser exposing(DeadEnd, Problem(..))
 import Regex
 import String
 import Html.Attributes as HA
-import MeenyLatex.ListMachine as ListMachine  
-import MeenyLatex.ParserTools as PT
+import MiniLatex.ListMachine as ListMachine  
+import MiniLatex.ParserTools as PT
 
 
 -- |> \str -> "\n<p>" ++ str ++ "</p>\n"
@@ -69,7 +69,7 @@ parseString parser str =
 renderString : LatexState -> String -> Html msg
 renderString latexState str =
     str
-        |> MeenyLatex.Parser.parse
+        |> MiniLatex.Parser.parse
         |> List.map (render latexState)
         |> Html.div []
 
@@ -392,7 +392,7 @@ renderCite : LatexState -> List LatexExpression -> Html msg
 renderCite latexState args =
     let
         label_ =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         ref =
             getDictionaryItem ("bibitem:" ++ label_) latexState
@@ -423,13 +423,13 @@ renderEllie : LatexState -> List LatexExpression -> Html msg
 renderEllie latexState args =
     let
         id =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         url =
             ("https://ellie-app.com/embed/" ++ id)
 
         title_ =
-            MeenyLatex.Render.renderArg 1 latexState args
+            MiniLatex.Render.renderArg 1 latexState args
 
         title =
             if title_ == "xxx" then
@@ -444,7 +444,7 @@ renderEqRef : LatexState -> List LatexExpression -> Html msg
 renderEqRef latexState args =
     let
         key =
-            MeenyLatex.Render.renderArg 0 emptyLatexState args
+            MiniLatex.Render.renderArg 0 emptyLatexState args
 
         ref =
             getCrossReference key latexState
@@ -456,10 +456,10 @@ renderHRef : LatexState -> List LatexExpression -> Html msg
 renderHRef latexState args =
     let
         url =
-            MeenyLatex.Render.renderArg 0 emptyLatexState args
+            MiniLatex.Render.renderArg 0 emptyLatexState args
 
         label =
-            MeenyLatex.Render.renderArg 1 emptyLatexState args
+            MiniLatex.Render.renderArg 1 emptyLatexState args
     in
         Html.a [ Html.Attributes.href url, Html.Attributes.target "_blank" ] [ Html.text label ]
 
@@ -468,13 +468,13 @@ renderImage : LatexState -> List LatexExpression -> Html msg
 renderImage latexState args =
     let
         url =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         label =
-            MeenyLatex.Render.renderArg 1 latexState args
+            MiniLatex.Render.renderArg 1 latexState args
 
         attributeString =
-            MeenyLatex.Render.renderArg 2 latexState args
+            MiniLatex.Render.renderArg 2 latexState args
 
         imageAttrs =
             parseImageAttributes attributeString
@@ -511,13 +511,13 @@ renderImageRef : LatexState -> List LatexExpression -> Html msg
 renderImageRef latexState args =
     let
         url =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         imageUrl =
-            MeenyLatex.Render.renderArg 1 latexState args
+            MiniLatex.Render.renderArg 1 latexState args
 
         attributeString =
-            MeenyLatex.Render.renderArg 2 latexState args
+            MiniLatex.Render.renderArg 2 latexState args
 
         imageAttrs =
             parseImageAttributes attributeString
@@ -723,10 +723,10 @@ renderNewCommand : LatexState -> List LatexExpression -> Html msg
 renderNewCommand latexState args =
     let
         command =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         definition =
-            MeenyLatex.Render.renderArg 1 latexState args
+            MiniLatex.Render.renderArg 1 latexState args
     in
         Html.span [] [ Html.text <| "\\newcommand{" ++ command ++ "}{" ++ definition ++ "}" ]
 
@@ -735,7 +735,7 @@ renderRef : LatexState -> List LatexExpression -> Html msg
 renderRef latexState args =
     let
         key =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
     in
         Html.span [] [ Html.text <| getCrossReference key latexState ]
 
@@ -760,7 +760,7 @@ renderSection : LatexState -> List LatexExpression -> Html msg
 renderSection latexState args =
     let
         sectionName =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -781,7 +781,7 @@ renderSectionStar : LatexState -> List LatexExpression -> Html msg
 renderSectionStar latexState args =
     let
         sectionName =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         ref =
             idPhrase "section" sectionName
@@ -793,7 +793,7 @@ renderSubsection : LatexState -> List LatexExpression -> Html msg
 renderSubsection latexState args =
     let
         sectionName =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -817,7 +817,7 @@ renderSubsectionStar : LatexState -> List LatexExpression -> Html msg
 renderSubsectionStar latexState args =
     let
         sectionName =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         ref =
             idPhrase "subsection" sectionName
@@ -829,7 +829,7 @@ renderSubSubsection : LatexState -> List LatexExpression -> Html msg
 renderSubSubsection latexState args =
     let
         sectionName =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -856,7 +856,7 @@ renderSubSubsectionStar : LatexState -> List LatexExpression -> Html msg
 renderSubSubsectionStar latexState args =
     let
         sectionName =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         ref =
             idPhrase "subsubsection" sectionName
@@ -911,7 +911,7 @@ renderSubheading : LatexState -> List LatexExpression -> Html msg
 renderSubheading latexState args =
     let
         title =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
     in
         Html.div [ HA.class "subheading" ] [ Html.text <| title ]
 
@@ -986,7 +986,7 @@ renderTerm : LatexState -> List LatexExpression -> Html msg
 renderTerm latexState args =
     let
         arg =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
     in
         Html.i [] [ Html.text <| arg ]
 
@@ -995,13 +995,13 @@ renderXLink : LatexState -> List LatexExpression -> Html msg
 renderXLink latexState args =
     let
         id =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         ref =
             (getDictionaryItem "setclient" latexState) ++ "/" ++ id
 
         label =
-            MeenyLatex.Render.renderArg 1 latexState args
+            MiniLatex.Render.renderArg 1 latexState args
     in
         Html.a [ Html.Attributes.href ref ] [ Html.text label ]
 
@@ -1010,13 +1010,13 @@ renderXLinkPublic : LatexState -> List LatexExpression -> Html msg
 renderXLinkPublic latexState args =
     let
         id =
-            MeenyLatex.Render.renderArg 0 latexState args
+            MiniLatex.Render.renderArg 0 latexState args
 
         ref =
             (getDictionaryItem "setclient" latexState) ++ "/" ++ id
 
         label =
-            MeenyLatex.Render.renderArg 1 latexState args
+            MiniLatex.Render.renderArg 1 latexState args
     in
         Html.a [ Html.Attributes.href ref ] [ Html.text label ]
 
@@ -1064,9 +1064,9 @@ renderBibItem latexState optArgs args body =
     let
         label =
             if List.length optArgs == 1 then
-                MeenyLatex.Render.renderArg 0 latexState optArgs
+                MiniLatex.Render.renderArg 0 latexState optArgs
             else
-                MeenyLatex.Render.renderArg 0 latexState args
+                MiniLatex.Render.renderArg 0 latexState args
 
         id =
             "bibitem:" ++ label
@@ -1192,7 +1192,7 @@ renderAlignEnvironment : LatexState -> LatexExpression -> Html msg
 renderAlignEnvironment latexState body =
     let
         r =
-            MeenyLatex.Render.render latexState body
+            MiniLatex.Render.render latexState body
 
         eqno =
             getCounter "eqno" latexState
@@ -1236,7 +1236,7 @@ renderEnumerate latexState body =
 renderDefItemEnvironment : LatexState -> List LatexExpression -> LatexExpression -> Html msg
 renderDefItemEnvironment latexState optArgs body =
   Html.div []
-    [   Html.strong [] [Html.text <| MeenyLatex.Render.renderArg 0 latexState optArgs]
+    [   Html.strong [] [Html.text <| MiniLatex.Render.renderArg 0 latexState optArgs]
       , Html.div [HA.style "margin-left" "25px", HA.style "margin-top" "15px"] [render latexState body]
     ]
 
@@ -1244,7 +1244,7 @@ renderDefItemEnvironment latexState optArgs body =
 -}
 renderEqnArray : LatexState -> LatexExpression -> Html msg
 renderEqnArray latexState body =
-    displayMathText (MeenyLatex.Render.render latexState body)
+    displayMathText (MiniLatex.Render.render latexState body)
 
 
 renderEquationEnvironment : LatexState -> LatexExpression -> Html msg
@@ -1266,7 +1266,7 @@ renderEquationEnvironment latexState body =
                 ""
 
         r =
-            (MeenyLatex.Render.render latexState body)
+            (MiniLatex.Render.render latexState body)
     in
         displayMathText <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
 
@@ -1289,7 +1289,7 @@ renderListing : LatexState -> LatexExpression -> Html msg
 renderListing latexState body =
     let
         text =
-            MeenyLatex.Render.render latexState body
+            MiniLatex.Render.render latexState body
 
         lines =
             Utility.addLineNumbers text
@@ -1299,7 +1299,7 @@ renderListing latexState body =
 
 renderMacros : LatexState -> LatexExpression -> Html msg
 renderMacros latexState body =
-    displayMathText (MeenyLatex.Render.render latexState body)
+    displayMathText (MiniLatex.Render.render latexState body)
 
 
 renderQuotation : LatexState -> LatexExpression -> Html msg
@@ -1352,18 +1352,18 @@ renderTheBibliography latexState body =
 
 renderUseForWeb : LatexState -> LatexExpression -> Html msg
 renderUseForWeb latexState body =
-    displayMathText (MeenyLatex.Render.render latexState body)
+    displayMathText (MiniLatex.Render.render latexState body)
 
 
 renderVerbatim : LatexState -> LatexExpression -> Html msg
 renderVerbatim latexState body =
     let
         body2 =
-            MeenyLatex.Render.render latexState body 
+            MiniLatex.Render.render latexState body 
     in
         Html.pre [ HA.style "margin-top" "-13px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 renderVerse : LatexState -> LatexExpression -> Html msg
 renderVerse latexState body =
-    Html.div [ HA.class "verse" ] [ Html.text (String.trim <| MeenyLatex.Render.render latexState body) ]
+    Html.div [ HA.class "verse" ] [ Html.text (String.trim <| MiniLatex.Render.render latexState body) ]

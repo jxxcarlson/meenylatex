@@ -1,4 +1,4 @@
-module MeenyLatex.Html exposing (div, img, a, h1, h2, h3)
+module MiniLatex.Html exposing (div, img, a, h1, h2, h3)
 
 
 div : List String -> List String -> String

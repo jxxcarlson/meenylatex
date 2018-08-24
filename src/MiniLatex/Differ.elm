@@ -1,4 +1,4 @@
-module MeenyLatex.Differ exposing
+module MiniLatex.Differ exposing
         ( EditRecord
         , createEditRecord
         , diff
@@ -20,8 +20,8 @@ then parsing and rendering the changed paragraphs.
 
 -}
 
-import MeenyLatex.LatexState exposing (LatexState, emptyLatexState)
-import MeenyLatex.Paragraph as Paragraph
+import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
+import MiniLatex.Paragraph as Paragraph
 import Html exposing (Html)
 
 

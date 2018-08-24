@@ -1,11 +1,11 @@
 module AccumulatorTest exposing (..)
 
-import MeenyLatex.Accumulator as Accumulator
-import MeenyLatex.Render as Render
-import MeenyLatex.Parser as Parser exposing (LatexExpression(..))
-import MeenyLatex.LatexState exposing (emptyLatexState)
-import MeenyLatex.Differ as Differ
-import MeenyLatex.LatexDiffer as LatexDiffer
+import MiniLatex.Accumulator as Accumulator
+import MiniLatex.Render as Render
+import MiniLatex.Parser as Parser exposing (LatexExpression(..))
+import MiniLatex.LatexState exposing (emptyLatexState)
+import MiniLatex.Differ as Differ
+import MiniLatex.LatexDiffer as LatexDiffer
 import Data
 import Dict
 

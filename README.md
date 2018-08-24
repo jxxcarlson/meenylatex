@@ -19,7 +19,7 @@ Changes
 
 0. The top level module `Driver` has been renamed `MiniLatex`
 
-1. MeenyLatex renders LaTeX source text into `Html a` using
+1. MiniLatex renders LaTeX source text into `Html a` using
 `Render2.render` rather than
 `String` representing Html using `Render.render`
 

@@ -1,11 +1,11 @@
-module MeenyLatex.LatexDiffer exposing (createEditRecord, update)
+module MiniLatex.LatexDiffer exposing (createEditRecord, update)
 
-import MeenyLatex.Accumulator as Accumulator
-import MeenyLatex.Differ as Differ exposing (EditRecord)
-import MeenyLatex.LatexState exposing (LatexState, emptyLatexState)
-import MeenyLatex.Paragraph as Paragraph
-import MeenyLatex.Render2 as Render exposing (render, renderLatexList)
-import MeenyLatex.Parser exposing (LatexExpression)
+import MiniLatex.Accumulator as Accumulator
+import MiniLatex.Differ as Differ exposing (EditRecord)
+import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
+import MiniLatex.Paragraph as Paragraph
+import MiniLatex.Render2 as Render exposing (render, renderLatexList)
+import MiniLatex.Parser exposing (LatexExpression)
 
 
 createEditRecord : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a

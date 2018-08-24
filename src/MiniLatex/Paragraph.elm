@@ -1,4 +1,4 @@
-module MeenyLatex.Paragraph exposing (logicalParagraphify)
+module MiniLatex.Paragraph exposing (logicalParagraphify)
 
 
 {-| This module exports just one function,
@@ -11,7 +11,7 @@ of logical paragraphs
 
 -}
 
-import MeenyLatex.Parser
+import MiniLatex.Parser
 import Parser
 import Regex
 
@@ -40,7 +40,7 @@ getBeginArg : String -> String
 getBeginArg line =
     let
         parseResult =
-            Parser.run MeenyLatex.Parser.envName line
+            Parser.run MiniLatex.Parser.envName line
 
         arg =
             case parseResult of
@@ -57,7 +57,7 @@ getEndArg : String -> String
 getEndArg line =
     let
         parseResult =
-            Parser.run MeenyLatex.Parser.endWord line
+            Parser.run MiniLatex.Parser.endWord line
 
         arg =
             case parseResult of

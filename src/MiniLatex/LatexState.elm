@@ -1,4 +1,4 @@
-module MeenyLatex.LatexState exposing (..)
+module MiniLatex.LatexState exposing (..)
 
 import Dict
 

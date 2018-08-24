@@ -1,4 +1,4 @@
-module MeenyLatex.JoinStrings exposing (joinList)
+module MiniLatex.JoinStrings exposing (joinList)
 
 {- joinList : List String -> String
    join a list of strings to make a single string.

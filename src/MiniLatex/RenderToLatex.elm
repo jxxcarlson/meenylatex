@@ -1,4 +1,4 @@
-module MeenyLatex.RenderToLatex
+module MiniLatex.RenderToLatex
     exposing
         ( render
         , renderBackToLatex
@@ -16,12 +16,12 @@ module MeenyLatex.RenderToLatex
 
 -}
 
-import MeenyLatex.ErrorMessages as ErrorMessages
-import MeenyLatex.JoinStrings as JoinStrings
-import MeenyLatex.Paragraph
-import MeenyLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import MiniLatex.ErrorMessages as ErrorMessages
+import MiniLatex.JoinStrings as JoinStrings
+import MiniLatex.Paragraph
+import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Parser
-import MeenyLatex.Utility as Utility
+import MiniLatex.Utility as Utility
 
 
 {-| parse a stringg and render it back into Latex
@@ -29,8 +29,8 @@ import MeenyLatex.Utility as Utility
 renderBackToLatex : String -> String
 renderBackToLatex str =
     str
-        |> MeenyLatex.Paragraph.logicalParagraphify
-        |> List.map MeenyLatex.Parser.parse
+        |> MiniLatex.Paragraph.logicalParagraphify
+        |> List.map MiniLatex.Parser.parse
         |> List.map renderLatexList
         |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
 

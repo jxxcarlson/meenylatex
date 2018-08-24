@@ -1,11 +1,11 @@
-module MeenyLatex.Accumulator
+module MiniLatex.Accumulator
     exposing
         ( parseParagraphs
         , renderParagraphs
         )
 
 import Dict
-import MeenyLatex.LatexState
+import MiniLatex.LatexState
     exposing
         ( Counters
         , CrossReferences
@@ -17,9 +17,9 @@ import MeenyLatex.LatexState
         , setDictionaryItem
         , updateCounter
         )
-import MeenyLatex.Parser as Parser exposing (LatexExpression(..), macro, parse)
-import MeenyLatex.Render2 as Render exposing (renderLatexList)
-import MeenyLatex.StateReducerHelpers as SRH
+import MiniLatex.Parser as Parser exposing (LatexExpression(..), macro, parse)
+import MiniLatex.Render2 as Render exposing (renderLatexList)
+import MiniLatex.StateReducerHelpers as SRH
 
 
 {- Types -}

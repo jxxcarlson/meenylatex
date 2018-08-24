@@ -7,12 +7,12 @@ import Html.Keyed as Keyed
 import Http
 import Types exposing (..)
 import String
-import MeenyLatex.Parser exposing (LatexExpression)
-import MeenyLatex.MiniLatex as MiniLatex
-import MeenyLatex.RenderToLatex as RenderToLatex
+import MiniLatex.Parser exposing (LatexExpression)
+import MiniLatex.MiniLatex as MiniLatex
+import MiniLatex.RenderToLatex as RenderToLatex
 import Json.Encode as Encode
-import MeenyLatex.Paragraph
-import MeenyLatex.RenderLatexForExport as RenderLatexForExport
+import MiniLatex.Paragraph
+import MiniLatex.RenderLatexForExport as RenderLatexForExport
 
 
 {- Word count -}

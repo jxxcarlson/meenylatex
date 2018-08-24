@@ -8,9 +8,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
-import MeenyLatex.HasMath as HasMath
-import MeenyLatex.MiniLatex as MiniLatex
-import MeenyLatex.Differ exposing (EditRecord)
+import MiniLatex.HasMath as HasMath
+import MiniLatex.MiniLatex as MiniLatex
+import MiniLatex.Differ exposing (EditRecord)
 import Random
 import Source
 import View exposing (..)

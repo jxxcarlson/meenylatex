@@ -376,17 +376,17 @@ renderStrong latexState args =
 
 renderBigSkip : LatexState -> List LatexExpression -> Html msg
 renderBigSkip latexState args =
-    Html.div [] [ Html.br [] [] ]
+     Html.div [HA.style "height" "40px"] [ ]
 
 
 renderMedSkip : LatexState -> List LatexExpression -> Html msg
 renderMedSkip latexState args =
-    Html.div [] [ Html.br [] [] ]
+    Html.div [HA.style "height" "10px"] [ ]
 
 
 renderSmallSkip : LatexState -> List LatexExpression -> Html msg
 renderSmallSkip latexState args =
-    Html.div [] [ Html.br [] [] ]
+    Html.div [HA.style "height" "0px"] [ ]
 
 
 renderCite : LatexState -> List LatexExpression -> Html msg

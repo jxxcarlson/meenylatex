@@ -16,8 +16,8 @@ module MiniLatex.Render2
 -}
 
 import Dict
-import Html exposing (Html)
-import Html.Attributes
+import Html exposing (Html, Attribute)
+import Html.Attributes 
 import Json.Encode
 
 
@@ -307,6 +307,10 @@ renderMacroDict =
         , ( "subheading", \x y z -> renderSubheading x z )
         , ( "tableofcontents", \x y z -> renderTableOfContents x z )
         , ( "innertableofcontents", \x y z -> renderInnerTableOfContents x z )
+        , ( "red", \x y z -> renderRed x z )
+        , ( "blue", \x y z -> renderBlue x z )
+        , ( "highlight", \x y z -> renderHighlighted x z )
+        , ( "strike", \x y z -> renderStrikeThrough x z )
         , ( "term", \x y z -> renderTerm x z )
         , ( "xlink", \x y z -> renderXLink x z )
         , ( "xlinkPublic", \x y z -> renderXLinkPublic x z )
@@ -450,7 +454,8 @@ renderIFrame latexState args =
         title =
             MiniLatex.Render.renderArg 1 latexState args
     in
-        Html.iframe [ Html.Attributes.src url, Html.Attributes.width 500, Html.Attributes.height 600 ] [ Html.text title ]
+      -- Html.a [ Html.Attributes.href url, Html.Attributes.target "_blank" ] [ Html.text title ]
+      Html.iframe [ Html.Attributes.src url, Html.Attributes.width 500, Html.Attributes.height 600 ] [ Html.text title ]
 
 
 renderEqRef : LatexState -> List LatexExpression -> Html msg
@@ -791,8 +796,16 @@ renderSection latexState args =
         ref =
             idPhrase "section" sectionName
     in
-        Html.h2 [ HA.id ref ] [ Html.text <| label ++ sectionName ]
+        Html.h2 (headingStyle ref 24) [ Html.text <| label ++ sectionName ]
 
+
+
+-- headingStyle : String -> Float -> Attribute 
+headingStyle ref h = 
+  [    HA.id ref
+     , HA.style "margin-top" ((String.fromFloat h) ++ "px")
+     , HA.style "margin-bottom" ((String.fromFloat (0.0*h)) ++ "px")
+  ]
 
 renderSectionStar : LatexState -> List LatexExpression -> Html msg
 renderSectionStar latexState args =
@@ -803,7 +816,7 @@ renderSectionStar latexState args =
         ref =
             idPhrase "section" sectionName
     in
-        Html.h2 [ HA.id ref ] [ Html.text <| sectionName ]
+        Html.h2 (headingStyle ref 24) [ Html.text <| sectionName ]
 
 
 renderSubsection : LatexState -> List LatexExpression -> Html msg
@@ -827,7 +840,8 @@ renderSubsection latexState args =
         ref =
             idPhrase "subsection" sectionName
     in
-        Html.h3 [ HA.id ref ] [ Html.text <| label ++ sectionName ]
+        Html.h3 (headingStyle ref 12) [ Html.text <| label ++ sectionName ]
+
 
 
 renderSubsectionStar : LatexState -> List LatexExpression -> Html msg
@@ -839,7 +853,7 @@ renderSubsectionStar latexState args =
         ref =
             idPhrase "subsection" sectionName
     in
-        Html.h3 [ HA.id ref ] [ Html.text <| sectionName ]
+        Html.h3 (headingStyle ref 12) [ Html.text <| sectionName ]
 
 
 renderSubSubsection : LatexState -> List LatexExpression -> Html msg
@@ -930,7 +944,7 @@ renderSubheading latexState args =
         title =
             MiniLatex.Render.renderArg 0 latexState args
     in
-        Html.div [ HA.style "font-weight" "bold" ] [ Html.text <| title ]
+        Html.p [ HA.style "font-weight" "bold", HA.style "margin-bottom" "0" ] [ Html.text <| title ]
 
 renderMakeTitle : LatexState -> List LatexExpression -> Html msg
 renderMakeTitle latexState list =
@@ -998,6 +1012,37 @@ renderEmail : LatexState -> List LatexExpression -> Html msg
 renderEmail latexState args =
     Html.span [] []
 
+renderRed : LatexState -> List LatexExpression -> Html msg
+renderRed latexState args =
+    let
+        arg =
+            MiniLatex.Render.renderArg 0 latexState args
+    in
+        Html.span [HA.style "color" "red"] [ Html.text <| arg ]
+
+renderBlue :  LatexState -> List LatexExpression -> Html msg
+renderBlue latexState args =
+    let
+        arg =
+            MiniLatex.Render.renderArg 0 latexState args
+    in
+        Html.span [HA.style "color" "blue"] [ Html.text <| arg ]
+
+renderHighlighted : LatexState -> List LatexExpression -> Html msg
+renderHighlighted latexState args =
+    let
+        arg =
+            MiniLatex.Render.renderArg 0 latexState args
+    in
+        Html.span [HA.style "background-color" "yellow"] [ Html.text <| arg ]
+
+renderStrikeThrough : LatexState -> List LatexExpression -> Html msg
+renderStrikeThrough latexState args =
+    let
+        arg =
+            MiniLatex.Render.renderArg 0 latexState args
+    in
+        Html.span [HA.style "text-decoration" "line-through"] [ Html.text <| arg ]
 
 renderTerm : LatexState -> List LatexExpression -> Html msg
 renderTerm latexState args =
@@ -1100,14 +1145,10 @@ renderBibItem latexState optArgs args body =
 {- LISTS -}
 
 
-itemClass : Int -> String
-itemClass level =
-    "item" ++ String.fromInt level
-
 
 renderItem : LatexState -> Int -> LatexExpression -> Html msg
 renderItem latexState level latexExpression =
-    Html.li [ HA.class (itemClass level) ] [ render latexState latexExpression ]
+    Html.li [ HA.style "margin-bottom" "8px" ] [ render latexState latexExpression ]
 
 
 
@@ -1248,14 +1289,14 @@ renderCommentEnvironment latexState body =
 
 renderEnumerate : LatexState -> LatexExpression -> Html msg
 renderEnumerate latexState body =
-    Html.ol [] [ render latexState body ]
+    Html.ol [HA.style "margin-top" "0px"] [ render latexState body ]
 
 renderDefItemEnvironment : LatexState -> List LatexExpression -> LatexExpression -> Html msg
 renderDefItemEnvironment latexState optArgs body =
-  Html.div []
-    [   Html.strong [] [Html.text <| MiniLatex.Render.renderArg 0 latexState optArgs]
-      , Html.div [HA.style "margin-left" "25px", HA.style "margin-top" "10px"] [render latexState body]
-    ]
+    Html.div []
+        [   Html.strong [] [Html.text <| MiniLatex.Render.renderArg 0 latexState optArgs]
+        , Html.div [HA.style "margin-left" "25px", HA.style "margin-top" "10px"] [render latexState body]
+        ]
 
 {-| XXX
 -}
@@ -1299,7 +1340,7 @@ renderIndentEnvironment latexState body =
 
 renderItemize : LatexState -> LatexExpression -> Html msg
 renderItemize latexState body =
-    Html.ul [] [ render latexState body ]
+    Html.ul [HA.style "margin-top" "0px"] [ render latexState body ]
 
 
 renderListing : LatexState -> LatexExpression -> Html msg

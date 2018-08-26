@@ -102,7 +102,7 @@ getRenderedText editRecord =
     ids = editRecord.idList
     
   in 
-    List.map2 (\para id -> Keyed.node "p" [HA.id id]  [(id,para)]) paragraphs ids 
+    List.map2 (\para id -> Keyed.node "p" [HA.id id, HA.style "margin-bottom" "10px"]  [(id,para)]) paragraphs ids 
      
 
 {-| Create an EditRecord from a string of MiniLaTeX text.

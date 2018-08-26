@@ -144,7 +144,8 @@ render latexState latexExpression =
 
 errorReport : DeadEnd -> String 
 errorReport deadEnd = 
-  "Error at row " ++ String.fromInt deadEnd.row ++ ", column " ++ String.fromInt deadEnd.col ++ "\n: " ++ (reportProblem deadEnd.problem)
+  -- "Error at row " ++ String.fromInt deadEnd.row ++ ", column " ++ String.fromInt deadEnd.col ++ "\n: " ++ (reportProblem deadEnd.problem)
+  reportProblem deadEnd.problem
 
 
 reportProblem : Problem -> String 
@@ -917,7 +918,7 @@ renderSubheading latexState args =
         title =
             MiniLatex.Render.renderArg 0 latexState args
     in
-        Html.div [ HA.class "subheading" ] [ Html.text <| title ]
+        Html.div [ HA.style "font-weight" "bold" ] [ Html.text <| title ]
 
 renderMakeTitle : LatexState -> List LatexExpression -> Html msg
 renderMakeTitle latexState list =
@@ -1241,7 +1242,7 @@ renderDefItemEnvironment : LatexState -> List LatexExpression -> LatexExpression
 renderDefItemEnvironment latexState optArgs body =
   Html.div []
     [   Html.strong [] [Html.text <| MiniLatex.Render.renderArg 0 latexState optArgs]
-      , Html.div [HA.style "margin-left" "25px", HA.style "margin-top" "15px"] [render latexState body]
+      , Html.div [HA.style "margin-left" "25px", HA.style "margin-top" "10px"] [render latexState body]
     ]
 
 {-| XXX
@@ -1365,7 +1366,7 @@ renderVerbatim latexState body =
         body2 =
             MiniLatex.Render.render latexState body 
     in
-        Html.pre [ HA.style "margin-top" "-13px", HA.style "font-size" "14px" ] [ Html.text body2 ]
+        Html.pre [ HA.style "margin-top" "-13px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 renderVerse : LatexState -> LatexExpression -> Html msg

@@ -281,6 +281,7 @@ renderMacroDict =
         , ( "emph", \x y z -> renderItalic x z )
         , ( "eqref", \x y z -> renderEqRef x z )
         , ( "href", \x y z -> renderHRef x z )
+        , ( "iframe", \x y z -> renderIFrame x z )
         , ( "image", \x y z -> renderImage x z )
         , ( "imageref", \x y z -> renderImageRef x z )
         , ( "index", \x y z -> renderIndex x z )
@@ -437,6 +438,17 @@ renderEllie latexState args =
                 "Link to Ellie"
             else
                 title_
+    in
+        Html.iframe [ Html.Attributes.src url, Html.Attributes.width 500, Html.Attributes.height 600 ] [ Html.text title ]
+
+renderIFrame : LatexState -> List LatexExpression -> Html msg
+renderIFrame latexState args =
+    let
+        url =
+            MiniLatex.Render.renderArg 0 latexState args
+
+        title =
+            MiniLatex.Render.renderArg 1 latexState args
     in
         Html.iframe [ Html.Attributes.src url, Html.Attributes.width 500, Html.Attributes.height 600 ] [ Html.text title ]
 

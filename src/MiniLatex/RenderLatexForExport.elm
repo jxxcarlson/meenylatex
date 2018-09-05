@@ -181,6 +181,8 @@ renderMacroDict =
         [ ( "image", \x y -> renderImage y )
         , ( "code", \x y -> renderCode x y )
         , ( "href", \x y -> renderHref x y )
+        , ( "mdash", \x y -> "---" )
+        , ( "ndash", \x y -> "--" )
         ]
 
 
@@ -252,10 +254,10 @@ renderImage args =
             Image.parseImageAttributes attributeString
 
         width_ =
-            imageAttrs.width |> toFloat |> (\x -> 2.5 * x)
+            imageAttrs.width |> toFloat |> (\x -> 4.5 * x)
 
         width =
-            String.fromFloat width_ ++ "px"
+            (String.fromFloat (6.0*width_/700.0)) ++ "in"
     in
         case ( imageAttrs.float, imageAttrs.align ) of
             ( "left", _ ) ->

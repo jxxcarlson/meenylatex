@@ -255,7 +255,7 @@ reproduceMacro name latexState optArgs args =
         renderedArgs =
             renderArgList latexState args |> List.map enclose
     in
-        Html.span []
+        Html.span [HA.style "color" "red"]
             ([ Html.text <| "\\" ++ name ] ++ renderedArgs)
 
 
@@ -456,6 +456,7 @@ renderIFrame latexState args =
     in
       -- Html.a [ Html.Attributes.href url, Html.Attributes.target "_blank" ] [ Html.text title ]
       Html.iframe [ Html.Attributes.src url, Html.Attributes.width 500, Html.Attributes.height 600 ] [ Html.text title ]
+
 
 
 renderEqRef : LatexState -> List LatexExpression -> Html msg
@@ -1419,7 +1420,7 @@ renderVerbatim latexState body =
         body2 =
             MiniLatex.Render.render latexState body 
     in
-        Html.pre [ HA.style "margin-top" "-13px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
+        Html.pre [ HA.style "margin-top" "-30px", HA.style "margin-bottom" "-7px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 renderVerse : LatexState -> LatexExpression -> Html msg

@@ -513,11 +513,11 @@ tableRow =
     )
 
 
-tableCell : Parser LatexExpression
+tableCell : Parser LatexExpression -- ###
 tableCell =
     -- inContext "tableCell" <|
     (succeed identity
-        |= oneOf [ inlineMath PH.ws, specialWords ]
+        |= oneOf [ macro PH.ws, inlineMath PH.ws, specialWords ]
     )
 
 

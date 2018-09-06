@@ -1368,7 +1368,8 @@ renderQuotation latexState body =
 
 renderTabular : LatexState -> LatexExpression -> Html msg
 renderTabular latexState body =
-    Html.table [] [ renderTableBody body ]
+    Html.table [Html.Attributes.style "border-spacing" "20px 10px"
+                 , Html.Attributes.style "margin-left" "-20px"] [ renderTableBody body ]
 
 
 renderCell : LatexExpression -> Html msg
@@ -1379,6 +1380,9 @@ renderCell cell =
 
         InlineMath s ->
             Html.td [] [ inlineMathText s ]
+
+        Macro s x y -> 
+            Html.td [] [ renderMacro emptyLatexState s x y ] -- ###
 
         _ ->
             Html.td [] []

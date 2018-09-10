@@ -1171,10 +1171,19 @@ environmentRenderer name =
         Nothing ->
             renderDefaultEnvironment name
 
+theoremLikeEnvironments : List String
+theoremLikeEnvironments = [ 
+      "theorem"
+    , "proposition"
+    , "corollary"
+    , "lemma"
+    , "definition" 
+    ]
+
 
 renderDefaultEnvironment : String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
 renderDefaultEnvironment name latexState args body =
-    if List.member name [ "theorem", "proposition", "corollary", "lemma", "definition" ] then
+    if List.member name theoremLikeEnvironments then
         renderTheoremLikeEnvironment latexState name args body
     else
         renderDefaultEnvironment2 latexState (Utility.capitalize name) args body

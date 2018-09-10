@@ -945,7 +945,7 @@ renderSubheading latexState args =
         title =
             MiniLatex.Render.renderArg 0 latexState args
     in
-        Html.p [ HA.style "font-weight" "bold", HA.style "margin-bottom" "0" ] [ Html.text <| title ]
+        Html.p [ HA.style "font-weight" "bold", HA.style "margin-bottom" "0", HA.style "margin-left" "-2px" ] [ Html.text <| title ]
 
 renderMakeTitle : LatexState -> List LatexExpression -> Html msg
 renderMakeTitle latexState list =
@@ -1178,7 +1178,7 @@ theoremLikeEnvironments = [
     , "corollary"
     , "lemma"
     , "definition" 
-    ]
+  ]
 
 
 renderDefaultEnvironment : String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg

@@ -4,7 +4,7 @@ import MiniLatex.Accumulator as Accumulator
 import MiniLatex.Differ as Differ exposing (EditRecord)
 import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
 import MiniLatex.Paragraph as Paragraph
-import MiniLatex.Render2 as Render exposing (render, renderLatexList)
+import MiniLatex.Render2 as Render exposing (render)
 import MiniLatex.Parser exposing (LatexExpression)
 
 

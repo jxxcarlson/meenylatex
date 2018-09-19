@@ -3,6 +3,7 @@ module MiniLatex.Render2
         ( makeTableOfContents
         , render
         , renderLatexList
+        , spacify
         , renderString
         )
 
@@ -185,6 +186,7 @@ addSpace internalState =
     c = internalState.after   |> Maybe.withDefault (LXString "")  
   in  
     case (a,b,c) of
+       
         (Macro _ _ _,  LXString str, _) ->
             if List.member (firstChar str) [ ".", ",", "?", "!", ";", ":" ] then
                 (LXString str)
@@ -203,7 +205,7 @@ addSpace internalState =
             else 
                 (LXString str)
          
-        (_, _, _) -> b
+        (_, _, _) ->  b
 
 
 lastChar =
@@ -225,6 +227,10 @@ renderLatexList latexState latexList =
         |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] (List.map (render latexState) list))
 
 
+spacify : List LatexExpression -> List LatexExpression
+spacify latexList = 
+  latexList
+        |> ListMachine.runMachine addSpace
 
 {- RENDER MACRO -}
 

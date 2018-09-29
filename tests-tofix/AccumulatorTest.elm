@@ -1,19 +1,17 @@
-module AccumulatorTest exposing (..)
-
-import MiniLatex.Accumulator as Accumulator
-import MiniLatex.Render as Render
-import MiniLatex.Parser as Parser exposing (LatexExpression(..))
-import MiniLatex.LatexState exposing (emptyLatexState)
-import MiniLatex.Differ as Differ
-import MiniLatex.LatexDiffer as LatexDiffer
-import Data
-import Dict
-
+module AccumulatorTest exposing (suite)
 
 -- http://package.elm-lang.org/packages/elm-community/elm-test/latest
 
+import Data
+import Dict
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, list, int, string)
+import Fuzz exposing (Fuzzer, int, list, string)
+import MiniLatex.Accumulator as Accumulator
+import MiniLatex.Differ as Differ
+import MiniLatex.LatexDiffer as LatexDiffer
+import MiniLatex.LatexState exposing (emptyLatexState)
+import MiniLatex.Parser as Parser exposing (LatexExpression(..))
+import MiniLatex.Render as Render
 import Test exposing (..)
 
 
@@ -32,7 +30,7 @@ suite =
                             |> Differ.paragraphify
                             |> List.map Parser.parseParagraph
                 in
-                    Expect.equal (List.length parseData1) 93
+                Expect.equal (List.length parseData1) 93
         , test "(3) parse and render paragraphs, verify final LatexState" <|
             \_ ->
                 let
@@ -45,7 +43,7 @@ suite =
                     expectedOutput =
                         { counters = Dict.fromList [ ( "eqno", 21 ), ( "s1", 4 ), ( "s2", 4 ), ( "s3", 0 ), ( "tno", 0 ) ], crossReferences = Dict.fromList [ ( "foo", "2.1" ) ] }
                 in
-                    Expect.equal output expectedOutput
+                Expect.equal output expectedOutput
         , test "(4) check that accumulator produces a list of the correct length" <|
             \_ ->
                 let
@@ -57,7 +55,7 @@ suite =
 
                     -- accumulator Parser.parseParagraph renderParagraph updateState latexState
                 in
-                    Expect.equal (output |> List.length) 93
+                Expect.equal (output |> List.length) 93
         , test "(5) check that '1 Introduction' exists as first section in output" <|
             \_ ->
                 let
@@ -69,7 +67,7 @@ suite =
                             |> List.head
                             |> Maybe.withDefault ""
                 in
-                    Expect.equal output "\\section{Introduction}\n\n"
+                Expect.equal output "\\section{Introduction}\n\n"
         , test "(7) test transformParagraphs1" <|
             \_ ->
                 let
@@ -78,19 +76,19 @@ suite =
                             |> Differ.paragraphify
                             |> Accumulator.parseParagraphs emptyLatexState
                 in
-                    Expect.equal output
-                        ( [ [ LXString "Test:", InlineMath "a^2 = 3" ]
-                          , [ Environment "equation" (LXString "\n\\label{foo}\na^ = 7") ]
-                          ]
-                        , { counters =
-                                Dict.fromList
-                                    [ ( "eqno", 1 )
-                                    , ( "s1", 0 )
-                                    , ( "s2", 0 )
-                                    , ( "s3", 0 )
-                                    , ( "tno", 0 )
-                                    ]
-                          , crossReferences = Dict.fromList [ ( "foo", "0.1" ) ]
-                          }
-                        )
+                Expect.equal output
+                    ( [ [ LXString "Test:", InlineMath "a^2 = 3" ]
+                      , [ Environment "equation" (LXString "\n\\label{foo}\na^ = 7") ]
+                      ]
+                    , { counters =
+                            Dict.fromList
+                                [ ( "eqno", 1 )
+                                , ( "s1", 0 )
+                                , ( "s2", 0 )
+                                , ( "s3", 0 )
+                                , ( "tno", 0 )
+                                ]
+                      , crossReferences = Dict.fromList [ ( "foo", "0.1" ) ]
+                      }
+                    )
         ]

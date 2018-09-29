@@ -1,17 +1,39 @@
-module MiniLatex.ParserHelpers exposing(..)
-    -- exposing
-    --     ( spaces
-    --     , ws
-    --     , parseUntil
-    --     , parseTo
-    --     , parseFromTo
-    --     , nonEmptyItemList
-    --     , itemList
-    --     , itemListWithSeparator
-    --     , transformWords
-    --     )
+module MiniLatex.ParserHelpers exposing
+    ( between
+    , braces
+    , brackets
+    , itemList
+    , itemListHelper
+    , itemListWithSeparator
+    , itemListWithSeparatorHelper
+    , itemList_
+    , many
+    , manyHelp
+    , nonEmptyItemList
+    , parens
+    , parseFromTo
+    , parseTo
+    , parseUntil
+    , some
+    , spaces
+    , transformWords
+    , ws
+    )
+
+-- exposing
+--     ( spaces
+--     , ws
+--     , parseUntil
+--     , parseTo
+--     , parseFromTo
+--     , nonEmptyItemList
+--     , itemList
+--     , itemListWithSeparator
+--     , transformWords
+--     )
 
 import Parser exposing (..)
+
 
 
 {- PARSER HELPERS
@@ -69,7 +91,7 @@ parseFromTo startString endString =
 nonEmptyItemList : Parser a -> Parser (List a)
 nonEmptyItemList itemParser =
     itemParser
-        |> andThen (\x -> (itemList_ [ x ] itemParser))
+        |> andThen (\x -> itemList_ [ x ] itemParser)
 
 
 itemList : Parser a -> Parser (List a)
@@ -128,7 +150,82 @@ transformWords : String -> String
 transformWords str =
     if str == "--" then
         "\\ndash"
+
     else if str == "---" then
         "\\mdash"
+
     else
         str
+
+
+
+{- From Punie/elm-parser-extras -}
+
+
+{-| Apply a parser zero or more times and return a list of the results.
+-}
+many : Parser a -> Parser (List a)
+many p =
+    loop [] (manyHelp p)
+
+
+{-| Apply a parser one or more times and return a tuple of the first result parsed
+and the list of the remaining results.
+-}
+some : Parser a -> Parser ( a, List a )
+some p =
+    succeed Tuple.pair
+        |= p
+        |. spaces
+        |= many p
+
+
+{-| Parse an expression between two other parsers
+-}
+between : Parser opening -> Parser closing -> Parser a -> Parser a
+between opening closing p =
+    succeed identity
+        |. opening
+        |. spaces
+        |= p
+        |. spaces
+        |. closing
+
+
+{-| Parse an expression between parenthesis.
+parens p == between (symbol "(") (symbol ")") p
+-}
+parens : Parser a -> Parser a
+parens =
+    between (symbol "(") (symbol ")")
+
+
+{-| Parse an expression between curly braces.
+braces p == between (symbol "{") (symbol "}") p
+-}
+braces : Parser a -> Parser a
+braces =
+    between (symbol "{") (symbol "}")
+
+
+{-| Parse an expression between square brackets.
+brackets p == between (symbol "[") (symbol "]") p
+-}
+brackets : Parser a -> Parser a
+brackets =
+    between (symbol "[") (symbol "]")
+
+
+
+-- HELPERS
+
+
+manyHelp : Parser a -> List a -> Parser (Step (List a) (List a))
+manyHelp p vs =
+    oneOf
+        [ succeed (\v -> Loop (v :: vs))
+            |= p
+            |. spaces
+        , succeed ()
+            |> map (\_ -> Done (List.reverse vs))
+        ]

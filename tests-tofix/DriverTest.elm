@@ -1,10 +1,10 @@
-module DriverTest exposing (..)
+module DriverTest exposing (suite)
 
 -- http://package.elm-lang.org/packages/elm-community/elm-test/latest
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import MiniLatex.Driver exposing (..)
+import MiniLatex.MiniLatex exposing (..)
 import Test exposing (..)
 
 

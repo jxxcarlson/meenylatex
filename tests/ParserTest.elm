@@ -77,20 +77,24 @@ suite =
         , doTest
             "(15) table with display math"
             (run latexExpression "\\begin{tabular}\n$$ \\int x^n dx $$ & $$ \\frac{x^{n+1}}{n+1} $$ \\\\\n$$ \\int e^x dx $$ & $$ e^x $$ \\\\\n\\end{tabular}")
-            (Err [ { col = 5, problem = ExpectingSymbol "\n", row = 2 }, { col = 5, problem = ExpectingSymbol "\\\\\n", row = 2 } ])
+            (Ok (Environment "tabular" [] (LatexList [ LatexList [ DisplayMath " \\int x^n dx ", DisplayMath " \\frac{x^{n+1}}{n+1} " ], LatexList [ DisplayMath " \\int e^x dx ", DisplayMath " e^x " ] ])))
         , doTest
-            "(16) label"
+            "(16) table with display math: brackets"
+            (run latexExpression "\\begin{tabular}\n\\[ \\int x^n dx \\] & $$ \\frac{x^{n+1}}{n+1} $$ \\\\\n$$ \\int e^x dx $$ & $$ e^x $$ \\\\\n\\end{tabular}")
+            (Ok (Environment "tabular" [] (LatexList [ LatexList [ DisplayMath " \\int x^n dx ", DisplayMath " \\frac{x^{n+1}}{n+1} " ], LatexList [ DisplayMath " \\int e^x dx ", DisplayMath " e^x " ] ])))
+        , doTest
+            "(17) label"
             (run latexExpression "\\begin{equation}\n\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar\n\\end{equation}")
             (Ok (Environment "equation" [] (LXString "\n\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar\n")))
         , doTest
-            "(17) punctuation"
+            "(18) punctuation"
             (run latexList "test \\code{foo}.")
             (Ok (LatexList [ LXString "test ", Macro "code" [] [ LatexList [ LXString "foo" ] ], LXString "." ]))
-        , doTest "(18) verse"
+        , doTest "(19) verse"
             (run latexList "\\begin{verse}\nTest\n\nTest\n\\end{verse}")
             (Ok (LatexList [ Environment "verse" [] (LXString "\nTest\n\nTest\n") ]))
         , doTest
-            "(19) verbatim"
+            "(20) verbatim"
             (run latexList "\\begin{verbatim}\nTest\n\nTest\n\\end{verbatim}")
             (Ok (LatexList [ Environment "verbatim" [] (LXString "\nTest\n\nTest\n") ]))
         ]

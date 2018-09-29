@@ -328,6 +328,7 @@ displayMathBrackets =
         |. PH.spaces
         |. symbol "\\["
         |= parseToSymbol "\\]"
+        |. ws
 
 
 {-| Capture the name of the environment in
@@ -509,7 +510,7 @@ tableCell : Parser LatexExpression
 tableCell =
     -- inContext "tableCell" <|
     succeed identity
-        |= oneOf [ macro PH.ws, inlineMath PH.ws, specialWords ]
+        |= oneOf [ displayMathBrackets, macro PH.ws, displayMathDollar, inlineMath PH.ws, specialWords ]
 
 
 tableCellHelp : List LatexExpression -> Parser (List LatexExpression)

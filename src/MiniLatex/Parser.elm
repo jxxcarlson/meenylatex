@@ -2,7 +2,7 @@ module MiniLatex.Parser exposing
     ( LatexExpression(..), macro, parse, defaultLatexList
     , latexList, endWord, envName, word
     , tableRow
-    , latexExpression, words
+    , blank, latexExpression, words
     )
 
 {-| This module is for quickly preparing latex for export.
@@ -72,7 +72,7 @@ latexList =
     -- inContext "latexList" <|
     succeed identity
         |. ws
-        |= nonEmptyItemList latexExpression
+        |= itemList latexExpression
         |> map LatexList
 
 
@@ -110,16 +110,25 @@ defaultLatexExpression =
 
 words : Parser LatexExpression
 words =
-    succeed identity
-        |. ws
-        |= words_
-        |. ws
+    oneOf
+        [ blank
+        , succeed identity
+            |. ws
+            |= words_
+            |. ws
+        ]
 
 
+words_ : Parser LatexExpression
 words_ =
     nonEmptyItemList (word notSpaceOrSpecialCharacters)
         |> map (String.join " ")
         |> map LXString
+
+
+blank : Parser LatexExpression
+blank =
+    symbol "\n\n" |> map (\_ -> LXString "\n\n")
 
 
 notSpaceOrSpecialCharacters : Char -> Bool

@@ -5,226 +5,92 @@ module ParserTest exposing (suite)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import MiniLatex.Parser exposing (..)
-import Parser exposing (run)
+import Parser exposing (Problem(..), run)
 import Test exposing (..)
+
+
+doTest comment inputExpression outputExpression =
+    test comment <|
+        \_ ->
+            Expect.equal inputExpression outputExpression
 
 
 suite : Test
 suite =
     describe "MiniLatex Parser"
-        -- Nest as many descriptions as you like.
-        [ test "(1) Comment" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexExpression "% This is a comment\n"
-
-                    expectedOutput =
-                        Ok (Comment "% This is a comment\n")
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(2) InlineMath" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexExpression "$a^2 = 7$"
-
-                    expectedOutput =
-                        Ok (InlineMath "a^2 = 7")
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(3) DisplayMath" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexExpression "$$b^2 = 3$$"
-
-                    expectedOutput =
-                        Ok (DisplayMath "b^2 = 3")
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(4) DisplayMath (Brackets)" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexExpression "\\[b^2 = 3\\]"
-
-                    expectedOutput =
-                        Ok (DisplayMath "b^2 = 3")
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(5) latexList words and macros" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexList "a b \\foo \\bar{1} \\baz{1}{2}"
-
-                    expectedOutput =
-                        Ok (LatexList [ LXString "a  b ", Macro "foo" [] [], Macro "bar" [] [ LatexList [ LXString "1" ] ], Macro "baz" [] [ LatexList [ LXString "1" ], LatexList [ LXString "2" ] ] ])
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(6) Environment" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexExpression "\\begin{theorem}\nInfinity is \\emph{very} large: $\\infinity^2 = \\infinity$. \\end{theorem}"
-
-                    expectedOutput =
-                        Ok (Environment "theorem" [] (LatexList [ LXString "Infinity  is ", Macro "emph" [] [ LatexList [ LXString "very" ] ], LXString "large: ", InlineMath "\\infinity^2 = \\infinity", LXString ". " ]))
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(7) Nested Environment" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexExpression "\\begin{th}  \\begin{a}$$hahah$$\\begin{x}yy\\end{x}\\end{a}\\begin{a} a{1}{2} b c yoko{1} $foo$ yada $$bar$$ a b c \\begin{u}yy\\end{u} \\end{a}\n\\end{th}"
-
-                    expectedOutput =
-                        Ok (Environment "th" [] (LatexList [ Environment "a" [] (LatexList [ DisplayMath "hahah", Environment "x" [] (LatexList [ LXString "yy" ]) ]), Environment "a" [] (LatexList [ LXString "a{1}{2}  b  c  yoko{1} ", InlineMath "foo", LXString "yada ", DisplayMath "bar", LXString "a  b  c ", Environment "u" [] (LatexList [ LXString "yy" ]) ]) ]))
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(8) Itemized List" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexList "\\begin{itemize} \\item aaa.\n \\item bbb.\n \\itemitem xx\n\\end{itemize}"
-
-                    expectedOutput =
-                        Ok (LatexList [ Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "aaa.\n " ]), Item 1 (LatexList [ LXString "bbb.\n ", Macro "itemitem" [] [], LXString "xx\n" ]) ]) ])
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(T.1) tablerow" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run tableRow "1 & 2 & 3 \\\\\n"
-
-                    expectedOutput =
-                        Ok (LatexList [ LXString "1", LXString "2", LXString "3" ])
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(T.1a) tablerow" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run tableRow "Hydrogen & H & 1 & 1.008 \\\\\n"
-
-                    expectedOutput =
-                        Ok (LatexList [ LXString "Hydrogen", LXString "H", LXString "1", LXString "1.008" ])
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(T.2) table" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexExpression "\\begin{tabular}\n1 & 2 \\\\\n 3 & 4 \\\\\n\\end{tabular}"
-
-                    expectedOutput =
-                        Ok (Environment "tabular" [] (LatexList [ LatexList [ LXString "1", LXString "2" ], LatexList [ LXString "3", LXString "4" ] ]))
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(T.3) table" <|
-            \_ ->
-                let
-                    input =
-                        "\\begin{tabular}{l l l l}\nHydrogen & H & 1 & 1.008 \\\\\nHelium & He & 2 & 4.003 \\\\\nLithium & Li & 3 &  6.94 \\\\\nBeryllium & Be & 4 & 9.012 \\\\\n\\end{tabular}"
-
-                    parsedInput =
-                        run latexExpression input
-
-                    expectedOutput =
-                        Ok (Environment "tabular" [ LatexList [ LXString "l  l  l  l" ] ] (LatexList [ LatexList [ LXString "Hydrogen", LXString "H", LXString "1", LXString "1.008" ], LatexList [ LXString "Helium", LXString "He", LXString "2", LXString "4.003" ], LatexList [ LXString "Lithium", LXString "Li", LXString "3", LXString "6.94" ], LatexList [ LXString "Beryllium", LXString "Be", LXString "4", LXString "9.012" ] ]))
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(T.3a) table" <|
-            \_ ->
-                let
-                    input =
-                        "\\begin{tabular}\nHydrogen & H & 1 & 1.008 \\\\\nHelium & He & 2 & 4.003 \\\\\nLithium & Li & 3 &  6.94 \\\\\nBeryllium & Be & 4 & 9.012 \\\\\n\\end{tabular}"
-
-                    parsedInput =
-                        run latexExpression input
-
-                    expectedOutput =
-                        Ok (Environment "tabular" [] (LatexList [ LatexList [ LXString "Hydrogen", LXString "H", LXString "1", LXString "1.008" ], LatexList [ LXString "Helium", LXString "He", LXString "2", LXString "4.003" ], LatexList [ LXString "Lithium", LXString "Li", LXString "3", LXString "6.94" ], LatexList [ LXString "Beryllium", LXString "Be", LXString "4", LXString "9.012" ] ]))
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(T.4) table with inline math" <|
-            \_ ->
-                let
-                    input =
-                        "\\begin{tabular}\n$ \\int x^n dx $ & $ \\frac{x^{n+1}}{n+1} $ \\\\\n$ \\int e^x dx $ & $ e^x $ \\\\\n\\end{tabular}"
-
-                    parsedInput =
-                        run latexExpression input
-
-                    expectedOutput =
-                        Ok (Environment "tabular" [] (LatexList [ LatexList [ InlineMath " \\int x^n dx ", InlineMath " \\frac{x^{n+1}}{n+1} " ], LatexList [ InlineMath " \\int e^x dx ", InlineMath " e^x " ] ]))
-                in
-                Expect.equal parsedInput expectedOutput
-
-        -- , test "(T.5) table with display math" <|
-        --     \_ ->
-        --         let
-        --             input =
-        --                 "\\begin{tabular}\n$$ \\int x^n dx $$ & $$ \\frac{x^{n+1}}{n+1} $$ \\\\\n$$ \\int e^x dx $$ & $$ e^x $$ \\\\\n\\end{tabular}"
-        --             parsedInput =
-        --                 run latexExpression input
-        --             expectedOutput =
-        --                 Ok
-        --                     (Environment "tabular"
-        --                         (LatexList
-        --                             [ LatexList
-        --                                 [ InlineMath " \\int x^n dx "
-        --                                 , InlineMath " \\frac{x^{n+1}}{n+1} "
-        --                                 ]
-        --                             , LatexList
-        --                                 [ InlineMath " \\int e^x dx "
-        --                                 , InlineMath " e^x "
-        --                                 ]
-        --                             ]
-        --                         )
-        --                     )
-        --         in
-        --         Expect.equal parsedInput expectedOutput
-        , test "(L.1) label" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexExpression "\\begin{equation}\n\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar\n\\end{equation}"
-
-                    expectedOutput =
-                        Ok (Environment "equation" [] (LXString "\n\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar\n"))
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(P.1) punctuation" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexList "test \\code{foo}."
-
-                    expectedOutput =
-                        Ok (LatexList [ LXString "test ", Macro "code" [] [ LatexList [ LXString "foo" ] ], LXString "." ])
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(V.1) verse" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexList "\\begin{verse}\nTest\n\nTest\n\\end{verse}"
-
-                    expectedOutput =
-                        Ok (LatexList [ Environment "verse" [] (LXString "\nTest\n\nTest\n") ])
-                in
-                Expect.equal parsedInput expectedOutput
-        , test "(VB.1) verbatim" <|
-            \_ ->
-                let
-                    parsedInput =
-                        run latexList "\\begin{verbatim}\nTest\n\nTest\n\\end{verbatim}"
-
-                    expectedOutput =
-                        Ok (LatexList [ Environment "verbatim" [] (LXString "\nTest\n\nTest\n") ])
-                in
-                Expect.equal parsedInput expectedOutput
+        [ doTest
+            "(1) Comment"
+            (run latexExpression "% This is a comment\n")
+            (Ok (Comment "% This is a comment\n"))
+        , doTest
+            "(2) InlineMath"
+            (run latexExpression "$a^2 = 7$")
+            (Ok (InlineMath "a^2 = 7"))
+        , doTest
+            "(3) DisplayMath"
+            (run latexExpression "$$b^2 = 3$$")
+            (Ok (DisplayMath "b^2 = 3"))
+        , doTest
+            "(4) DisplayMath (Brackets)"
+            (run latexExpression "\\[b^2 = 3\\]")
+            (Ok (DisplayMath "b^2 = 3"))
+        , doTest
+            "(5) latexList words and macros"
+            (run latexList "a b \\foo \\bar{1} \\baz{1}{2}")
+            (Ok (LatexList [ LXString "a  b ", Macro "foo" [] [], Macro "bar" [] [ LatexList [ LXString "1" ] ], Macro "baz" [] [ LatexList [ LXString "1" ], LatexList [ LXString "2" ] ] ]))
+        , doTest
+            "(6) Environment"
+            (run latexExpression "\\begin{theorem}\nInfinity is \\emph{very} large: $\\infinity^2 = \\infinity$. \\end{theorem}")
+            (Ok (Environment "theorem" [] (LatexList [ LXString "Infinity  is ", Macro "emph" [] [ LatexList [ LXString "very" ] ], LXString "large: ", InlineMath "\\infinity^2 = \\infinity", LXString ". " ])))
+        , doTest
+            "(7) Nested Environment"
+            (run latexExpression "\\begin{th}  \\begin{a}$$hahah$$\\begin{x}yy\\end{x}\\end{a}\\begin{a} a{1}{2} b c yoko{1} $foo$ yada $$bar$$ a b c \\begin{u}yy\\end{u} \\end{a}\n\\end{th}")
+            (Ok (Environment "th" [] (LatexList [ Environment "a" [] (LatexList [ DisplayMath "hahah", Environment "x" [] (LatexList [ LXString "yy" ]) ]), Environment "a" [] (LatexList [ LXString "a{1}{2}  b  c  yoko{1} ", InlineMath "foo", LXString "yada ", DisplayMath "bar", LXString "a  b  c ", Environment "u" [] (LatexList [ LXString "yy" ]) ]) ])))
+        , doTest
+            "(8) Itemized List"
+            (run latexList "\\begin{itemize} \\item aaa.\n \\item bbb.\n \\itemitem xx\n\\end{itemize}")
+            (Ok (LatexList [ Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "aaa.\n " ]), Item 1 (LatexList [ LXString "bbb.\n ", Macro "itemitem" [] [], LXString "xx\n" ]) ]) ]))
+        , doTest
+            "(9) tablerow"
+            (run tableRow "1 & 2 & 3 \\\\\n")
+            (Ok (LatexList [ LXString "1", LXString "2", LXString "3" ]))
+        , doTest
+            "(10) tablerow"
+            (run tableRow "Hydrogen & H & 1 & 1.008 \\\\\n")
+            (Ok (LatexList [ LXString "Hydrogen", LXString "H", LXString "1", LXString "1.008" ]))
+        , doTest
+            "(11) table"
+            (run latexExpression "\\begin{tabular}\n1 & 2 \\\\\n 3 & 4 \\\\\n\\end{tabular}")
+            (Ok (Environment "tabular" [] (LatexList [ LatexList [ LXString "1", LXString "2" ], LatexList [ LXString "3", LXString "4" ] ])))
+        , doTest
+            "(12) table"
+            (run latexExpression "\\begin{tabular}{l l l l}\nHydrogen & H & 1 & 1.008 \\\\\nHelium & He & 2 & 4.003 \\\\\nLithium & Li & 3 &  6.94 \\\\\nBeryllium & Be & 4 & 9.012 \\\\\n\\end{tabular}")
+            (Ok (Environment "tabular" [ LatexList [ LXString "l  l  l  l" ] ] (LatexList [ LatexList [ LXString "Hydrogen", LXString "H", LXString "1", LXString "1.008" ], LatexList [ LXString "Helium", LXString "He", LXString "2", LXString "4.003" ], LatexList [ LXString "Lithium", LXString "Li", LXString "3", LXString "6.94" ], LatexList [ LXString "Beryllium", LXString "Be", LXString "4", LXString "9.012" ] ])))
+        , doTest
+            "(13) table"
+            (run latexExpression "\\begin{tabular}\nHydrogen & H & 1 & 1.008 \\\\\nHelium & He & 2 & 4.003 \\\\\nLithium & Li & 3 &  6.94 \\\\\nBeryllium & Be & 4 & 9.012 \\\\\n\\end{tabular}")
+            (Ok (Environment "tabular" [] (LatexList [ LatexList [ LXString "Hydrogen", LXString "H", LXString "1", LXString "1.008" ], LatexList [ LXString "Helium", LXString "He", LXString "2", LXString "4.003" ], LatexList [ LXString "Lithium", LXString "Li", LXString "3", LXString "6.94" ], LatexList [ LXString "Beryllium", LXString "Be", LXString "4", LXString "9.012" ] ])))
+        , doTest
+            "(14) table with inline math"
+            (run latexExpression "\\begin{tabular}\n$ \\int x^n dx $ & $ \\frac{x^{n+1}}{n+1} $ \\\\\n$ \\int e^x dx $ & $ e^x $ \\\\\n\\end{tabular}")
+            (Ok (Environment "tabular" [] (LatexList [ LatexList [ InlineMath " \\int x^n dx ", InlineMath " \\frac{x^{n+1}}{n+1} " ], LatexList [ InlineMath " \\int e^x dx ", InlineMath " e^x " ] ])))
+        , doTest
+            "(15) table with display math"
+            (run latexExpression "\\begin{tabular}\n$$ \\int x^n dx $$ & $$ \\frac{x^{n+1}}{n+1} $$ \\\\\n$$ \\int e^x dx $$ & $$ e^x $$ \\\\\n\\end{tabular}")
+            (Err [ { col = 5, problem = ExpectingSymbol "\n", row = 2 }, { col = 5, problem = ExpectingSymbol "\\\\\n", row = 2 } ])
+        , doTest
+            "(16) label"
+            (run latexExpression "\\begin{equation}\n\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar\n\\end{equation}")
+            (Ok (Environment "equation" [] (LXString "\n\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar\n")))
+        , doTest
+            "(17) punctuation"
+            (run latexList "test \\code{foo}.")
+            (Ok (LatexList [ LXString "test ", Macro "code" [] [ LatexList [ LXString "foo" ] ], LXString "." ]))
+        , doTest "(18) verse"
+            (run latexList "\\begin{verse}\nTest\n\nTest\n\\end{verse}")
+            (Ok (LatexList [ Environment "verse" [] (LXString "\nTest\n\nTest\n") ]))
+        , doTest
+            "(19) verbatim"
+            (run latexList "\\begin{verbatim}\nTest\n\nTest\n\\end{verbatim}")
+            (Ok (LatexList [ Environment "verbatim" [] (LXString "\nTest\n\nTest\n") ]))
         ]

@@ -11,7 +11,7 @@ module MiniLatex.ParserHelpers exposing
     , manyHelp
     , nonEmptyItemList
     , parens
-    , parseFromTo
+    , parseBetweenSymbols
     , parseToSymbol
     , parseUntil
     , some
@@ -25,7 +25,7 @@ module MiniLatex.ParserHelpers exposing
 --     , ws
 --     , parseUntil
 --     , parseToSymbol
---     , parseFromTo
+--     , parseBetweenSymbols
 --     , nonEmptyItemList
 --     , itemList
 --     , itemListWithSeparator
@@ -76,8 +76,8 @@ parseToSymbol marker =
         |> map (String.dropRight (String.length marker))
 
 
-parseFromTo : String -> String -> Parser String
-parseFromTo startString endString =
+parseBetweenSymbols : String -> String -> Parser String
+parseBetweenSymbols startString endString =
     succeed identity
         |. symbol startString
         |. spaces

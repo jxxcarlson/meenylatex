@@ -27,11 +27,11 @@ suite =
             (run (parseUntil "!") "one two! three")
             (Ok "one two")
         , doTest
-            "parseFromTo (1)"
-            (run (parseFromTo "[" "]") "[one two] three")
+            "parseBetweenSymbols (1)"
+            (run (parseBetweenSymbols "[" "]") "[one two] three")
             (Ok "one two")
         , doTest
-            "parseFromTo (2)"
-            (run (parseFromTo "[[[" "]]]") "[[[one [and] two]]] three")
+            "parseBetweenSymbols (2)"
+            (run (parseBetweenSymbols "[[[" "]]]") "[[[one [and] two]]] three")
             (Ok "one [and] two")
         ]

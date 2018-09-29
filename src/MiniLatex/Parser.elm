@@ -196,21 +196,21 @@ inOptionArgWord c =
 {- SPECIAL WORDS -}
 
 
-specialWords : Parser LatexExpression
-specialWords =
-    nonEmptyItemList specialWord
+tableCellWords : Parser LatexExpression
+tableCellWords =
+    nonEmptyItemList tableCellWord
         |> map (String.join " ")
         |> map String.trim
         |> map LXString
 
 
-specialWord : Parser String
-specialWord =
-    word inSpecialWord
+tableCellWord : Parser String
+tableCellWord =
+    word inTableCellWord
 
 
-inSpecialWord : Char -> Bool
-inSpecialWord c =
+inTableCellWord : Char -> Bool
+inTableCellWord c =
     not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '&')
 
 
@@ -519,7 +519,7 @@ tableCell : Parser LatexExpression
 tableCell =
     -- inContext "tableCell" <|
     succeed identity
-        |= oneOf [ displayMathBrackets, macro PH.ws, displayMathDollar, inlineMath PH.ws, specialWords ]
+        |= oneOf [ displayMathBrackets, macro PH.ws, displayMathDollar, inlineMath PH.ws, tableCellWords ]
 
 
 tableCellHelp : List LatexExpression -> Parser (List LatexExpression)

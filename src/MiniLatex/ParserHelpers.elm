@@ -3,10 +3,6 @@ module MiniLatex.ParserHelpers exposing
     , braces
     , brackets
     , itemList
-    , itemListHelper
-    , itemListWithSeparator
-    , itemListWithSeparatorHelper
-    , itemList_
     , many
     , manyHelp
     , nonEmptyItemList
@@ -77,11 +73,11 @@ parseToSymbol marker =
 
 
 parseBetweenSymbols : String -> String -> Parser String
-parseBetweenSymbols startString endString =
+parseBetweenSymbols startSymbol endSymbol =
     succeed identity
-        |. symbol startString
+        |. symbol startSymbol
         |. spaces
-        |= parseUntil endString
+        |= parseUntil endSymbol
 
 
 
@@ -114,23 +110,19 @@ itemListHelper itemParser revItems =
         ]
 
 
-itemListWithSeparator : Parser () -> Parser String -> Parser (List String)
-itemListWithSeparator separatorParser itemParser =
-    Parser.loop [] (itemListWithSeparatorHelper separatorParser itemParser)
 
-
-itemListWithSeparatorHelper : Parser () -> Parser String -> List String -> Parser (Step (List String) (List String))
-itemListWithSeparatorHelper separatorParser itemParser revItems =
-    oneOf
-        [ succeed (\w -> Loop (w :: revItems))
-            |= itemParser
-            |. separatorParser
-        , succeed ()
-            |> Parser.map (\_ -> Done (List.reverse revItems))
-        ]
-
-
-
+-- itemListWithSeparator : Parser () -> Parser a -> Parser (List a)
+-- itemListWithSeparator separatorParser itemParser =
+--     Parser.loop [] (itemListWithSeparatorHelper separatorParser itemParser)
+-- itemListWithSeparatorHelper : Parser () -> Parser a -> List a -> Parser (Step (List a) (List a))
+-- itemListWithSeparatorHelper separatorParser itemParser revItems =
+--     oneOf
+--         [ succeed (\w -> Loop (w :: revItems))
+--             |= itemParser
+--             |. separatorParser
+--         , succeed ()
+--             |> Parser.map (\_ -> Done (List.reverse revItems))
+--         ]
 {-
    notSpecialTableOrMacroCharacter : Char -> Bool
    notSpecialTableOrMacroCharacter c =

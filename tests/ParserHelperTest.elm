@@ -23,7 +23,7 @@ suite =
             (run (parseUntil "!") "one two! three")
             (Ok "one two")
         , doTest
-            "parseTo"
+            "parseToSymbol"
             (run (parseUntil "!") "one two! three")
             (Ok "one two")
         , doTest

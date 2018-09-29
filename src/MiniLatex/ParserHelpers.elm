@@ -12,7 +12,7 @@ module MiniLatex.ParserHelpers exposing
     , nonEmptyItemList
     , parens
     , parseFromTo
-    , parseTo
+    , parseToSymbol
     , parseUntil
     , some
     , spaces
@@ -24,7 +24,7 @@ module MiniLatex.ParserHelpers exposing
 --     ( spaces
 --     , ws
 --     , parseUntil
---     , parseTo
+--     , parseToSymbol
 --     , parseFromTo
 --     , nonEmptyItemList
 --     , itemList
@@ -66,8 +66,8 @@ parseUntil marker =
 {-| chomp to end of the marker and return the
 chomped sring minus the makrder.
 -}
-parseTo : String -> Parser String
-parseTo marker =
+parseToSymbol : String -> Parser String
+parseToSymbol marker =
     (getChompedString <|
         succeed identity
             |= chompUntilEndOr marker

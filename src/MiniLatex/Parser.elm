@@ -307,7 +307,7 @@ inlineMath : Parser () -> Parser LatexExpression
 inlineMath wsParser =
     succeed InlineMath
         |. symbol "$"
-        |= parseTo "$"
+        |= parseToSymbol "$"
         |. wsParser
 
 
@@ -317,7 +317,7 @@ displayMathDollar =
     succeed DisplayMath
         |. PH.spaces
         |. symbol "$$"
-        |= parseTo "$$"
+        |= parseToSymbol "$$"
         |. ws
 
 
@@ -327,7 +327,7 @@ displayMathBrackets =
     succeed DisplayMath
         |. PH.spaces
         |. symbol "\\["
-        |= parseTo "\\]"
+        |= parseToSymbol "\\]"
 
 
 {-| Capture the name of the environment in
@@ -340,7 +340,7 @@ envName =
     succeed identity
         |. PH.spaces
         |. symbol "\\begin{"
-        |= parseTo "}"
+        |= parseToSymbol "}"
 
 
 {-| Use to parse begin ... end blocks
@@ -350,7 +350,7 @@ endWord =
     succeed identity
         |. PH.spaces
         |. symbol "\\end{"
-        |= parseTo "}"
+        |= parseToSymbol "}"
         |. ws
 
 
@@ -428,7 +428,7 @@ passThroughBody : String -> String -> Parser LatexExpression
 passThroughBody endWoord envType =
     --  inContext "passThroughBody" <|
     succeed identity
-        |= parseTo endWoord
+        |= parseToSymbol endWoord
         |. ws
         |> map LXString
         |> map (Environment envType [])

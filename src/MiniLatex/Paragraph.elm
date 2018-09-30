@@ -89,11 +89,11 @@ lineType line =
         Text
 
 
-{-| nextState is the transition function for a finite-state
+{-| getNextState is the transition function for a finite-state
 machine which parses lines.
 -}
-nextState : String -> ParserState -> ParserState
-nextState line parserState =
+getNextState : String -> ParserState -> ParserState
+getNextState line parserState =
     case ( parserState, lineType line ) of
         ( Start, Blank ) ->
             Start
@@ -176,35 +176,39 @@ fixLine line =
         line
 
 
+{-| Given an line and a parserRecord, compute a new parserRecord.
+The new parserRecord depends on the getNextState of the FSM. Note
+that the state of the machine is part of the parserRecord.
+-}
 updateParserRecord : String -> ParserRecord -> ParserRecord
 updateParserRecord line parserRecord =
     let
-        state2 =
-            nextState line parserRecord.state
+        nextState =
+            getNextState line parserRecord.state
     in
-    case state2 of
+    case nextState of
         Start ->
             { parserRecord
                 | currentParagraph = ""
                 , paragraphList = parserRecord.paragraphList ++ [ joinLines parserRecord.currentParagraph line ]
-                , state = state2
+                , state = nextState
             }
 
         InParagraph ->
             { parserRecord
                 | currentParagraph = joinLines parserRecord.currentParagraph line
-                , state = state2
+                , state = nextState
             }
 
         InBlock arg ->
             { parserRecord
                 | currentParagraph = joinLines parserRecord.currentParagraph (fixLine line)
-                , state = state2
+                , state = nextState
             }
 
         IgnoreLine ->
             { parserRecord
-                | state = state2
+                | state = nextState
             }
 
         Error ->

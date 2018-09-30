@@ -65,6 +65,16 @@ parse text =
             [ LXString "yada!" ]
 
 
+parse2 : String -> LatexExpression
+parse2 text =
+    case Parser.run latexExpression text of
+        Ok expr ->
+            expr
+
+        Err error ->
+            LXError error
+
+
 {-| Production: $ LatexList &\\Rightarrow LatexExpression^+ $
 -}
 latexList : Parser LatexExpression

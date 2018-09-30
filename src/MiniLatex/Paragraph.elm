@@ -128,9 +128,9 @@ getNextState line ( parserState, stack ) =
 
         ( InBlock arg1, EndBlock arg2 ) ->
             let
-                nextStack =
-                    --  Debug.log "POP"
-                    Stack.pop stack
+                ( nextStack, line_ ) =
+                    -- Debug.log "POP"
+                    ( Stack.pop stack, line )
 
                 -- _ =
                 --    Debug.log "LINE" line
@@ -206,8 +206,10 @@ updateParserRecord : String -> ParserRecord -> ParserRecord
 updateParserRecord line parserRecord =
     let
         ( nextState, nextStack ) =
-            --  Debug.log "(State, Stack)"
-            getNextState line ( parserRecord.state, parserRecord.stack )
+            -- Debug.log "S,S"
+            getNextState
+                line
+                ( parserRecord.state, parserRecord.stack )
 
         -- _ =
         --     Debug.log "line" line
@@ -218,27 +220,31 @@ updateParserRecord line parserRecord =
                 | currentParagraph = ""
                 , paragraphList = parserRecord.paragraphList ++ [ joinLines parserRecord.currentParagraph line ]
                 , state = nextState
+                , stack = nextStack
             }
 
         InParagraph ->
             { parserRecord
                 | currentParagraph = joinLines parserRecord.currentParagraph line
                 , state = nextState
+                , stack = nextStack
             }
 
         InBlock arg ->
             { parserRecord
                 | currentParagraph = joinLines parserRecord.currentParagraph (fixLine line)
                 , state = nextState
+                , stack = nextStack
             }
 
         IgnoreLine ->
             { parserRecord
                 | state = nextState
+                , stack = nextStack
             }
 
         Error ->
-            parserRecord
+            { parserRecord | stack = nextStack }
 
 
 logicalParagraphParse : String -> ParserRecord

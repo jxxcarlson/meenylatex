@@ -27,6 +27,10 @@ suite =
             2
         , doTest
             "nested paragraphs"
-            (logicalParagraphify "abc\n\n\\begin{a}\nxyz\n\\begin{a}HHH\\end{a}\n\n\\end{a}\n\nhohoho")
-            [ "abc\n\n", "\\begin{a}\nxyz\n\\begin{a}HHH\\end{a}\n\n\\end{a}\n\n", "hohoho\n\n" ]
+            (logicalParagraphify "abc\n\n\\begin{a}\nxyz\n\\begin{a}\nHHH\n\\end{a}\n\n\\end{a}\n\nhohoho")
+            [ "abc\n\n", "\\begin{a}\nxyz\n\\begin{a}\nHHH\n\\end{a}\n\n\\end{a}\n\n", "hohoho\n\n" ]
+        , doTest
+            "nested paragraphs II"
+            (logicalParagraphify "\\begin{enumerate}\n\\item One\n\\item Two\n\\begin{itemize}\n\\item Foo\n\\end{itemize}\n\\end{enumerate}\n\n")
+            [ "\\begin{enumerate}\n\\item One\n\\item Two\n\\begin{itemize}\n\\item Foo\n\\end{itemize}\n\\end{enumerate}\n\n" ]
         ]

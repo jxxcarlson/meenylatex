@@ -285,7 +285,7 @@ macroName =
         |> map (String.dropLeft 1)
 
 
-{-| The smacro parser assumes that the texxt to be
+{-| The smacro parser assumes that the text to be
 parsed forms a single paragraph
 -}
 smacro : Parser LatexExpression
@@ -340,6 +340,10 @@ displayMathBrackets =
         |. ws
 
 
+
+{- ENVIRONMENTS -}
+
+
 {-| Capture the name of the environment in
 a \\begin{ENV} ... \\end{ENV}
 pair
@@ -362,10 +366,6 @@ endWord =
         |. symbol "\\end{"
         |= parseToSymbol "}"
         |. ws
-
-
-
-{- ENVIRONMENTS -}
 
 
 environment : Parser LatexExpression
@@ -453,7 +453,7 @@ itemEnvironmentBody endWoord envType =
     ---  inContext "itemEnvironmentBody" <|
     succeed identity
         |. ws
-        |= itemList item
+        |= itemList (oneOf [ item, lazy (\_ -> environment) ])
         |. ws
         |. symbol endWoord
         |. ws

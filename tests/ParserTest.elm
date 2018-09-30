@@ -97,4 +97,28 @@ suite =
             "(20) verbatim"
             (run latexList "\\begin{verbatim}\nTest\n\nTest\n\\end{verbatim}")
             (Ok (LatexList [ Environment "verbatim" [] (LXString "\nTest\n\nTest\n") ]))
+        , doTest
+            "(21) nested list"
+            (run latexExpression "\\begin{itemize}\n\n\\item One\n\n\\item Two\n\n\\begin{itemize}\n\n\\item Foo\n\n\\item Bar\n\n\\end{itemize}\n\n\\end{itemize}")
+            (Ok (Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "One\n\n" ]), Item 1 (LatexList [ LXString "Two\n\n" ]), Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "Foo\n\n" ]), Item 1 (LatexList [ LXString "Bar\n\n" ]) ]) ])))
         ]
+
+
+
+-- a =
+--     Ok
+--         (Environment "itemize"
+--             []
+--             (LatexList
+--                 [ Item 1 (LatexList [ LXString "One\n\n" ])
+--                 , Item 1 (LatexList [ LXString "Two\n\n" ])
+--                 , Environment "itemize"
+--                     []
+--                     (LatexList
+--                         [ Item 1 (LatexList [ LXString "Foo\n\n" ])
+--                         , Item 1 (LatexList [ LXString "Bar\n\n" ])
+--                         ]
+--                     )
+--                 ]
+--             )
+--         )

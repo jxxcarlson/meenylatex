@@ -13,6 +13,7 @@ finite-state machine.
 -}
 
 import MiniLatex.Parser
+import MiniLatex.Stack as Stack exposing (Stack)
 import Parser
 import Regex
 
@@ -34,7 +35,7 @@ type LineType
 
 
 type alias ParserRecord =
-    { currentParagraph : String, paragraphList : List String, state : ParserState }
+    { currentParagraph : String, paragraphList : List String, state : ParserState, stack : Stack String }
 
 
 getBeginArg : String -> String
@@ -89,63 +90,84 @@ lineType line =
         Text
 
 
-{-| nextState is the transition function for a finite-state
+{-| getNextState is the transition function for a finite-state
 machine which parses lines.
 -}
-nextState : String -> ParserState -> ParserState
-nextState line parserState =
+getNextState : String -> ( ParserState, Stack String ) -> ( ParserState, Stack String )
+getNextState line ( parserState, stack ) =
     case ( parserState, lineType line ) of
         ( Start, Blank ) ->
-            Start
+            ( Start, stack )
 
         ( Start, Text ) ->
-            InParagraph
+            ( InParagraph, stack )
 
         ( Start, BeginBlock arg ) ->
-            InBlock arg
+            ( InBlock arg, Stack.push arg stack )
 
         ( Start, Ignore ) ->
-            IgnoreLine
+            ( IgnoreLine, stack )
 
         ( IgnoreLine, Blank ) ->
-            Start
+            ( Start, stack )
 
         ( IgnoreLine, Text ) ->
-            InParagraph
+            ( InParagraph, stack )
 
         ( IgnoreLine, BeginBlock arg ) ->
-            InBlock arg
+            ( InBlock arg, Stack.push arg stack )
 
         ( InBlock arg, Blank ) ->
-            InBlock arg
+            ( InBlock arg, stack )
 
         ( InBlock arg, Text ) ->
-            InBlock arg
+            ( InBlock arg, stack )
 
         ( InBlock arg, BeginBlock arg2 ) ->
-            InBlock arg
+            ( InBlock arg, Stack.push arg2 stack )
 
         ( InBlock arg1, EndBlock arg2 ) ->
-            if arg1 == arg2 then
-                Start
+            let
+                ( nextStack, line_ ) =
+                    -- Debug.log "POP"
+                    ( Stack.pop stack, line )
 
-            else
-                InBlock arg1
+                -- _ =
+                --    Debug.log "LINE" line
+            in
+            case Stack.top nextStack of
+                Nothing ->
+                    -- ( InBlock arg1, nextStack )
+                    -- Debug.log "NOTHING"
+                    ( Start, nextStack )
+
+                Just arg ->
+                    -- Debug.log "JUST ARG"
+                    ( InBlock arg, nextStack )
 
         ( InParagraph, Text ) ->
-            InParagraph
+            ( InParagraph, stack )
 
         ( InParagraph, BeginBlock str ) ->
-            InParagraph
+            ( InParagraph, Stack.push str stack )
 
         ( InParagraph, EndBlock arg ) ->
-            InParagraph
+            ( Error, stack )
 
+        -- let
+        --     nextStack =
+        --         Stack.pop stack
+        -- in
+        -- case Stack.top nextStack of
+        --     Nothing ->
+        --         ( Start, nextStack )
+        --     Just arg_ ->
+        --         ( InParagraph, nextStack )
         ( InParagraph, Blank ) ->
-            Start
+            ( Start, stack )
 
         ( _, _ ) ->
-            Error
+            ( Error, stack )
 
 
 joinLines : String -> String -> String
@@ -176,46 +198,60 @@ fixLine line =
         line
 
 
+{-| Given an line and a parserRecord, compute a new parserRecord.
+The new parserRecord depends on the getNextState of the FSM. Note
+that the state of the machine is part of the parserRecord.
+-}
 updateParserRecord : String -> ParserRecord -> ParserRecord
 updateParserRecord line parserRecord =
     let
-        state2 =
-            nextState line parserRecord.state
+        ( nextState, nextStack ) =
+            -- Debug.log "S,S"
+            getNextState
+                line
+                ( parserRecord.state, parserRecord.stack )
+
+        -- _ =
+        --     Debug.log "line" line
     in
-    case state2 of
+    case nextState of
         Start ->
             { parserRecord
                 | currentParagraph = ""
                 , paragraphList = parserRecord.paragraphList ++ [ joinLines parserRecord.currentParagraph line ]
-                , state = state2
+                , state = nextState
+                , stack = nextStack
             }
 
         InParagraph ->
             { parserRecord
                 | currentParagraph = joinLines parserRecord.currentParagraph line
-                , state = state2
+                , state = nextState
+                , stack = nextStack
             }
 
         InBlock arg ->
             { parserRecord
                 | currentParagraph = joinLines parserRecord.currentParagraph (fixLine line)
-                , state = state2
+                , state = nextState
+                , stack = nextStack
             }
 
         IgnoreLine ->
             { parserRecord
-                | state = state2
+                | state = nextState
+                , stack = nextStack
             }
 
         Error ->
-            parserRecord
+            { parserRecord | stack = nextStack }
 
 
 logicalParagraphParse : String -> ParserRecord
 logicalParagraphParse text =
     (text ++ "\n")
         |> String.split "\n"
-        |> List.foldl updateParserRecord { currentParagraph = "", paragraphList = [], state = Start }
+        |> List.foldl updateParserRecord { currentParagraph = "", paragraphList = [], state = Start, stack = Stack.empty }
 
 
 {-| logicalParagraphify text: split text into logical

@@ -4,6 +4,7 @@ module ParserTest exposing (suite)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
+import MiniLatex.Paragraph exposing (logicalParagraphify)
 import MiniLatex.Parser exposing (..)
 import Parser exposing (Problem(..), run)
 import Test exposing (..)
@@ -97,4 +98,36 @@ suite =
             "(20) verbatim"
             (run latexList "\\begin{verbatim}\nTest\n\nTest\n\\end{verbatim}")
             (Ok (LatexList [ Environment "verbatim" [] (LXString "\nTest\n\nTest\n") ]))
+        , doTest
+            "(21) nested list"
+            (run latexExpression "\\begin{itemize}\n\n\\item One\n\n\\item Two\n\n\\begin{itemize}\n\n\\item Foo\n\n\\item Bar\n\n\\end{itemize}\n\n\\end{itemize}")
+            (Ok (Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "One\n\n" ]), Item 1 (LatexList [ LXString "Two\n\n" ]), Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "Foo\n\n" ]), Item 1 (LatexList [ LXString "Bar\n\n" ]) ]) ])))
+        , doTest
+            "(22) simple nested list"
+            (logicalParagraphify "abc\n\n\\begin{a}\nxyz\n\\begin{a}\nHHH\n\\end{a}\n\n\\end{a}\n\nhohoho" |> List.map (run latexExpression))
+            [ Ok (LXString "abc\n\n"), Ok (Environment "a" [] (LatexList [ LXString "xyz\n", Environment "a" [] (LatexList [ LXString "HHH\n" ]) ])), Ok (LXString "hohoho\n\n") ]
+        , doTest
+            "(23) another nested list"
+            (run latexExpression "\\begin{itemize}\n\\item One\n\\item Two\n\\begin{itemize}\n\\item Foo\n\\end{itemize}\n\\end{itemize}\n")
+            (Ok (Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "One\n" ]), Item 1 (LatexList [ LXString "Two\n" ]), Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "Foo\n" ]) ]) ])))
         ]
+
+
+
+-- a =
+--     Ok
+--         (Environment "itemize"
+--             []
+--             (LatexList
+--                 [ Item 1 (LatexList [ LXString "One\n\n" ])
+--                 , Item 1 (LatexList [ LXString "Two\n\n" ])
+--                 , Environment "itemize"
+--                     []
+--                     (LatexList
+--                         [ Item 1 (LatexList [ LXString "Foo\n\n" ])
+--                         , Item 1 (LatexList [ LXString "Bar\n\n" ])
+--                         ]
+--                     )
+--                 ]
+--             )
+--         )

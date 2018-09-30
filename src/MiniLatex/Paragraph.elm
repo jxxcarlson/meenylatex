@@ -129,13 +129,20 @@ getNextState line ( parserState, stack ) =
         ( InBlock arg1, EndBlock arg2 ) ->
             let
                 nextStack =
+                    --  Debug.log "POP"
                     Stack.pop stack
+
+                -- _ =
+                --    Debug.log "LINE" line
             in
             case Stack.top nextStack of
                 Nothing ->
-                    ( InBlock arg1, nextStack )
+                    -- ( InBlock arg1, nextStack )
+                    -- Debug.log "NOTHING"
+                    ( Start, nextStack )
 
                 Just arg ->
+                    -- Debug.log "JUST ARG"
                     ( InBlock arg, nextStack )
 
         ( InParagraph, Text ) ->
@@ -145,17 +152,17 @@ getNextState line ( parserState, stack ) =
             ( InParagraph, Stack.push str stack )
 
         ( InParagraph, EndBlock arg ) ->
-            let
-                nextStack =
-                    Stack.pop stack
-            in
-            case Stack.top nextStack of
-                Nothing ->
-                    ( Start, nextStack )
+            ( Error, stack )
 
-                Just arg_ ->
-                    ( InParagraph, nextStack )
-
+        -- let
+        --     nextStack =
+        --         Stack.pop stack
+        -- in
+        -- case Stack.top nextStack of
+        --     Nothing ->
+        --         ( Start, nextStack )
+        --     Just arg_ ->
+        --         ( InParagraph, nextStack )
         ( InParagraph, Blank ) ->
             ( Start, stack )
 
@@ -199,7 +206,11 @@ updateParserRecord : String -> ParserRecord -> ParserRecord
 updateParserRecord line parserRecord =
     let
         ( nextState, nextStack ) =
+            --  Debug.log "(State, Stack)"
             getNextState line ( parserRecord.state, parserRecord.stack )
+
+        -- _ =
+        --     Debug.log "line" line
     in
     case nextState of
         Start ->

@@ -453,7 +453,7 @@ itemEnvironmentBody endWoord envType =
     ---  inContext "itemEnvironmentBody" <|
     succeed identity
         |. ws
-        |= itemList item
+        |= itemList (oneOf [ item, lazy (\_ -> environment) ])
         |. ws
         |. symbol endWoord
         |. ws

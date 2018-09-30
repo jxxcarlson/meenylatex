@@ -1,8 +1,7 @@
-module MiniLatex.Accumulator
-    exposing
-        ( parseParagraphs
-        , renderParagraphs
-        )
+module MiniLatex.Accumulator exposing
+    ( parseParagraphs
+    , renderParagraphs
+    )
 
 import Dict
 import MiniLatex.LatexState
@@ -20,6 +19,7 @@ import MiniLatex.LatexState
 import MiniLatex.Parser as Parser exposing (LatexExpression(..), macro, parse)
 import MiniLatex.Render2 as Render exposing (renderLatexList)
 import MiniLatex.StateReducerHelpers as SRH
+
 
 
 {- Types -}
@@ -72,8 +72,8 @@ type alias LatexInfo =
 --         |> accumulator Parser.parse renderParagraph latexStateReducer latexState
 --
 --
--- renderParagraph : List LatexExpression -> LatexState -> String
--- renderParagraph parsedParagraph latexState =
+-- renderParagraphs : List LatexExpression -> LatexState -> String
+-- renderParagraphs parsedParagraph latexState =
 --     renderLatexList latexState parsedParagraph
 --         |> \paragraph -> "<p>" ++ paragraph ++ "</p>"
 
@@ -98,7 +98,7 @@ renderParagraphs : LatexState -> List (List LatexExpression) -> ( List String, L
 -}
 renderParagraphs : (LatexState -> List LatexExpression -> a) -> Accumulator LatexState (List LatexExpression) a
 renderParagraphs renderer latexState paragraphs =
-    (renderAccumulator renderer) latexState paragraphs
+    renderAccumulator renderer latexState paragraphs
 
 
 
@@ -131,7 +131,7 @@ parserReducerTransformer parse latexStateReducer_ input acc =
         newState =
             latexStateReducer_ parsedInput state
     in
-        ( outputList ++ [ parsedInput ], newState )
+    ( outputList ++ [ parsedInput ], newState )
 
 
 renderAccumulatorReducer : (LatexState -> List LatexExpression -> a) -> Reducer (List LatexExpression) ( List a, LatexState )
@@ -159,7 +159,7 @@ renderTransformer render latexStateReducer_ input acc =
         renderedInput =
             render newState input
     in
-        ( outputList ++ [ renderedInput ], newState )
+    ( outputList ++ [ renderedInput ], newState )
 
 
 info : LatexExpression -> LatexInfo
@@ -230,7 +230,7 @@ latexStateReducer parsedParagraph latexState =
         he =
             { typ = "macro", name = "setcounter", value = [ LatexList [ LXString "section" ], LatexList [ LXString "7" ] ] }
     in
-        latexStateReducerDispatcher ( headElement.typ, headElement.name ) headElement latexState
+    latexStateReducerDispatcher ( headElement.typ, headElement.name ) headElement latexState
 
 
 

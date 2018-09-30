@@ -1,5 +1,6 @@
 module MiniLatex.Accumulator exposing
     ( parseParagraphs
+    , parserReducerTransformer
     , renderParagraphs
     )
 
@@ -32,19 +33,34 @@ type alias Accumulator state a b =
     state -> List a -> ( List b, state )
 
 
+{-| A reducer (a -> b -> b) is used by foldl : (a -> b -> b) -> b -> List a -> b
+to produce a new b from an initial b and a list of a's .
+-}
 type alias Reducer a b =
     a -> b -> b
 
 
+{-| A ParserReducer is used to produce a new LatexState from an initial LatexState
+given a list of lists of LatexExpressions.
+-}
 type alias ParserReducer =
     Reducer (List LatexExpression) LatexState
 
 
+{-| A RenderReducer is used to produce a new (List String, LatexState)
+from an initial (List String, LatexState and a list of lists of LatexExpressions
+-}
 type alias RenderReducer =
     Reducer (List LatexExpression) ( List String, LatexState )
 
 
 {-| Transform a reducer using (a -> b)
+
+Start with a Reducer that transforms c using
+a list of b's . Make a new Reducer that
+transforms values of type (List b, c) using a list
+of a's
+
 -}
 type alias ParserReducerTransformer a b c =
     (a -> b)
@@ -87,7 +103,13 @@ parseParagraphs : LatexState -> List String -> ( List (List LatexExpression), La
 -}
 parseParagraphs : Accumulator LatexState String (List LatexExpression)
 parseParagraphs latexState paragraphs =
-    parseAccumulator latexState paragraphs
+    paragraphs
+        |> List.foldl parserAccumulatorReducer ( [], latexState )
+
+
+parserAccumulatorReducer : Reducer String ( List (List LatexExpression), LatexState )
+parserAccumulatorReducer =
+    parserReducerTransformer Parser.parse latexStateReducer
 
 
 {-| renderParagraphs: take a list of (List LatexExpressions)
@@ -98,23 +120,17 @@ renderParagraphs : LatexState -> List (List LatexExpression) -> ( List String, L
 -}
 renderParagraphs : (LatexState -> List LatexExpression -> a) -> Accumulator LatexState (List LatexExpression) a
 renderParagraphs renderer latexState paragraphs =
-    renderAccumulator renderer latexState paragraphs
+    paragraphs
+        |> List.foldl (renderAccumulatorReducer renderer) ( [], latexState )
+
+
+renderAccumulatorReducer : (LatexState -> List LatexExpression -> a) -> Reducer (List LatexExpression) ( List a, LatexState )
+renderAccumulatorReducer renderer =
+    renderTransformer renderer latexStateReducer
 
 
 
 {- ACCUMULATORS AND TRANSFORMERS -}
--- parseAccumulator : LatexState -> List String -> ( List (List LatexExpression), LatexState )
-
-
-parseAccumulator : Accumulator LatexState String (List LatexExpression)
-parseAccumulator latexState inputList =
-    inputList
-        |> List.foldl parserAccumulatorReducer ( [], latexState )
-
-
-parserAccumulatorReducer : Reducer String ( List (List LatexExpression), LatexState )
-parserAccumulatorReducer =
-    parserReducerTransformer Parser.parse latexStateReducer
 
 
 {-| parserReducerTransformer parse latexStateReducer is a Reducer input acc
@@ -132,17 +148,6 @@ parserReducerTransformer parse latexStateReducer_ input acc =
             latexStateReducer_ parsedInput state
     in
     ( outputList ++ [ parsedInput ], newState )
-
-
-renderAccumulatorReducer : (LatexState -> List LatexExpression -> a) -> Reducer (List LatexExpression) ( List a, LatexState )
-renderAccumulatorReducer renderer =
-    renderTransformer renderer latexStateReducer
-
-
-renderAccumulator : (LatexState -> List LatexExpression -> a) -> Accumulator LatexState (List LatexExpression) a
-renderAccumulator renderer latexState inputList =
-    inputList
-        |> List.foldl (renderAccumulatorReducer renderer) ( [], latexState )
 
 
 {-| renderTransformer render latexStateReducer is a Reducer input acc
@@ -218,6 +223,9 @@ latexStateReducerDispatcher ( typ_, name ) =
             \latexInfo latexState -> latexState
 
 
+{-| Use a fold and a latexStateReducer to transform
+a LatexState using a list of lists of LatexExpressions.
+-}
 latexStateReducer : Reducer (List LatexExpression) LatexState
 latexStateReducer parsedParagraph latexState =
     let

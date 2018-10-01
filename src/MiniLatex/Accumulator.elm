@@ -1,6 +1,5 @@
 module MiniLatex.Accumulator exposing
     ( parseParagraphs
-    , parserReducerTransformer
     , renderParagraphs
     )
 
@@ -33,65 +32,8 @@ type alias Accumulator state a b =
     state -> List a -> ( List b, state )
 
 
-{-| A reducer (a -> b -> b) is used by foldl : (a -> b -> b) -> b -> List a -> b
-to produce a new b from an initial b and a list of a's .
--}
-type alias Reducer a b =
-    a -> b -> b
-
-
-{-| A ParserReducer is used to produce a new LatexState from an initial LatexState
-given a list of lists of LatexExpressions.
--}
-type alias ParserReducer =
-    Reducer (List LatexExpression) LatexState
-
-
-{-| A RenderReducer is used to produce a new (List String, LatexState)
-from an initial (List String, LatexState and a list of lists of LatexExpressions
--}
-type alias RenderReducer =
-    Reducer (List LatexExpression) ( List String, LatexState )
-
-
-{-| Transform a reducer using (a -> b)
-
-Start with a Reducer that transforms c using
-a list of b's . Make a new Reducer that
-transforms values of type (List b, c) using a list
-of a's
-
--}
-type alias ParserReducerTransformer a b c =
-    (a -> b)
-    -> Reducer b c
-    -> Reducer a ( List b, c )
-
-
-{-| Transform a reducer using (a -> b -> c)
--}
-type alias RenderReducerTransformer a b c =
-    (a -> b -> c)
-    -> Reducer b a
-    -> Reducer b ( List c, a )
-
-
 type alias LatexInfo =
     { typ : String, name : String, options : List LatexExpression, value : List LatexExpression }
-
-
-
-{- EXPORTED FUNCTIONS -}
--- transformParagraphs : LatexState -> List String -> ( List String, LatexState )
--- transformParagraphs latexState paragraphs =
---     paragraphs
---         |> accumulator Parser.parse renderParagraph latexStateReducer latexState
---
---
--- renderParagraphs : List LatexExpression -> LatexState -> String
--- renderParagraphs parsedParagraph latexState =
---     renderLatexList latexState parsedParagraph
---         |> \paragraph -> "<p>" ++ paragraph ++ "</p>"
 
 
 {-| parseParagraphs: Using a given LatexState, take a list of strings,
@@ -104,12 +46,22 @@ parseParagraphs : LatexState -> List String -> ( List (List LatexExpression), La
 parseParagraphs : Accumulator LatexState String (List LatexExpression)
 parseParagraphs latexState paragraphs =
     paragraphs
-        |> List.foldl parserAccumulatorReducer ( [], latexState )
+        |> List.foldl parserReducer ( [], latexState )
 
 
-parserAccumulatorReducer : Reducer String ( List (List LatexExpression), LatexState )
-parserAccumulatorReducer =
-    parserReducerTransformer Parser.parse latexStateReducer
+parserReducer : String -> ( List (List LatexExpression), LatexState ) -> ( List (List LatexExpression), LatexState )
+parserReducer inputList latexState =
+    let
+        ( outputList, state ) =
+            latexState
+
+        parsedInput =
+            Parser.parse inputList
+
+        newState =
+            latexStateReducer parsedInput state
+    in
+    ( outputList ++ [ parsedInput ], newState )
 
 
 {-| renderParagraphs: take a list of (List LatexExpressions)
@@ -121,48 +73,21 @@ renderParagraphs : LatexState -> List (List LatexExpression) -> ( List String, L
 renderParagraphs : (LatexState -> List LatexExpression -> a) -> Accumulator LatexState (List LatexExpression) a
 renderParagraphs renderer latexState paragraphs =
     paragraphs
-        |> List.foldl (renderAccumulatorReducer renderer) ( [], latexState )
+        |> List.foldl (renderReducer renderer) ( [], latexState )
 
 
-renderAccumulatorReducer : (LatexState -> List LatexExpression -> a) -> Reducer (List LatexExpression) ( List a, LatexState )
-renderAccumulatorReducer renderer =
-    renderTransformer renderer latexStateReducer
-
-
-
-{- ACCUMULATORS AND TRANSFORMERS -}
-
-
-{-| parserReducerTransformer parse latexStateReducer is a Reducer input acc
--}
-parserReducerTransformer : ParserReducerTransformer String (List LatexExpression) LatexState
-parserReducerTransformer parse latexStateReducer_ input acc =
+renderReducer :
+    (LatexState -> List LatexExpression -> a)
+    -> List LatexExpression
+    -> ( List a, LatexState )
+    -> ( List a, LatexState )
+renderReducer renderer input ( outputList, state ) =
     let
-        ( outputList, state ) =
-            acc
-
-        parsedInput =
-            parse input
-
         newState =
-            latexStateReducer_ parsedInput state
-    in
-    ( outputList ++ [ parsedInput ], newState )
-
-
-{-| renderTransformer render latexStateReducer is a Reducer input acc
--}
-renderTransformer : RenderReducerTransformer LatexState (List LatexExpression) a
-renderTransformer render latexStateReducer_ input acc =
-    let
-        ( outputList, state ) =
-            acc
-
-        newState =
-            latexStateReducer_ input state
+            latexStateReducer input state
 
         renderedInput =
-            render newState input
+            renderer newState input
     in
     ( outputList ++ [ renderedInput ], newState )
 
@@ -184,7 +109,25 @@ info latexExpression =
 
 
 
-{- UPDATERS -}
+{- latexStateReducer -}
+
+
+{-| Use a fold and a latexStateReducer to transform
+a LatexState using a list of lists of LatexExpressions.
+-}
+latexStateReducer : List LatexExpression -> LatexState -> LatexState
+latexStateReducer parsedParagraph latexState =
+    let
+        headElement =
+            parsedParagraph
+                |> List.head
+                |> Maybe.map info
+                |> Maybe.withDefault (LatexInfo "null" "null" [] [])
+
+        he =
+            { typ = "macro", name = "setcounter", value = [ LatexList [ LXString "section" ], LatexList [ LXString "7" ] ] }
+    in
+    latexStateReducerDispatcher ( headElement.typ, headElement.name ) headElement latexState
 
 
 latexStateReducerDict : Dict.Dict ( String, String ) (LatexInfo -> LatexState -> LatexState)
@@ -221,29 +164,3 @@ latexStateReducerDispatcher ( typ_, name ) =
 
         Nothing ->
             \latexInfo latexState -> latexState
-
-
-{-| Use a fold and a latexStateReducer to transform
-a LatexState using a list of lists of LatexExpressions.
--}
-latexStateReducer : Reducer (List LatexExpression) LatexState
-latexStateReducer parsedParagraph latexState =
-    let
-        headElement =
-            parsedParagraph
-                |> List.head
-                |> Maybe.map info
-                |> Maybe.withDefault (LatexInfo "null" "null" [] [])
-
-        he =
-            { typ = "macro", name = "setcounter", value = [ LatexList [ LXString "section" ], LatexList [ LXString "7" ] ] }
-    in
-    latexStateReducerDispatcher ( headElement.typ, headElement.name ) headElement latexState
-
-
-
-{-
-
-   |> Maybe.withDefault (LatexInfo "null" "null" [ Macro "null" [] [] ])
-
--}

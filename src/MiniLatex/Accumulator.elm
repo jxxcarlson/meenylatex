@@ -28,6 +28,10 @@ type alias Accumulator state a b =
     state -> List a -> ( List b, state )
 
 
+type alias Reducer a b =
+    a -> b -> b
+
+
 {-| parseParagraphs: Using a given LatexState, take a list of strings,
 i.e., paragraphs, and compute a tuple consisting of the parsed
 paragraphs and ad upodated LatexState.
@@ -35,25 +39,28 @@ paragraphs and ad upodated LatexState.
 parseParagraphs : LatexState -> List String -> ( List (List LatexExpression), LatexState )
 
 -}
-parseParagraphs : Accumulator LatexState String (List LatexExpression)
+parseParagraphs :
+    LatexState
+    -> List String
+    -> ( List (List LatexExpression), LatexState )
 parseParagraphs latexState paragraphs =
     paragraphs
         |> List.foldl parserParagraphsReducer ( [], latexState )
 
 
-parserParagraphsReducer : String -> ( List (List LatexExpression), LatexState ) -> ( List (List LatexExpression), LatexState )
-parserParagraphsReducer inputList latexState =
+parserParagraphsReducer :
+    String
+    -> ( List (List LatexExpression), LatexState )
+    -> ( List (List LatexExpression), LatexState )
+parserParagraphsReducer str ( inputList, state ) =
     let
-        ( outputList, state ) =
-            latexState
-
         parsedInput =
-            Parser.parse inputList
+            Parser.parse str
 
         newState =
             latexStateReducer parsedInput state
     in
-    ( outputList ++ [ parsedInput ], newState )
+    ( inputList ++ [ parsedInput ], newState )
 
 
 {-| renderParagraphs: Using a given LatexState, take a list of (List LatexExpressions)
@@ -63,7 +70,11 @@ LatexSttate.
 renderParagraphs : LatexState -> List (List LatexExpression) -> ( List String, LatexState )
 
 -}
-renderParagraphs : (LatexState -> List LatexExpression -> a) -> Accumulator LatexState (List LatexExpression) a
+renderParagraphs :
+    (LatexState -> List LatexExpression -> a)
+    -> LatexState
+    -> List (List LatexExpression)
+    -> ( List a, LatexState )
 renderParagraphs renderer latexState paragraphs =
     paragraphs
         |> List.foldl (renderParagraphsReducer renderer) ( [], latexState )

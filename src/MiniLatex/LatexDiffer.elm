@@ -4,8 +4,8 @@ import MiniLatex.Accumulator as Accumulator
 import MiniLatex.Differ as Differ exposing (EditRecord)
 import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
 import MiniLatex.Paragraph as Paragraph
-import MiniLatex.Render2 as Render exposing (render)
 import MiniLatex.Parser exposing (LatexExpression)
+import MiniLatex.Render2 as Render exposing (render)
 
 
 createEditRecord : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
@@ -28,12 +28,12 @@ createEditRecord renderer latexState text =
 
         ( renderedParagraphs, _ ) =
             latexExpressionList
-                |> (Accumulator.renderParagraphs renderer) latexState2
+                |> Accumulator.renderParagraphs renderer latexState2
 
         idList =
             makeIdList paragraphs
     in
-        EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
+    EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
 
 
 makeIdList : List String -> List String
@@ -41,15 +41,27 @@ makeIdList paragraphs =
     List.range 1 (List.length paragraphs) |> List.map (Differ.prefixer 0)
 
 
-update_ : Int -> (LatexState -> String -> a) -> EditRecord a -> String -> EditRecord a
+update_ :
+    Int
+    -> (LatexState -> String -> a)
+    -> EditRecord a
+    -> String
+    -> EditRecord a
 update_ seed renderer editorRecord text =
     text
         |> Differ.update seed (renderer editorRecord.latexState) editorRecord
 
 
-update : Int -> (LatexState -> List LatexExpression -> a) -> (LatexState -> String -> a) -> EditRecord a -> String -> EditRecord a
+update :
+    Int
+    -> (LatexState -> List LatexExpression -> a)
+    -> (LatexState -> String -> a)
+    -> EditRecord a
+    -> String
+    -> EditRecord a
 update seed renderLatexExpression renderString editRecord content =
     if Differ.isEmpty editRecord then
-        (createEditRecord renderLatexExpression) emptyLatexState content
+        createEditRecord renderLatexExpression emptyLatexState content
+
     else
         update_ seed renderString editRecord content

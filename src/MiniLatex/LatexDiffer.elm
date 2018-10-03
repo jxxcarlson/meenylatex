@@ -15,9 +15,9 @@ createEditRecord renderer latexState text =
             text
                 |> Paragraph.logicalParagraphify
 
-        ( latexExpressionList, latexState1 ) =
+        ( latexState1, latexExpressionList ) =
             paragraphs
-                |> Accumulator.parseParagraphs emptyLatexState
+                |> Accumulator.parse emptyLatexState
 
         latexState2 =
             { emptyLatexState
@@ -26,9 +26,9 @@ createEditRecord renderer latexState text =
                 , dictionary = latexState1.dictionary
             }
 
-        ( renderedParagraphs, _ ) =
+        ( _, renderedParagraphs ) =
             latexExpressionList
-                |> Accumulator.renderParagraphs renderer latexState2
+                |> Accumulator.render renderer latexState2
 
         idList =
             makeIdList paragraphs

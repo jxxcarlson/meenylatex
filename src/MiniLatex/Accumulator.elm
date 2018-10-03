@@ -1,6 +1,6 @@
 module MiniLatex.Accumulator exposing
-    ( parseParagraphs
-    , renderParagraphs
+    ( parse
+    , render
     )
 
 import Dict
@@ -16,7 +16,7 @@ import MiniLatex.LatexState
         , setDictionaryItem
         , updateCounter
         )
-import MiniLatex.Parser as Parser exposing (LatexExpression(..), macro, parse)
+import MiniLatex.Parser as Parser exposing (LatexExpression(..), macro)
 import MiniLatex.Render2 as Render exposing (renderLatexList)
 import MiniLatex.StateReducerHelpers as SRH
 
@@ -25,34 +25,34 @@ import MiniLatex.StateReducerHelpers as SRH
 produce a list of outputs of type b and a new state
 -}
 type alias Accumulator state a b =
-    state -> List a -> ( List b, state )
+    state -> List a -> ( state, List b )
 
 
 type alias Reducer a b =
     a -> b -> b
 
 
-{-| parseParagraphs: Using a given LatexState, take a list of strings,
+{-| parse: Using a given LatexState, take a list of strings,
 i.e., paragraphs, and compute a tuple consisting of the parsed
 paragraphs and ad upodated LatexState.
 
-parseParagraphs : LatexState -> List String -> ( List (List LatexExpression), LatexState )
+parse : LatexState -> List String -> ( List (List LatexExpression), LatexState )
 
 -}
-parseParagraphs :
+parse :
     LatexState
     -> List String
-    -> ( List (List LatexExpression), LatexState )
-parseParagraphs latexState paragraphs =
+    -> ( LatexState, List (List LatexExpression) )
+parse latexState paragraphs =
     paragraphs
-        |> List.foldl parserParagraphsReducer ( [], latexState )
+        |> List.foldl parseReducer ( latexState, [] )
 
 
-parserParagraphsReducer :
+parseReducer :
     String
-    -> ( List (List LatexExpression), LatexState )
-    -> ( List (List LatexExpression), LatexState )
-parserParagraphsReducer str ( inputList, state ) =
+    -> ( LatexState, List (List LatexExpression) )
+    -> ( LatexState, List (List LatexExpression) )
+parseReducer str ( state, inputList ) =
     let
         parsedInput =
             Parser.parse str
@@ -60,32 +60,32 @@ parserParagraphsReducer str ( inputList, state ) =
         newState =
             latexStateReducer parsedInput state
     in
-    ( inputList ++ [ parsedInput ], newState )
+    ( newState, inputList ++ [ parsedInput ] )
 
 
-{-| renderParagraphs: Using a given LatexState, take a list of (List LatexExpressions)
+{-| render: Using a given LatexState, take a list of (List LatexExpressions)
 and compute a tupe consisting of a new list of (List LatexExpressins) and an updated
 LatexSttate.
 
-renderParagraphs : LatexState -> List (List LatexExpression) -> ( List String, LatexState )
+render : LatexState -> List (List LatexExpression) -> ( List String, LatexState )
 
 -}
-renderParagraphs :
+render :
     (LatexState -> List LatexExpression -> a)
     -> LatexState
     -> List (List LatexExpression)
-    -> ( List a, LatexState )
-renderParagraphs renderer latexState paragraphs =
+    -> ( LatexState, List a )
+render renderer latexState paragraphs =
     paragraphs
-        |> List.foldl (renderParagraphsReducer renderer) ( [], latexState )
+        |> List.foldl (renderReducer renderer) ( latexState, [] )
 
 
-renderParagraphsReducer :
+renderReducer :
     (LatexState -> List LatexExpression -> a)
     -> List LatexExpression
-    -> ( List a, LatexState )
-    -> ( List a, LatexState )
-renderParagraphsReducer renderer input ( outputList, state ) =
+    -> ( LatexState, List a )
+    -> ( LatexState, List a )
+renderReducer renderer input ( state, outputList ) =
     let
         newState =
             latexStateReducer input state
@@ -93,7 +93,7 @@ renderParagraphsReducer renderer input ( outputList, state ) =
         renderedInput =
             renderer newState input
     in
-    ( outputList ++ [ renderedInput ], newState )
+    ( newState, outputList ++ [ renderedInput ] )
 
 
 {-| LatexState Reducer

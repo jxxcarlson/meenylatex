@@ -84,7 +84,7 @@ run reducer inputList =
 
 {-|
 
-`runMachine` opearates a `ListMachine`. Givcen an
+`runMachine` opearates a `ListMachine`. Given an
 output function of type `InternalState a -> b` and
 an input list of type `List a`, it computes a
 `List b`.

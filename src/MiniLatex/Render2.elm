@@ -211,7 +211,7 @@ addSpace internalState =
                 LXString (" " ++ str)
 
         ( InlineMath _, LXString str, _ ) ->
-            if List.member (firstChar str) [ ".", ",", "?", "!", ";", ":" ] then
+            if List.member (firstChar str) [ "-", ".", ",", "?", "!", ";", ":" ] then
                 LXString str
 
             else

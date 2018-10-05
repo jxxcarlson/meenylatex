@@ -104,7 +104,7 @@ latexStateReducer parsedParagraph latexState =
                 |> Maybe.map info
                 |> Maybe.withDefault (LatexInfo "null" "null" [] [])
     in
-    latexStateReducerDispatcher ( theInfo.typ, theInfo.name ) theInfo latexState
+    (latexStateReducerDispatcher  theInfo) theInfo latexState
 
 
 type alias LatexInfo =
@@ -127,9 +127,9 @@ info latexExpression =
             { typ = "null", name = "null", options = [], value = [] }
 
 
-latexStateReducerDispatcher : ( String, String ) -> (LatexInfo -> LatexState -> LatexState)
-latexStateReducerDispatcher ( typ_, name ) =
-    case Dict.get ( typ_, name ) latexStateReducerDict of
+latexStateReducerDispatcher : LatexInfo -> (LatexInfo -> LatexState -> LatexState)
+latexStateReducerDispatcher theInfo =
+    case Dict.get ( theInfo.typ, theInfo.name ) latexStateReducerDict of
         Just f ->
             f
 

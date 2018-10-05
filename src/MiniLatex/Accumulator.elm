@@ -98,16 +98,13 @@ renderReducer renderer input ( state, outputList ) =
 latexStateReducer : List LatexExpression -> LatexState -> LatexState
 latexStateReducer parsedParagraph latexState =
     let
-        headElement =
+        theInfo =
             parsedParagraph
                 |> List.head
                 |> Maybe.map info
                 |> Maybe.withDefault (LatexInfo "null" "null" [] [])
-
-        he =
-            { typ = "macro", name = "setcounter", value = [ LatexList [ LXString "section" ], LatexList [ LXString "7" ] ] }
     in
-    latexStateReducerDispatcher ( headElement.typ, headElement.name ) headElement latexState
+    latexStateReducerDispatcher ( theInfo.typ, theInfo.name ) theInfo latexState
 
 
 type alias LatexInfo =

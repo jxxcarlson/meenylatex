@@ -1,13 +1,4 @@
-module MiniLatex.Differ exposing
-        ( EditRecord
-        , createEditRecord
-        , diff
-        , emptyEditRecord
-        , emptyEditRecordHtmlMsg
-        , isEmpty
-        , prefixer
-        , update
-        )
+module MiniLatex.Differ exposing (EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, createRecord, diff, prefixer, update)
 
 {-| This module is used to speed up parsing-rendering by
 comparing the old and new lists of paragraphs, noting the changes,
@@ -16,13 +7,14 @@ then parsing and rendering the changed paragraphs.
 
 # API
 
-@docs EditRecord, emptyEditRecord, emptyEditRecordHtmlMsg, isEmpty, createEditRecord, diff, prefixer, update
+@docs EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, createRecord, diff, prefixer, update
 
 -}
 
+import Html exposing (Html)
 import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
 import MiniLatex.Paragraph as Paragraph
-import Html exposing (Html)
+
 
 
 {- TYPES -}
@@ -57,29 +49,28 @@ type alias EditRecord a =
     }
 
 
-{-| An empty EditRecord -- like the intefer 0 in another context.
+{-| An empty EditRecord -- like the integer 0 in another context.
 -}
-emptyEditRecord : EditRecord String
-emptyEditRecord =
-    (EditRecord) [] [] emptyLatexState [] Nothing Nothing
+emptyStringRecord : EditRecord String
+emptyStringRecord =
+    EditRecord [] [] emptyLatexState [] Nothing Nothing
 
 
 {-| An empty EditRecord -- like the integer 0 in another context. For
 renderers with `Html a` as target.
 -}
-emptyEditRecordHtmlMsg : EditRecord (Html msg)
-emptyEditRecordHtmlMsg =
-    (EditRecord) [] [] emptyLatexState [] Nothing Nothing
+emptyHtmlMsgRecord : EditRecord (Html msg)
+emptyHtmlMsgRecord =
+    EditRecord [] [] emptyLatexState [] Nothing Nothing
 
 
-
-{-| createEditRecord: Create an edit record by (1)
+{-| createRecord: Create an edit record by (1)
 breaking the text in to pargraphs, (2) applying
 the transformer to each string in the resulting
 list of strings.
 -}
-createEditRecord : (String -> a) -> String -> EditRecord a
-createEditRecord transformer text =
+createRecord : (String -> a) -> String -> EditRecord a
+createRecord transformer text =
     let
         paragraphs =
             Paragraph.logicalParagraphify text
@@ -93,7 +84,7 @@ createEditRecord transformer text =
         renderedParagraphs =
             List.map transformer paragraphs
     in
-        EditRecord paragraphs renderedParagraphs emptyLatexState idList Nothing Nothing
+    EditRecord paragraphs renderedParagraphs emptyLatexState idList Nothing Nothing
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -128,7 +119,7 @@ update seed transformer editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-        EditRecord newParagraphs newRenderedParagraphs emptyLatexState p.idList p.newIdsStart p.newIdsEnd
+    EditRecord newParagraphs newRenderedParagraphs emptyLatexState p.idList p.newIdsStart p.newIdsEnd
 
 
 {-| Let u and v be two lists of strings. Write them as
@@ -138,7 +129,7 @@ and b is the greatest common suffix. Return DiffRecord a b x y
 diff : List String -> List String -> DiffRecord
 diff u v =
     let
-        a = 
+        a =
             commonInitialSegment u v
 
         b_ =
@@ -159,18 +150,21 @@ diff u v =
         b =
             if la == List.length u then
                 []
+
             else
                 b_
     in
-        DiffRecord a b x y
+    DiffRecord a b x y
 
 
 commonInitialSegment : List String -> List String -> List String
 commonInitialSegment x y =
     if x == [] then
         []
+
     else if y == [] then
         []
+
     else
         let
             a =
@@ -179,10 +173,12 @@ commonInitialSegment x y =
             b =
                 List.take 1 y
         in
-            if a == b then
-                a ++ commonInitialSegment (List.drop 1 x) (List.drop 1 y)
-            else
-                []
+        if a == b then
+            a ++ commonInitialSegment (List.drop 1 x) (List.drop 1 y)
+
+        else
+            []
+
 
 
 -- commonTerminalSegment1 : List String -> List String -> List String
@@ -192,20 +188,26 @@ commonInitialSegment x y =
 
 commonTerminalSegment : List String -> List String -> List String
 commonTerminalSegment x y =
-  let 
-    cis = commonInitialSegment x y 
-  in 
-    commonTerminalSegmentAux cis x y 
+    let
+        cis =
+            commonInitialSegment x y
+    in
+    commonTerminalSegmentAux cis x y
 
 
-commonTerminalSegmentAux :  List String -> List String -> List String -> List String
+commonTerminalSegmentAux : List String -> List String -> List String -> List String
 commonTerminalSegmentAux cis x y =
-  let 
-    n = List.length cis 
-    xx = List.drop n x |> List.reverse
-    yy = List.drop n y |> List.reverse
-  in
-    (commonInitialSegment xx yy) |> List.reverse
+    let
+        n =
+            List.length cis
+
+        xx =
+            List.drop n x |> List.reverse
+
+        yy =
+            List.drop n y |> List.reverse
+    in
+    commonInitialSegment xx yy |> List.reverse
 
 
 dropLast : Int -> List a -> List a
@@ -265,7 +267,7 @@ differentialRender renderer diffRecord editRecord =
         middleSegmentRendered =
             List.map renderer diffRecord.middleSegmentInTarget
     in
-        initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
+    initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
 
 
 differentialIdList : Int -> DiffRecord -> EditRecord a -> IdListPacket
@@ -298,10 +300,11 @@ differentialIdList seed diffRecord editRecord =
         ( newIdsStart, newIdsEnd ) =
             if nt == 0 then
                 ( Nothing, Nothing )
+
             else
                 ( Just ii, Just (ii + nt - 1) )
     in
-        { idList = idList
-        , newIdsStart = newIdsStart
-        , newIdsEnd = newIdsEnd
-        }
+    { idList = idList
+    , newIdsStart = newIdsStart
+    , newIdsEnd = newIdsEnd
+    }

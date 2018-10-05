@@ -1,19 +1,11 @@
-module MiniLatex.MiniLatex
-    exposing
-        ( emptyEditRecord
-        , initializeEditRecord
-        , updateEditRecord
-        , getRenderedText
-        , parse
-        , render   
-        )
+module MiniLatex.MiniLatex exposing (render, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord)
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
 Most users will need only (1) the functions exposed in the `MiniLatex` module
-and (2) `EditRecord`, which is exposed in the `Differ` module. 
+and (2) `EditRecord`, which is exposed in the `Differ` module.
 
 See [MiniLatex Live](https://jxxcarlson.github.io/app/miniLatexLive/index.html)
-for a no-login demo of the MiniLatex technology.  [Source code](https://github.com/jxxcarlson/MiniLatexLive)
+for a no-login demo of the MiniLatex technology. [Source code](https://github.com/jxxcarlson/MiniLatexLive)
 
 See this [Hackernoon article](https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08)
 for an explanation of the theory behind the MiniLatex package.
@@ -21,7 +13,7 @@ for an explanation of the theory behind the MiniLatex package.
 
 # API
 
-@docs render, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyEditRecord
+@docs render, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord
 
 -}
 
@@ -30,11 +22,11 @@ import Html.Attributes as HA
 import Html.Keyed as Keyed
 import MiniLatex.Differ as Differ exposing (EditRecord)
 import MiniLatex.LatexDiffer as MiniLatexDiffer
-import MiniLatex.LatexState exposing (emptyLatexState)
+import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
 import MiniLatex.Paragraph as Paragraph
 import MiniLatex.Parser as MiniLatexParser exposing (LatexExpression)
-import MiniLatex.LatexState exposing (LatexState)
 import MiniLatex.Render2 as Render
+
 
 
 -- exposing (render, renderString)
@@ -48,9 +40,9 @@ to render purely mathematical text. The `macros` string
 may be empty. Thus, if
 
 macros = ""
-source = "\italic{Test:}\n\n$$a^2 + b^2 = c^2$$\n\n\strong{Q.E.D.}"
+source = "\\italic{Test:}\\n\\n$$a^2 + b^2 = c^2$$\\n\\n\\strong{Q.E.D.}"
 
-then `render macros source` yields an HTML msg value 
+then `render macros source` yields an HTML msg value
 representing the HTML text
 
     <p>
@@ -66,21 +58,22 @@ representing the HTML text
 -}
 render : String -> String -> Html msg
 render macroDefinitions text =
-    MiniLatexDiffer.createEditRecord Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
-        |> getRenderedText 
+    MiniLatexDiffer.createRecord Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
+        |> getRenderedText
         |> Html.div []
 
-prependMacros macros_ sourceText = 
-  "$$\n" ++ (String.trim macros_) ++ "\n$$\n\n" ++ sourceText 
+
+prependMacros macros_ sourceText =
+    "$$\n" ++ String.trim macros_ ++ "\n$$\n\n" ++ sourceText
 
 
 {-| Parse the given text and return an AST represeting it.
 
-Example: 
+Example:
 
 > import MiniLatex.MiniLatex exposing(parse)
-> parse  "This \\strong{is a test!}"
-[[LXString ("This "),Macro "strong" [] [LatexList [LXString ("is  a  test!")]]]]
+> parse "This \\strong{is a test!}"
+> [[LXString ("This "),Macro "strong" [][LatexList [LXString ("is  a  test!")]]][LXString ("This "),Macro "strong" [] [LatexList [LXString ("is  a  test!")]]]][[LXString ("This "),Macro "strong" [] [LatexList [LXString ("is  a  test!")]]]]
 
 -}
 parse : String -> List (List LatexExpression)
@@ -96,18 +89,19 @@ of the editRecord.
 -}
 getRenderedText : EditRecord (Html msg) -> List (Html msg)
 getRenderedText editRecord =
-  let 
-    paragraphs = editRecord.renderedParagraphs
+    let
+        paragraphs =
+            editRecord.renderedParagraphs
 
-    ids = editRecord.idList
-    
-  in 
-    List.map2 (\para id -> Keyed.node "p" [HA.id id, HA.style "margin-bottom" "10px"]  [(id,para)]) paragraphs ids 
-     
+        ids =
+            editRecord.idList
+    in
+    List.map2 (\para id -> Keyed.node "p" [ HA.id id, HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
+
 
 {-| Create an EditRecord from a string of MiniLaTeX text.
 The `seed` is used for creating id's for rendered paragraphs
-in order to help Elm's runtime optimize diffing for rendering 
+in order to help Elm's runtime optimize diffing for rendering
 text.
 
 > editRecord = MiniLatex.initialize source
@@ -140,7 +134,7 @@ text.
 -}
 initializeEditRecord : Int -> String -> EditRecord (Html msg)
 initializeEditRecord seed text =
-    MiniLatexDiffer.update seed Render.renderLatexList Render.renderString Differ.emptyEditRecordHtmlMsg text
+    MiniLatexDiffer.update seed Render.renderLatexList Render.renderString Differ.emptyHtmlMsgRecord text
 
 
 {-| Return an empty EditRecord
@@ -163,9 +157,9 @@ initializeEditRecord seed text =
         }
 
 -}
-emptyEditRecord : EditRecord (Html msg)
-emptyEditRecord =
-    Differ.emptyEditRecordHtmlMsg
+emptyStringRecord : EditRecord (Html msg)
+emptyStringRecord =
+    Differ.emptyHtmlMsgRecord
 
 
 {-| Update the given edit record with modified text.

@@ -1,4 +1,4 @@
-module MiniLatex.LatexDiffer exposing (createEditRecord, update)
+module MiniLatex.LatexDiffer exposing (createRecord, update)
 
 import MiniLatex.Accumulator as Accumulator
 import MiniLatex.Differ as Differ exposing (EditRecord)
@@ -8,8 +8,8 @@ import MiniLatex.Parser exposing (LatexExpression)
 import MiniLatex.Render2 as Render exposing (render)
 
 
-createEditRecord : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
-createEditRecord renderer latexState text =
+createRecord : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
+createRecord renderer latexState text =
     let
         paragraphs =
             text
@@ -61,7 +61,7 @@ update :
     -> EditRecord a
 update seed renderLatexExpression renderString editRecord content =
     if Differ.isEmpty editRecord then
-        createEditRecord renderLatexExpression emptyLatexState content
+        createRecord renderLatexExpression emptyLatexState content
 
     else
         update_ seed renderString editRecord content

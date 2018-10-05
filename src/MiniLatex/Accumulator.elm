@@ -1,4 +1,4 @@
-module MiniLatex.Accumulator exposing (parse, render)
+module MiniLatex.Accumulator exposing (parse, render, info)
 
 import Dict
 import MiniLatex.LatexState

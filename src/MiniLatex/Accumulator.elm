@@ -49,10 +49,10 @@ parseReducer :
     String
     -> ( LatexState, List (List LatexExpression) )
     -> ( LatexState, List (List LatexExpression) )
-parseReducer str ( state, inputList ) =
+parseReducer inputString ( state, inputList ) =
     let
         parsedInput =
-            Parser.parse str
+            Parser.parse inputString
 
         newState =
             latexStateReducer parsedInput state

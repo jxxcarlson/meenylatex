@@ -36,7 +36,7 @@ sumState internalState =
     a + b + c
 ```
 
-Given these definitins, one runs the machine like this:
+Given these definitions, one runs the machine like this:
 
 ```
 runMachine sumState [0,1,2,3,4]
@@ -61,7 +61,7 @@ state is initialized using `initialState`.
 -}
 type alias State a = {before: Maybe a, current: Maybe a, after: Maybe a, inputList: List a}
 
-type alias TotalState a b = {internalstate: State a, outputList: List b}
+type alias TotalState a b = {state: State a, outputList: List b}
 
 type alias Reducer a b = a -> TotalState a b -> TotalState a b
 
@@ -76,15 +76,15 @@ an input list of type `List a`, it computes a `List b`.
 runMachine : (State a -> b) -> List a -> List b 
 runMachine outputFunction inputList = 
   run (makeReducer outputFunction) inputList 
+  
 
- 
 run : Reducer a b -> List a -> List b
-run reducer inputList = 
+run reducer inputList =
   let
-    initialMachineState_ = initialMachineState inputList 
-    finalState = makeAccumulator reducer initialMachineState_ inputList
+    initialTotalState_ = initialTotalState inputList
+    finalTotalState = (makeAccumulator reducer) initialTotalState_ inputList
   in
-    List.reverse finalState.outputList  
+    List.reverse finalTotalState.outputList
 
 
 makeAccumulator : Reducer a b -> TotalState a b -> List a -> TotalState a b
@@ -95,9 +95,9 @@ makeAccumulator reducer initialMachineState_ inputList =
 
 -- INITIALIZERS
     
-initialMachineState : List a -> TotalState a b
-initialMachineState inputList = 
-  {internalstate =  initialState inputList, outputList = []}
+initialTotalState : List a -> TotalState a b
+initialTotalState inputList = 
+  {state =  initialState inputList, outputList = []}
   
 initialState : List a -> State a
 initialState inputList = 
@@ -108,7 +108,7 @@ initialState inputList =
    }
    
 
--- NEXT internalstate FUNCTION
+-- NEXT state FUNCTION
 
 nextState : State a -> State a
 nextState internalState_ = 
@@ -128,11 +128,11 @@ nextState internalState_ =
 makeReducer : (State a -> b) -> Reducer a b
 makeReducer computeOutput input machineState =
   let 
-    nextInputList = List.drop 1 machineState.internalstate.inputList  
-    nextInternalState_ = nextState machineState.internalstate
-    newOutput = computeOutput machineState.internalstate
+    nextInputList = List.drop 1 machineState.state.inputList  
+    nextInternalState_ = nextState machineState.state
+    newOutput = computeOutput machineState.state
     outputList = newOutput::machineState.outputList 
   in
-    {internalstate = nextInternalState_, outputList = outputList}
+    {state = nextInternalState_, outputList = outputList}
 
   

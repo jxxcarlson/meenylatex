@@ -1,5 +1,5 @@
  
-module MiniLatex.ListMachine exposing(runMachine, InternalState)  
+module MiniLatex.ListMachine exposing(runMachine, State)  
 
 {-| 
 
@@ -13,20 +13,20 @@ before the current one and after the current one.
 We model these as values of type `Maybe a`, since
 `Nothing` can occur, e.g., when the first element
 of the input list is being read.  To be more precise,
-the `InternalState` of the machine holds a record
+the `State` of the machine holds a record
 with fields `before`, `current`, and `after`.  The 
 new output element is a function of these three
 fields.
 
 `ListMachine` exposes one function, `runMachine`,
-and one type, `InternalState`.  To define a `ListMachine`,
+and one type, `State`.  To define a `ListMachine`,
 it is enough to define an "output function" of type
-`InternalState a -> b`.  In the example, below,
+`State a -> b`.  In the example, below,
 a ListMachine is defined with an output function that
 sends the interenal state to `before + current + after`:
 
 ```
-sumState : InternalState Int -> Int 
+sumState : State Int -> Int 
 sumState internalState = 
   let
     a = internalState.before  |> Maybe.withDefault 0 
@@ -42,7 +42,7 @@ Given these definitins, one runs the machine like this:
 runMachine sumState [0,1,2,3,4]
 ```
 
-@docs runMachine, InternalState
+@docs runMachine, State
 
 See [Making Functional Machines with Elm](https://medium.com/@jxxcarlson/making-functional-machines-with-elm-c07700bba13c)
 
@@ -55,54 +55,52 @@ See [Making Functional Machines with Elm](https://medium.com/@jxxcarlson/making-
 {-|
 
 A `ListMachine` computes outputs by looking at its internal state
-and applying the `nextInternalState` function. The internal 
-state is initialized using `initialInternalState`.
+and applying the `nextState` function. The internal 
+state is initialized using `initialState`.
 
 -}
-type alias InternalState a = {before: Maybe a, current: Maybe a, after: Maybe a, inputList: List a}
+type alias State a = {before: Maybe a, current: Maybe a, after: Maybe a, inputList: List a}
 
-type alias MachineState a b = {internalstate: InternalState a, outputList: List b}
+type alias TotalState a b = {internalstate: State a, outputList: List b}
 
-type alias Reducer a b = a -> MachineState a b -> MachineState a b
+type alias Reducer a b = a -> TotalState a b -> TotalState a b
 
 
 -- RUNNERS
 
-run_ : Reducer a b -> MachineState a b -> List a -> MachineState a b
-run_ reducer initialMachineState_ inputList = 
-  List.foldl reducer initialMachineState_ inputList
-  
+{-|
+`runMachine` operates a `ListMachine`. Given an
+output function of type `State a -> b` and
+an input list of type `List a`, it computes a `List b`.
+-} 
+runMachine : (State a -> b) -> List a -> List b 
+runMachine outputFunction inputList = 
+  run (makeReducer outputFunction) inputList 
+
  
 run : Reducer a b -> List a -> List b
 run reducer inputList = 
   let
     initialMachineState_ = initialMachineState inputList 
-    finalState = run_ reducer initialMachineState_ inputList
+    finalState = makeAccumulator reducer initialMachineState_ inputList
   in
     List.reverse finalState.outputList  
- 
 
-{-|
 
-`runMachine` opearates a `ListMachine`. Given an
-output function of type `InternalState a -> b` and
-an input list of type `List a`, it computes a
-`List b`.
-
--} 
-runMachine : (InternalState a -> b) -> List a -> List b 
-runMachine outputFunction inputList = 
-  run (makeReducer outputFunction) inputList 
+makeAccumulator : Reducer a b -> TotalState a b -> List a -> TotalState a b
+makeAccumulator reducer initialMachineState_ inputList = 
+  List.foldl reducer initialMachineState_ inputList
+  
 
 
 -- INITIALIZERS
     
-initialMachineState : List a -> MachineState a b
+initialMachineState : List a -> TotalState a b
 initialMachineState inputList = 
-  {internalstate =  initialInternalState inputList, outputList = []}
+  {internalstate =  initialState inputList, outputList = []}
   
-initialInternalState : List a -> InternalState a
-initialInternalState inputList = 
+initialState : List a -> State a
+initialState inputList = 
   {before = Nothing
    , current = List.head inputList 
    , after = List.head (List.drop 1 inputList)
@@ -112,8 +110,8 @@ initialInternalState inputList =
 
 -- NEXT internalstate FUNCTION
 
-nextInternalState : InternalState a -> InternalState a
-nextInternalState internalState_ = 
+nextState : State a -> State a
+nextState internalState_ = 
   let 
      nextInputList_ = List.drop 1 internalState_.inputList
   in
@@ -127,11 +125,11 @@ nextInternalState internalState_ =
 
 -- A REDUCER MAKER
 
-makeReducer : (InternalState a -> b) -> Reducer a b
+makeReducer : (State a -> b) -> Reducer a b
 makeReducer computeOutput input machineState =
   let 
     nextInputList = List.drop 1 machineState.internalstate.inputList  
-    nextInternalState_ = nextInternalState machineState.internalstate
+    nextInternalState_ = nextState machineState.internalstate
     newOutput = computeOutput machineState.internalstate
     outputList = newOutput::machineState.outputList 
   in

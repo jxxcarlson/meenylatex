@@ -190,7 +190,7 @@ displayMathText str =
 {- PROCESS SPACES BETWEEN ELEMENTS  V2 -}
 
 
-addSpace : ListMachine.InternalState LatexExpression -> LatexExpression
+addSpace : ListMachine.State LatexExpression -> LatexExpression
 addSpace internalState =
     let
         a =

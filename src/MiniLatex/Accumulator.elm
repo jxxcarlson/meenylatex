@@ -82,15 +82,15 @@ renderReducer :
     -> List LatexExpression
     -> ( LatexState, List a )
     -> ( LatexState, List a )
-renderReducer renderer input ( state, outputList ) =
+renderReducer renderer listLatexExpression ( state, inputList ) =
     let
         newState =
-            latexStateReducer input state
+            latexStateReducer listLatexExpression state
 
         renderedInput =
-            renderer newState input
+            renderer newState listLatexExpression
     in
-    ( newState, outputList ++ [ renderedInput ] )
+    ( newState, inputList ++ [ renderedInput ] )
 
 
 {-| LatexState Reducer
@@ -127,7 +127,7 @@ info latexExpression =
             { typ = "null", name = "null", options = [], value = [] }
 
 
-latexStateReducerDispatcher : LatexInfo -> (LatexInfo -> LatexState -> LatexState)
+latexStateReducerDispatcher : LatexInfo -> LatexInfo -> (LatexState -> LatexState)
 latexStateReducerDispatcher theInfo =
     case Dict.get ( theInfo.typ, theInfo.name ) latexStateReducerDict of
         Just f ->

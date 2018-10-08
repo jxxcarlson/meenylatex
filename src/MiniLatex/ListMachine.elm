@@ -75,20 +75,20 @@ an input list of type `List a`, it computes a `List b`.
 -} 
 runMachine : (State a -> b) -> List a -> List b 
 runMachine outputFunction inputList = 
-  run (makeReducer outputFunction) inputList 
+  run_ (makeReducer outputFunction) inputList 
   
 
-run : Reducer a b -> List a -> List b
-run reducer inputList =
+run_ : Reducer a b -> List a -> List b
+run_ reducer inputList =
   let
     initialTotalState_ = initialTotalState inputList
-    finalTotalState = (makeAccumulator reducer) initialTotalState_ inputList
+    finalTotalState = (makeMachine reducer) initialTotalState_ inputList
   in
     List.reverse finalTotalState.outputList
 
 
-makeAccumulator : Reducer a b -> TotalState a b -> List a -> TotalState a b
-makeAccumulator reducer initialMachineState_ inputList = 
+makeMachine : Reducer a b -> TotalState a b -> List a -> TotalState a b
+makeMachine reducer initialMachineState_ inputList = 
   List.foldl reducer initialMachineState_ inputList
   
 

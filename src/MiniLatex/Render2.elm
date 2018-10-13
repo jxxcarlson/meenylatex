@@ -250,7 +250,7 @@ renderLatexList latexState latexList =
 spacify : List LatexExpression -> List LatexExpression
 spacify latexList =
     latexList
-        |> ListMachine.runMachine addSpace
+        |> ListMachine.run addSpace
 
 
 

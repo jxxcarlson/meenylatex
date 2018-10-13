@@ -1,5 +1,5 @@
  
-module MiniLatex.ListMachine exposing(runMachine, State)  
+module MiniLatex.ListMachine exposing(run, State)  
 
 {-| 
 
@@ -18,7 +18,7 @@ with fields `before`, `current`, and `after`.  The
 new output element is a function of these three
 fields.
 
-`ListMachine` exposes one function, `runMachine`,
+`ListMachine` exposes one function, `run`,
 and one type, `State`.  To define a `ListMachine`,
 it is enough to define an "output function" of type
 `State a -> b`.  In the example, below,
@@ -39,10 +39,10 @@ sumState internalState =
 Given these definitions, one runs the machine like this:
 
 ```
-runMachine sumState [0,1,2,3,4]
+run sumState [0,1,2,3,4]
 ```
 
-@docs runMachine, State
+@docs run, State
 
 See [Making Functional Machines with Elm](https://medium.com/@jxxcarlson/making-functional-machines-with-elm-c07700bba13c)
 
@@ -69,12 +69,12 @@ type alias Reducer a b = a -> TotalState a b -> TotalState a b
 -- RUNNERS
 
 {-|
-`runMachine` operates a `ListMachine`. Given an
+`run` operates a `ListMachine`. Given an
 output function of type `State a -> b` and
 an input list of type `List a`, it computes a `List b`.
 -} 
-runMachine : (State a -> b) -> List a -> List b 
-runMachine outputFunction inputList = 
+run : (State a -> b) -> List a -> List b 
+run outputFunction inputList = 
   run_ (makeReducer outputFunction) inputList 
   
 

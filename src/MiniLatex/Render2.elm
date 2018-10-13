@@ -259,22 +259,17 @@ spacify latexList =
 
 renderMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
 renderMacro latexState name optArgs args =
-    macroRenderer name latexState optArgs args
-
-
-renderArg : Int -> LatexState -> List LatexExpression -> Html msg
-renderArg k latexState args =
-    render latexState (getElement k args)
-
-
-macroRenderer : String -> (LatexState -> List LatexExpression -> List LatexExpression -> Html msg)
-macroRenderer name latexState optArgs args =
     case Dict.get name renderMacroDict of
         Just f ->
             f latexState optArgs args
 
         Nothing ->
             reproduceMacro name latexState optArgs args
+
+
+renderArg : Int -> LatexState -> List LatexExpression -> Html msg
+renderArg k latexState args =
+    render latexState (getElement k args)
 
 
 reproduceMacro : String -> LatexState -> List LatexExpression -> List LatexExpression -> Html msg

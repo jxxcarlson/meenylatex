@@ -1510,9 +1510,9 @@ renderVerbatim latexState body =
         body2 =
             MiniLatex.Render.render latexState body
     in
-    Html.pre [ HA.style "margin-top" "-30px", HA.style "margin-bottom" "-7px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
+    Html.pre [ HA.style "margin-top" "-22px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 renderVerse : LatexState -> LatexExpression -> Html msg
 renderVerse latexState body =
-    Html.div [ HA.class "verse" ] [ Html.text (String.trim <| MiniLatex.Render.render latexState body) ]
+    Html.div [ HA.style "white-space" "pre-line" ] [ Html.text (String.trim <| MiniLatex.Render.render latexState body) ]

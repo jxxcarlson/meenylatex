@@ -140,6 +140,9 @@ render latexState latexExpression =
         LXString str ->
             str
 
+        NewCommand  commandName numberOfArgs commandBody ->
+          "newCommand: " ++ commandName
+
         LXError error ->
             List.map ErrorMessages.renderError error |> String.join "; "
 
@@ -476,7 +479,6 @@ renderMacroDict1 =
         , ( "maketitle", \x y z -> renderTitle x z )
         , ( "mdash", \x y z -> "&mdash;" )
         , ( "ndash", \x y z -> "&ndash;" )
-        , ( "newcommand", \x y z -> renderNewCommand x z )
         , ( "ref", \x y z -> renderRef x z )
         , ( "section", \x y z -> renderSection x z )
         , ( "section*", \x y z -> renderSectionStar x z )
@@ -718,17 +720,6 @@ renderItalic : LatexState -> List LatexExpression -> String
 renderItalic latexState args =
     " <span class=italic>" ++ renderArg 0 latexState args ++ "</span>"
 
-
-renderNewCommand : LatexState -> List LatexExpression -> String
-renderNewCommand latexState args =
-    let
-        command =
-            renderArg 0 latexState args
-
-        definition =
-            renderArg 1 latexState args
-    in
-        "\\newcommand{" ++ command ++ "}{" ++ definition ++ "}"
 
 
 renderRef : LatexState -> List LatexExpression -> String

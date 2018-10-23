@@ -41,8 +41,8 @@ type LatexExpression
     | Macro String (List LatexExpression) (List LatexExpression) -- Macro name optArgs args
     | Environment String (List LatexExpression) LatexExpression -- Environment name optArgs body
     | LatexList (List LatexExpression)
+    | NewCommand String Int LatexExpression
     | LXError (List DeadEnd)
-
 
 {-| Transform a string into a list of LatexExpressions
 -}
@@ -93,6 +93,7 @@ latexExpression =
         , displayMathDollar
         , displayMathBrackets
         , inlineMath ws
+        , newcommand 
         , macro ws
         , smacro
         , words
@@ -245,6 +246,17 @@ texComment =
 -}
 -- type alias Macro2 =
 --     String (List LatexExpression) (List LatexExpression)
+
+newcommand : Parser LatexExpression 
+newcommand = 
+  succeed NewCommand 
+    |. symbol "\\newcommand{"
+    |= macroName
+    |. symbol "}["
+    |= int 
+    |. symbol "]"
+    |= arg
+    |. ws 
 
 
 {-| Parse the macro keyword followed by

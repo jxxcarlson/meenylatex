@@ -137,6 +137,9 @@ render latexState latexExpression =
                 _ ->
                     Html.span [] [ Html.text str ]
 
+        NewCommand  commandName numberOfArgs commandBody ->
+          Html.p [] [Html.text <| "newCommand: " ++ commandName]
+
         LXError error ->
             Html.p [ HA.style "color" "red" ] [ Html.text <| String.join "\n---\n\n" (List.map errorReport error) ]
 
@@ -315,7 +318,6 @@ renderMacroDict =
         , ( "underscore", \x y z -> renderUnderscore x z )
         , ( "backslash", \x y z -> renderBackslash x z )
         , ( "texarg", \x y z -> renderTexArg x z )
-        , ( "newcommand", \x y z -> renderNewCommand x z )
         , ( "ref", \x y z -> renderRef x z )
         , ( "medskip", \x y z -> renderMedSkip x z )
         , ( "smallskip", \x y z -> renderSmallSkip x z )
@@ -783,17 +785,6 @@ renderTexArg : LatexState -> List LatexExpression -> Html msg
 renderTexArg latexState args =
     Html.span [] [ Html.text "{", renderArg 0 latexState args, Html.text "}" ]
 
-
-renderNewCommand : LatexState -> List LatexExpression -> Html msg
-renderNewCommand latexState args =
-    let
-        command =
-            MiniLatex.Render.renderArg 0 latexState args
-
-        definition =
-            MiniLatex.Render.renderArg 1 latexState args
-    in
-    Html.span [] [ Html.text <| "\\newcommand{" ++ command ++ "}{" ++ definition ++ "}" ]
 
 
 renderRef : LatexState -> List LatexExpression -> Html msg

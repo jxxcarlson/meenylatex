@@ -1,6 +1,5 @@
 module MiniLatex.Render2 exposing
     ( makeTableOfContents, render, renderLatexList, renderString
-    , spacify
     )
 
 {-| This module is for quickly preparing latex for export.

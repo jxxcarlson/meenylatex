@@ -1,8 +1,7 @@
 module MiniLatex.Parser exposing
     ( LatexExpression(..), macro, parse, defaultLatexList
     , latexList, endWord, envName, word
-    , tableRow
-    , blank, latexExpression, words
+    , latexExpression
     )
 
 {-| This module is for quickly preparing latex for export.
@@ -11,8 +10,7 @@ module MiniLatex.Parser exposing
 # API
 
 @docs LatexExpression, macro, parse, defaultLatexList
-@docs latexList, endWord, envName, word
-@docs tableRow
+@docs latexList, endWord, envName, word, latexExpression
 
 -}
 

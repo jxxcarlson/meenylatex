@@ -20,13 +20,13 @@ expandMacro_  macro macroDef =
             Comment str
 
         Macro name optArgs args ->
-            Macro name optArgs args
+            Macro name optArgs (List.map (expandMacro_ macro) args)
 
         SMacro name optArgs args le ->
-             SMacro name optArgs args le 
+             SMacro name optArgs (List.map (expandMacro_ macro) args) (expandMacro_ macro le) 
 
         Item level latexExpr ->
-            Item level latexExpr
+            Item level (expandMacro_ macro latexExpr)
 
         InlineMath str ->
             InlineMath str
@@ -35,7 +35,7 @@ expandMacro_  macro macroDef =
             DisplayMath str
 
         Environment name args body ->
-            Environment name args body
+            Environment name args (expandMacro_ macro body)
 
         LatexList latexList ->
             LatexList (List.map (expandMacro_ macro) latexList)

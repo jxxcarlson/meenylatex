@@ -5,20 +5,6 @@ import MiniLatex.LatexState exposing(emptyLatexState)
 import MiniLatex.Render 
 import Parser
 
-{-
-macroDef = NewCommand 
-  "hello" 
-  1 
-  (LatexList [
-      Macro "strong" [] [LatexList [LXString "Hello"]]
-    , LXString (",  #1  !")]
-  )
-  
-
-macro = Macro "hello" [] [LatexList [LXString "John"]]
-
--}
-
 
 expandMacro : LatexExpression -> LatexExpression -> LatexExpression
 expandMacro  macro macroDef = 

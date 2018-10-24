@@ -55,6 +55,9 @@ hasMath expr =
         LatexList list ->
             list |> List.foldr (\x acc -> hasMath x || acc) False
 
+        NewCommand _ _ _ ->
+          False
+          
         LXError _ ->
             False
 

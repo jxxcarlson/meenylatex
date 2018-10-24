@@ -64,6 +64,9 @@ render latexExpression =
         LXString str ->
             str
 
+        NewCommand _ _ _ ->
+           ""
+
         LXError error ->
             List.map ErrorMessages.renderError error |> String.join "; "
 

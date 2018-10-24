@@ -25,6 +25,15 @@ type alias LatexInfo =
     { typ : String, name : String, options : List LatexExpression, value : List LatexExpression }
 
 
+setMacroDefinition : LatexInfo -> LatexState -> LatexState
+setMacroDefinition info latexState =
+   let 
+     definition = List.head info.value |> Maybe.withDefault (LXString "no macro definition")
+   in
+     MiniLatex.LatexState.setMacroDefinition info.name (NewCommand info.name 0 definition) latexState 
+  
+
+
 setSectionCounters : LatexInfo -> LatexState -> LatexState
 setSectionCounters info latexState =
     let

@@ -38,6 +38,7 @@ import MiniLatex.Utility as Utility
 import Parser exposing (DeadEnd, Problem(..))
 import Regex
 import String
+import MiniLatex.Macro as Macro
 
 
 
@@ -138,7 +139,7 @@ render latexState latexExpression =
                     Html.span [] [ Html.text str ]
 
         NewCommand  commandName numberOfArgs commandBody ->
-          Html.p [] [Html.text <| "newCommand: " ++ commandName]
+          Html.span [] []
 
         LXError error ->
             Html.p [ HA.style "color" "red" ] [ Html.text <| String.join "\n---\n\n" (List.map errorReport error) ]
@@ -266,7 +267,16 @@ renderMacro latexState name optArgs args =
             f latexState optArgs args
 
         Nothing ->
-            reproduceMacro name latexState optArgs args
+            case  Dict.get name latexState.macroDictionary of 
+                Nothing -> reproduceMacro name latexState optArgs args
+                Just macroDefinition ->
+                    let 
+                        macro = Macro name optArgs args
+                        expr =  Macro.expandMacro macro macroDefinition
+                    in
+                        render latexState expr
+
+
 
 
 renderArg : Int -> LatexState -> List LatexExpression -> Html msg

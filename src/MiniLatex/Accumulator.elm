@@ -117,6 +117,9 @@ info latexExpression =
         Macro name optArgs args ->
             { typ = "macro", name = name, options = optArgs, value = args }
 
+        NewCommand name nArgs definition ->
+            { typ = "newCommand", name = name, options = [], value = [definition] }
+
         SMacro name optArgs args body ->
             { typ = "smacro", name = name, options = optArgs, value = args }
 
@@ -134,7 +137,11 @@ latexStateReducerDispatcher theInfo =
             f
 
         Nothing ->
-            \latexInfo latexState -> latexState
+           case theInfo.typ of 
+             "newCommand" -> \latexInfo latexState -> SRH.setMacroDefinition theInfo latexState
+             _ -> \latexInfo latexState -> latexState
+
+
 
 
 latexStateReducerDict : Dict.Dict ( String, String ) (LatexInfo -> LatexState -> LatexState)
@@ -151,7 +158,7 @@ latexStateReducerDict =
         , ( ( "macro", "host" ), \x y -> SRH.setDictionaryItemForMacro x y )
         , ( ( "macro", "setclient" ), \x y -> SRH.setDictionaryItemForMacro x y )
         , ( ( "macro", "setdocid" ), \x y -> SRH.setDictionaryItemForMacro x y )
-        , ( ( "macro", "revision" ), \x y -> SRH.setDictionaryItemForMacro x y )
+        , ( ( "macro", "revision" ), \x y -> SRH.setDictionaryItemForMacro x y ) 
         , ( ( "env", "theorem" ), \x y -> SRH.setTheoremNumber x y )
         , ( ( "env", "proposition" ), \x y -> SRH.setTheoremNumber x y )
         , ( ( "env", "lemma" ), \x y -> SRH.setTheoremNumber x y )

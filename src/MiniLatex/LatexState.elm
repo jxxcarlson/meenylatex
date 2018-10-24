@@ -1,29 +1,29 @@
 module MiniLatex.LatexState exposing (..)
 
 import Dict
-
+import MiniLatex.Parser exposing(LatexExpression)
 
 {- TYPES AND DEFAULT VALJUES -}
 
-
-type alias CrossReferences =
-    Dict.Dict String String
 
 
 type alias Counters =
     Dict.Dict String Int
 
-
-type alias Dictionary =
+type alias CrossReferences =
     Dict.Dict String String
-
 
 type alias TableOfContents =
     List TocEntry
 
-
 type alias TocEntry =
     { name : String, label : String, level : Int }
+
+type alias Dictionary =
+    Dict.Dict String String
+
+type alias MacroDictionary =
+  Dict.Dict String LatexExpression
 
 
 emptyDict : Dict.Dict k v
@@ -36,6 +36,7 @@ type alias LatexState =
     , crossReferences : CrossReferences
     , tableOfContents : TableOfContents
     , dictionary : Dictionary
+    , macroDictionary : MacroDictionary
     }
 
 
@@ -127,6 +128,17 @@ setCrossReference label value latexState =
     in
     { latexState | crossReferences = newCrossReferences }
 
+setMacroDefinition : String -> LatexExpression -> LatexState -> LatexState
+setMacroDefinition macroName macroDefinition latexState  =
+  let
+        macroDictionary =
+            latexState.macroDictionary
+
+        newMacroDictionary =
+            Dict.insert macroName macroDefinition macroDictionary
+    in
+    { latexState | macroDictionary = newMacroDictionary }
+  
 
 initialCounters : Dict.Dict String number
 initialCounters =
@@ -139,4 +151,5 @@ emptyLatexState =
     , crossReferences = Dict.empty
     , dictionary = Dict.empty
     , tableOfContents = []
+    , macroDictionary = Dict.empty
     }

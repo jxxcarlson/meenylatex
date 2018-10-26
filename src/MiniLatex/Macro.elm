@@ -52,10 +52,29 @@ expandMacro_  macro macroDef =
 
 substitute : LatexExpression -> String -> String 
 substitute macro str = 
+  substituteMany (nArgs macro) macro str 
+
+
+substituteOne : Int -> LatexExpression -> String -> String 
+substituteOne k macro str = 
   let 
-    arg1 =  renderArg 1 macro
+    arg =  renderArg k macro
+    hashK = "#" ++ String.fromInt k
   in
-    String.replace "#1" arg1 str
+    String.replace hashK arg str
+
+nArgs : LatexExpression -> Int 
+nArgs latexExpression =  
+  case latexExpression of 
+    Macro name optArgs args -> List.length args 
+    _ -> 0  
+
+substituteMany : Int -> LatexExpression -> String -> String 
+substituteMany k macro str = 
+  if k == 0 then
+    str 
+  else 
+    substituteMany (k - 1) macro (substituteOne k macro str)
 
 renderArg : Int -> LatexExpression -> String
 renderArg k macro = 

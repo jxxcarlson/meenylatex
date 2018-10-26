@@ -1510,7 +1510,7 @@ renderVerbatim latexState body =
         body2 =
             MiniLatex.Render.render latexState body
     in
-    Html.pre [ HA.style "margin-top" "-22px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
+    Html.pre [ HA.style "margin-top" "-14px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 renderVerse : LatexState -> LatexExpression -> Html msg

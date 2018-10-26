@@ -2,7 +2,6 @@ module MiniLatex.Parser exposing
     ( LatexExpression(..), macro, parse, defaultLatexList
     , latexList, endWord, envName, word
     , latexExpression
-    , newcommand
     )
 
 {-| This module is for quickly preparing latex for export.

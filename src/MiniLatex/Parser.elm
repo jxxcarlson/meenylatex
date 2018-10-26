@@ -2,6 +2,7 @@ module MiniLatex.Parser exposing
     ( LatexExpression(..), macro, parse, defaultLatexList
     , latexList, endWord, envName, word
     , latexExpression
+    , newcommand
     )
 
 {-| This module is for quickly preparing latex for export.
@@ -224,7 +225,7 @@ inTableCellWord c =
 
 
 
-{- TEX COMMENTS -}
+{- TEX COMMENTS -}  
 
 
 texComment : Parser LatexExpression
@@ -241,7 +242,7 @@ texComment =
 
 
 {- MACROS -}
-{- NOTE: macro sequences should be of the form "" followed by alphabetic characterS,
+{- NOTE: macro sequences should be of the form "" followed by alphabetic characters,
    but not equal to certain reserved words, e.g., "\begin", "\end", "\item"
 -}
 -- type alias Macro2 =
@@ -252,12 +253,34 @@ newcommand =
   succeed NewCommand 
     |. symbol "\\newcommand{"
     |= macroName
-    |. symbol "}["
-    |= int 
-    |. symbol "]"
+    |. symbol "}"
+    |= numberOfArgs
     |= arg
     |. ws 
 
+numberOfArgs_ : Parser Int 
+numberOfArgs_ =
+  succeed identity 
+    |. symbol "["
+    |= int 
+    |. symbol "]"
+
+
+numberOfArgs : Parser Int
+numberOfArgs = 
+  many numberOfArgs_
+    |> map List.head
+    |> map (Maybe.withDefault 0) 
+
+-- numberOfArgs : Parser Int 
+-- numberOfArgs =
+--   let
+--     listOfIntegers = many numberOfArgs_ 
+--    in
+--      if listOfIntegers ==  [] then 
+--        0
+--      else
+--        (List.head listOfIntegers) |> Maybe.withDefault 0
 
 {-| Parse the macro keyword followed by
 zero or more optional follwed by zero or more more eventual nominnees.

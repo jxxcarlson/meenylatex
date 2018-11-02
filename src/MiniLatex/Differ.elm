@@ -323,3 +323,15 @@ differentialIdList seed diffRecord editRecord =
     , newIdsStart = newIdsStart
     , newIdsEnd = newIdsEnd
     }
+
+freshIdList : Int -> EditRecord a -> IdListPacket
+freshIdList seed editRecord =
+    let
+       newIdsStart = 0
+       newIdsEnd = (List.length editRecord.paragraphs) - 1
+       idList = List.range newIdsStart newIdsEnd |> List.map (prefixer seed)
+    in 
+        { idList = idList
+        , newIdsStart = Just newIdsStart
+        , newIdsEnd = Just newIdsEnd
+        }

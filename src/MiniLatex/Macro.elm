@@ -5,6 +5,33 @@ import MiniLatex.LatexState exposing(emptyLatexState)
 import MiniLatex.Render 
 import Parser
 
+{-
+
+EXAMPLE
+
+> import Parser exposing(run)
+> import MiniLatex.Parser exposing(..)
+> import MiniLatex.Macro exposing(..)
+
+############
+
+> run latexExpression "\\newcommand{\\hello}[1]{Hello \\strong{#1}!}"
+Ok (NewCommand "hello" 1 (LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "#1"]],LXString "!"]))
+> run latexExpression "\\hello{John}"
+Ok (Macro "hello" [] [LatexList [LXString "John"]])
+
+############
+
+> macroDef = NewCommand "hello" 1 (LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "#1"]],LXString "!"])
+> macro = Macro "hello" [] [LatexList [LXString "John"]]
+
+############
+
+> expandMacro macro macroDef
+LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "John"]],LXString "!"]
+
+-}
+
 
 expandMacro : LatexExpression -> LatexExpression -> LatexExpression
 expandMacro  macro macroDef = 
@@ -50,6 +77,8 @@ expandMacro_  macro macroDef =
             LXError error
 
 
+-- SUBSTITUTION
+
 substitute : LatexExpression -> String -> String 
 substitute macro str = 
   substituteMany (nArgs macro) macro str 
@@ -83,9 +112,3 @@ renderArg k macro =
           MiniLatex.Render.renderArg (k-1) emptyLatexState args 
     _ -> ""
 
-getStuff : LatexExpression -> LatexExpression
-getStuff expr = 
-  case expr of 
-    NewCommand name nargs args ->
-          args
-    _ -> LXString "error" 

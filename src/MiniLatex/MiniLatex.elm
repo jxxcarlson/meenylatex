@@ -1,4 +1,5 @@
-module MiniLatex.MiniLatex exposing (render, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord)
+module MiniLatex.MiniLatex exposing (render
+  , initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord)
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
 Most users will need only (1) the functions exposed in the `MiniLatex` module
@@ -171,7 +172,7 @@ then we can say
 
 editRecord2 = updateEditRecord 0 source2 editRecord
 
-The `updateEditRecord` function attempts to re-render only the (logical) aragraphs
+The `updateEditRecord` function attempts to re-render only the (logical) paragraphs
 which have been changed. It will always update the text correctly,
 but its efficiency depends on the nature of the edit. This is
 because the "differ" used to detect changes is rather crude.

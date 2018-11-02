@@ -1,4 +1,4 @@
-module MiniLatex.Differ exposing (EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, createRecord, diff, prefixer, update)
+module MiniLatex.Differ exposing (EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, createRecord, diff, simpleDifferentialRender, prefixer, update)
 
 {-| This module is used to speed up parsing-rendering by
 comparing the old and new lists of paragraphs, noting the changes,
@@ -121,6 +121,21 @@ update seed transformer editRecord text =
     in
     EditRecord newParagraphs newRenderedParagraphs emptyLatexState p.idList p.newIdsStart p.newIdsEnd
 
+
+{-|  Update the renderedList by applying the transformer onlly to the
+changed source elments.
+-}
+simpleDifferentialRender : (String ->a) -> DiffRecord -> (List a) -> (List a)
+simpleDifferentialRender transformer diffRecord  renderedList =
+  let 
+    prefixLengh = List.length diffRecord.commonInitialSegment
+    suffixLength = List.length diffRecord.commonTerminalSegment
+    renderedPrefix = List.take prefixLengh renderedList
+    renderedSuffix = takeLast suffixLength renderedList
+  in  
+    renderedPrefix ++ (List.map transformer diffRecord.middleSegmentInTarget) ++ renderedSuffix
+  
+  
 
 {-| Let u and v be two lists of strings. Write them as
 u = axb, v = ayb, where a is the greatest common prefix

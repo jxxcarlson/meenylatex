@@ -40,16 +40,16 @@ suite =
                         diff p1 p2
                 in
                     Expect.equal diffRecord.middleSegmentInTarget [ "verde" ]
-        , test "(2) compute renderDiff for diff p1 p2 and r1" <|
+        , test "(2) compute simpleDifferentialRender for diff p1 p2 and r1" <|
             \_ ->
                 let
                     diffRecord =
                         diff p1 p2
 
                     r2 =
-                        renderDiff 0 String.toUpper diffRecord r1
+                        simpleDifferentialRender String.toUpper diffRecord r1
                 in
-                    Expect.equal r2.renderedParagraphs [ "RED", "VERDE", "BLUE" ]
+                    Expect.equal r2 [ "RED", "VERDE", "BLUE" ]
         , test "(3) initialize generated the correct paragraph list" <|
             \_ ->
                 let
@@ -57,7 +57,7 @@ suite =
                         "a\n\nb\n\nc\n\nd\n\ne\n\nf\n\ng"
 
                     editRecord =
-                        initialize String.toUpper text
+                        createRecord String.toUpper text
                 in
                     Expect.equal editRecord.paragraphs [ "a\n\n", "b\n\n", "c\n\n", "d\n\n", "e\n\n", "f\n\n", "g\n\n" ]
         , test "(4) initialize generated the correct rendered paragraph list" <|
@@ -67,7 +67,7 @@ suite =
                         "a\n\nb\n\nc\n\nd\n\ne\n\nf\n\ng"
 
                     editRecord =
-                        initialize String.toUpper text
+                        createRecord String.toUpper text
                 in
                     Expect.equal editRecord.renderedParagraphs [ "A\n\n", "B\n\n", "C\n\n", "D\n\n", "E\n\n", "F\n\n", "G\n\n" ]
         , test "(5) identity diff" <|
@@ -77,7 +77,7 @@ suite =
                         "a\n\nb\n\nc\n\nd\n\ne\n\nf\n\ng"
 
                     editRecord =
-                        initialize String.toUpper text
+                        createRecord String.toUpper text
 
                     newEditRecord =
                         update 0 String.toUpper editRecord text

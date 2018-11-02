@@ -52,14 +52,6 @@ suite =
             (run latexList "\\begin{itemize} \\item aaa.\n \\item bbb.\n \\itemitem xx\n\\end{itemize}")
             (Ok (LatexList [ Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "aaa.\n " ]), Item 1 (LatexList [ LXString "bbb.\n ", Macro "itemitem" [] [], LXString "xx\n" ]) ]) ]))
         , doTest
-            "(9) tablerow"
-            (run tableRow "1 & 2 & 3 \\\\\n")
-            (Ok (LatexList [ LXString "1", LXString "2", LXString "3" ]))
-        , doTest
-            "(10) tablerow"
-            (run tableRow "Hydrogen & H & 1 & 1.008 \\\\\n")
-            (Ok (LatexList [ LXString "Hydrogen", LXString "H", LXString "1", LXString "1.008" ]))
-        , doTest
             "(11) table"
             (run latexExpression "\\begin{tabular}\n1 & 2 \\\\\n 3 & 4 \\\\\n\\end{tabular}")
             (Ok (Environment "tabular" [] (LatexList [ LatexList [ LXString "1", LXString "2" ], LatexList [ LXString "3", LXString "4" ] ])))
@@ -113,21 +105,3 @@ suite =
         ]
 
 
-
--- a =
---     Ok
---         (Environment "itemize"
---             []
---             (LatexList
---                 [ Item 1 (LatexList [ LXString "One\n\n" ])
---                 , Item 1 (LatexList [ LXString "Two\n\n" ])
---                 , Environment "itemize"
---                     []
---                     (LatexList
---                         [ Item 1 (LatexList [ LXString "Foo\n\n" ])
---                         , Item 1 (LatexList [ LXString "Bar\n\n" ])
---                         ]
---                     )
---                 ]
---             )
---         )

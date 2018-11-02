@@ -3,7 +3,7 @@
     "name": "jxxcarlson/meenylatex",
     "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
     "license": "BSD-3-Clause",
-    "version": "5.0.1",
+    "version": "5.1.0",
     "exposed-modules": [
         "MiniLatex.MiniLatex",
         "MiniLatex.HasMath",

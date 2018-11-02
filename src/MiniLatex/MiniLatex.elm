@@ -13,7 +13,7 @@ for an explanation of the theory behind the MiniLatex package.
 
 # API
 
-@docs render, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord
+@docs render, renderWithSeed, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord
 
 -}
 
@@ -62,6 +62,8 @@ render macroDefinitions text =
         |> getRenderedText
         |> Html.div []
 
+{-|  Like render, but used the `seed` to define the ids for each paragraph.
+-}
 renderWithSeed  : Int -> String -> String -> Html msg
 renderWithSeed seed macroDefinitions text =
     MiniLatexDiffer.createRecordWithSeed seed Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)

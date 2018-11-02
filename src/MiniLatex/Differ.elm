@@ -7,7 +7,7 @@ then parsing and rendering the changed paragraphs.
 
 # API
 
-@docs EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, createRecord, diff, prefixer, update
+@docs EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, createRecord, diff, prefixer, update, simpleDifferentialRender
 
 -}
 

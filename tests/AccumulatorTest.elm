@@ -25,10 +25,10 @@ doTest comment inputExpression outputExpression =
 suite : Test
 suite =
     describe "Accumulator"
-        [ -- doTest 
-            test "(1) length of input" <|
-            \_ ->
-                Expect.equal (Data.qftIntroText |> String.length) 19321
+        [ doTest 
+           "(1) length of input"
+            (Data.qftIntroText |> String.length) 
+            19321
         , test "(2) parse into a list of Latex elements" <|
             \_ ->
                 let

@@ -1,5 +1,4 @@
-module MiniLatex.MiniLatex exposing (render
-  , initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord)
+module MiniLatex.MiniLatex exposing (render, renderWithSeed, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord)
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
 Most users will need only (1) the functions exposed in the `MiniLatex` module
@@ -59,6 +58,18 @@ representing the HTML text
 -}
 render : String -> String -> Html msg
 render macroDefinitions text =
+    MiniLatexDiffer.createRecord Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
+        |> getRenderedText
+        |> Html.div []
+
+renderWithSeed  : Int -> String -> String -> Html msg
+renderWithSeed seed macroDefinitions text =
+    MiniLatexDiffer.createRecordWithSeed seed Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
+        |> getRenderedText
+        |> Html.div []
+
+freshRender : String -> String -> Html msg
+freshRender macroDefinitions text =
     MiniLatexDiffer.createRecord Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
         |> getRenderedText
         |> Html.div []

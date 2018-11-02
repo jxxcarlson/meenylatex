@@ -1,4 +1,4 @@
-module MiniLatex.LatexDiffer exposing (createRecord, update)
+module MiniLatex.LatexDiffer exposing (createRecord, createRecordWithSeed, update)
 
 import MiniLatex.Accumulator as Accumulator
 import MiniLatex.Differ as Differ exposing (EditRecord)
@@ -35,10 +35,42 @@ createRecord renderer latexState text =
     in
     EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
 
+createRecordWithSeed : Int -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
+createRecordWithSeed  seed renderer latexState text =
+    let
+        paragraphs =
+            text
+                |> Paragraph.logicalParagraphify
+
+        ( latexState1, latexExpressionList ) =
+            paragraphs
+                |> Accumulator.parse emptyLatexState
+
+        latexState2 =
+            { emptyLatexState
+                | crossReferences = latexState1.crossReferences
+                , tableOfContents = latexState1.tableOfContents
+                , dictionary = latexState1.dictionary
+            }
+
+        ( _, renderedParagraphs ) =
+            latexExpressionList
+                |> Accumulator.render renderer latexState2
+
+        idList =
+            makeIdListWithSeed seed paragraphs
+    in
+    EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
+
 
 makeIdList : List String -> List String
 makeIdList paragraphs =
     List.range 1 (List.length paragraphs) |> List.map (Differ.prefixer 0)
+
+
+makeIdListWithSeed : Int -> List String -> List String
+makeIdListWithSeed seed paragraphs =
+    List.range 1 (List.length paragraphs) |> List.map (Differ.prefixer seed)
 
 
 update_ :

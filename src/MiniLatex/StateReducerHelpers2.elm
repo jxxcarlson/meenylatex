@@ -97,6 +97,40 @@ setSectionCounters macroArgs latexState =
             latexState
 
 
+setDictionaryItemForMacro : String -> (List LatexExpression) -> LatexState -> LatexState
+setDictionaryItemForMacro name args latexState =
+    let
+        value =
+            PT.unpackString args
+    in
+        setDictionaryItem name value latexState
+
+
+setTheoremNumber : LatexExpression -> LatexState -> LatexState
+setTheoremNumber body latexState =
+    let
+        label =  case body |> PT.macroValue "label" of 
+          Just str -> str 
+          Nothing -> ""
+
+        latexState1 =
+            incrementCounter "tno" latexState
+
+        tno =
+            getCounter "tno" latexState1
+
+        s1 =
+            getCounter "s1" latexState1
+
+        latexState2 =
+            if label /= "" then
+                setCrossReference label (String.fromInt s1 ++ "." ++ String.fromInt tno) latexState1
+            else
+                latexState1
+    in
+        latexState2
+
+
 {- Helpers -}
 
 

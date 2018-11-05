@@ -120,20 +120,60 @@ latexStateReducer parsedParagraph latexState =
 --     | NewCommand String Int LatexExpression
 --     | LXError (List DeadEnd)
 
+{-
+
+> z = LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),LXString (", "),Macro "strong" [] [LatexList [LXString "bar"]]]
+LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),LXString (", "),Macro "strong" [] [LatexList [LXString "bar"]]]
+    : LatexExpression
+
+> latexStateReducer2 z emptyLatexState
+{ counters = Dict.fromList [("eqno",0),("s1",0),("s2",0),("s3",0),("tno",0)], crossReferences = Dict.fromList [], dictionary = Dict.fromList [("title","foo")], macroDictionary = Dict.fromList [], tableOfContents = [] }
+
+-}
+
 latexStateReducer2 : LatexExpression -> LatexState -> LatexState
 latexStateReducer2 lexpr state = 
   case lexpr of 
     Macro name optionalArgs args -> 
-     macroReducer name optionalArgs args state
-    LatexList list -> List.foldl latexStateReducer2 state list
+       macroReducer name optionalArgs args state
+    Environment name optonalArgs body ->
+       envReducer name optonalArgs body state
+    LatexList list -> List.foldr latexStateReducer2 state list
     _ -> state
+
+envReducer : String -> (List LatexExpression) -> LatexExpression -> LatexState -> LatexState
+envReducer name optonalArgs body state = 
+  if List.member name theoremWords then 
+    SRH2.setTheoremNumber body state
+  else state
+
+{- 
+
+> env3
+LatexList [Macro "label" [] [LatexList [LXString "foo"]],LXString ("ho  ho  ho ")]
+    : LatexExpression
+
+> latexStateReducer2 env2 emptyLatexState
+{ counters = Dict.fromList [("eqno",0),("s1",0),("s2",0),("s3",0),("tno",1)]
+, crossReferences = Dict.fromList [("foo","0.1")], dictionary = Dict.fromList []
+, macroDictionary = Dict.fromList [], tableOfContents = [] }
+
+-}
+
+theoremWords = ["theorem", "proposition", "corollary", "lemma", "definition"]   
+
+dictionaryWords = ["title", "author", "data", "email",  "revision", "host", "setclient", "setdocid"]
 
 macroReducer : String -> (List LatexExpression) -> (List LatexExpression)  -> LatexState -> LatexState 
 macroReducer name optionalArgs args state =
+  if List.member name dictionaryWords then 
+    SRH2.setDictionaryItemForMacro name args state
+  else
   case name of 
    "section" -> SRH2.updateSectionNumber args state
    "subsection" -> SRH2.updateSubsectionNumber args state
    "subsubsection" -> SRH2.updateSubsubsectionNumber args state
+   "setcounter" -> SRH2.setSectionCounters args state
    _ -> state   
 
 type alias LatexInfo =

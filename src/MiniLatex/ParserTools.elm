@@ -5,6 +5,10 @@ module MiniLatex.ParserTools exposing (..)
 import MiniLatex.Parser exposing (LatexExpression(..))
 
 
+{-| 
+List.filter (isMacro "label") latexList returns
+a list of macros with name "label"
+-}
 isMacro : String -> LatexExpression -> Bool
 isMacro macroName latexExpression =
     case latexExpression of
@@ -15,6 +19,46 @@ isMacro macroName latexExpression =
         _ ->
             False
 
+
+
+filterMacro : String -> List LatexExpression -> List LatexExpression 
+filterMacro macroName list = 
+  List.filter (isMacro macroName) list
+
+-- smaroArgs : LatexExpression -> Maybe (Liat LatexExpression)
+-- macroArgs  latexExpression =
+--   case latexExpression of 
+--      (Macro _ _ list) -> Just list 
+--      _ -> Nothing
+
+{- PT.filterMacro "label" list |> List.head |> Maybe.map PT.getMacroArgs2
+-}
+{- PT.filterMacro "label" list |> List.head |> Maybe.map PT.getMacroArgs2 |> Maybe.andThen  List.head  -}
+
+macroValue macroName envBody = 
+  case envBody of 
+    LatexList list -> macroValue_ macroName list 
+    _ -> Nothing
+
+macroValue_ macroName list = 
+  list
+    |> filterMacro macroName 
+    |> List.head 
+    |> Maybe.map getMacroArgs2 
+    |> Maybe.andThen  List.head
+    |> Maybe.andThen List.head  
+    |> Maybe.map getString
+
+
+
+getMacroArgs2 latexExpression =
+    case latexExpression of
+      Macro name optArgs args ->
+        args 
+          |> List.map latexList2List  
+      _ ->
+            []
+       
 
 getMacroArgs macroName latexExpression =
     case latexExpression of
@@ -86,10 +130,10 @@ getString latexString =
             ""
 
 
-getMacros : String -> List LatexExpression -> List LatexExpression
-getMacros macroName expressionList =
-    expressionList
-        |> List.filter (\expr -> isMacro macroName expr)
+-- getMacros : String -> List LatexExpression -> List LatexExpression
+-- getMacros macroName expressionList =
+--     expressionList
+--         |> List.filter (\expr -> isMacro macroName expr)
 
 
 

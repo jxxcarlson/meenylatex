@@ -1,5 +1,4 @@
-module MiniLatex.Accumulator exposing (parse, render, info, 
-  latexStateReducerDispatcher, latexStateReducer, latexStateReducer2, latexStateReducer3)
+module MiniLatex.Accumulator exposing (parse, render, latexStateReducer, latexStateReducerAux)
 
 import Dict
 import MiniLatex.LatexState
@@ -16,7 +15,6 @@ import MiniLatex.LatexState
         )
 import MiniLatex.Parser as Parser exposing (LatexExpression(..), macro)
 import MiniLatex.Render2 as Render exposing (renderLatexList)
-import MiniLatex.StateReducerHelpers as SRH
 import MiniLatex.StateReducerHelpers2 as SRH2
 
 
@@ -87,26 +85,12 @@ renderReducer :
 renderReducer renderer listLatexExpression ( state, inputList ) =
     let
         newState =
-            latexStateReducer3 listLatexExpression state
+            latexStateReducer listLatexExpression state
 
         renderedInput =
             renderer newState listLatexExpression
     in
     ( newState, inputList ++ [ renderedInput ] )
-
-
-{-| LatexState Reducer
--}
-latexStateReducer : List LatexExpression -> LatexState -> LatexState
-latexStateReducer parsedParagraph latexState =
-    let
-        theInfo =
-            parsedParagraph
-                |> List.head
-                |> Maybe.map info
-                |> Maybe.withDefault (LatexInfo "null" "null" [] [])
-    in
-    (latexStateReducerDispatcher  theInfo) theInfo latexState
 
 {-
 
@@ -114,17 +98,17 @@ latexStateReducer parsedParagraph latexState =
 LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),LXString (", "),Macro "strong" [] [LatexList [LXString "bar"]]]
     : LatexExpression
 
-> latexStateReducer2 z emptyLatexState
+> latexStateReducerAux z emptyLatexState
 { counters = Dict.fromList [("eqno",0),("s1",0),("s2",0),("s3",0),("tno",0)], crossReferences = Dict.fromList [], dictionary = Dict.fromList [("title","foo")], macroDictionary = Dict.fromList [], tableOfContents = [] }
 
 -}
 
-latexStateReducer3 : List LatexExpression -> LatexState -> LatexState 
-latexStateReducer3 list state =
-  List.foldr latexStateReducer2 state list
+latexStateReducer : List LatexExpression -> LatexState -> LatexState 
+latexStateReducer list state =
+  List.foldr latexStateReducerAux state list
 
-latexStateReducer2 : LatexExpression -> LatexState -> LatexState
-latexStateReducer2 lexpr state = 
+latexStateReducerAux : LatexExpression -> LatexState -> LatexState
+latexStateReducerAux lexpr state = 
   case lexpr of 
     Macro name optionalArgs args -> 
        macroReducer name optionalArgs args state
@@ -134,7 +118,7 @@ latexStateReducer2 lexpr state =
        SRH2.setMacroDefinition name body state
     Environment name optonalArgs body ->
        envReducer name optonalArgs body state
-    LatexList list -> List.foldr latexStateReducer2 state list
+    LatexList list -> List.foldr latexStateReducerAux state list
     _ -> state
 
 envReducer : String -> (List LatexExpression) -> LatexExpression -> LatexState -> LatexState
@@ -153,7 +137,7 @@ envReducer name optonalArgs body state =
 LatexList [Macro "label" [] [LatexList [LXString "foo"]],LXString ("ho  ho  ho ")]
     : LatexExpression
 
-> latexStateReducer2 env2 emptyLatexState
+> latexStateReducerAux env2 emptyLatexState
 { counters = Dict.fromList [("eqno",0),("s1",0),("s2",0),("s3",0),("tno",1)]
 , crossReferences = Dict.fromList [("foo","0.1")], dictionary = Dict.fromList []
 , macroDictionary = Dict.fromList [], tableOfContents = [] }
@@ -182,64 +166,3 @@ smacroReducer name optionalArgs args latexExpression state =
    "bibitem" -> SRH2.setBibItemXRef optionalArgs args state
    _ -> state   
 
-type alias LatexInfo =
-    { typ : String, name : String, options : List LatexExpression, value : List LatexExpression }
-
-
-info : LatexExpression -> LatexInfo
-info latexExpression =
-    case latexExpression of
-        Macro name optArgs args ->
-            { typ = "macro", name = name, options = optArgs, value = args }
-
-        NewCommand name nArgs definition ->
-            { typ = "newCommand", name = name, options = [], value = [definition] }
-
-        SMacro name optArgs args body ->
-            { typ = "smacro", name = name, options = optArgs, value = args }
-
-        Environment name args body ->
-            { typ = "env", name = name, options = args, value = [ body ] }
-
-        _ ->
-            { typ = "null", name = "null", options = [], value = [] }
-
-
-latexStateReducerDispatcher : LatexInfo -> LatexInfo -> (LatexState -> LatexState)
-latexStateReducerDispatcher theInfo =
-    case Dict.get ( theInfo.typ, theInfo.name ) latexStateReducerDict of
-        Just f ->
-            f
-
-        Nothing ->
-           case theInfo.typ of 
-             "newCommand" -> \latexInfo latexState -> SRH.setMacroDefinition theInfo latexState
-             _ -> \latexInfo latexState -> latexState
-
-
-
-
-latexStateReducerDict : Dict.Dict ( String, String ) (LatexInfo -> LatexState -> LatexState)
-latexStateReducerDict =
-    Dict.fromList
-        [ ( ( "macro", "setcounter" ), \x y -> SRH.setSectionCounters x y )
-        , ( ( "macro", "section" ), \x y -> SRH.updateSectionNumber x y )
-        , ( ( "macro", "subsection" ), \x y -> SRH.updateSubsectionNumber x y )
-        , ( ( "macro", "subsubsection" ), \x y -> SRH.updateSubsubsectionNumber x y )
-        , ( ( "macro", "title" ), \x y -> SRH.setDictionaryItemForMacro x y )
-        , ( ( "macro", "author" ), \x y -> SRH.setDictionaryItemForMacro x y )
-        , ( ( "macro", "date" ), \x y -> SRH.setDictionaryItemForMacro x y )
-        , ( ( "macro", "email" ), \x y -> SRH.setDictionaryItemForMacro x y )
-        , ( ( "macro", "host" ), \x y -> SRH.setDictionaryItemForMacro x y )
-        , ( ( "macro", "setclient" ), \x y -> SRH.setDictionaryItemForMacro x y )
-        , ( ( "macro", "setdocid" ), \x y -> SRH.setDictionaryItemForMacro x y )
-        , ( ( "macro", "revision" ), \x y -> SRH.setDictionaryItemForMacro x y ) 
-        , ( ( "env", "theorem" ), \x y -> SRH.setTheoremNumber x y )
-        , ( ( "env", "proposition" ), \x y -> SRH.setTheoremNumber x y )
-        , ( ( "env", "lemma" ), \x y -> SRH.setTheoremNumber x y )
-        , ( ( "env", "definition" ), \x y -> SRH.setTheoremNumber x y )
-        , ( ( "env", "corollary" ), \x y -> SRH.setTheoremNumber x y )
-        , ( ( "env", "equation" ), \x y -> SRH.setEquationNumber x y )
-        , ( ( "env", "align" ), \x y -> SRH.setEquationNumber x y )
-        , ( ( "smacro", "bibitem" ), \x y -> SRH.setBibItemXRef x y )
-        ]

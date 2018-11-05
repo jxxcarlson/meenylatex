@@ -1,4 +1,4 @@
-module MiniLatex.Accumulator exposing (parse, render, info, latexStateReducerDispatcher)
+module MiniLatex.Accumulator exposing (parse, render, info, latexStateReducerDispatcher, latexStateReducer2)
 
 import Dict
 import MiniLatex.LatexState
@@ -16,6 +16,7 @@ import MiniLatex.LatexState
 import MiniLatex.Parser as Parser exposing (LatexExpression(..), macro)
 import MiniLatex.Render2 as Render exposing (renderLatexList)
 import MiniLatex.StateReducerHelpers as SRH
+import MiniLatex.StateReducerHelpers2 as SRH2
 
 
 {-| Given an initial state and list of inputs of type a,
@@ -106,6 +107,34 @@ latexStateReducer parsedParagraph latexState =
     in
     (latexStateReducerDispatcher  theInfo) theInfo latexState
 
+-- type LatexExpression
+--     = LXString String
+--     | Comment String
+--     | Item Int LatexExpression
+--     | InlineMath String
+--     | DisplayMath String
+--     | SMacro String (List LatexExpression) (List LatexExpression) LatexExpression
+--     | Macro String (List LatexExpression) (List LatexExpression) 
+--     | Environment String (List LatexExpression) LatexExpression 
+--     | LatexList (List LatexExpression)
+--     | NewCommand String Int LatexExpression
+--     | LXError (List DeadEnd)
+
+latexStateReducer2 : LatexExpression -> LatexState -> LatexState
+latexStateReducer2 lexpr state = 
+  case lexpr of 
+    Macro name optionalArgs args -> 
+     macroReducer name optionalArgs args state
+    LatexList list -> List.foldl latexStateReducer2 state list
+    _ -> state
+
+macroReducer : String -> (List LatexExpression) -> (List LatexExpression)  -> LatexState -> LatexState 
+macroReducer name optionalArgs args state =
+  case name of 
+   "section" -> SRH2.updateSectionNumber args state
+   "subsection" -> SRH2.updateSubsectionNumber args state
+   "subsubsection" -> SRH2.updateSubsubsectionNumber args state
+   _ -> state   
 
 type alias LatexInfo =
     { typ : String, name : String, options : List LatexExpression, value : List LatexExpression }

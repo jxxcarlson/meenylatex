@@ -130,6 +130,7 @@ valueOfLXString expr =
             "Error getting value of LatexString"
 
 
+{-| Get string arg -}
 unpackString : List LatexExpression -> String
 unpackString expr =
     expr |> headLatexExpression |> valueOfLatexList |> headLatexExpression |> valueOfLXString

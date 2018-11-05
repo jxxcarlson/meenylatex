@@ -157,6 +157,31 @@ setEquationNumber body latexState =
     in
         latexState2
 
+setBibItemXRef : List LatexExpression -> List LatexExpression -> LatexState -> LatexState
+setBibItemXRef optionalArgs args latexState =
+    let
+        label =
+            PT.unpackString args
+
+        value =
+            if optionalArgs== [] then
+                label
+            else
+                PT.unpackString optionalArgs
+    in
+        setDictionaryItem ("bibitem:" ++ label) value latexState
+
+setMacroDefinition : String -> LatexExpression -> LatexState -> LatexState
+setMacroDefinition name body latexState =
+--    let 
+--      maybeDefinition = body -- |> PT.latexList2List |> List.head |> Maybe.map PT.getString
+--    in
+    --  case maybeDefinition of 
+    --    Nothing -> latexState 
+    --    Just definition -> 
+          MiniLatex.LatexState.setMacroDefinition name (NewCommand name 0 body) latexState 
+  
+
 
 {- Helpers -}
 

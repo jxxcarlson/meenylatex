@@ -1,5 +1,5 @@
 module MiniLatex.Accumulator exposing (parse, render, info, 
-  latexStateReducerDispatcher, latexStateReducer, latexStateReducer2)
+  latexStateReducerDispatcher, latexStateReducer, latexStateReducer2, latexStateReducer3)
 
 import Dict
 import MiniLatex.LatexState
@@ -87,7 +87,7 @@ renderReducer :
 renderReducer renderer listLatexExpression ( state, inputList ) =
     let
         newState =
-            latexStateReducer listLatexExpression state
+            latexStateReducer3 listLatexExpression state
 
         renderedInput =
             renderer newState listLatexExpression
@@ -108,19 +108,6 @@ latexStateReducer parsedParagraph latexState =
     in
     (latexStateReducerDispatcher  theInfo) theInfo latexState
 
--- type LatexExpression
---     = LXString String
---     | Comment String
---     | Item Int LatexExpression
---     | InlineMath String
---     | DisplayMath String
---     | SMacro String (List LatexExpression) (List LatexExpression) LatexExpression
---     | Macro String (List LatexExpression) (List LatexExpression) 
---     | Environment String (List LatexExpression) LatexExpression 
---     | LatexList (List LatexExpression)
---     | NewCommand String Int LatexExpression
---     | LXError (List DeadEnd)
-
 {-
 
 > z = LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),LXString (", "),Macro "strong" [] [LatexList [LXString "bar"]]]
@@ -132,11 +119,19 @@ LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),
 
 -}
 
+latexStateReducer3 : List LatexExpression -> LatexState -> LatexState 
+latexStateReducer3 list state =
+  List.foldr latexStateReducer2 state list
+
 latexStateReducer2 : LatexExpression -> LatexState -> LatexState
 latexStateReducer2 lexpr state = 
   case lexpr of 
     Macro name optionalArgs args -> 
        macroReducer name optionalArgs args state
+    SMacro name optionalArgs args latexExpression -> 
+       smacroReducer name optionalArgs args latexExpression state
+    NewCommand name nArgs body ->
+       SRH2.setMacroDefinition name body state
     Environment name optonalArgs body ->
        envReducer name optonalArgs body state
     LatexList list -> List.foldr latexStateReducer2 state list
@@ -179,6 +174,12 @@ macroReducer name optionalArgs args state =
    "subsection" -> SRH2.updateSubsectionNumber args state
    "subsubsection" -> SRH2.updateSubsubsectionNumber args state
    "setcounter" -> SRH2.setSectionCounters args state
+   _ -> state   
+
+smacroReducer : String -> (List LatexExpression) -> (List LatexExpression)  -> LatexExpression -> LatexState -> LatexState 
+smacroReducer name optionalArgs args latexExpression state =
+  case name of 
+   "bibitem" -> SRH2.setBibItemXRef optionalArgs args state
    _ -> state   
 
 type alias LatexInfo =

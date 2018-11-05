@@ -1,4 +1,5 @@
-module MiniLatex.Accumulator exposing (parse, render, info, latexStateReducerDispatcher, latexStateReducer2)
+module MiniLatex.Accumulator exposing (parse, render, info, 
+  latexStateReducerDispatcher, latexStateReducer, latexStateReducer2)
 
 import Dict
 import MiniLatex.LatexState
@@ -145,7 +146,11 @@ envReducer : String -> (List LatexExpression) -> LatexExpression -> LatexState -
 envReducer name optonalArgs body state = 
   if List.member name theoremWords then 
     SRH2.setTheoremNumber body state
-  else state
+  else  
+  case name of 
+    "equation" -> SRH2.setEquationNumber body state 
+    "align" -> SRH2.setEquationNumber body state 
+    _ -> state
 
 {- 
 

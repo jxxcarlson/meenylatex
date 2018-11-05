@@ -130,6 +130,33 @@ setTheoremNumber body latexState =
     in
         latexState2
 
+setEquationNumber : LatexExpression -> LatexState -> LatexState
+setEquationNumber body latexState =
+    let
+        label =
+            case body of
+                LXString str ->
+                    getLabel str
+
+                _ -> ""
+
+        latexState1 =
+            incrementCounter "eqno" latexState
+
+        eqno =
+            getCounter "eqno" latexState1
+
+        s1 =
+            getCounter "s1" latexState1
+
+        latexState2 =
+            if label /= "" then
+                setCrossReference label (String.fromInt s1 ++ "." ++ String.fromInt eqno) latexState1
+            else
+                latexState1
+    in
+        latexState2
+
 
 {- Helpers -}
 

@@ -39,6 +39,7 @@ import Parser exposing (DeadEnd, Problem(..))
 import Regex
 import String
 import MiniLatex.Macro as Macro
+import MiniLatex.Paragraph as Paragraph
 
 
 
@@ -59,14 +60,28 @@ parseString parser str =
 -- renderString latexList latexState text
 
 
-{-| Parse a string, then render it.
+{-| Old version, keeping it around for a while. 
+It does not execute `spacify`, which is a problem.
 -}
-renderString : LatexState -> String -> Html msg
-renderString latexState str =
+renderString1 : LatexState -> String -> Html msg
+renderString1 latexState str =
     str
         |> MiniLatex.Parser.parse
         |> List.map (render latexState)
         |> Html.div []
+
+
+{-| Parse a string, then render it.
+-}
+renderString : LatexState -> String -> Html msg
+renderString latexState str =
+    str 
+        |> Paragraph.logicalParagraphify
+        |> List.map MiniLatex.Parser.parse
+        |> List.map (List.map (render latexState))
+        |> List.map (\x -> Html.div [] x)
+        |> Html.div []  
+
 
 
 postProcess : String -> String

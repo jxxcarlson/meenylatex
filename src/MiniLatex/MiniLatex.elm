@@ -33,27 +33,12 @@ import MiniLatex.Render2 as Render
 
 
 {-| The function call `render macros sourceTest` produces
-an HTML element corresponding to the MiniLatex source text
+an HTML element or Html msg value corresponding to the MiniLatex source text
 `sourceText`. The macro definitions in `macros`
 are prepended to this string and are used by MathJax
 to render purely mathematical text. The `macros` string
-may be empty. Thus, if
-
-macros = ""
-source = "\\italic{Test:}\\n\\n$$a^2 + b^2 = c^2$$\\n\\n\\strong{Q.E.D.}"
-
-then `render macros source` yields an HTML msg value
-representing the HTML text
-
-    <p>
-    <span class=italic>Test:</span></p>
-      <p>
-        $$a^2 + b^2 = c^2$$
-      </p>
-    <p>
-
-    <span class="strong">Q.E.D.</span>
-    </p>
+may be empty.
+>
 
 -}
 render : String -> String -> Html msg
@@ -82,13 +67,6 @@ prependMacros macros_ sourceText =
 
 
 {-| Parse the given text and return an AST represeting it.
-
-Example:
-
-> import MiniLatex.MiniLatex exposing(parse)
-> parse "This \\strong{is a test!}"
-> [[LXString ("This "),Macro "strong" [][LatexList [LXString ("is  a  test!")]]][LXString ("This "),Macro "strong" [] [LatexList [LXString ("is  a  test!")]]]][[LXString ("This "),Macro "strong" [] [LatexList [LXString ("is  a  test!")]]]]
-
 -}
 parse : String -> List (List LatexExpression)
 parse text =
@@ -193,4 +171,5 @@ because the "differ" used to detect changes is rather crude.
 -}
 updateEditRecord : Int -> EditRecord (Html msg) -> String -> EditRecord (Html msg)
 updateEditRecord seed editRecord text =
-    MiniLatexDiffer.update seed Render.renderLatexList Render.renderString editRecord text
+   MiniLatexDiffer.update seed Render.renderLatexList Render.renderString editRecord text
+  --   MiniLatexDiffer.update seed Render.renderLatexList Render.renderString Differ.emptyHtmlMsgRecord text

@@ -1,0 +1,61 @@
+module MiniLatex.FastExport exposing (transform)
+
+{-| This module is for quickly preparing latex for export.
+
+
+# API
+
+@docs transform
+
+-}
+
+import MiniLatex.JoinStrings as JoinStrings
+import MiniLatex.Paragraph as Paragraph
+import MiniLatex.Export as Export
+
+
+{-| Tranform MiniLatex text into Latex text.
+-}
+transform : String -> String
+transform sourceText =
+    sourceText
+        |> Paragraph.logicalParagraphify
+        |> List.map processParagraph
+        |> List.map (\par -> par ++ "\n\n")
+        |> JoinStrings.joinList
+
+
+processParagraph : String -> String
+processParagraph par =
+    let
+        prefix =
+            String.left 14 par
+
+        signature =
+            if String.left 6 prefix == "\\begin" then
+                String.dropLeft 7 prefix |> String.dropRight 1
+            else if String.contains "\\code" par then
+                "code"
+            else if String.contains "\\href" par then
+                "href"
+            else
+                String.left 6 prefix
+    in
+        case signature of
+            "\\image" ->
+                Export.transform par
+
+            "listin" ->
+                Export.transform par
+
+            "code" ->
+                Export.transform par
+
+            "href" ->
+                Export.transform par
+
+            "usefor" ->
+                Export.transform par
+
+            _ ->
+                Export.transform par

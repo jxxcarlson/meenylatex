@@ -3,7 +3,7 @@
     "name": "jxxcarlson/meenylatex",
     "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
     "license": "BSD-3-Clause",
-    "version": "6.0.0",
+    "version": "7.0.0",
     "exposed-modules": [
         "MiniLatex.MiniLatex",
         "MiniLatex.HasMath",
@@ -23,7 +23,8 @@
         "elm/json": "1.0.0 <= v < 2.0.0",
         "elm/parser": "1.0.0 <= v < 2.0.0",
         "elm/random": "1.0.0 <= v < 2.0.0",
-        "elm/regex": "1.0.0 <= v < 2.0.0"
+        "elm/regex": "1.0.0 <= v < 2.0.0",
+        "elm-community/maybe-extra": "5.0.0 <= v < 6.0.0"
     },
     "test-dependencies": {
         "elm-explorations/test": "1.1.0 <= v < 2.0.0"

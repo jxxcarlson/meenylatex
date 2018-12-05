@@ -14,6 +14,7 @@ import Dict
 
 -- import List.Extra
 
+import MiniLatex.ParserTools as ParserTools
 import MiniLatex.ErrorMessages as ErrorMessages
 import MiniLatex.Image as Image
 import MiniLatex.JoinStrings as JoinStrings
@@ -21,17 +22,50 @@ import MiniLatex.Paragraph
 import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import MiniLatex.Utility as Utility
 import String
+import Maybe.Extra
 
 
-{-| parse a string and render it back into Latex
+{-| parse a string and render it to a tuple,
+where the first element is the string rendered
+back into Latex, and where the second element is the list
+of image urls from the string.
 -}
-transform : String -> String
+transform : String -> ( String, List String )
 transform str =
+    let
+        parsand =
+            str
+                |> MiniLatex.Paragraph.logicalParagraphify
+                |> List.map MiniLatex.Parser.parse
+
+        latex =
+            parsand
+                |> List.map renderLatexList
+                |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
+
+        imageUrlList =
+            parsand
+                --|> List.concat
+                |> List.map (ParserTools.macroValue_ "image")
+                |> Maybe.Extra.values
+    in
+        ( latex, imageUrlList )
+
+
+foo str =
     str
         |> MiniLatex.Paragraph.logicalParagraphify
         |> List.map MiniLatex.Parser.parse
-        |> List.map renderLatexList
-        |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
+
+
+testString =
+    """
+This is a test.
+
+\\image{http://foo.bar/yada.jpg}{Yada}{width: 400}
+
+End of test.
+"""
 
 
 render : LatexExpression -> String

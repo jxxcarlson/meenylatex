@@ -5,8 +5,7 @@ module MiniLatex.ParserTools exposing (..)
 import MiniLatex.Parser exposing (LatexExpression(..))
 
 
-{-| 
-List.filter (isMacro "label") latexList returns
+{-| List.filter (isMacro "label") latexList returns
 a list of macros with name "label"
 -}
 isMacro : String -> LatexExpression -> Bool
@@ -20,45 +19,49 @@ isMacro macroName latexExpression =
             False
 
 
+filterMacro : String -> List LatexExpression -> List LatexExpression
+filterMacro macroName list =
+    List.filter (isMacro macroName) list
 
-filterMacro : String -> List LatexExpression -> List LatexExpression 
-filterMacro macroName list = 
-  List.filter (isMacro macroName) list
+
 
 -- smaroArgs : LatexExpression -> Maybe (Liat LatexExpression)
 -- macroArgs  latexExpression =
---   case latexExpression of 
---      (Macro _ _ list) -> Just list 
+--   case latexExpression of
+--      (Macro _ _ list) -> Just list
 --      _ -> Nothing
+{- PT.filterMacro "label" list |> List.head |> Maybe.map PT.getMacroArgs2 -}
+{- PT.filterMacro "label" list |> List.head |> Maybe.map PT.getMacroArgs2 |> Maybe.andThen  List.head -}
 
-{- PT.filterMacro "label" list |> List.head |> Maybe.map PT.getMacroArgs2
--}
-{- PT.filterMacro "label" list |> List.head |> Maybe.map PT.getMacroArgs2 |> Maybe.andThen  List.head  -}
 
-macroValue macroName envBody = 
-  case envBody of 
-    LatexList list -> macroValue_ macroName list 
-    _ -> Nothing
+macroValue macroName envBody =
+    case envBody of
+        LatexList list ->
+            macroValue_ macroName list
 
-macroValue_ macroName list = 
-  list
-    |> filterMacro macroName 
-    |> List.head 
-    |> Maybe.map getMacroArgs2 
-    |> Maybe.andThen  List.head
-    |> Maybe.andThen List.head  
-    |> Maybe.map getString
+        _ ->
+            Nothing
 
+
+macroValue_ macroName list =
+    list
+        |> filterMacro macroName
+        |> List.head
+        |> Maybe.map getMacroArgs2
+        |> Maybe.andThen List.head
+        |> Maybe.andThen List.head
+        |> Maybe.map getString
 
 
 getMacroArgs2 latexExpression =
     case latexExpression of
-      Macro name optArgs args ->
-        args 
-          |> List.map latexList2List  
-      _ ->
+        Macro name optArgs args ->
+            args
+                |> List.map latexList2List
+
+        _ ->
             []
-       
+
 
 getMacroArgs macroName latexExpression =
     case latexExpression of
@@ -82,12 +85,12 @@ getFirstMacroArg macroName latexExpression =
         arg =
             getSimpleMacroArgs macroName latexExpression |> List.head
     in
-    case arg of
-        Just value ->
-            value
+        case arg of
+            Just value ->
+                value
 
-        _ ->
-            ""
+            _ ->
+                ""
 
 
 list2LeadingString list =
@@ -103,12 +106,12 @@ list2LeadingString list =
                 Nothing ->
                     LXString ""
     in
-    case value of
-        LXString str ->
-            str
+        case value of
+            LXString str ->
+                str
 
-        _ ->
-            ""
+            _ ->
+                ""
 
 
 latexList2List latexExpression =
@@ -130,13 +133,11 @@ getString latexString =
             ""
 
 
+
 -- getMacros : String -> List LatexExpression -> List LatexExpression
 -- getMacros macroName expressionList =
 --     expressionList
 --         |> List.filter (\expr -> isMacro macroName expr)
-
-
-
 -- unpack : List LatexExpression -> LatexExpression
 
 
@@ -151,7 +152,7 @@ headLatexExpression list =
                 Nothing ->
                     LatexList []
     in
-    he
+        he
 
 
 valueOfLatexList : LatexExpression -> List LatexExpression
@@ -174,7 +175,8 @@ valueOfLXString expr =
             "Error getting value of LatexString"
 
 
-{-| Get string arg -}
+{-| Get string arg
+-}
 unpackString : List LatexExpression -> String
 unpackString expr =
     expr |> headLatexExpression |> valueOfLatexList |> headLatexExpression |> valueOfLXString

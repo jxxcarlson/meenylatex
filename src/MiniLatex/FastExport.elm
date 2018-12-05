@@ -43,19 +43,19 @@ processParagraph par =
     in
         case signature of
             "\\image" ->
-                Export.transform par
+                Export.transform par |> Tuple.first
 
             "listin" ->
-                Export.transform par
+                Export.transform par |> Tuple.first
 
             "code" ->
-                Export.transform par
+                Export.transform par |> Tuple.first
 
             "href" ->
-                Export.transform par
+                Export.transform par |> Tuple.first
 
             "usefor" ->
-                Export.transform par
+                Export.transform par |> Tuple.first
 
             _ ->
-                Export.transform par
+                Export.transform par |> Tuple.first

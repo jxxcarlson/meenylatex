@@ -294,7 +294,7 @@ renderImage args =
             imageAttrs.width |> toFloat |> (\x -> 4.5 * x)
 
         width =
-            (String.fromFloat (3.0 * width_ / 700.0)) ++ "in"
+            (String.fromFloat (3.0 * width_ / 1400.0)) ++ "in"
     in
         case ( imageAttrs.float, imageAttrs.align ) of
             ( "left", _ ) ->

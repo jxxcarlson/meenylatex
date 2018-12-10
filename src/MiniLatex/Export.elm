@@ -23,6 +23,7 @@ import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexLi
 import MiniLatex.Utility as Utility
 import String
 import Maybe.Extra
+import MiniLatex.ParserTools as PT
 
 
 {-| parse a string and render it to a tuple,
@@ -220,6 +221,7 @@ renderMacroDict =
         , ( "href", \x y -> renderHref x y )
         , ( "mdash", \x y -> "---" )
         , ( "ndash", \x y -> "--" )
+        , ( "setcounter", \x y -> renderSetCounter x y )
         ]
 
 
@@ -251,6 +253,19 @@ renderCode optArgs args =
 renderHref : List LatexExpression -> List LatexExpression -> String
 renderHref optArgs args =
     " \\href" ++ renderSpecialArgList args
+
+
+renderSetCounter : List LatexExpression -> List LatexExpression -> String
+renderSetCounter optArgs args =
+    let
+        argValue =
+            PT.getDecrementedSetCounterArg args |> Maybe.withDefault "0"
+    in
+        " \\setcounter{section}" ++ "{" ++ argValue ++ "}"
+
+
+
+-- \setcounter{section}{2}
 
 
 reproduceMacro : String -> List LatexExpression -> List LatexExpression -> String

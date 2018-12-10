@@ -2,7 +2,8 @@ module MiniLatex.ParserTools exposing (..)
 
 {- Some of these functoins are used by MiniLatex.Accumulator -}
 
-import MiniLatex.Parser exposing (LatexExpression(..))
+import MiniLatex.Parser as MP exposing (LatexExpression(..))
+import MiniLatex.Utility as Utility
 
 
 {-| List.filter (isMacro "label") latexList returns
@@ -34,6 +35,7 @@ filterMacro macroName list =
 {- PT.filterMacro "label" list |> List.head |> Maybe.map PT.getMacroArgs2 |> Maybe.andThen  List.head -}
 
 
+macroValue : String -> LatexExpression -> Maybe String
 macroValue macroName envBody =
     case envBody of
         LatexList list ->
@@ -43,6 +45,7 @@ macroValue macroName envBody =
             Nothing
 
 
+macroValue_ : String -> List LatexExpression -> Maybe String
 macroValue_ macroName list =
     list
         |> filterMacro macroName
@@ -53,6 +56,115 @@ macroValue_ macroName list =
         |> Maybe.map getString
 
 
+{-|
+
+> pp
+> Macro "setcounter" [][LatexList [LXString "section"],LatexList [LXString "3"]]
+
+> getMacroArgs2 pp
+> [[LXString "section"],[LXString "3"]]
+
+    : List (List LatexExpression)
+
+getMacroArgs2 pp |> getAt 1 == Just [LXString "3"]
+
+-}
+addToNumberAsString : Int -> String -> String
+addToNumberAsString k str =
+    case String.toInt str of
+        Nothing ->
+            str
+
+        Just n ->
+            n + k |> String.fromInt
+
+
+
+-- decrementSetCounter : LatexExpression -> List LatexExpression
+
+
+decrementArg1 : LatexExpression -> List LatexExpression
+decrementArg1 macro =
+    getMacroArgs2 macro
+        |> Utility.getAt 1
+        |> Maybe.map (List.map (transformLXString (addToNumberAsString -1)))
+        |> Maybe.withDefault []
+
+
+{-|
+
+> pp
+> Macro "setcounter" [][LatexList [LXString "section"],LatexList [LXString "3"]]
+
+> decrementSetCounter pp
+> Macro "setcounter" [][LatexList [LXString "section"],LatexList [LXString "2"]]
+
+-}
+decrementSetCounter : LatexExpression -> LatexExpression
+decrementSetCounter macro =
+    case macro of
+        Macro "setcounter" [] args ->
+            let
+                arg1 =
+                    (Macro "setcounter" [] args)
+                        |> decrementArg1
+            in
+                Macro "setcounter" [] [ LatexList [ LXString "section" ], LatexList arg1 ]
+
+        _ ->
+            macro
+
+
+{-|
+
+> transformLXString (addToNumberAsString -1) (LXString "5")
+> LXString "4" : LatexExpression
+-}
+transformLXString : (String -> String) -> LatexExpression -> LatexExpression
+transformLXString f latexExpr =
+    case latexExpr of
+        LXString str ->
+            LXString (f str)
+
+        _ ->
+            latexExpr
+
+
+transformLXList : (String -> String) -> LatexExpression -> LatexExpression
+transformLXList f latexExpr =
+    case latexExpr of
+        LatexList list ->
+            LatexList <| (List.map (transformLXString f) list)
+
+        _ ->
+            latexExpr
+
+
+{-|
+
+> pp
+> Macro "setcounter" [][LatexList [LXString "section"],LatexList [LXString "3"]]
+
+> args |> List.map (transformLXList (addToNumberAsString -1))
+> [LatexList [LXString "section"],LatexList [LXString "2"]]
+
+-}
+decrementSetCounterArgs : List LatexExpression -> List LatexExpression
+decrementSetCounterArgs args =
+    args |> List.map (transformLXList (addToNumberAsString -1))
+
+
+getDecrementedSetCounterArg : List LatexExpression -> Maybe String
+getDecrementedSetCounterArg args =
+    args
+        |> decrementSetCounterArgs
+        |> Utility.getAt 1
+        |> Maybe.map latexList2List
+        |> Maybe.andThen List.head
+        |> Maybe.map getString
+
+
+getMacroArgs2 : LatexExpression -> List (List LatexExpression)
 getMacroArgs2 latexExpression =
     case latexExpression of
         Macro name optArgs args ->

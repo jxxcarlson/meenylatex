@@ -9,10 +9,9 @@ import Types exposing (..)
 import String
 import MiniLatex.Parser exposing (LatexExpression)
 import MiniLatex.MiniLatex as MiniLatex
-import MiniLatex.RenderToLatex as RenderToLatex
+import MiniLatex.Export as Export
 import Json.Encode as Encode
 import MiniLatex.Paragraph
-import MiniLatex.RenderLatexForExport as RenderLatexForExport
 
 
 {- Word count -}
@@ -182,6 +181,7 @@ dataUrl data =
     "data:text/plain;charset=utf-8," ++ "FOO"
 
 
+
 {-
    ertical ->
        parseResult |> List.map String.fromInt |> List.map (String.replace " " "\n ") |> String.join "\n\n"
@@ -216,7 +216,7 @@ renderToLatexPane model =
         -- rerenderedText =
         --     MiniLatex.RenderToLatex.renderBackToLatex model.sourceText
         rerenderedText =
-           RenderLatexForExport.renderLatexForExport model.sourceText
+            Export.transform model.sourceText |> Tuple.first
 
         --|> MiniLatex.RenderToLatex.eval
     in
@@ -270,7 +270,7 @@ buttonBarBottomLeft =
         [ basicExampleButton 96
         , techReportButton 93
         , grammarButton 93
-        , wavePacketButton 93    
+        , wavePacketButton 93
         ]
 
 
@@ -414,8 +414,9 @@ label text_ =
 
 
 {- STYLE FUNCTIONS -}
-
 -- RWIDTH
+
+
 ribbonStyle color =
     [ style "width" "990px"
     , style "height" "20px"
@@ -483,7 +484,11 @@ parseResultsStyle =
 reRenderedLatexStyle =
     textStyle3 "400px" "600px" "20px" "#eee"
 
+
+
 -- RWIDTH
+
+
 renderedLatexStyle =
     textStyle3 "545px" "670px" "40px" "#eee"
 

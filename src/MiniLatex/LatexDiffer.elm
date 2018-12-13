@@ -10,10 +10,11 @@ import MiniLatex.Render2 as Render exposing (render)
 
 createRecord : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
 createRecord renderer latexState text =
-  createRecordWithSeed  0 renderer latexState text
+    createRecordWithSeed 0 renderer latexState text
+
 
 createRecordWithSeed : Int -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
-createRecordWithSeed  seed renderer latexState text =
+createRecordWithSeed seed renderer latexState text =
     let
         paragraphs =
             text
@@ -37,7 +38,7 @@ createRecordWithSeed  seed renderer latexState text =
         idList =
             makeIdListWithSeed seed paragraphs
     in
-    EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
+        EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
 
 
 makeIdList : List String -> List String
@@ -49,6 +50,7 @@ makeIdListWithSeed : Int -> List String -> List String
 makeIdListWithSeed seed paragraphs =
     List.range 1 (List.length paragraphs) |> List.map (Differ.prefixer seed)
 
+
 update :
     Int
     -> (LatexState -> List LatexExpression -> a)
@@ -57,9 +59,9 @@ update :
     -> String
     -> EditRecord a
 update seed renderLatexExpression renderString editRecord content =
+    -- ### LatexDiffer.update
     if Differ.isEmpty editRecord then
         createRecord renderLatexExpression emptyLatexState content
     else
-       content
-        |> Differ.update seed (renderString editRecord.latexState) editRecord
-
+        content
+            |> Differ.update seed (renderString editRecord.latexState) editRecord

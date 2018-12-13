@@ -78,9 +78,11 @@ renderString1 latexState str =
 -}
 renderString : LatexState -> String -> Html msg
 renderString latexState str =
+    -- ### Render2.renderString
     str
         |> Paragraph.logicalParagraphify
         |> List.map MiniLatex.Parser.parse
+        |> List.map spacify
         |> List.map (List.map (render latexState))
         |> List.map (\x -> Html.div [] x)
         |> Html.div []
@@ -258,6 +260,7 @@ to Html mgs
 -}
 renderLatexList : LatexState -> List LatexExpression -> Html msg
 renderLatexList latexState latexList =
+    -- ### Render2.renderLatexList
     latexList
         |> spacify
         |> List.map (render latexState)
@@ -266,6 +269,7 @@ renderLatexList latexState latexList =
 
 spacify : List LatexExpression -> List LatexExpression
 spacify latexList =
+    -- ### Reader2.spacify
     latexList
         |> ListMachine.run addSpace
 

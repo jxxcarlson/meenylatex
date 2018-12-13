@@ -1,4 +1,13 @@
-module MiniLatex.MiniLatex exposing (render, renderWithSeed, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord)
+module MiniLatex.MiniLatex
+    exposing
+        ( render
+        , renderWithSeed
+        , initializeEditRecord
+        , getRenderedText
+        , parse
+        , updateEditRecord
+        , emptyStringRecord
+        )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
 Most users will need only (1) the functions exposed in the `MiniLatex` module
@@ -28,7 +37,6 @@ import MiniLatex.Parser as MiniLatexParser exposing (LatexExpression)
 import MiniLatex.Render2 as Render
 
 
-
 -- exposing (render, renderString)
 
 
@@ -38,8 +46,6 @@ an HTML element or Html msg value corresponding to the MiniLatex source text
 are prepended to this string and are used by MathJax
 to render purely mathematical text. The `macros` string
 may be empty.
->
-
 -}
 render : String -> String -> Html msg
 render macroDefinitions text =
@@ -47,13 +53,15 @@ render macroDefinitions text =
         |> getRenderedText
         |> Html.div []
 
-{-|  Like render, but used the `seed` to define the ids for each paragraph.
+
+{-| Like render, but used the `seed` to define the ids for each paragraph.
 -}
-renderWithSeed  : Int -> String -> String -> Html msg
+renderWithSeed : Int -> String -> String -> Html msg
 renderWithSeed seed macroDefinitions text =
     MiniLatexDiffer.createRecordWithSeed seed Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
         |> getRenderedText
         |> Html.div []
+
 
 freshRender : String -> String -> Html msg
 freshRender macroDefinitions text =
@@ -88,7 +96,7 @@ getRenderedText editRecord =
         ids =
             editRecord.idList
     in
-    List.map2 (\para id -> Keyed.node "p" [ HA.id id, HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
+        List.map2 (\para id -> Keyed.node "p" [ HA.id id, HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
 
 
 {-| Create an EditRecord from a string of MiniLaTeX text.
@@ -171,5 +179,9 @@ because the "differ" used to detect changes is rather crude.
 -}
 updateEditRecord : Int -> EditRecord (Html msg) -> String -> EditRecord (Html msg)
 updateEditRecord seed editRecord text =
-   MiniLatexDiffer.update seed Render.renderLatexList Render.renderString editRecord text
-  --   MiniLatexDiffer.update seed Render.renderLatexList Render.renderString Differ.emptyHtmlMsgRecord text
+    -- ### updateEditRecord, MiniLatexDiffer.update
+    MiniLatexDiffer.update seed Render.renderLatexList Render.renderString editRecord text
+
+
+
+--   MiniLatexDiffer.update seed Render.renderLatexList Render.renderString Differ.emptyHtmlMsgRecord text

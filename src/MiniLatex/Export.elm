@@ -1,4 +1,4 @@
-module MiniLatex.Export exposing (transform, renderLatexList)
+module MiniLatex.Export exposing (transform)
 
 {-| This module is for preparing latex for export.
 

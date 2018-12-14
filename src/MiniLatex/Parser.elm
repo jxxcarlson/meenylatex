@@ -9,7 +9,6 @@ module MiniLatex.Parser
         , envName
         , word
         , latexExpression
-        , biblioExample
         )
 
 {-| This module is for quickly preparing latex for export.

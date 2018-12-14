@@ -26,6 +26,15 @@ import Maybe.Extra
 import MiniLatex.ParserTools as PT
 
 
+table =
+    """
+\\begin{tabular}
+A & B \\\\
+C & D \\\\
+\\end{tabular}
+"""
+
+
 {-| parse a string and render it to a tuple,
 where the first element is the string rendered
 back into Latex, and where the second element is the list
@@ -178,7 +187,7 @@ renderEnvironment : String -> List LatexExpression -> LatexExpression -> String
 renderEnvironment name args body =
     case Dict.get name renderEnvironmentDict of
         Just f ->
-            f body
+            f args body
 
         Nothing ->
             renderDefaultEnvironment name args body
@@ -193,12 +202,13 @@ renderDefaultEnvironment name args body =
         "\\begin{" ++ name ++ "}" ++ renderArgList args ++ "\n" ++ slimBody ++ "\n\\end{" ++ name ++ "}\n"
 
 
-renderEnvironmentDict : Dict.Dict String (LatexExpression -> String)
+renderEnvironmentDict : Dict.Dict String (List LatexExpression -> LatexExpression -> String)
 renderEnvironmentDict =
     Dict.fromList
-        [ ( "listing", \x -> renderListing x )
-        , ( "useforweb", \x -> renderUseForWeb x )
-        , ( "thebibliography", \x -> renderTheBibliography x )
+        [ ( "listing", \args body -> renderListing body )
+        , ( "useforweb", \args body -> renderUseForWeb body )
+        , ( "thebibliography", \args body -> renderTheBibliography body )
+        , ( "tabular", \args body -> renderTabular args body )
         ]
 
 
@@ -214,6 +224,35 @@ renderTheBibliography body =
     "\n\\begin{thebibliography}{abc}\n"
         ++ render body
         ++ "\n\\end{thebibliography}\n"
+
+
+renderTabular args body =
+    let
+        format =
+            renderArg 0 args
+    in
+        case body of
+            LatexList rows ->
+                rows
+                    |> List.map renderRow
+                    |> String.join "\n"
+                    |> (\x -> "\\begin{tabular}{" ++ format ++ "}\n" ++ x ++ "\n\\end{tabular}\n")
+
+            _ ->
+                "renderTabular: error"
+
+
+renderRow : LatexExpression -> String
+renderRow expr =
+    case expr of
+        LatexList cells ->
+            cells
+                |> List.map render
+                |> String.join " & "
+                |> (\x -> x ++ " \\\\")
+
+        _ ->
+            "renderRow: error"
 
 
 renderUseForWeb body =

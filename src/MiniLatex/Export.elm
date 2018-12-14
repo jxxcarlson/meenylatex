@@ -1,4 +1,4 @@
-module MiniLatex.Export exposing (transform)
+module MiniLatex.Export exposing (transform, renderLatexList)
 
 {-| This module is for preparing latex for export.
 
@@ -42,7 +42,7 @@ transform str =
         latex =
             parsand
                 |> List.map renderLatexList
-                |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
+                |> List.foldl (\par acc -> acc ++ "\n\n" ++ par) ""
 
         imageUrlList =
             parsand
@@ -198,6 +198,7 @@ renderEnvironmentDict =
     Dict.fromList
         [ ( "listing", \x -> renderListing x )
         , ( "useforweb", \x -> renderUseForWeb x )
+        , ( "thebibliography", \x -> renderTheBibliography x )
         ]
 
 
@@ -207,6 +208,12 @@ renderListing body =
             render body
     in
         "\n\\begin{verbatim}\n" ++ Utility.addLineNumbers text ++ "\n\\end{verbatim}\n"
+
+
+renderTheBibliography body =
+    "\n\\begin{thebibliography}{abc}\n"
+        ++ render body
+        ++ "\n\\end{thebibliography}\n"
 
 
 renderUseForWeb body =

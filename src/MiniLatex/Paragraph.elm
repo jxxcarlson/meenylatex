@@ -52,7 +52,7 @@ getBeginArg line =
                 Err _ ->
                     ""
     in
-    arg
+        arg
 
 
 getEndArg : String -> String
@@ -69,23 +69,19 @@ getEndArg line =
                 Err _ ->
                     ""
     in
-    arg
+        arg
 
 
 lineType : String -> LineType
 lineType line =
     if line == "" then
         Blank
-
-    else if line == "\\begin{thebibliography}" || line == "\\end{thebibliography}" then
-        Ignore
-
+        -- else if line == "\\begin{thebibliography}" || line == "\\end{thebibliography}" then
+        --     Ignore
     else if String.startsWith "\\begin" line then
         BeginBlock (getBeginArg line)
-
     else if String.startsWith "\\end" line then
         EndBlock (getEndArg line)
-
     else
         Text
 
@@ -135,15 +131,15 @@ getNextState line ( parserState, stack ) =
                 -- _ =
                 --    Debug.log "LINE" line
             in
-            case Stack.top nextStack of
-                Nothing ->
-                    -- ( InBlock arg1, nextStack )
-                    -- Debug.log "NOTHING"
-                    ( Start, nextStack )
+                case Stack.top nextStack of
+                    Nothing ->
+                        -- ( InBlock arg1, nextStack )
+                        -- Debug.log "NOTHING"
+                        ( Start, nextStack )
 
-                Just arg ->
-                    -- Debug.log "JUST ARG"
-                    ( InBlock arg, nextStack )
+                    Just arg ->
+                        -- Debug.log "JUST ARG"
+                        ( InBlock arg, nextStack )
 
         ( InParagraph, Text ) ->
             ( InParagraph, stack )
@@ -193,7 +189,6 @@ fixLine : String -> String
 fixLine line =
     if line == "" then
         "\n"
-
     else
         line
 
@@ -214,37 +209,37 @@ updateParserRecord line parserRecord =
         -- _ =
         --     Debug.log "line" line
     in
-    case nextState of
-        Start ->
-            { parserRecord
-                | currentParagraph = ""
-                , paragraphList = parserRecord.paragraphList ++ [ joinLines parserRecord.currentParagraph line ]
-                , state = nextState
-                , stack = nextStack
-            }
+        case nextState of
+            Start ->
+                { parserRecord
+                    | currentParagraph = ""
+                    , paragraphList = parserRecord.paragraphList ++ [ joinLines parserRecord.currentParagraph line ]
+                    , state = nextState
+                    , stack = nextStack
+                }
 
-        InParagraph ->
-            { parserRecord
-                | currentParagraph = joinLines parserRecord.currentParagraph line
-                , state = nextState
-                , stack = nextStack
-            }
+            InParagraph ->
+                { parserRecord
+                    | currentParagraph = joinLines parserRecord.currentParagraph line
+                    , state = nextState
+                    , stack = nextStack
+                }
 
-        InBlock arg ->
-            { parserRecord
-                | currentParagraph = joinLines parserRecord.currentParagraph (fixLine line)
-                , state = nextState
-                , stack = nextStack
-            }
+            InBlock arg ->
+                { parserRecord
+                    | currentParagraph = joinLines parserRecord.currentParagraph (fixLine line)
+                    , state = nextState
+                    , stack = nextStack
+                }
 
-        IgnoreLine ->
-            { parserRecord
-                | state = nextState
-                , stack = nextStack
-            }
+            IgnoreLine ->
+                { parserRecord
+                    | state = nextState
+                    , stack = nextStack
+                }
 
-        Error ->
-            { parserRecord | stack = nextStack }
+            Error ->
+                { parserRecord | stack = nextStack }
 
 
 logicalParagraphParse : String -> ParserRecord
@@ -257,7 +252,7 @@ logicalParagraphParse text =
 {-| logicalParagraphify text: split text into logical
 parapgraphs, where these are either normal paragraphs, i.e.,
 blocks text with no blank lines surrounded by blank lines,
-or outer blocks of the form \\begin{_} ... \\end{_}.
+or outer blocks of the form \begin{*} ... \end{*}.
 -}
 logicalParagraphify : String -> List String
 logicalParagraphify text =
@@ -265,10 +260,10 @@ logicalParagraphify text =
         lastState =
             logicalParagraphParse text
     in
-    lastState.paragraphList
-        ++ [ lastState.currentParagraph ]
-        |> List.filter (\x -> x /= "")
-        |> List.map (\paragraph -> String.trim paragraph ++ "\n\n")
+        lastState.paragraphList
+            ++ [ lastState.currentParagraph ]
+            |> List.filter (\x -> x /= "")
+            |> List.map (\paragraph -> String.trim paragraph ++ "\n\n")
 
 
 para : Regex.Regex

@@ -343,6 +343,7 @@ renderMacroDict =
         , ( "index", \x y z -> renderIndex x z )
         , ( "italic", \x y z -> renderItalic x z )
         , ( "label", \x y z -> renderLabel x z )
+        , ( "maintableofcontents", \x y z -> renderMainTableOfContents x z )
         , ( "maketitle", \x y z -> renderMakeTitle x z )
         , ( "mdash", \x y z -> renderMdash x z )
         , ( "ndash", \x y z -> renderNdash x z )
@@ -1068,6 +1069,11 @@ renderDate latexState args =
 
 renderRevision : LatexState -> List LatexExpression -> Html msg
 renderRevision latexState args =
+    Html.span [] []
+
+
+renderMainTableOfContents : LatexState -> List LatexExpression -> Html msg
+renderMainTableOfContents latexState args =
     Html.span [] []
 
 

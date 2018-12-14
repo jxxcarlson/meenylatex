@@ -1,8 +1,16 @@
-module MiniLatex.Parser exposing
-    ( LatexExpression(..), macro, parse, defaultLatexList
-    , latexList, endWord, envName, word
-    , latexExpression
-    )
+module MiniLatex.Parser
+    exposing
+        ( LatexExpression(..)
+        , macro
+        , parse
+        , defaultLatexList
+        , latexList
+        , endWord
+        , envName
+        , word
+        , latexExpression
+        , biblioExample
+        )
 
 {-| This module is for quickly preparing latex for export.
 
@@ -18,7 +26,6 @@ import Dict
 import MiniLatex.ParserHelpers as PH exposing (..)
 import Parser exposing (..)
 import Set
-
 
 
 {- ELLIE: https://ellie-app.com/pcB5b3BPfa1/0
@@ -44,6 +51,7 @@ type LatexExpression
     | NewCommand String Int LatexExpression
     | LXError (List DeadEnd)
 
+
 {-| Transform a string into a list of LatexExpressions
 -}
 parse : String -> List LatexExpression
@@ -52,15 +60,15 @@ parse text =
         expr =
             Parser.run latexList text
     in
-    case expr of
-        Ok (LatexList list) ->
-            list
+        case expr of
+            Ok (LatexList list) ->
+                list
 
-        Err error ->
-            [ LXError error ]
+            Err error ->
+                [ LXError error ]
 
-        _ ->
-            [ LXString "yada!" ]
+            _ ->
+                [ LXString "yada!" ]
 
 
 parse2 : String -> LatexExpression
@@ -73,7 +81,7 @@ parse2 text =
             LXError error
 
 
-{-| Production: $ LatexList &\\Rightarrow LatexExpression^+ $
+{-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
 -}
 latexList : Parser LatexExpression
 latexList =
@@ -84,7 +92,7 @@ latexList =
         |> map LatexList
 
 
-{-| Production: $ LatexExpression &\\Rightarrow Words\\ |\\ Comment\\ |\\ IMath\\ |\\ DMath\\ |\\ Macro\\ |\\ Env $
+{-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment\ |\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
 -}
 latexExpression : Parser LatexExpression
 latexExpression =
@@ -93,7 +101,7 @@ latexExpression =
         , displayMathDollar
         , displayMathBrackets
         , inlineMath ws
-        , newcommand 
+        , newcommand
         , macro ws
         , smacro
         , words
@@ -224,7 +232,7 @@ inTableCellWord c =
 
 
 
-{- TEX COMMENTS -}  
+{- TEX COMMENTS -}
 
 
 texComment : Parser LatexExpression
@@ -247,39 +255,44 @@ texComment =
 -- type alias Macro2 =
 --     String (List LatexExpression) (List LatexExpression)
 
-newcommand : Parser LatexExpression 
-newcommand = 
-  succeed NewCommand 
-    |. symbol "\\newcommand{"
-    |= macroName
-    |. symbol "}"
-    |= numberOfArgs
-    |= arg
-    |. ws 
 
-numberOfArgs_ : Parser Int 
+newcommand : Parser LatexExpression
+newcommand =
+    succeed NewCommand
+        |. symbol "\\newcommand{"
+        |= macroName
+        |. symbol "}"
+        |= numberOfArgs
+        |= arg
+        |. ws
+
+
+numberOfArgs_ : Parser Int
 numberOfArgs_ =
-  succeed identity 
-    |. symbol "["
-    |= int 
-    |. symbol "]"
+    succeed identity
+        |. symbol "["
+        |= int
+        |. symbol "]"
 
 
 numberOfArgs : Parser Int
-numberOfArgs = 
-  many numberOfArgs_
-    |> map List.head
-    |> map (Maybe.withDefault 0) 
+numberOfArgs =
+    many numberOfArgs_
+        |> map List.head
+        |> map (Maybe.withDefault 0)
 
--- numberOfArgs : Parser Int 
+
+
+-- numberOfArgs : Parser Int
 -- numberOfArgs =
 --   let
---     listOfIntegers = many numberOfArgs_ 
+--     listOfIntegers = many numberOfArgs_
 --    in
---      if listOfIntegers ==  [] then 
+--      if listOfIntegers ==  [] then
 --        0
 --      else
 --        (List.head listOfIntegers) |> Maybe.withDefault 0
+
 
 {-| Parse the macro keyword followed by
 zero or more optional follwed by zero or more more eventual nominnees.
@@ -387,7 +400,7 @@ displayMathBrackets =
 
 
 {-| Capture the name of the environment in
-a \\begin{ENV} ... \\end{ENV}
+a \begin{ENV} ... \end{ENV}
 pair
 -}
 envName : Parser String
@@ -424,11 +437,10 @@ environmentOfType envType =
         envKind =
             if List.member envType [ "equation", "align", "eqnarray", "verbatim", "listing", "verse" ] then
                 "passThrough"
-
             else
                 envType
     in
-    environmentParser envKind theEndWord envType
+        environmentParser envKind theEndWord envType
 
 
 
@@ -450,6 +462,7 @@ parseEnvironmentDict =
     Dict.fromList
         [ ( "enumerate", \endWoord envType -> itemEnvironmentBody endWoord envType )
         , ( "itemize", \endWoord envType -> itemEnvironmentBody endWoord envType )
+        , ( "thebibliography", \endWoord envType -> biblioEnvironmentBody endWoord envType )
         , ( "tabular", \endWoord envType -> tabularEnvironmentBody endWoord envType )
         , ( "passThrough", \endWoord envType -> passThroughBody endWoord envType )
         ]
@@ -501,6 +514,31 @@ itemEnvironmentBody endWoord envType =
         |. ws
         |> map LatexList
         |> map (Environment envType [])
+
+
+biblioEnvironmentBody : String -> String -> Parser LatexExpression
+biblioEnvironmentBody endWoord envType =
+    ---  inContext "itemEnvironmentBody" <|
+    succeed identity
+        |. ws
+        |= itemList smacro
+        |. ws
+        |. symbol endWoord
+        |. ws
+        |> map LatexList
+        |> map (Environment envType [])
+
+
+biblioExample =
+    """
+\\begin{thebibliography}
+
+\\bibitem{X} ABCD
+
+\\bibitem{Y} EFGH
+
+\\end{thebibliography}
+"""
 
 
 item : Parser LatexExpression

@@ -22,6 +22,7 @@ type ParserState
     = Start
     | InParagraph
     | InBlock String
+    | InMathBlock
     | IgnoreLine
     | Error
 
@@ -32,6 +33,7 @@ type LineType
     | Text
     | BeginBlock String
     | EndBlock String
+    | MathBlock
 
 
 type alias ParserRecord =
@@ -82,6 +84,8 @@ lineType line =
         BeginBlock (getBeginArg line)
     else if String.startsWith "\\end" line then
         EndBlock (getEndArg line)
+    else if String.startsWith "$$" line then
+        MathBlock
     else
         Text
 
@@ -101,6 +105,9 @@ getNextState line ( parserState, stack ) =
         ( Start, BeginBlock arg ) ->
             ( InBlock arg, Stack.push arg stack )
 
+        ( Start, MathBlock ) ->
+            ( InMathBlock, stack )
+
         ( Start, Ignore ) ->
             ( IgnoreLine, stack )
 
@@ -113,11 +120,17 @@ getNextState line ( parserState, stack ) =
         ( IgnoreLine, BeginBlock arg ) ->
             ( InBlock arg, Stack.push arg stack )
 
+        ( IgnoreLine, MathBlock ) ->
+            ( InMathBlock, stack )
+
         ( InBlock arg, Blank ) ->
             ( InBlock arg, stack )
 
         ( InBlock arg, Text ) ->
             ( InBlock arg, stack )
+
+        ( InBlock arg, MathBlock ) ->
+            ( InMathBlock, stack )
 
         ( InBlock arg, BeginBlock arg2 ) ->
             ( InBlock arg, Stack.push arg2 stack )
@@ -125,20 +138,13 @@ getNextState line ( parserState, stack ) =
         ( InBlock arg1, EndBlock arg2 ) ->
             let
                 ( nextStack, line_ ) =
-                    -- Debug.log "POP"
                     ( Stack.pop stack, line )
-
-                -- _ =
-                --    Debug.log "LINE" line
             in
                 case Stack.top nextStack of
                     Nothing ->
-                        -- ( InBlock arg1, nextStack )
-                        -- Debug.log "NOTHING"
                         ( Start, nextStack )
 
                     Just arg ->
-                        -- Debug.log "JUST ARG"
                         ( InBlock arg, nextStack )
 
         ( InParagraph, Text ) ->
@@ -147,20 +153,26 @@ getNextState line ( parserState, stack ) =
         ( InParagraph, BeginBlock str ) ->
             ( InParagraph, Stack.push str stack )
 
+        ( InParagraph, MathBlock ) ->
+            ( InMathBlock, stack )
+
         ( InParagraph, EndBlock arg ) ->
             ( Error, stack )
 
-        -- let
-        --     nextStack =
-        --         Stack.pop stack
-        -- in
-        -- case Stack.top nextStack of
-        --     Nothing ->
-        --         ( Start, nextStack )
-        --     Just arg_ ->
-        --         ( InParagraph, nextStack )
         ( InParagraph, Blank ) ->
             ( Start, stack )
+
+        ( InMathBlock, BeginBlock str ) ->
+            ( InMathBlock, stack )
+
+        ( InMathBlock, EndBlock str ) ->
+            ( InMathBlock, stack )
+
+        ( InMathBlock, MathBlock ) ->
+            ( Start, stack )
+
+        ( InMathBlock, _ ) ->
+            ( InMathBlock, stack )
 
         ( _, _ ) ->
             ( Error, stack )
@@ -201,13 +213,9 @@ updateParserRecord : String -> ParserRecord -> ParserRecord
 updateParserRecord line parserRecord =
     let
         ( nextState, nextStack ) =
-            -- Debug.log "S,S"
             getNextState
                 line
                 ( parserRecord.state, parserRecord.stack )
-
-        -- _ =
-        --     Debug.log "line" line
     in
         case nextState of
             Start ->
@@ -219,6 +227,13 @@ updateParserRecord line parserRecord =
                 }
 
             InParagraph ->
+                { parserRecord
+                    | currentParagraph = joinLines parserRecord.currentParagraph line
+                    , state = nextState
+                    , stack = nextStack
+                }
+
+            InMathBlock ->
                 { parserRecord
                     | currentParagraph = joinLines parserRecord.currentParagraph line
                     , state = nextState

@@ -205,7 +205,11 @@ inlineMathText str =
 
 displayMathText : String -> Html msg
 displayMathText str =
-    mathText <| "$$\n" ++ String.trim str ++ "\n$$"
+    let
+        str2 =
+            String.trim str
+    in
+        mathText <| "$$\n" ++ str2 ++ "\n$$"
 
 
 

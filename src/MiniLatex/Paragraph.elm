@@ -37,7 +37,11 @@ type LineType
 
 
 type alias ParserRecord =
-    { currentParagraph : String, paragraphList : List String, state : ParserState, stack : Stack String }
+    { currentParagraph : String
+    , paragraphList : List String
+    , state : ParserState
+    , stack : Stack String
+    }
 
 
 getBeginArg : String -> String
@@ -106,8 +110,13 @@ getNextState line ( parserState, stack ) =
             ( InBlock arg, Stack.push arg stack )
 
         ( Start, MathBlock ) ->
-            ( InMathBlock, stack )
+            if String.endsWith "$$" (String.dropLeft 2 line) then
+                ( Start, stack )
+            else
+                ( InMathBlock, stack )
 
+        -- ( Start, MathBlock ) ->
+        --     ( InMathBlock, stack )
         ( Start, Ignore ) ->
             ( IgnoreLine, stack )
 
@@ -172,7 +181,10 @@ getNextState line ( parserState, stack ) =
             ( Start, stack )
 
         ( InMathBlock, _ ) ->
-            ( InMathBlock, stack )
+            if String.endsWith "$$" (String.dropLeft 2 line) then
+                ( Start, stack )
+            else
+                ( InMathBlock, stack )
 
         ( _, _ ) ->
             ( Error, stack )

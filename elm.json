@@ -1,7 +1,7 @@
 {
     "type": "package",
     "name": "jxxcarlson/meenylatex",
-    "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change witout notice.",
+    "summary": "EXPERIMENTAL version of the MiniLatex package.  API can change without notice.",
     "license": "BSD-3-Clause",
     "version": "7.0.8",
     "exposed-modules": [

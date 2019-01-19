@@ -1354,7 +1354,7 @@ renderAlignEnvironment latexState body =
                 ""
 
         content =
-            "\n\\begin{align}\n" ++ addendum ++ r ++ "\n\\end{align}\n"
+            "\n\\begin{align*}\n" ++ addendum ++ r ++ "\n\\end{align*}\n"
     in
         displayMathText content
 

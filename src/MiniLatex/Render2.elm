@@ -521,7 +521,14 @@ renderIFrame latexState args =
             MiniLatex.Render.renderArg 1 latexState args
     in
         -- Html.a [ HA.href url, HA.target "_blank" ] [ Html.text title ]
-        Html.iframe [ HA.src url, HA.width 500, HA.height 600 ] [ Html.text title ]
+        Html.iframe
+            [ HA.src url
+            , HA.width 400
+            , HA.height 500
+            , HA.attribute "Content-Type" "application/pdf"
+            , HA.attribute "Content-Disposition" "inline"
+            ]
+            [ Html.text title ]
 
 
 renderEqRef : LatexState -> List LatexExpression -> Html msg
@@ -1450,7 +1457,7 @@ renderMacros latexState body =
 
 renderQuotation : LatexState -> LatexExpression -> Html msg
 renderQuotation latexState body =
-    Html.div [ HA.class "quotation" ] [ render latexState body ]
+    Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render latexState body ]
 
 
 renderTabular : LatexState -> LatexExpression -> Html msg

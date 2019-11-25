@@ -1,10 +1,10 @@
-module MiniLatex.LatexDiffer exposing (createRecord, createRecordWithSeed, update)
+module Internal.LatexDiffer exposing (createRecord, createRecordWithSeed, update)
 
-import MiniLatex.Accumulator as Accumulator
-import MiniLatex.Differ as Differ exposing (EditRecord)
-import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
-import MiniLatex.Paragraph as Paragraph
-import MiniLatex.Parser exposing (LatexExpression)
+import Internal.Accumulator as Accumulator
+import Internal.Differ as Differ exposing (EditRecord)
+import Internal.LatexState exposing (LatexState, emptyLatexState)
+import Internal.Paragraph as Paragraph
+import Internal.Parser exposing (LatexExpression)
 import MiniLatex.Render2 as Render exposing (render)
 
 

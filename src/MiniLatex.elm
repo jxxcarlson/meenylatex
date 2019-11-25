@@ -30,11 +30,11 @@ for an explanation of the theory behind the MiniLatex package.
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Keyed as Keyed
-import MiniLatex.Differ as Differ exposing (EditRecord)
-import MiniLatex.LatexDiffer as MiniLatexDiffer
-import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
-import MiniLatex.Paragraph as Paragraph
-import MiniLatex.Parser as MiniLatexParser exposing (LatexExpression)
+import Internal.Differ as Differ exposing (EditRecord)
+import Internal.LatexDiffer as MiniLatexDiffer
+import Internal.LatexState exposing (LatexState, emptyLatexState)
+import Internal.Paragraph as Paragraph
+import Internal.Parser as MiniLatexParser exposing (LatexExpression)
 import MiniLatex.Render2 as Render
 
 
@@ -108,7 +108,7 @@ The `seed` is used for creating id's for rendered paragraphs
 in order to help Elm's runtime optimize diffing for rendering
 text.
 
-> editRecord = MiniLatex.initialize source
+> editRecord = Internal.initialize source
 
         { paragraphs =
             [ "\\italic{Test:}\n\n"
@@ -133,7 +133,7 @@ text.
             }
         , idList = []
         , idListStart = 0
-        } : MiniLatex.Differ.EditRecord
+        } : Internal.Differ.EditRecord
 
 -}
 initializeEditRecord : Int -> String -> EditRecord (Html msg)

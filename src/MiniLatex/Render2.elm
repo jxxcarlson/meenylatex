@@ -21,11 +21,11 @@ import Dict
 import Html exposing (Attribute, Html)
 import Html.Attributes as HA
 import Json.Encode
-import MiniLatex.Configuration as Configuration
-import MiniLatex.ErrorMessages as ErrorMessages
-import MiniLatex.Image as Image exposing (..)
-import MiniLatex.JoinStrings as JoinStrings
-import MiniLatex.LatexState
+import Configuration
+import Internal.ErrorMessages as ErrorMessages
+import Internal.Image as Image exposing (..)
+import Internal.JoinStrings as JoinStrings
+import Internal.LatexState
     exposing
         ( LatexState
         , TocEntry
@@ -34,16 +34,16 @@ import MiniLatex.LatexState
         , getCrossReference
         , getDictionaryItem
         )
-import MiniLatex.ListMachine as ListMachine
-import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import MiniLatex.ParserTools as PT
+import Internal.ListMachine as ListMachine
+import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import Internal.ParserTools as PT
 import MiniLatex.Render
-import MiniLatex.Utility as Utility
+import Internal.Utility as Utility
 import Parser exposing (DeadEnd, Problem(..))
 import Regex
 import String
-import MiniLatex.Macro as Macro
-import MiniLatex.Paragraph as Paragraph
+import Internal.Macro as Macro
+import Internal.Paragraph as Paragraph
 
 
 -- |> \str -> "\n<p>" ++ str ++ "</p>\n"
@@ -69,7 +69,7 @@ It does not execute `spacify`, which is a problem.
 renderString1 : LatexState -> String -> Html msg
 renderString1 latexState str =
     str
-        |> MiniLatex.Parser.parse
+        |> Internal.Parser.parse
         |> List.map (render latexState)
         |> Html.div []
 
@@ -81,7 +81,7 @@ renderString latexState str =
     -- ### Render2.renderString
     str
         |> Paragraph.logicalParagraphify
-        |> List.map MiniLatex.Parser.parse
+        |> List.map Internal.Parser.parse
         |> List.map spacify
         |> List.map (List.map (render latexState))
         |> List.map (\x -> Html.div [] x)

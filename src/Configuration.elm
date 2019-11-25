@@ -1,4 +1,4 @@
-module MiniLatex.Configuration exposing (client)
+module Configuration exposing (client)
 
 
 client : String

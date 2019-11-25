@@ -4,8 +4,8 @@ module ParserHelperTest exposing (suite)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import MiniLatex.ParserHelpers exposing (..)
-import MiniLatex.TestParser exposing (..)
+import Internal.ParserHelpers exposing (..)
+import Internal.TestParser exposing (..)
 import Parser exposing (run)
 import Test exposing (..)
 

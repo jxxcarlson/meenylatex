@@ -1,7 +1,7 @@
 module Types exposing (..)
 
-import MiniLatex.Parser exposing (LatexExpression)
-import MiniLatex.Differ exposing (EditRecord)
+import Internal.Parser exposing (LatexExpression)
+import Internal.Differ exposing (EditRecord)
 import Html exposing (Html)
 import Time exposing (Posix)
 

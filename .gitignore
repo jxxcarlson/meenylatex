@@ -9,5 +9,6 @@ elm-package.json
 scratch.md
 demo/Main.js
 dist/
-src/MiniLatex/Example.elm
+src/Internal/Example.elm
 .idea/
+tests/VerifyExamples/

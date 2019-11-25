@@ -1,7 +1,7 @@
-module MiniLatex.Accumulator exposing (latexStateReducer, latexStateReducerAux, parse, render)
+module Internal.Accumulator exposing (latexStateReducer, latexStateReducerAux, parse, render)
 
 import Dict
-import MiniLatex.LatexState
+import Internal.LatexState
     exposing
         ( Counters
         , CrossReferences
@@ -13,9 +13,9 @@ import MiniLatex.LatexState
         , setDictionaryItem
         , updateCounter
         )
-import MiniLatex.Parser as Parser exposing (LatexExpression(..), macro)
+import Internal.Parser as Parser exposing (LatexExpression(..), macro)
 import MiniLatex.Render2 as Render exposing (renderLatexList)
-import MiniLatex.StateReducerHelpers2 as SRH2
+import Internal.StateReducerHelpers2 as SRH2
 
 
 {-| Given an initial state and list of inputs of type a,

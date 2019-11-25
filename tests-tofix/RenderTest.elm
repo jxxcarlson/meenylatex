@@ -1,8 +1,8 @@
 module RenderTest exposing (..)
 
-import MiniLatex.Parser exposing (..)
+import Internal.Parser exposing (..)
 import MiniLatex.Render exposing (..)
-import MiniLatex.LatexState
+import Internal.LatexState
 import Parser exposing (run)
 
 
@@ -13,9 +13,9 @@ import Fuzz exposing (Fuzzer, list, int, string)
 import Test exposing (..)
 
 
-renderString2 : Parser.Parser MiniLatex.Parser.LatexExpression -> String -> String
+renderString2 : Parser.Parser Internal.Parser.LatexExpression -> String -> String
 renderString2 parser str =
-    renderString parser MiniLatex.LatexState.emptyLatexState str
+    renderString parser Internal.LatexState.emptyLatexState str
 
 
 suite : Test

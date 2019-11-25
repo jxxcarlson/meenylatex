@@ -1,14 +1,16 @@
-module MiniLatex.Parser
+module Internal.Parser
     exposing
-        ( LatexExpression(..)
-        , macro
+        (  macro
         , parse
         , defaultLatexList
         , latexList
+        , newcommand
         , endWord
         , envName
+        , numberOfArgs
         , word
         , latexExpression
+        , LatexExpression(..)
         )
 
 {-| This module is for quickly preparing latex for export.
@@ -22,7 +24,7 @@ module MiniLatex.Parser
 -}
 
 import Dict
-import MiniLatex.ParserHelpers as PH exposing (..)
+import Internal.ParserHelpers as PH exposing (..)
 import Parser exposing (..)
 import Set
 
@@ -33,7 +35,6 @@ import Set
 
 -}
 {- End of Has Math code -}
-
 
 {-| The type for the Abstract syntax tree
 -}
@@ -51,7 +52,11 @@ type LatexExpression
     | LXError (List DeadEnd)
 
 
+
 {-| Transform a string into a list of LatexExpressions
+
+    parse "Pythagoras: $a^2 + b^2 = c^2$"
+    --> [LXString ("Pythagoras: "),InlineMath ("a^2 + b^2 = c^2")]
 -}
 parse : String -> List LatexExpression
 parse text =
@@ -67,17 +72,9 @@ parse text =
                 [ LXError error ]
 
             _ ->
-                [ LXString "yada!" ]
+                [ LXString "Dude! not great code here." ]
 
 
-parse2 : String -> LatexExpression
-parse2 text =
-    case Parser.run latexExpression text of
-        Ok expr ->
-            expr
-
-        Err error ->
-            LXError error
 
 
 {-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
@@ -153,6 +150,14 @@ notSpaceOrSpecialCharacters c =
 
 
 {-| Use `inWord` to parse a word.
+
+   import Parser
+
+   inWord : Char -> Bool
+   inWord c = not (c == ' ')
+
+   Parser.run word "this is a test"
+   --> Ok "this"
 -}
 word : (Char -> Bool) -> Parser String
 word inWord =
@@ -175,7 +180,6 @@ macroArgWords =
     nonEmptyItemList macroArgWord
         |> map (String.join " ")
         |> map LXString
-
 
 macroArgWord : Parser String
 macroArgWord =
@@ -247,14 +251,21 @@ texComment =
 
 
 
-{- MACROS -}
-{- NOTE: macro sequences should be of the form "" followed by alphabetic characters,
+{- MACROS -
+   NOTE: macro sequences should be of the form "" followed by alphabetic characters,
    but not equal to certain reserved words, e.g., "\begin", "\end", "\item"
 -}
--- type alias Macro2 =
---     String (List LatexExpression) (List LatexExpression)
 
 
+{-| Parse the macro keyword followed by
+zero or more optional followed by zero or more more eventual arguments.
+
+    import Parser
+
+    Parser.run newcommand "\\newcommand{\\hello}[1]{Hello \\strong{#1}!}"
+    --> Ok (NewCommand "hello" 1 (LatexList [LXString "Hello ",Macro "strong" [] [LatexList [LXString "#1"]],LXString "!"]))
+
+-}
 newcommand : Parser LatexExpression
 newcommand =
     succeed NewCommand
@@ -273,7 +284,13 @@ numberOfArgs_ =
         |= int
         |. symbol "]"
 
+{-|
+    import Parser
 
+    Parser.run numberOfArgs "[3]"
+    --> Ok 3
+
+-}
 numberOfArgs : Parser Int
 numberOfArgs =
     many numberOfArgs_
@@ -281,24 +298,18 @@ numberOfArgs =
         |> map (Maybe.withDefault 0)
 
 
-
--- numberOfArgs : Parser Int
--- numberOfArgs =
---   let
---     listOfIntegers = many numberOfArgs_
---    in
---      if listOfIntegers ==  [] then
---        0
---      else
---        (List.head listOfIntegers) |> Maybe.withDefault 0
-
-
 {-| Parse the macro keyword followed by
-zero or more optional follwed by zero or more more eventual nominnees.
+zero or more optional followed by zero or more more eventual arguments.
+
+    import Parser
+    import Internal.ParserHelpers as PH
+
+    Parser.run (macro PH.ws) "\\hello}[1]{Hello \\strong{#1}!}"
+    --> Ok (Macro "hello" [] [])g
+
 -}
 macro : Parser () -> Parser LatexExpression
 macro wsParser =
-    --  "macro" <|
     succeed Macro
         |= macroName
         |= itemList optionalArg
@@ -310,7 +321,6 @@ macro wsParser =
 -}
 optionalArg : Parser LatexExpression
 optionalArg =
-    -- inContext "optionalArg" <|
     succeed identity
         |. symbol "["
         |= itemList (oneOf [ optionArgWords, inlineMath PH.spaces ])

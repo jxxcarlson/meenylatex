@@ -1,7 +1,7 @@
-module MiniLatex.LatexState exposing (..)
+module Internal.LatexState exposing (..)
 
 import Dict
-import MiniLatex.Parser exposing(LatexExpression)
+import Internal.Parser exposing(LatexExpression)
 
 {- TYPES AND DEFAULT VALJUES -}
 

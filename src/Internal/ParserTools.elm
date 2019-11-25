@@ -1,9 +1,9 @@
-module MiniLatex.ParserTools exposing (..)
+module Internal.ParserTools exposing (..)
 
-{- Some of these functoins are used by MiniLatex.Accumulator -}
+{- Some of these functoins are used by Internal.Accumulator -}
 
-import MiniLatex.Parser as MP exposing (LatexExpression(..))
-import MiniLatex.Utility as Utility
+import Internal.Parser as MP exposing (LatexExpression(..))
+import Internal.Utility as Utility
 
 
 {-| List.filter (isMacro "label") latexList returns

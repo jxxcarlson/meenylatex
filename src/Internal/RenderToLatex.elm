@@ -1,4 +1,4 @@
-module MiniLatex.RenderToLatex
+module Internal.RenderToLatex
     exposing
         ( render
         , renderBackToLatex
@@ -16,12 +16,12 @@ module MiniLatex.RenderToLatex
 
 -}
 
-import MiniLatex.ErrorMessages as ErrorMessages
-import MiniLatex.JoinStrings as JoinStrings
-import MiniLatex.Paragraph
-import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import Internal.ErrorMessages as ErrorMessages
+import Internal.JoinStrings as JoinStrings
+import Internal.Paragraph
+import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Parser
-import MiniLatex.Utility as Utility
+import Internal.Utility as Utility
 
 
 {-| parse a stringg and render it back into Latex
@@ -29,8 +29,8 @@ import MiniLatex.Utility as Utility
 renderBackToLatex : String -> String
 renderBackToLatex str =
     str
-        |> MiniLatex.Paragraph.logicalParagraphify
-        |> List.map MiniLatex.Parser.parse
+        |> Internal.Paragraph.logicalParagraphify
+        |> List.map Internal.Parser.parse
         |> List.map renderLatexList
         |> List.foldl (\par acc -> acc ++ par ++ "\n\n") ""
 

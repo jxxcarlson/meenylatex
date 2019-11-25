@@ -22,12 +22,12 @@ import Dict
 
 -- import List.Extra
 
-import MiniLatex.Configuration as Configuration
-import MiniLatex.ErrorMessages as ErrorMessages
-import MiniLatex.Html as Html
-import MiniLatex.Image as Image exposing (..)
-import MiniLatex.JoinStrings as JoinStrings
-import MiniLatex.LatexState
+import Configuration
+import Internal.ErrorMessages as ErrorMessages
+import Internal.Html as Html
+import Internal.Image as Image exposing (..)
+import Internal.JoinStrings as JoinStrings
+import Internal.LatexState
     exposing
         ( LatexState
         , TocEntry
@@ -36,8 +36,8 @@ import MiniLatex.LatexState
         , getCrossReference
         , getDictionaryItem
         )
-import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import MiniLatex.Utility as Utility
+import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import Internal.Utility as Utility
 import Parser
 import Regex
 import String

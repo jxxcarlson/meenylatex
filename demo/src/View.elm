@@ -7,11 +7,11 @@ import Html.Keyed as Keyed
 import Http
 import Types exposing (..)
 import String
-import MiniLatex.Parser exposing (LatexExpression)
-import MiniLatex.MiniLatex as MiniLatex
+import Internal.Parser exposing (LatexExpression)
+import Internal.MiniLatex as MiniLatex
 import MiniLatex.Export as Export
 import Json.Encode as Encode
-import MiniLatex.Paragraph
+import Internal.Paragraph
 
 
 {- Word count -}
@@ -204,7 +204,7 @@ parseResultPane model =
 rawRenderedSourcePane model =
     let
         renderedText =
-            MiniLatex.getRenderedText model.editRecord
+            Internal.getRenderedText model.editRecord
     in
         pre
             parseResultsStyle
@@ -214,11 +214,11 @@ rawRenderedSourcePane model =
 renderToLatexPane model =
     let
         -- rerenderedText =
-        --     MiniLatex.RenderToLatex.renderBackToLatex model.sourceText
+        --     Internal.RenderToLatex.renderBackToLatex model.sourceText
         rerenderedText =
             Export.transform model.sourceText |> Tuple.first
 
-        --|> MiniLatex.RenderToLatex.eval
+        --|> Internal.RenderToLatex.eval
     in
         pre
             reRenderedLatexStyle
@@ -233,7 +233,7 @@ exportLatexPane model =
 
 renderedSourcePane : Model (Html msg) -> Html msg
 renderedSourcePane model =
-    MiniLatex.getRenderedText model.editRecord
+    Internal.getRenderedText model.editRecord
         |> List.map (\x -> Html.div [ Attr.style "margin-bottom" "0.65em" ] [ x ])
         |> Html.div []
 

@@ -10,7 +10,7 @@ has mathmode t4ext
 
 -}
 
-import MiniLatex.Parser exposing (LatexExpression(..))
+import Internal.Parser exposing (LatexExpression(..))
 
 
 {- Has Math code -}

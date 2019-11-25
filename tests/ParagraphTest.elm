@@ -4,7 +4,7 @@ module ParagraphTest exposing (suite)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import MiniLatex.Paragraph exposing (logicalParagraphify)
+import Internal.Paragraph exposing (logicalParagraphify)
 import Test exposing (..)
 
 

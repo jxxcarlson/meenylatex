@@ -1,4 +1,4 @@
-module MiniLatex.Differ
+module Internal.Differ
     exposing
         ( EditRecord
         , emptyStringRecord
@@ -16,15 +16,15 @@ comparing the old and new lists of paragraphs, noting the changes,
 then parsing and rendering the changed paragraphs.
 
 
-# API
+# APIw
 
 @docs EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, createRecord, diff, prefixer, update, simpleDifferentialRender
 
 -}
 
 import Html exposing (Html)
-import MiniLatex.LatexState exposing (LatexState, emptyLatexState)
-import MiniLatex.Paragraph as Paragraph
+import Internal.LatexState exposing (LatexState, emptyLatexState)
+import Internal.Paragraph as Paragraph
 
 
 {- TYPES -}

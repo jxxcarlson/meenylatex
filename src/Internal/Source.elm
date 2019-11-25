@@ -1,4 +1,4 @@
-module MiniLatex.Source exposing (texPrefix, texSuffix)
+module Internal.Source exposing (texPrefix, texSuffix)
 
 {-| This module provides boilerplate
 

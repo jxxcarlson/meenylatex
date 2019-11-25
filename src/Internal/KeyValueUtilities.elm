@@ -1,11 +1,11 @@
-module MiniLatex.KeyValueUtilities exposing(..)
+module Internal.KeyValueUtilities exposing(..)
 
 -- exposing (getKeyValueList, getValue)
 
 import Char
 import Parser exposing (..)
-import MiniLatex.ParserHelpers exposing (itemList)
-import MiniLatex.Parser exposing (word)
+import Internal.ParserHelpers exposing (itemList)
+import Internal.Parser exposing (word)
 
 
 -- type alias KeyValuePair =

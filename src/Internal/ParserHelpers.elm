@@ -1,4 +1,4 @@
-module MiniLatex.ParserHelpers exposing
+module Internal.ParserHelpers exposing
     ( between
     , braces
     , brackets

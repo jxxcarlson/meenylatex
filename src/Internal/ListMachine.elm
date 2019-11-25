@@ -1,5 +1,5 @@
  
-module MiniLatex.ListMachine exposing(run, State)  
+module Internal.ListMachine exposing(run, State)
 
 {-| 
 

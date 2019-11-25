@@ -9,8 +9,8 @@ module MiniLatex.FastExport exposing (transform)
 
 -}
 
-import MiniLatex.JoinStrings as JoinStrings
-import MiniLatex.Paragraph as Paragraph
+import Internal.JoinStrings as JoinStrings
+import Internal.Paragraph as Paragraph
 import MiniLatex.Export as Export
 
 

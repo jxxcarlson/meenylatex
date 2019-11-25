@@ -6,12 +6,12 @@ import Data
 import Dict exposing(Dict)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import MiniLatex.Accumulator as Accumulator
-import MiniLatex.Differ as Differ
-import MiniLatex.Paragraph as Paragraph
-import MiniLatex.LatexDiffer as LatexDiffer
-import MiniLatex.LatexState exposing (emptyLatexState)
-import MiniLatex.Parser as Parser exposing (LatexExpression(..))
+import Internal.Accumulator as Accumulator
+import Internal.Differ as Differ
+import Internal.Paragraph as Paragraph
+import Internal.LatexDiffer as LatexDiffer
+import Internal.LatexState exposing (emptyLatexState)
+import Internal.Parser as Parser exposing (LatexExpression(..))
 import MiniLatex.Render as Render
 import Test exposing (..)
 

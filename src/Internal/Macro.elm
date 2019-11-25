@@ -1,8 +1,8 @@
-module MiniLatex.Macro exposing(..)
+module Internal.Macro exposing(..)
 
-import MiniLatex.Parser exposing(LatexExpression(..))
-import MiniLatex.LatexState exposing(emptyLatexState)
-import MiniLatex.Render 
+import Internal.Parser exposing(LatexExpression(..))
+import Internal.LatexState exposing(emptyLatexState)
+import MiniLatex.Render
 import Parser
 
 {-
@@ -10,8 +10,8 @@ import Parser
 EXAMPLE
 
 > import Parser exposing(run)
-> import MiniLatex.Parser exposing(..)
-> import MiniLatex.Macro exposing(..)
+> import Internal.Parser exposing(..)
+> import Internal.Macro exposing(..)
 
 ############
 
@@ -109,6 +109,6 @@ renderArg : Int -> LatexExpression -> String
 renderArg k macro = 
   case macro of 
     Macro name optArgs args ->
-          MiniLatex.Render.renderArg (k-1) emptyLatexState args 
+          MiniLatex.Render.renderArg (k-1) emptyLatexState args
     _ -> ""
 

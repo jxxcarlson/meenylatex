@@ -1,4 +1,4 @@
-module MiniLatex.JoinStrings exposing (joinList)
+module Internal.JoinStrings exposing (joinList)
 
 {- joinList : List String -> String
    join a list of strings to make a single string.

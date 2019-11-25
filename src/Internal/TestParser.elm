@@ -1,6 +1,6 @@
-module MiniLatex.TestParser exposing (bracketIntBlock, intBlock, intItem)
+module Internal.TestParser exposing (bracketIntBlock, intBlock, intItem)
 
-import MiniLatex.ParserHelpers exposing (..)
+import Internal.ParserHelpers exposing (..)
 import Parser exposing (..)
 
 

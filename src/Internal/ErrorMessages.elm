@@ -1,4 +1,4 @@
-module MiniLatex.ErrorMessages exposing (renderError)
+module Internal.ErrorMessages exposing (renderError)
 
 import Dict
 import Parser exposing(DeadEnd, deadEndsToString)

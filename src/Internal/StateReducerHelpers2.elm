@@ -1,11 +1,11 @@
-module MiniLatex.StateReducerHelpers2 exposing(..)
+module Internal.StateReducerHelpers2 exposing(..)
 
-import MiniLatex.Parser as Parser exposing(LatexExpression(..))
-import MiniLatex.Utility as Utility
+import Internal.Parser as Parser exposing(LatexExpression(..))
+import Internal.Utility as Utility
 import Parser as P 
-import MiniLatex.ParserHelpers as ParserHelpers   
+import Internal.ParserHelpers as ParserHelpers
 
-import MiniLatex.LatexState
+import Internal.LatexState
     exposing 
         ( Counters
         , CrossReferences
@@ -18,7 +18,7 @@ import MiniLatex.LatexState
         , updateCounter
         )
 
-import MiniLatex.ParserTools as PT 
+import Internal.ParserTools as PT
 
 updateSectionNumber : (List LatexExpression) -> LatexState -> LatexState
 updateSectionNumber macroArgs latexState =
@@ -179,7 +179,7 @@ setMacroDefinition name body latexState =
     --  case maybeDefinition of 
     --    Nothing -> latexState 
     --    Just definition -> 
-          MiniLatex.LatexState.setMacroDefinition name (NewCommand name 0 body) latexState 
+          Internal.LatexState.setMacroDefinition name (NewCommand name 0 body) latexState
   
 
 

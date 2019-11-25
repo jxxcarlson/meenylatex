@@ -14,16 +14,16 @@ import Dict
 
 -- import List.Extra
 
-import MiniLatex.ParserTools as ParserTools
-import MiniLatex.ErrorMessages as ErrorMessages
-import MiniLatex.Image as Image
-import MiniLatex.JoinStrings as JoinStrings
-import MiniLatex.Paragraph
-import MiniLatex.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import MiniLatex.Utility as Utility
+import Internal.ParserTools as ParserTools
+import Internal.ErrorMessages as ErrorMessages
+import Internal.Image as Image
+import Internal.JoinStrings as JoinStrings
+import Internal.Paragraph
+import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import Internal.Utility as Utility
 import String
 import Maybe.Extra
-import MiniLatex.ParserTools as PT
+import Internal.ParserTools as PT
 
 
 table =
@@ -45,8 +45,8 @@ transform str =
     let
         parsand =
             str
-                |> MiniLatex.Paragraph.logicalParagraphify
-                |> List.map MiniLatex.Parser.parse
+                |> Internal.Paragraph.logicalParagraphify
+                |> List.map Internal.Parser.parse
 
         latex =
             parsand
@@ -64,8 +64,8 @@ transform str =
 
 foo str =
     str
-        |> MiniLatex.Paragraph.logicalParagraphify
-        |> List.map MiniLatex.Parser.parse
+        |> Internal.Paragraph.logicalParagraphify
+        |> List.map Internal.Parser.parse
 
 
 testString =

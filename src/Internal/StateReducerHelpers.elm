@@ -1,8 +1,8 @@
-module MiniLatex.StateReducerHelpers exposing (..)
+module Internal.StateReducerHelpers exposing (..)
 
 -- import List.Extra
 
-import MiniLatex.LatexState
+import Internal.LatexState
     exposing
         ( Counters
         , CrossReferences
@@ -14,11 +14,11 @@ import MiniLatex.LatexState
         , setDictionaryItem
         , updateCounter
         )
-import MiniLatex.Parser as Parser exposing (LatexExpression(..))
-import MiniLatex.ParserHelpers as ParserHelpers
-import MiniLatex.ParserTools as PT
+import Internal.Parser as Parser exposing (LatexExpression(..))
+import Internal.ParserHelpers as ParserHelpers
+import Internal.ParserTools as PT
 import Parser as P
-import MiniLatex.Utility as Utility
+import Internal.Utility as Utility
 
 
 type alias LatexInfo =
@@ -30,7 +30,7 @@ setMacroDefinition info latexState =
    let 
      definition = List.head info.value |> Maybe.withDefault (LXString "no macro definition")
    in
-     MiniLatex.LatexState.setMacroDefinition info.name (NewCommand info.name 0 definition) latexState 
+     Internal.LatexState.setMacroDefinition info.name (NewCommand info.name 0 definition) latexState
   
 
 

@@ -1,4 +1,4 @@
-module MiniLatex.Stack exposing (Stack(..), depth, empty, isEmpty, pop, popElement, push, top)
+module Internal.Stack exposing (Stack(..), depth, empty, isEmpty, pop, popElement, push, top)
 
 
 type Stack a

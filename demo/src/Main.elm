@@ -9,8 +9,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
 import MiniLatex.HasMath as HasMath
-import MiniLatex.MiniLatex as MiniLatex
-import MiniLatex.Differ exposing (EditRecord)
+import Internal.MiniLatex as MiniLatex
+import Internal.Differ exposing (EditRecord)
 import Random
 import Source
 import View exposing (..)
@@ -39,10 +39,10 @@ init : Flags -> ( Model (Html msg), Cmd Msg )
 init flags =
     let
         parseResult =
-            MiniLatex.parse Source.initialText
+            Internal.parse Source.initialText
 
         editRecord =
-            MiniLatex.initializeEditRecord 0 Source.initialText
+            Internal.initializeEditRecord 0 Source.initialText
 
         model =
             { counter = 0
@@ -79,10 +79,10 @@ update msg model =
         FastRender ->
             let
                 newEditRecord =
-                    MiniLatex.updateEditRecord model.seed model.editRecord model.sourceText
+                    Internal.updateEditRecord model.seed model.editRecord model.sourceText
 
                 parseResult =
-                    MiniLatex.parse model.sourceText
+                    Internal.parse model.sourceText
 
                 hasMathResult =
                     (List.map HasMath.listHasMath parseResult)
@@ -106,7 +106,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = ""
-                , editRecord = MiniLatex.initializeEditRecord model.seed ""
+                , editRecord = Internal.initializeEditRecord model.seed ""
               }
             , Cmd.none
               -- sendToJs <| encodeData "full" []
@@ -116,7 +116,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = Source.initialText
-                , editRecord = MiniLatex.initializeEditRecord model.seed Source.initialText
+                , editRecord = Internal.initializeEditRecord model.seed Source.initialText
               }
             , Cmd.none
               -- sendToJs <| encodeData "full" []
@@ -208,13 +208,13 @@ useSource : String -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
 useSource text model =
     let
         editRecord =
-            MiniLatex.initializeEditRecord model.seed text
+            Internal.initializeEditRecord model.seed text
     in
         ( { model
             | counter = model.counter + 1
             , sourceText = text
             , editRecord = editRecord
-            , parseResult = MiniLatex.parse text
+            , parseResult = Internal.parse text
             , inputString = exportLatex2Html editRecord
           }
         , getStartTime

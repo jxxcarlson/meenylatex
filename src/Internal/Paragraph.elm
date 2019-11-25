@@ -1,4 +1,4 @@
-module MiniLatex.Paragraph exposing (logicalParagraphify)
+module Internal.Paragraph exposing (logicalParagraphify)
 
 {-| This module exports just one function,
 intended to turn a string into a lisst
@@ -12,8 +12,8 @@ finite-state machine.
 
 -}
 
-import MiniLatex.Parser
-import MiniLatex.Stack as Stack exposing (Stack)
+import Internal.Parser
+import Internal.Stack as Stack exposing (Stack)
 import Parser
 import Regex
 
@@ -48,7 +48,7 @@ getBeginArg : String -> String
 getBeginArg line =
     let
         parseResult =
-            Parser.run MiniLatex.Parser.envName line
+            Parser.run Internal.Parser.envName line
 
         arg =
             case parseResult of
@@ -65,7 +65,7 @@ getEndArg : String -> String
 getEndArg line =
     let
         parseResult =
-            Parser.run MiniLatex.Parser.endWord line
+            Parser.run Internal.Parser.endWord line
 
         arg =
             case parseResult of

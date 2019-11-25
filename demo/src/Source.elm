@@ -221,7 +221,7 @@ e.g., theorem.
 \\end{enumerate}
 \\end{restrictions}
 
-We are working to fix known issues and to expand the scope of MiniLatex.
+We are working to fix known issues and to expand the scope of Internal.
 
 % NOTE. The real bibliography machinery
 % has not been wired up yet.
@@ -389,7 +389,7 @@ This is MiniLaTeX:
 \\end{theorem}
 \\end{verbatim}
 
-Running \\code{MiniLatex.Parser.latexList} on this text results in the following AST:
+Running \\code{Internal.Parser.latexList} on this text results in the following AST:
 
 \\begin{verbatim}
 Ok (LatexList (
@@ -578,7 +578,7 @@ type alias EditRecord =
     }
 \\end{verbatim}
 
-To set up this structure when an author begins editing, we make use of the general \\code{initialize} function in module \\code{MiniLatex.Differ}:
+To set up this structure when an author begins editing, we make use of the general \\code{initialize} function in module \\code{Internal.Differ}:
 
 \\begin{verbatim}
 initialize : (List String ⟶ List String) ⟶ String ⟶ EditRecord
@@ -1875,7 +1875,7 @@ grammar =
       | LatexList (List LatexExpression)
   \\end{verbatim}
 
-  The translation from source text to abstract syntax tree is accomplished by a function in the \\code{MiniLatex.Parser} module:
+  The translation from source text to abstract syntax tree is accomplished by a function in the \\code{Internal.Parser} module:
 
   \\begin{equation}
   parse: {\\tt String} \\rightarrow {\\tt LatexExpression}.

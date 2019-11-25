@@ -1,4 +1,4 @@
-module MiniLatex.Utility exposing (addLineNumbers, addLineNumbers_, getAt, capitalize)
+module Internal.Utility exposing (addLineNumbers, addLineNumbers_, getAt, capitalize)
 
 {-| From List.Extra
 -}

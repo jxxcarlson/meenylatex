@@ -1,7 +1,7 @@
-module MiniLatex.Image exposing (..)
+module Internal.Image exposing (..)
 
-import MiniLatex.Html as Html
-import MiniLatex.KeyValueUtilities as KeyValueUtilities
+import Internal.Html as Html
+import Internal.KeyValueUtilities as KeyValueUtilities
 
 
 {- IMAGE HELPERS -}

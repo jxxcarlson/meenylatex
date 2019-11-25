@@ -1,4 +1,4 @@
-module MiniLatex.Accumulator exposing (parse, render, latexStateReducer, latexStateReducerAux)
+module MiniLatex.Accumulator exposing (latexStateReducer, latexStateReducerAux, parse, render)
 
 import Dict
 import MiniLatex.LatexState
@@ -61,10 +61,12 @@ parseReducer inputString ( latexState, inputList ) =
 
 
 {-| render: Using a given LatexState, take a list of (List LatexExpressions)
-and compute a tupe consisting of a new list of (List LatexExpressins) and an updated
+and compute a tuple consisting of a new list of (List LatexExpressins) and an updated
 LatexSttate.
 
 render : LatexState -> List (List LatexExpression) -> ( List String, LatexState )
+
+NOTE: render renderer is an Accumulator
 
 -}
 render :
@@ -92,77 +94,115 @@ renderReducer renderer listLatexExpression ( state, inputList ) =
     in
     ( newState, inputList ++ [ renderedInput ] )
 
+
+
 {-
 
-> z = LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),LXString (", "),Macro "strong" [] [LatexList [LXString "bar"]]]
-LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),LXString (", "),Macro "strong" [] [LatexList [LXString "bar"]]]
-    : LatexExpression
+   > z = LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),LXString (", "),Macro "strong" [] [LatexList [LXString "bar"]]]
+   LatexList [Macro "title" [] [LatexList [LXString "foo"]],InlineMath ("x^2 = 1"),LXString (", "),Macro "strong" [] [LatexList [LXString "bar"]]]
+       : LatexExpression
 
-> latexStateReducerAux z emptyLatexState
-{ counters = Dict.fromList [("eqno",0),("s1",0),("s2",0),("s3",0),("tno",0)], crossReferences = Dict.fromList [], dictionary = Dict.fromList [("title","foo")], macroDictionary = Dict.fromList [], tableOfContents = [] }
+   > latexStateReducerAux z emptyLatexState
+   { counters = Dict.fromList [("eqno",0),("s1",0),("s2",0),("s3",0),("tno",0)], crossReferences = Dict.fromList [], dictionary = Dict.fromList [("title","foo")], macroDictionary = Dict.fromList [], tableOfContents = [] }
 
 -}
 
-latexStateReducer : List LatexExpression -> LatexState -> LatexState 
+
+latexStateReducer : List LatexExpression -> LatexState -> LatexState
 latexStateReducer list state =
-  List.foldr latexStateReducerAux state list
+    List.foldr latexStateReducerAux state list
+
 
 latexStateReducerAux : LatexExpression -> LatexState -> LatexState
-latexStateReducerAux lexpr state = 
-  case lexpr of 
-    Macro name optionalArgs args -> 
-       macroReducer name optionalArgs args state
-    SMacro name optionalArgs args latexExpression -> 
-       smacroReducer name optionalArgs args latexExpression state
-    NewCommand name nArgs body ->
-       SRH2.setMacroDefinition name body state
-    Environment name optonalArgs body ->
-       envReducer name optonalArgs body state
-    LatexList list -> List.foldr latexStateReducerAux state list
-    _ -> state
+latexStateReducerAux lexpr state =
+    case lexpr of
+        Macro name optionalArgs args ->
+            macroReducer name optionalArgs args state
 
-envReducer : String -> (List LatexExpression) -> LatexExpression -> LatexState -> LatexState
-envReducer name optonalArgs body state = 
-  if List.member name theoremWords then 
-    SRH2.setTheoremNumber body state
-  else  
-  case name of 
-    "equation" -> SRH2.setEquationNumber body state 
-    "align" -> SRH2.setEquationNumber body state 
-    _ -> state
+        SMacro name optionalArgs args latexExpression ->
+            smacroReducer name optionalArgs args latexExpression state
 
-{- 
+        NewCommand name nArgs body ->
+            SRH2.setMacroDefinition name body state
 
-> env3
-LatexList [Macro "label" [] [LatexList [LXString "foo"]],LXString ("ho  ho  ho ")]
-    : LatexExpression
+        Environment name optonalArgs body ->
+            envReducer name optonalArgs body state
 
-> latexStateReducerAux env2 emptyLatexState
-{ counters = Dict.fromList [("eqno",0),("s1",0),("s2",0),("s3",0),("tno",1)]
-, crossReferences = Dict.fromList [("foo","0.1")], dictionary = Dict.fromList []
-, macroDictionary = Dict.fromList [], tableOfContents = [] }
+        LatexList list ->
+            List.foldr latexStateReducerAux state list
+
+        _ ->
+            state
+
+
+envReducer : String -> List LatexExpression -> LatexExpression -> LatexState -> LatexState
+envReducer name optonalArgs body state =
+    if List.member name theoremWords then
+        SRH2.setTheoremNumber body state
+
+    else
+        case name of
+            "equation" ->
+                SRH2.setEquationNumber body state
+
+            "align" ->
+                SRH2.setEquationNumber body state
+
+            _ ->
+                state
+
+
+
+{-
+
+   > env3
+   LatexList [Macro "label" [] [LatexList [LXString "foo"]],LXString ("ho  ho  ho ")]
+       : LatexExpression
+
+   > latexStateReducerAux env2 emptyLatexState
+   { counters = Dict.fromList [("eqno",0),("s1",0),("s2",0),("s3",0),("tno",1)]
+   , crossReferences = Dict.fromList [("foo","0.1")], dictionary = Dict.fromList []
+   , macroDictionary = Dict.fromList [], tableOfContents = [] }
 
 -}
 
-theoremWords = ["theorem", "proposition", "corollary", "lemma", "definition"]   
 
-dictionaryWords = ["title", "author", "data", "email",  "revision", "host", "setclient", "setdocid"]
+theoremWords =
+    [ "theorem", "proposition", "corollary", "lemma", "definition" ]
 
-macroReducer : String -> (List LatexExpression) -> (List LatexExpression)  -> LatexState -> LatexState 
+
+dictionaryWords =
+    [ "title", "author", "data", "email", "revision", "host", "setclient", "setdocid" ]
+
+
+macroReducer : String -> List LatexExpression -> List LatexExpression -> LatexState -> LatexState
 macroReducer name optionalArgs args state =
-  if List.member name dictionaryWords then 
-    SRH2.setDictionaryItemForMacro name args state
-  else
-  case name of 
-   "section" -> SRH2.updateSectionNumber args state
-   "subsection" -> SRH2.updateSubsectionNumber args state
-   "subsubsection" -> SRH2.updateSubsubsectionNumber args state
-   "setcounter" -> SRH2.setSectionCounters args state
-   _ -> state   
+    if List.member name dictionaryWords then
+        SRH2.setDictionaryItemForMacro name args state
 
-smacroReducer : String -> (List LatexExpression) -> (List LatexExpression)  -> LatexExpression -> LatexState -> LatexState 
+    else
+        case name of
+            "section" ->
+                SRH2.updateSectionNumber args state
+
+            "subsection" ->
+                SRH2.updateSubsectionNumber args state
+
+            "subsubsection" ->
+                SRH2.updateSubsubsectionNumber args state
+
+            "setcounter" ->
+                SRH2.setSectionCounters args state
+
+            _ ->
+                state
+
+
+smacroReducer : String -> List LatexExpression -> List LatexExpression -> LatexExpression -> LatexState -> LatexState
 smacroReducer name optionalArgs args latexExpression state =
-  case name of 
-   "bibitem" -> SRH2.setBibItemXRef optionalArgs args state
-   _ -> state   
+    case name of
+        "bibitem" ->
+            SRH2.setBibItemXRef optionalArgs args state
 
+        _ ->
+            state

@@ -16,17 +16,7 @@ module Internal.ParserHelpers exposing
     , ws
     )
 
--- exposing
---     ( spaces
---     , ws
---     , parseUntil
---     , parseToSymbol
---     , parseBetweenSymbols
---     , nonEmptyItemList
---     , itemList
---     , itemListWithSeparator
---     , transformWords
---     )
+
 
 import Parser exposing (..)
 
@@ -60,7 +50,7 @@ parseUntil marker =
 
 
 {-| chomp to end of the marker and return the
-chomped sring minus the makrder.
+chomped string minus the marker.
 -}
 parseToSymbol : String -> Parser String
 parseToSymbol marker =
@@ -172,7 +162,13 @@ some p =
         |= many p
 
 
-{-| Parse an expression between two other parsers
+{-| Parse an expression between two other parser
+
+    import Parser exposing(symbol)
+
+    Parser.run (between (symbol "<<") (symbol ">>") Parser.int) "<<4>>"
+    --> Ok 4
+
 -}
 between : Parser opening -> Parser closing -> Parser a -> Parser a
 between opening closing p =
@@ -185,7 +181,12 @@ between opening closing p =
 
 
 {-| Parse an expression between parenthesis.
-parens p == between (symbol "(") (symbol ")") p
+
+    import Parser
+
+    Parser.run (parens Parser.int) "(4)"
+    --> Ok 4
+
 -}
 parens : Parser a -> Parser a
 parens =
@@ -193,7 +194,12 @@ parens =
 
 
 {-| Parse an expression between curly braces.
-braces p == between (symbol "{") (symbol "}") p
+
+    import Parser
+
+    Parser.run (braces Parser.int) "{4}"
+    --> Ok 4
+
 -}
 braces : Parser a -> Parser a
 braces =

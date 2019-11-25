@@ -1,6 +1,6 @@
 module MiniLatex.Source exposing (texPrefix, texSuffix)
 
-{-| This module provides boilerplat eext.
+{-| This module provides boilerplate
 
 
 # API
@@ -10,7 +10,7 @@ module MiniLatex.Source exposing (texPrefix, texSuffix)
 -}
 
 
-{-| A standarad preamble
+{-| A standard preamble
 -}
 texPrefix : String
 texPrefix =

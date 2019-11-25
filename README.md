@@ -1,9 +1,6 @@
 
-MeenyLaTeX
+MiniLaTeX
 =========
-
-MeenyLaTeX is an experimental version of the MiniLatex
-package.
 
 
 MiniLatex (the language) is a subset of LaTeX that can be rendered

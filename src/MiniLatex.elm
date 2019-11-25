@@ -1,4 +1,4 @@
-module MiniLatex.MiniLatex
+module MiniLatex
     exposing
         ( render
         , renderWithSeed
@@ -7,6 +7,7 @@ module MiniLatex.MiniLatex
         , parse
         , updateEditRecord
         , emptyStringRecord
+        , EditRecord
         )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
@@ -82,6 +83,9 @@ parse text =
         |> Paragraph.logicalParagraphify
         |> List.map MiniLatexParser.parse
 
+
+
+type alias EditRecord a = Differ.EditRecord a
 
 {-| Using the renderedParagraph list of the editRecord,
 return an HTML element represeing the paragraph list
@@ -160,6 +164,7 @@ initializeEditRecord seed text =
 emptyStringRecord : EditRecord (Html msg)
 emptyStringRecord =
     Differ.emptyHtmlMsgRecord
+
 
 
 {-| Update the given edit record with modified text.

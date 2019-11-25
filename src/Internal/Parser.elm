@@ -305,7 +305,7 @@ zero or more optional followed by zero or more more eventual arguments.
     import Internal.ParserHelpers as PH
 
     Parser.run (macro PH.ws) "\\hello}[1]{Hello \\strong{#1}!}"
-    --> Ok (Macro "hello" [] [])g
+    --> Ok (Macro "hello" [] [])
 
 -}
 macro : Parser () -> Parser LatexExpression

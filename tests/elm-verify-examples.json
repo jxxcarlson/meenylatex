@@ -1,4 +1,4 @@
 {
   "root": "../src",
-  "tests": ["Internal.Parser"]
+  "tests": ["Internal.Parser", "Internal.Stack"]
 }

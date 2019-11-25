@@ -7,8 +7,14 @@ module Internal.Parser
         , newcommand
         , endWord
         , envName
+        , environment
         , numberOfArgs
         , word
+        , words
+        , inlineMath
+        , displayMathDollar
+        , displayMathBrackets
+        , texComment
         , latexExpression
         , LatexExpression(..)
         )
@@ -120,7 +126,12 @@ defaultLatexExpression =
 
 {- WORDS -}
 
+{-|
+    import Parser
+    Parser.run words "one two three"
+    --> Ok (LXString ("one  two  three"))
 
+-}
 words : Parser LatexExpression
 words =
     oneOf
@@ -237,7 +248,15 @@ inTableCellWord c =
 
 {- TEX COMMENTS -}
 
+{-|
+    import Parser
 
+    Parser.run texComment "% testing ...\n"
+    --> Ok (Comment ("% testing ...\n"))
+
+    Parser.run texComment "% testing ..."
+    --> Err [{ col = 14, problem = Parser.UnexpectedChar, row = 1 }]
+-}
 texComment : Parser LatexExpression
 texComment =
     (getChompedString <|
@@ -375,7 +394,14 @@ smacroName =
 {- Latex List and Expression -}
 {- MATHEMATICAL TEXT -}
 
+{-|
 
+    import Parser
+    import Internal.ParserHelpers as PH
+
+    Parser.run (inlineMath PH.ws) "$a^2 + b^2$"
+    --> Ok (InlineMath ("a^2 + b^2"))
+-}
 inlineMath : Parser () -> Parser LatexExpression
 inlineMath wsParser =
     succeed InlineMath
@@ -383,7 +409,14 @@ inlineMath wsParser =
         |= parseToSymbol "$"
         |. wsParser
 
+{-|
 
+    import Parser
+
+    Parser.run displayMathDollar "$$a^2 + b^2$$"
+    --> Ok (DisplayMath ("a^2 + b^2"))
+
+-}
 displayMathDollar : Parser LatexExpression
 displayMathDollar =
     -- inContext "display math $$" <|
@@ -393,7 +426,14 @@ displayMathDollar =
         |= parseToSymbol "$$"
         |. ws
 
+{-|
 
+    import Parser
+
+    Parser.run displayMathBrackets "\\[a^2 + b^2\\]"
+    --> Ok (DisplayMath ("a^2 + b^2"))
+
+-}
 displayMathBrackets : Parser LatexExpression
 displayMathBrackets =
     -- inContext "display math brackets" <|
@@ -431,7 +471,14 @@ endWord =
         |= parseToSymbol "}"
         |. ws
 
+{-|
 
+    import Parser
+
+    Parser.run environment "\\begin{theorem}\nFor all integers $i$, $j$, $i + j = j = i$.\n\\end{theorem}"
+    --> Ok (Environment "theorem" [] (LatexList [LXString ("For  all  integers "),InlineMath "i",LXString (", "),InlineMath "j",LXString (", "),InlineMath ("i + j = j = i"),LXString ".\n"]))
+
+-}
 environment : Parser LatexExpression
 environment =
     envName |> andThen environmentOfType

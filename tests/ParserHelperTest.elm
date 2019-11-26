@@ -56,7 +56,7 @@ suite =
             (run intBlock "1, 2, 3")
             (Ok [ 1, 2, 3 ])
         , doTest
-            "bracetIntBlock"
+            "bracketIntBlock"
             (run bracketIntBlock "[1, 2, 3]")
             (Ok [ 1, 2, 3 ])
         ]

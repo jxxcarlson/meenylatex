@@ -1,38 +1,34 @@
-module Internal.Macro exposing(..)
+module Internal.Macro exposing(expandMacro)
 
 import Internal.Parser exposing(LatexExpression(..))
 import Internal.LatexState exposing(emptyLatexState)
 import MiniLatex.Render
 import Parser
 
-{-
+{-|
 
 EXAMPLE
 
-> import Parser exposing(run)
-> import Internal.Parser exposing(..)
-> import Internal.Macro exposing(..)
+    import Parser exposing(run)
+    import Internal.Parser exposing(..)
+    import Internal.Macro exposing(..)
 
-############
+    run latexExpression "\\newcommand{\\hello}[1]{Hello \\strong{#1}!}"
+    --> Ok (NewCommand "hello" 1 (LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "#1"]],LXString "!"]))
 
-> run latexExpression "\\newcommand{\\hello}[1]{Hello \\strong{#1}!}"
-Ok (NewCommand "hello" 1 (LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "#1"]],LXString "!"]))
-> run latexExpression "\\hello{John}"
-Ok (Macro "hello" [] [LatexList [LXString "John"]])
+    run latexExpression "\\hello{John}"
+    --> Ok (Macro "hello" [] [LatexList [LXString "John"]])
 
-############
+    macroDef : LatexExpression
+    macroDef = NewCommand "hello" 1 (LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "#1"]],LXString "!"])
 
-> macroDef = NewCommand "hello" 1 (LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "#1"]],LXString "!"])
-> macro = Macro "hello" [] [LatexList [LXString "John"]]
+    macro : LatexExpression
+    macro = Macro "hello" [] [LatexList [LXString "John"]]
 
-############
-
-> expandMacro macro macroDef
-LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "John"]],LXString "!"]
+    expandMacro macro macroDef
+    --> LatexList [LXString ("Hello "),Macro "strong" [] [LatexList [LXString "John"]],LXString "!"]
 
 -}
-
-
 expandMacro : LatexExpression -> LatexExpression -> LatexExpression
 expandMacro  macro macroDef = 
   case expandMacro_  macro macroDef of 

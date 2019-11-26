@@ -4,14 +4,10 @@ import Html exposing (..)
 import Html.Attributes as Attr exposing (..)
 import Html.Events as Events exposing (onClick, onInput)
 import Html.Keyed as Keyed
-import Http
 import Types exposing (..)
 import String
-import Internal.Parser exposing (LatexExpression)
-import Internal.MiniLatex as MiniLatex
+import MiniLatex
 import MiniLatex.Export as Export
-import Json.Encode as Encode
-import Internal.Paragraph
 
 
 {- Word count -}
@@ -204,7 +200,7 @@ parseResultPane model =
 rawRenderedSourcePane model =
     let
         renderedText =
-            Internal.getRenderedText model.editRecord
+            MiniLatex.getRenderedText model.editRecord
     in
         pre
             parseResultsStyle
@@ -233,7 +229,7 @@ exportLatexPane model =
 
 renderedSourcePane : Model (Html msg) -> Html msg
 renderedSourcePane model =
-    Internal.getRenderedText model.editRecord
+    MiniLatex.getRenderedText model.editRecord
         |> List.map (\x -> Html.div [ Attr.style "margin-bottom" "0.65em" ] [ x ])
         |> Html.div []
 

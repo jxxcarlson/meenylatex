@@ -26,7 +26,7 @@ filterMacro macroName list =
 
 
 
--- smaroArgs : LatexExpression -> Maybe (Liat LatexExpression)
+-- smacroArgs : LatexExpression -> Maybe (Liat LatexExpression)
 -- macroArgs  latexExpression =
 --   case latexExpression of
 --      (Macro _ _ list) -> Just list

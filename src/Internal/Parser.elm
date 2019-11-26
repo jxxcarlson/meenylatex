@@ -188,14 +188,9 @@ word inWord =
 
 macroArgWords : Parser LatexExpression
 macroArgWords =
-    nonEmptyItemList macroArgWord
+    nonEmptyItemList (word inMacroArg)
         |> map (String.join " ")
         |> map LXString
-
-macroArgWord : Parser String
-macroArgWord =
-    word inMacroArg
-
 
 inMacroArg : Char -> Bool
 inMacroArg c =
@@ -208,14 +203,9 @@ inMacroArg c =
 
 optionArgWords : Parser LatexExpression
 optionArgWords =
-    nonEmptyItemList optionArgWord
+    nonEmptyItemList (word inOptionArgWord)
         |> map (String.join " ")
         |> map LXString
-
-
-optionArgWord : Parser String
-optionArgWord =
-    word inOptionArgWord
 
 
 inOptionArgWord : Char -> Bool
@@ -229,15 +219,10 @@ inOptionArgWord c =
 
 tableCellWords : Parser LatexExpression
 tableCellWords =
-    nonEmptyItemList tableCellWord
+    nonEmptyItemList (word inTableCellWord)
         |> map (String.join " ")
         |> map String.trim
         |> map LXString
-
-
-tableCellWord : Parser String
-tableCellWord =
-    word inTableCellWord
 
 
 inTableCellWord : Char -> Bool

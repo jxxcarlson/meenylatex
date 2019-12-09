@@ -7,7 +7,12 @@ module MiniLatex
         , parse
         , updateEditRecord
         , emptyStringRecord
+        , emptyHtmlMsgRecord
+        , emptyLatexState
         , EditRecord
+        , LatexState
+        , TocEntry
+        , TableOfContents
         )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
@@ -25,6 +30,10 @@ for an explanation of the theory behind the MiniLatex package.
 
 @docs render, renderWithSeed, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord
 
+@docs EditRecord, LatexState, TocEntry, TableOfContents
+
+@docs emptyLatexState, emptyHtmlMsgRecord
+
 -}
 
 import Html exposing (Html)
@@ -37,9 +46,21 @@ import Internal.Paragraph as Paragraph
 import Internal.Parser as MiniLatexParser exposing (LatexExpression)
 import MiniLatex.Render2 as Render
 
+{-| Auxiliary data compiled during parsing -}
+type alias LatexState = Internal.LatexState.LatexState
 
--- exposing (render, renderString)
 
+{-| Describes an entry in the table of contents -}
+type alias TocEntry = Internal.LatexState.TocEntry
+
+
+{-| The table of contents -}
+type alias TableOfContents = Internal.LatexState.TableOfContents
+
+
+{-| Used for initialization -}
+emptyLatexState : LatexState
+emptyLatexState = Internal.LatexState.emptyLatexState
 
 {-| The function call `render macros sourceTest` produces
 an HTML element or Html msg value corresponding to the MiniLatex source text
@@ -84,7 +105,7 @@ parse text =
         |> List.map MiniLatexParser.parse
 
 
-
+{-| Data for differential parsing and rendering -}
 type alias EditRecord a = Differ.EditRecord a
 
 {-| Using the renderedParagraph list of the editRecord,
@@ -165,7 +186,9 @@ emptyStringRecord : EditRecord (Html msg)
 emptyStringRecord =
     Differ.emptyHtmlMsgRecord
 
-
+{-| Used for initialization -}
+emptyHtmlMsgRecord : EditRecord (Html msg)
+emptyHtmlMsgRecord = Differ.emptyHtmlMsgRecord
 
 {-| Update the given edit record with modified text.
 Thus, if

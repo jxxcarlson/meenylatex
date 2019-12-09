@@ -1,4 +1,4 @@
-module Configuration exposing (client)
+module XConfiguration exposing (client)
 
 
 client : String

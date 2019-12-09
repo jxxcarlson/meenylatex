@@ -21,7 +21,7 @@ import Dict
 import Html exposing (Attribute, Html)
 import Html.Attributes as HA
 import Json.Encode
-import Configuration
+import XConfiguration
 import Internal.ErrorMessages as ErrorMessages
 import Internal.Image as Image exposing (..)
 import Internal.JoinStrings as JoinStrings

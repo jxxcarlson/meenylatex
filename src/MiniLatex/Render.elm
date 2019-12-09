@@ -22,7 +22,7 @@ import Dict
 
 -- import List.Extra
 
-import Configuration
+import XConfiguration
 import Internal.ErrorMessages as ErrorMessages
 import Internal.Html as Html
 import Internal.Image as Image exposing (..)
@@ -888,7 +888,7 @@ renderXLink latexState args =
         label =
             renderArg 1 latexState args
     in
-        " <a href=\"" ++ Configuration.client ++ "##document/" ++ id ++ "\">" ++ label ++ "</a>"
+        " <a href=\"" ++ XConfiguration.client ++ "##document/" ++ id ++ "\">" ++ label ++ "</a>"
 
 
 renderXLinkPublic : LatexState -> List LatexExpression -> String
@@ -900,7 +900,7 @@ renderXLinkPublic latexState args =
         label =
             renderArg 1 latexState args
     in
-        " <a href=\"" ++ Configuration.client ++ "##public/" ++ id ++ "\">" ++ label ++ "</a>"
+        " <a href=\"" ++ XConfiguration.client ++ "##public/" ++ id ++ "\">" ++ label ++ "</a>"
 
 
 

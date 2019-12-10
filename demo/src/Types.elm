@@ -1,7 +1,7 @@
 module Types exposing (..)
 
 import Internal.Parser exposing (LatexExpression)
-import Internal.Differ exposing (EditRecord)
+import MiniLatex.Edit
 import Html exposing (Html)
 import Time exposing (Posix)
 
@@ -13,7 +13,7 @@ type alias Model a =
     , parseResult : List (List LatexExpression)
     , inputString : String
     , hasMathResult : List Bool
-    , editRecord : EditRecord a
+    , editData : MiniLatex.Edit.Data a
     , seed : Int
     , configuration : Configuration
     , lineViewStyle : LineViewStyle

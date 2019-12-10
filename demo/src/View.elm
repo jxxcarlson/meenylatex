@@ -7,6 +7,7 @@ import Html.Keyed as Keyed
 import Types exposing (..)
 import String
 import MiniLatex
+import MiniLatex.Edit
 import MiniLatex.Export as Export
 
 
@@ -200,7 +201,7 @@ parseResultPane model =
 rawRenderedSourcePane model =
     let
         renderedText =
-            MiniLatex.getRenderedText model.editRecord
+            MiniLatex.Edit.get model.editData
     in
         pre
             parseResultsStyle
@@ -229,7 +230,7 @@ exportLatexPane model =
 
 renderedSourcePane : Model (Html msg) -> Html msg
 renderedSourcePane model =
-    MiniLatex.getRenderedText model.editRecord
+    MiniLatex.Edit.get model.editData
         |> List.map (\x -> Html.div [ Attr.style "margin-bottom" "0.65em" ] [ x ])
         |> Html.div []
 

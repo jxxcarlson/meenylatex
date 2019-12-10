@@ -3,12 +3,20 @@ port module Main exposing (..)
 {-| Test app for MiniLatex
 -}
 
+
+{-
+
+  MiniLatex.initializeEditRecord -> MiniLatex.Edit.init
+  MiniLatex.updateEditRecord -> MiniLatex.Edit.update
+
+-}
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Keyed as Keyed
 import MiniLatex.HasMath as HasMath
-import MiniLatex exposing(EditRecord)
+import MiniLatex
+import MiniLatex.Edit
 import Random
 import Source
 import View exposing (..)
@@ -37,17 +45,17 @@ init : Flags -> ( Model (Html msg), Cmd Msg )
 init flags =
     let
         parseResult =
-            MiniLatex.parse Source.initialText
+            MiniLatex.Edit.parse Source.initialText
 
-        editRecord =
-            MiniLatex.initializeEditRecord 0 Source.initialText
+        editData =
+            MiniLatex.Edit.init 0 Source.initialText
 
         model =
             { counter = 0
             , sourceText = Source.initialText
             , sourceText2 = Source.initialText
-            , editRecord = editRecord
-            , inputString = exportLatex2Html editRecord
+            , editData = editData
+            , inputString = exportLatex2Html editData
             , parseResult = parseResult
             , hasMathResult = (List.map HasMath.listHasMath parseResult)
             , seed = 0
@@ -77,17 +85,17 @@ update msg model =
         FastRender ->
             let
                 newEditRecord =
-                    MiniLatex.updateEditRecord model.seed model.editRecord model.sourceText
+                     MiniLatex.Edit.update model.seed model.editData model.sourceText
 
                 parseResult =
-                    MiniLatex.parse model.sourceText
+                    MiniLatex.Edit.parse model.sourceText
 
                 hasMathResult =
                     (List.map HasMath.listHasMath parseResult)
             in
                 ( { model
                     | counter = model.counter + 1
-                    , editRecord = newEditRecord
+                    , editData = newEditRecord
                     , parseResult = parseResult
                     , hasMathResult = hasMathResult
                   }
@@ -104,7 +112,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = ""
-                , editRecord = MiniLatex.initializeEditRecord model.seed ""
+                , editData = MiniLatex.Edit.init model.seed ""
               }
             , Cmd.none
               -- sendToJs <| encodeData "full" []
@@ -114,7 +122,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = Source.initialText
-                , editRecord = MiniLatex.initializeEditRecord model.seed Source.initialText
+                , editData = MiniLatex.Edit.init model.seed Source.initialText
               }
             , Cmd.none
               -- sendToJs <| encodeData "full" []
@@ -205,15 +213,15 @@ update msg model =
 useSource : String -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
 useSource text model =
     let
-        editRecord =
-            MiniLatex.initializeEditRecord model.seed text
+        editData =
+            MiniLatex.Edit.init model.seed text
     in
         ( { model
             | counter = model.counter + 1
             , sourceText = text
-            , editRecord = editRecord
-            , parseResult = MiniLatex.parse text
-            , inputString = exportLatex2Html editRecord
+            , editData = editData
+            , parseResult = MiniLatex.Edit.parse text
+            , inputString = exportLatex2Html editData
           }
         , getStartTime
         )
@@ -227,8 +235,8 @@ getStartTime =
     Task.perform ReceiveStartTime Time.now
 
 
-exportLatex2Html : EditRecord (Html msg) -> String
-exportLatex2Html editRecord =
+exportLatex2Html : MiniLatex.Edit.Data (Html msg) -> String
+exportLatex2Html editData =
     "NOT IMPLEMENTED"
 
 

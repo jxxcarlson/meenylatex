@@ -2,7 +2,7 @@ module Internal.Macro exposing(expandMacro)
 
 import Internal.Parser exposing(LatexExpression(..))
 import Internal.LatexState exposing(emptyLatexState)
-import MiniLatex.Render
+import Internal.Render
 import Parser
 
 {-|
@@ -105,6 +105,6 @@ renderArg : Int -> LatexExpression -> String
 renderArg k macro = 
   case macro of 
     Macro name optArgs args ->
-          MiniLatex.Render.renderArg (k-1) emptyLatexState args
+          Internal.Render.renderArg (k-1) emptyLatexState args
     _ -> ""
 

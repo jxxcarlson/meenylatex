@@ -5,7 +5,7 @@ import Internal.Differ as Differ exposing (EditRecord)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression)
-import MiniLatex.Render2 as Render exposing (render)
+import Internal.Render2 as Render exposing (render)
 
 
 createRecord : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a

@@ -1,4 +1,4 @@
-module MiniLatex.Render2
+module Internal.Render2
     exposing
         ( makeTableOfContents
         , render
@@ -37,7 +37,7 @@ import Internal.LatexState
 import Internal.ListMachine as ListMachine
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Internal.ParserTools as PT
-import MiniLatex.Render
+import Internal.Render
 import Internal.Utility as Utility
 import Parser exposing (DeadEnd, Problem(..))
 import Regex
@@ -463,7 +463,7 @@ renderCite : LatexState -> List LatexExpression -> Html msg
 renderCite latexState args =
     let
         label_ =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         ref =
             getDictionaryItem ("bibitem:" ++ label_) latexState
@@ -494,13 +494,13 @@ renderEllie : LatexState -> List LatexExpression -> Html msg
 renderEllie latexState args =
     let
         id =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         url =
             "https://ellie-app.com/embed/" ++ id
 
         title_ =
-            MiniLatex.Render.renderArg 1 latexState args
+            Internal.Render.renderArg 1 latexState args
 
         title =
             if title_ == "xxx" then
@@ -515,10 +515,10 @@ renderIFrame : LatexState -> List LatexExpression -> Html msg
 renderIFrame latexState args =
     let
         url =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         title =
-            MiniLatex.Render.renderArg 1 latexState args
+            Internal.Render.renderArg 1 latexState args
     in
         -- Html.a [ HA.href url, HA.target "_blank" ] [ Html.text title ]
         Html.iframe
@@ -535,7 +535,7 @@ renderEqRef : LatexState -> List LatexExpression -> Html msg
 renderEqRef latexState args =
     let
         key =
-            MiniLatex.Render.renderArg 0 emptyLatexState args
+            Internal.Render.renderArg 0 emptyLatexState args
 
         ref =
             getCrossReference key latexState
@@ -547,10 +547,10 @@ renderHRef : LatexState -> List LatexExpression -> Html msg
 renderHRef latexState args =
     let
         url =
-            MiniLatex.Render.renderArg 0 emptyLatexState args
+            Internal.Render.renderArg 0 emptyLatexState args
 
         label =
-            MiniLatex.Render.renderArg 1 emptyLatexState args
+            Internal.Render.renderArg 1 emptyLatexState args
     in
         Html.a [ HA.href url, HA.target "_blank" ] [ Html.text label ]
 
@@ -559,13 +559,13 @@ renderImage : LatexState -> List LatexExpression -> Html msg
 renderImage latexState args =
     let
         url =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         label =
-            MiniLatex.Render.renderArg 1 latexState args
+            Internal.Render.renderArg 1 latexState args
 
         attributeString =
-            MiniLatex.Render.renderArg 2 latexState args
+            Internal.Render.renderArg 2 latexState args
 
         imageAttrs =
             parseImageAttributes attributeString
@@ -603,13 +603,13 @@ renderImageRef : LatexState -> List LatexExpression -> Html msg
 renderImageRef latexState args =
     let
         url =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         imageUrl =
-            MiniLatex.Render.renderArg 1 latexState args
+            Internal.Render.renderArg 1 latexState args
 
         attributeString =
-            MiniLatex.Render.renderArg 2 latexState args
+            Internal.Render.renderArg 2 latexState args
 
         imageAttrs =
             parseImageAttributes attributeString
@@ -820,7 +820,7 @@ renderRef : LatexState -> List LatexExpression -> Html msg
 renderRef latexState args =
     let
         key =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
     in
         Html.span [] [ Html.text <| getCrossReference key latexState ]
 
@@ -850,7 +850,7 @@ renderSection : LatexState -> List LatexExpression -> Html msg
 renderSection latexState args =
     let
         sectionName =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -882,7 +882,7 @@ renderSectionStar : LatexState -> List LatexExpression -> Html msg
 renderSectionStar latexState args =
     let
         sectionName =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         ref =
             idPhrase "section" sectionName
@@ -894,7 +894,7 @@ renderSubsection : LatexState -> List LatexExpression -> Html msg
 renderSubsection latexState args =
     let
         sectionName =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -918,7 +918,7 @@ renderSubsectionStar : LatexState -> List LatexExpression -> Html msg
 renderSubsectionStar latexState args =
     let
         sectionName =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         ref =
             idPhrase "subsection" sectionName
@@ -930,7 +930,7 @@ renderSubSubsection : LatexState -> List LatexExpression -> Html msg
 renderSubSubsection latexState args =
     let
         sectionName =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -957,7 +957,7 @@ renderSubSubsectionStar : LatexState -> List LatexExpression -> Html msg
 renderSubSubsectionStar latexState args =
     let
         sectionName =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         ref =
             idPhrase "subsubsection" sectionName
@@ -1012,7 +1012,7 @@ renderSubheading : LatexState -> List LatexExpression -> Html msg
 renderSubheading latexState args =
     let
         title =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
     in
         Html.p [ HA.style "font-weight" "bold", HA.style "margin-bottom" "0", HA.style "margin-left" "-2px" ] [ Html.text <| title ]
 
@@ -1097,7 +1097,7 @@ renderRed : LatexState -> List LatexExpression -> Html msg
 renderRed latexState args =
     let
         arg =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
     in
         Html.span [ HA.style "color" "red" ] [ Html.text <| arg ]
 
@@ -1106,7 +1106,7 @@ renderBlue : LatexState -> List LatexExpression -> Html msg
 renderBlue latexState args =
     let
         arg =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
     in
         Html.span [ HA.style "color" "blue" ] [ Html.text <| arg ]
 
@@ -1115,7 +1115,7 @@ renderHighlighted : LatexState -> List LatexExpression -> Html msg
 renderHighlighted latexState args =
     let
         arg =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
     in
         Html.span [ HA.style "background-color" "yellow" ] [ Html.text <| arg ]
 
@@ -1124,7 +1124,7 @@ renderStrikeThrough : LatexState -> List LatexExpression -> Html msg
 renderStrikeThrough latexState args =
     let
         arg =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
     in
         Html.span [ HA.style "text-decoration" "line-through" ] [ Html.text <| arg ]
 
@@ -1133,7 +1133,7 @@ renderTerm : LatexState -> List LatexExpression -> Html msg
 renderTerm latexState args =
     let
         arg =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
     in
         Html.i [] [ Html.text <| arg ]
 
@@ -1142,13 +1142,13 @@ renderXLink : LatexState -> List LatexExpression -> Html msg
 renderXLink latexState args =
     let
         id =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         ref =
             getDictionaryItem "setclient" latexState ++ "/" ++ id
 
         label =
-            MiniLatex.Render.renderArg 1 latexState args
+            Internal.Render.renderArg 1 latexState args
     in
         Html.a [ HA.href ref ] [ Html.text label ]
 
@@ -1157,13 +1157,13 @@ renderXLinkPublic : LatexState -> List LatexExpression -> Html msg
 renderXLinkPublic latexState args =
     let
         id =
-            MiniLatex.Render.renderArg 0 latexState args
+            Internal.Render.renderArg 0 latexState args
 
         ref =
             getDictionaryItem "setclient" latexState ++ "/" ++ id
 
         label =
-            MiniLatex.Render.renderArg 1 latexState args
+            Internal.Render.renderArg 1 latexState args
     in
         Html.a [ HA.href ref ] [ Html.text label ]
 
@@ -1211,9 +1211,9 @@ renderBibItem latexState optArgs args body =
     let
         label =
             if List.length optArgs == 1 then
-                MiniLatex.Render.renderArg 0 latexState optArgs
+                Internal.Render.renderArg 0 latexState optArgs
             else
-                MiniLatex.Render.renderArg 0 latexState args
+                Internal.Render.renderArg 0 latexState args
 
         id =
             "bibitem:" ++ label
@@ -1343,7 +1343,7 @@ renderAlignEnvironment : LatexState -> LatexExpression -> Html msg
 renderAlignEnvironment latexState body =
     let
         r =
-            MiniLatex.Render.render latexState body
+            Internal.Render.render latexState body
 
         eqno =
             getCounter "eqno" latexState
@@ -1388,7 +1388,7 @@ renderEnumerate latexState body =
 renderDefItemEnvironment : LatexState -> List LatexExpression -> LatexExpression -> Html msg
 renderDefItemEnvironment latexState optArgs body =
     Html.div []
-        [ Html.strong [] [ Html.text <| MiniLatex.Render.renderArg 0 latexState optArgs ]
+        [ Html.strong [] [ Html.text <| Internal.Render.renderArg 0 latexState optArgs ]
         , Html.div [ HA.style "margin-left" "25px", HA.style "margin-top" "10px" ] [ render latexState body ]
         ]
 
@@ -1397,7 +1397,7 @@ renderDefItemEnvironment latexState optArgs body =
 -}
 renderEqnArray : LatexState -> LatexExpression -> Html msg
 renderEqnArray latexState body =
-    displayMathText (MiniLatex.Render.render latexState body)
+    displayMathText (Internal.Render.render latexState body)
 
 
 renderEquationEnvironment : LatexState -> LatexExpression -> Html msg
@@ -1419,7 +1419,7 @@ renderEquationEnvironment latexState body =
                 ""
 
         r =
-            MiniLatex.Render.render latexState body
+            Internal.Render.render latexState body
     in
         displayMathText <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
 
@@ -1442,7 +1442,7 @@ renderListing : LatexState -> LatexExpression -> Html msg
 renderListing latexState body =
     let
         text =
-            MiniLatex.Render.render latexState body
+            Internal.Render.render latexState body
 
         lines =
             Utility.addLineNumbers text
@@ -1452,7 +1452,7 @@ renderListing latexState body =
 
 renderMacros : LatexState -> LatexExpression -> Html msg
 renderMacros latexState body =
-    displayMathText (MiniLatex.Render.render latexState body)
+    displayMathText (Internal.Render.render latexState body)
 
 
 renderQuotation : LatexState -> LatexExpression -> Html msg
@@ -1513,18 +1513,18 @@ renderTheBibliography latexState body =
 
 renderUseForWeb : LatexState -> LatexExpression -> Html msg
 renderUseForWeb latexState body =
-    displayMathText (MiniLatex.Render.render latexState body)
+    displayMathText (Internal.Render.render latexState body)
 
 
 renderVerbatim : LatexState -> LatexExpression -> Html msg
 renderVerbatim latexState body =
     let
         body2 =
-            MiniLatex.Render.render latexState body
+            Internal.Render.render latexState body
     in
         Html.pre [ HA.style "margin-top" "-14px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 renderVerse : LatexState -> LatexExpression -> Html msg
 renderVerse latexState body =
-    Html.div [ HA.style "white-space" "pre-line" ] [ Html.text (String.trim <| MiniLatex.Render.render latexState body) ]
+    Html.div [ HA.style "white-space" "pre-line" ] [ Html.text (String.trim <| Internal.Render.render latexState body) ]

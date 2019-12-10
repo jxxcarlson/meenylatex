@@ -1,4 +1,4 @@
-module MiniLatex.HasMath exposing (hasMath, listHasMath)
+module Internal.HasMath exposing (hasMath, listHasMath)
 
 {-| This module is for determining whether the Latex
 has mathmode t4ext

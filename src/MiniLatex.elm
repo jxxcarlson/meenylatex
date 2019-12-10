@@ -21,23 +21,19 @@ for an explanation of the theory behind the MiniLatex package.
 
 # API
 
-@docs render, renderWithSeed, initializeEditRecord, getRenderedText, parse, updateEditRecord, emptyStringRecord
+@docs render, renderWithSeed
 
-@docs EditRecord, LatexState, TocEntry, TableOfContents
+@docs LatexState, TocEntry, TableOfContents
 
-@docs emptyLatexState, emptyHtmlMsgRecord
+@docs emptyLatexState
 
 -}
 
 import Html exposing (Html)
-import Html.Attributes as HA
-import Html.Keyed as Keyed
-import Internal.Differ as Differ exposing (EditRecord)
+
 import Internal.LatexDiffer as MiniLatexDiffer
 import Internal.LatexState exposing (LatexState, emptyLatexState)
-import Internal.Paragraph as Paragraph
-import Internal.Parser as MiniLatexParser exposing (LatexExpression)
-import MiniLatex.Render2 as Render
+import Internal.Render2 as Render
 import MiniLatex.Edit
 
 {-| Auxiliary data compiled during parsing -}
@@ -83,7 +79,3 @@ prependMacros macros_ sourceText =
     "$$\n" ++ String.trim macros_ ++ "\n$$\n\n" ++ sourceText
 
 
-
-
-
---   MiniLatexDiffer.update seed Render.renderLatexList Render.renderString Differ.emptyHtmlMsgRecord text

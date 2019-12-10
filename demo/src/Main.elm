@@ -14,8 +14,6 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Keyed as Keyed
-import MiniLatex.HasMath as HasMath
-import MiniLatex
 import MiniLatex.Edit
 import Random
 import Source
@@ -57,8 +55,7 @@ init flags =
             , editData = editData
             , inputString = exportLatex2Html editData
             , parseResult = parseResult
-            , hasMathResult = (List.map HasMath.listHasMath parseResult)
-            , seed = 0
+            , version = 0
             , configuration = StandardView
             , lineViewStyle = Horizontal
             , windowWidth = flags.width
@@ -85,19 +82,17 @@ update msg model =
         FastRender ->
             let
                 newEditRecord =
-                     MiniLatex.Edit.update model.seed model.editData model.sourceText
+                     MiniLatex.Edit.update model.version model.sourceText model.editData
 
                 parseResult =
                     MiniLatex.Edit.parse model.sourceText
 
-                hasMathResult =
-                    (List.map HasMath.listHasMath parseResult)
+
             in
                 ( { model
                     | counter = model.counter + 1
                     , editData = newEditRecord
                     , parseResult = parseResult
-                    , hasMathResult = hasMathResult
                   }
                 , Cmd.batch
                     [ -- sendToJs <| encodeData "fast" newEditRecord.idList
@@ -112,7 +107,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = ""
-                , editData = MiniLatex.Edit.init model.seed ""
+                , editData = MiniLatex.Edit.init model.version ""
               }
             , Cmd.none
               -- sendToJs <| encodeData "full" []
@@ -122,7 +117,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , sourceText = Source.initialText
-                , editData = MiniLatex.Edit.init model.seed Source.initialText
+                , editData = MiniLatex.Edit.init model.version Source.initialText
               }
             , Cmd.none
               -- sendToJs <| encodeData "full" []
@@ -135,7 +130,7 @@ update msg model =
             ( model, Random.generate NewSeed (Random.int 1 10000) )
 
         NewSeed newSeed ->
-            ( { model | seed = newSeed }, Cmd.none )
+            ( { model | version = newSeed }, Cmd.none )
 
         ShowStandardView ->
             ( { model | configuration = StandardView }, Cmd.none )
@@ -214,7 +209,7 @@ useSource : String -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
 useSource text model =
     let
         editData =
-            MiniLatex.Edit.init model.seed text
+            MiniLatex.Edit.init model.version text
     in
         ( { model
             | counter = model.counter + 1

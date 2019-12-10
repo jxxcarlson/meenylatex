@@ -6,11 +6,8 @@
     "version": "7.0.9",
     "exposed-modules": [
         "MiniLatex",
-        "MiniLatex.HasMath",
-        "MiniLatex.Render",
-        "MiniLatex.Render2",
-        "MiniLatex.Export",
-        "MiniLatex.FastExport"
+        "MiniLatex.Edit",
+        "MiniLatex.Export"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {

@@ -35,10 +35,10 @@ C & D \\\\
 """
 
 
-{-| parse a string and render it to a tuple,
+{-| Parse a string and render it as a tuple,
 where the first element is the string rendered
-back into Latex, and where the second element is the list
-of image urls from the string.
+back into Latex, and where the second element is a list
+of image urls.
 -}
 transform : String -> ( String, List String )
 transform str =

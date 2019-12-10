@@ -12,9 +12,8 @@ type alias Model a =
     , sourceText2 : String
     , parseResult : List (List LatexExpression)
     , inputString : String
-    , hasMathResult : List Bool
     , editData : MiniLatex.Edit.Data a
-    , seed : Int
+    , version : Int
     , configuration : Configuration
     , lineViewStyle : LineViewStyle
     , windowHeight : Int

@@ -1,4 +1,4 @@
-module MiniLatex.Render
+module Internal.Render
     exposing
         ( makeTableOfContents
         , render

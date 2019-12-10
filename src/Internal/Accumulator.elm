@@ -14,7 +14,7 @@ import Internal.LatexState
         , updateCounter
         )
 import Internal.Parser as Parser exposing (LatexExpression(..), macro)
-import MiniLatex.Render2 as Render exposing (renderLatexList)
+import Internal.Render2 as Render exposing (renderLatexList)
 import Internal.StateReducerHelpers2 as SRH2
 
 

@@ -23,7 +23,8 @@ import Dict
 -- import List.Extra
 
 import XConfiguration
-import Internal.ErrorMessages as ErrorMessages
+import Parser.Advanced
+import Internal.ErrorMessages2 as ErrorMessages
 import Internal.Html as Html
 import Internal.Image as Image exposing (..)
 import Internal.JoinStrings as JoinStrings
@@ -36,7 +37,7 @@ import Internal.LatexState
         , getCrossReference
         , getDictionaryItem
         )
-import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import Internal.Parser exposing (LatexExpression(..), LXParser, defaultLatexList, latexList)
 import Internal.Utility as Utility
 import Parser
 import Regex
@@ -68,11 +69,11 @@ parseString parser str =
 
 {-| Parse a string, then render it.
 -}
-renderString : Parser.Parser LatexExpression -> LatexState -> String -> String
+renderString : LXParser LatexExpression -> LatexState -> String -> String
 renderString parser latexState str =
     let
         parserOutput =
-            Parser.run parser str
+            Parser.Advanced.run parser str
 
         renderOutput =
             case parserOutput of
@@ -80,7 +81,8 @@ renderString parser latexState str =
                     render latexState latexExpression |> postProcess
 
                 Err error ->
-                    "Error: " ++ Parser.deadEndsToString error
+                   --  "Error: " ++ Parser.deadEndsToString error
+                    "Error: " ++ ErrorMessages.renderErrors error
     in
         renderOutput
 

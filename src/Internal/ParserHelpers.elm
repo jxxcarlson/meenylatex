@@ -18,9 +18,21 @@ module Internal.ParserHelpers exposing
 
 
 
-import Parser exposing (..)
+import Parser.Advanced exposing (..)
 
+type alias HParser a = Parser.Advanced.Parser Context Problem a
 
+type Context
+    = Definition String
+
+type Problem
+    = ExpectingMarker
+    | ExpectingLeftBrace
+    | ExpectingRightBrace
+    | ExpectingLeftBracket
+    | ExpectingRightBracket
+    | ExpectingLeftParen
+    | ExpectingRightParen
 
 {- PARSER HELPERS
 
@@ -34,38 +46,39 @@ import Parser exposing (..)
 -}
 
 
-spaces : Parser ()
+spaces : HParser ()
 spaces =
     chompWhile (\c -> c == ' ')
 
 
-ws : Parser ()
+ws : HParser ()
 ws =
     chompWhile (\c -> c == ' ' || c == '\n')
 
 
-parseUntil : String -> Parser String
+parseUntil : String -> HParser String
 parseUntil marker =
-    getChompedString <| chompUntil marker
+    getChompedString <| chompUntil (Token marker ExpectingMarker)
+
 
 
 {-| chomp to end of the marker and return the
 chomped string minus the marker.
 -}
-parseToSymbol : String -> Parser String
+parseToSymbol : String -> HParser String
 parseToSymbol marker =
     (getChompedString <|
         succeed identity
             |= chompUntilEndOr marker
-            |. symbol marker
+            |. symbol (Token marker ExpectingMarker)
     )
         |> map (String.dropRight (String.length marker))
 
 
-parseBetweenSymbols : String -> String -> Parser String
+parseBetweenSymbols : String -> String -> HParser String
 parseBetweenSymbols startSymbol endSymbol =
     succeed identity
-        |. symbol startSymbol
+        |. symbol (Token startSymbol ExpectingMarker)
         |. spaces
         |= parseUntil endSymbol
 
@@ -74,29 +87,29 @@ parseBetweenSymbols startSymbol endSymbol =
 {- ITEM LIST PARSERS -}
 
 
-nonEmptyItemList : Parser a -> Parser (List a)
+nonEmptyItemList : HParser a -> HParser (List a)
 nonEmptyItemList itemParser =
     itemParser
         |> andThen (\x -> itemList_ [ x ] itemParser)
 
 
-itemList : Parser a -> Parser (List a)
+itemList : HParser a -> HParser (List a)
 itemList itemParser =
     itemList_ [] itemParser
 
 
-itemList_ : List a -> Parser a -> Parser (List a)
+itemList_ : List a -> HParser a -> HParser (List a)
 itemList_ initialList itemParser =
-    Parser.loop initialList (itemListHelper itemParser)
+   loop initialList (itemListHelper itemParser)
 
 
-itemListHelper : Parser a -> List a -> Parser (Step (List a) (List a))
+itemListHelper : HParser a -> List a -> HParser (Step (List a) (List a))
 itemListHelper itemParser revItems =
     oneOf
         [ succeed (\item -> Loop (item :: revItems))
             |= itemParser
         , succeed ()
-            |> Parser.map (\_ -> Done (List.reverse revItems))
+            |> map (\_ -> Done (List.reverse revItems))
         ]
 
 
@@ -146,7 +159,7 @@ transformWords str =
 
 {-| Apply a parser zero or more times and return a list of the results.
 -}
-many : Parser a -> Parser (List a)
+many : HParser a -> HParser (List a)
 many p =
     loop [] (manyHelp p)
 
@@ -154,7 +167,7 @@ many p =
 {-| Apply a parser one or more times and return a tuple of the first result parsed
 and the list of the remaining results.
 -}
-some : Parser a -> Parser ( a, List a )
+some : HParser a -> HParser ( a, List a )
 some p =
     succeed Tuple.pair
         |= p
@@ -170,7 +183,7 @@ some p =
     --> Ok 4
 
 -}
-between : Parser opening -> Parser closing -> Parser a -> Parser a
+between : HParser opening -> HParser closing -> HParser a -> HParser a
 between opening closing p =
     succeed identity
         |. opening
@@ -188,9 +201,9 @@ between opening closing p =
     --> Ok 4
 
 -}
-parens : Parser a -> Parser a
+parens : HParser a -> HParser a
 parens =
-    between (symbol "(") (symbol ")")
+    between (symbol (Token "(" ExpectingLeftParen)) (symbol (Token ")" ExpectingRightParen))
 
 
 {-| Parse an expression between curly braces.
@@ -201,24 +214,24 @@ parens =
     --> Ok 4
 
 -}
-braces : Parser a -> Parser a
+braces : HParser a -> HParser a
 braces =
-    between (symbol "{") (symbol "}")
+    between (symbol (Token "{" ExpectingLeftBrace)) (symbol (Token "}" ExpectingRightBrace))
 
 
 {-| Parse an expression between square brackets.
 brackets p == between (symbol "[") (symbol "]") p
 -}
-brackets : Parser a -> Parser a
+brackets : HParser a -> HParser a
 brackets =
-    between (symbol "[") (symbol "]")
+    between (symbol (Token "[" ExpectingLeftBracket)) (symbol (Token "]" ExpectingRightBracket))
 
 
 
 -- HELPERS
 
 
-manyHelp : Parser a -> List a -> Parser (Step (List a) (List a))
+manyHelp : HParser a -> List a -> HParser (Step (List a) (List a))
 manyHelp p vs =
     oneOf
         [ succeed (\v -> Loop (v :: vs))

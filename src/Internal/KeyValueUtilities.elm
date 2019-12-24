@@ -3,9 +3,19 @@ module Internal.KeyValueUtilities exposing(..)
 -- exposing (getKeyValueList, getValue)
 
 import Char
-import Parser exposing (..)
-import Internal.ParserHelpers exposing (itemList)
-import Internal.Parser exposing (word)
+import Parser.Advanced exposing (..)
+-- import Internal.Parser exposing (word, itemList)
+
+type alias KVParser a = Parser.Advanced.Parser Context Problem a
+
+
+type Context
+    = Definition String
+
+type Problem
+    = ExpectingColon
+    | ExpectingInWord
+    | ExpectingComma
 
 
 -- type alias KeyValuePair =
@@ -19,20 +29,20 @@ type alias KeyValuePair =
     ( String, String )
 
 
-keyValuePair : Parser KeyValuePair
+keyValuePair : KVParser KeyValuePair
 keyValuePair =
     succeed Tuple.pair
         |. spaces
         |= word (\c -> (c /= ':'))
         |. spaces
-        |. symbol ":"
+        |. symbol (Token ":" ExpectingColon)
         |. spaces
         |= word (\c -> (c /= ','))
-        |. oneOf [symbol ",", spaces]
+        |. oneOf [symbol (Token "," ExpectingComma), spaces]
         |> map (\( a, b ) -> ( String.trim a, String.trim b ))
 
 
-keyValuePairs : Parser (List KeyValuePair)
+keyValuePairs : KVParser (List KeyValuePair)
 keyValuePairs =
     -- inContext "keyValuePairs" <|
     succeed identity
@@ -40,7 +50,7 @@ keyValuePairs =
 
 
 getKeyValueList str =
-    Parser.run keyValuePairs str |> Result.withDefault []
+    Parser.Advanced.run keyValuePairs str |> Result.withDefault []
 
 
 
@@ -53,3 +63,52 @@ getValue key kvpList =
         |> List.map (\x -> Tuple.second x)
         |> List.head
         |> Maybe.withDefault ""
+
+
+--
+-- HELPERS
+--
+
+{-| Use `inWord` to parse a word.
+
+   import Parser
+
+   inWord : Char -> Bool
+   inWord c = not (c == ' ')
+
+   KVParser.run word "this is a test"
+   --> Ok "this"
+-}
+word : (Char -> Bool) -> KVParser String
+word inWord =
+    succeed String.slice
+        |. ws
+        |= getOffset
+        |. chompIf inWord ExpectingInWord
+        |. chompWhile inWord
+        |. ws
+        |= getOffset
+        |= getSource
+
+ws : KVParser ()
+ws =
+    chompWhile (\c -> c == ' ' || c == '\n')
+    
+itemList : KVParser a -> KVParser (List a)
+itemList itemParser =
+    itemList_ [] itemParser
+
+
+itemList_ : List a -> KVParser a -> KVParser (List a)
+itemList_ initialList itemParser =
+   loop initialList (itemListHelper itemParser)
+
+
+itemListHelper : KVParser a -> List a -> KVParser (Step (List a) (List a))
+itemListHelper itemParser revItems =
+    oneOf
+        [ succeed (\item_ -> Loop (item_ :: revItems))
+            |= itemParser
+        , succeed ()
+            |> map (\_ -> Done (List.reverse revItems))
+        ]

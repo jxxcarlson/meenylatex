@@ -14,7 +14,7 @@ finite-state machine.
 
 import Internal.Parser
 import Internal.Stack as Stack exposing (Stack)
-import Parser
+import Parser.Advanced
 import Regex
 
 
@@ -48,7 +48,7 @@ getBeginArg : String -> String
 getBeginArg line =
     let
         parseResult =
-            Parser.run Internal.Parser.envName line
+            Parser.Advanced.run Internal.Parser.envName line
 
         arg =
             case parseResult of
@@ -65,7 +65,7 @@ getEndArg : String -> String
 getEndArg line =
     let
         parseResult =
-            Parser.run Internal.Parser.endWord line
+            Parser.Advanced.run Internal.Parser.endWord line
 
         arg =
             case parseResult of

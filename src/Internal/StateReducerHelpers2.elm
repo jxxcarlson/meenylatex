@@ -1,9 +1,10 @@
 module Internal.StateReducerHelpers2 exposing(..)
 
-import Internal.Parser as Parser exposing(LatexExpression(..))
+import Internal.Parser as LXParser exposing(LatexExpression(..))
 import Internal.Utility as Utility
 import Parser as P 
 import Internal.ParserHelpers as ParserHelpers
+import Parser.Advanced
 
 import Internal.LatexState
     exposing 
@@ -210,7 +211,7 @@ getLabel str =
         maybeMacro =
             str
                 |> String.trim
-                |> P.run (Parser.macro ParserHelpers.ws)
+                |> Parser.Advanced.run (LXParser.macro LXParser.ws)
     in
         case maybeMacro of
             Ok macro ->

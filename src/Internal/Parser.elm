@@ -2,6 +2,9 @@ module Internal.Parser
     exposing
         (  macro
         , parse
+        , Problem
+        , Context
+        , LXParser
         , defaultLatexList
         , latexList
         , newcommand
@@ -17,6 +20,8 @@ module Internal.Parser
         , texComment
         , latexExpression
         , LatexExpression(..)
+        , ws
+        , itemList
         )
 
 {-| This module is for quickly preparing latex for export.
@@ -30,8 +35,8 @@ module Internal.Parser
 -}
 
 import Dict
-import Internal.ParserHelpers as PH exposing (..)
-import Parser exposing (..)
+-- import Internal.ParserHelpers as PH exposing (..)
+import Parser.Advanced exposing (..)
 import Set
 
 
@@ -55,9 +60,41 @@ type LatexExpression
     | Environment String (List LatexExpression) LatexExpression -- Environment name optArgs body
     | LatexList (List LatexExpression)
     | NewCommand String Int LatexExpression
-    | LXError (List DeadEnd)
+    | LXError (List (DeadEnd Context Problem))
 
 
+
+type alias LXParser a = Parser.Advanced.Parser Context Problem a
+
+type Context
+    = Definition String
+
+type Problem
+    = ExpectingInWord
+    | ExpectingMarker
+    | ExpectingLeftBrace
+    | ExpectingRightBrace
+    | ExpectingLeftBracket
+    | ExpectingRightBracket
+    | ExpectingLeftParen
+    | ExpectingRightParen
+    | ExpectingNewline
+    | ExpectingPercent
+    | ExpectingMacroReservedWord
+    | ExpectingmSMacroReservedWord
+    | ExpectingInt
+    | InvalidInt
+    | ExpectingLeadingDollarSign
+    | ExpectingBeginAndRightBrace
+    | ExpectingEndAndRightBrace
+    | ExpectingEscapeAndLeftBracket
+    | ExpectingDoubleNewline
+    | ExpectingEscapedItem
+    | ExpectingSpace
+    | ExpectingAmpersand
+    | ExpectingDoubleEscapeAndNewline
+    | ExpectingEscapedNewcommandAndBrace
+    | ExpectingEndWord
 
 {-| Transform a string into a list of LatexExpressions
 
@@ -68,7 +105,7 @@ parse : String -> List LatexExpression
 parse text =
     let
         expr =
-            Parser.run latexList text
+            Parser.Advanced.run latexList text
     in
         case expr of
             Ok (LatexList list) ->
@@ -85,7 +122,7 @@ parse text =
 
 {-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
 -}
-latexList : Parser LatexExpression
+latexList : LXParser LatexExpression
 latexList =
     -- inContext "latexList" <|
     succeed identity
@@ -96,7 +133,7 @@ latexList =
 
 {-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment\ |\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
 -}
-latexExpression : Parser LatexExpression
+latexExpression : LXParser LatexExpression
 latexExpression =
     oneOf
         [ texComment
@@ -127,12 +164,12 @@ defaultLatexExpression =
 {- WORDS -}
 
 {-|
-    import Parser
-    Parser.run words "one two three"
+    import Parser.Advanced
+    LXParser.run words "one two three"
     --> Ok (LXString ("one  two  three"))
 
 -}
-words : Parser LatexExpression
+words : LXParser LatexExpression
 words =
     oneOf
         [ blank
@@ -143,16 +180,16 @@ words =
         ]
 
 
-words_ : Parser LatexExpression
+words_ : LXParser LatexExpression
 words_ =
     nonEmptyItemList (word notSpaceOrSpecialCharacters)
         |> map (String.join " ")
         |> map LXString
 
 
-blank : Parser LatexExpression
+blank : LXParser LatexExpression
 blank =
-    symbol "\n\n" |> map (\_ -> LXString "\n\n")
+    symbol (Token "\n\n" ExpectingDoubleNewline) |> map (\_ -> LXString "\n\n")
 
 
 notSpaceOrSpecialCharacters : Char -> Bool
@@ -167,15 +204,15 @@ notSpaceOrSpecialCharacters c =
    inWord : Char -> Bool
    inWord c = not (c == ' ')
 
-   Parser.run word "this is a test"
+   LXParser.run word "this is a test"
    --> Ok "this"
 -}
-word : (Char -> Bool) -> Parser String
+word : (Char -> Bool) -> LXParser String
 word inWord =
     succeed String.slice
         |. ws
         |= getOffset
-        |. chompIf inWord
+        |. chompIf inWord ExpectingInWord
         |. chompWhile inWord
         |. ws
         |= getOffset
@@ -186,7 +223,7 @@ word inWord =
 {- MACRO WORDS -}
 
 
-macroArgWords : Parser LatexExpression
+macroArgWords : LXParser LatexExpression
 macroArgWords =
     nonEmptyItemList (word inMacroArg)
         |> map (String.join " ")
@@ -201,7 +238,7 @@ inMacroArg c =
 {- OPTION ARG WORDS -}
 
 
-optionArgWords : Parser LatexExpression
+optionArgWords : LXParser LatexExpression
 optionArgWords =
     nonEmptyItemList (word inOptionArgWord)
         |> map (String.join " ")
@@ -217,7 +254,7 @@ inOptionArgWord c =
 {- SPECIAL WORDS -}
 
 
-tableCellWords : Parser LatexExpression
+tableCellWords : LXParser LatexExpression
 tableCellWords =
     nonEmptyItemList (word inTableCellWord)
         |> map (String.join " ")
@@ -234,21 +271,21 @@ inTableCellWord c =
 {- TEX COMMENTS -}
 
 {-|
-    import Parser
+    import LXParser
 
-    Parser.run texComment "% testing ...\n"
+    LXParser.run texComment "% testing ...\n"
     --> Ok (Comment ("% testing ...\n"))
 
-    Parser.run texComment "% testing ..."
-    --> Err [{ col = 14, problem = Parser.UnexpectedChar, row = 1 }]
+    LXParser.run texComment "% testing ..."
+    --> Err [{ col = 14, problem = LXParser.UnexpectedChar, row = 1 }]
 -}
-texComment : Parser LatexExpression
+texComment : LXParser LatexExpression
 texComment =
     (getChompedString <|
         succeed ()
-            |. chompIf (\c -> c == '%')
+            |. chompIf (\c -> c == '%') ExpectingPercent
             |. chompWhile (\c -> c /= '\n')
-            |. chompIf (\c -> c == '\n')
+            |. chompIf (\c -> c == '\n') ExpectingNewline
             |. ws
     )
         |> map Comment
@@ -264,38 +301,38 @@ texComment =
 {-| Parse the macro keyword followed by
 zero or more optional followed by zero or more more eventual arguments.
 
-    import Parser
+    import LXParser
 
-    Parser.run newcommand "\\newcommand{\\hello}[1]{Hello \\strong{#1}!}"
+    LXParser.run newcommand "\\newcommand{\\hello}[1]{Hello \\strong{#1}!}"
     --> Ok (NewCommand "hello" 1 (LatexList [LXString "Hello ",Macro "strong" [] [LatexList [LXString "#1"]],LXString "!"]))
 
 -}
-newcommand : Parser LatexExpression
+newcommand : LXParser LatexExpression
 newcommand =
     succeed NewCommand
-        |. symbol "\\newcommand{"
+        |. symbol (Token "\\newcommand{" ExpectingEscapedNewcommandAndBrace)
         |= macroName
-        |. symbol "}"
+        |. symbol (Token "}" ExpectingRightBrace)
         |= numberOfArgs
         |= arg
         |. ws
 
 
-numberOfArgs_ : Parser Int
+numberOfArgs_ : LXParser Int
 numberOfArgs_ =
     succeed identity
-        |. symbol "["
-        |= int
-        |. symbol "]"
+        |. symbol (Token "[" ExpectingLeftBracket)
+        |= int ExpectingInt InvalidInt
+        |. symbol (Token "]" ExpectingRightBracket)
 
 {-|
-    import Parser
+    import LXParser
 
-    Parser.run numberOfArgs "[3]"
+    LXParser.run numberOfArgs "[3]"
     --> Ok 3
 
 -}
-numberOfArgs : Parser Int
+numberOfArgs : LXParser Int
 numberOfArgs =
     many numberOfArgs_
         |> map List.head
@@ -305,14 +342,14 @@ numberOfArgs =
 {-| Parse the macro keyword followed by
 zero or more optional followed by zero or more more eventual arguments.
 
-    import Parser
+    import LXParser
     import Internal.ParserHelpers as PH
 
-    Parser.run (macro PH.ws) "\\hello}[1]{Hello \\strong{#1}!}"
+    LXParser.run (macro ws) "\\hello}[1]{Hello \\strong{#1}!}"
     --> Ok (Macro "hello" [] [])
 
 -}
-macro : Parser () -> Parser LatexExpression
+macro : LXParser () -> LXParser LatexExpression
 macro wsParser =
     succeed Macro
         |= macroName
@@ -323,32 +360,33 @@ macro wsParser =
 
 {-| Use to parse arguments for macros
 -}
-optionalArg : Parser LatexExpression
+optionalArg : LXParser LatexExpression
 optionalArg =
     succeed identity
-        |. symbol "["
-        |= itemList (oneOf [ optionArgWords, inlineMath PH.spaces ])
-        |. symbol "]"
+        |. symbol (Token "[" ExpectingLeftBracket)
+        |= itemList (oneOf [ optionArgWords, inlineMath spaces ])
+        |. symbol (Token "]" ExpectingRightBracket)
         |> map LatexList
 
 
 {-| Use to parse arguments for macros
 -}
-arg : Parser LatexExpression
+arg : LXParser LatexExpression
 arg =
     succeed identity
-        |. symbol "{"
-        |= itemList (oneOf [ macroArgWords, inlineMath PH.spaces, lazy (\_ -> macro PH.spaces) ])
-        |. symbol "}"
+        |. symbol (Token "{" ExpectingLeftBrace)
+        |= itemList (oneOf [ macroArgWords, inlineMath spaces, lazy (\_ -> macro spaces) ])
+        |. symbol (Token "}" ExpectingRightBrace)
         |> map LatexList
 
 
-macroName : Parser String
+macroName : LXParser String
 macroName =
     variable
         { start = \c -> c == '\\'
         , inner = \c -> Char.isAlphaNum c || c == '*'
         , reserved = Set.fromList [ "\\begin", "\\end", "\\item", "\\bibitem" ]
+        , expecting = ExpectingMacroReservedWord
         }
         |> map (String.dropLeft 1)
 
@@ -356,7 +394,7 @@ macroName =
 {-| The smacro parser assumes that the text to be
 parsed forms a single paragraph
 -}
-smacro : Parser LatexExpression
+smacro : LXParser LatexExpression
 smacro =
     succeed SMacro
         |= smacroName
@@ -365,12 +403,13 @@ smacro =
         |= lazy (\_ -> latexList)
 
 
-smacroName : Parser String
+smacroName : LXParser String
 smacroName =
     variable
         { start = \c -> c == '\\'
         , inner = \c -> Char.isAlphaNum c
         , reserved = Set.fromList [ "\\begin", "\\end", "\\item" ]
+        , expecting = ExpectingmSMacroReservedWord
         }
         |> map (String.dropLeft 1)
 
@@ -381,50 +420,50 @@ smacroName =
 
 {-|
 
-    import Parser
+    import LXParser
     import Internal.ParserHelpers as PH
 
-    Parser.run (inlineMath PH.ws) "$a^2 + b^2$"
+    LXParser.run (inlineMath ws) "$a^2 + b^2$"
     --> Ok (InlineMath ("a^2 + b^2"))
 -}
-inlineMath : Parser () -> Parser LatexExpression
+inlineMath : LXParser () -> LXParser LatexExpression
 inlineMath wsParser =
     succeed InlineMath
-        |. symbol "$"
+        |. symbol (Token "$" ExpectingLeadingDollarSign)
         |= parseToSymbol "$"
         |. wsParser
 
 {-|
 
-    import Parser
+    import LXParser
 
-    Parser.run displayMathDollar "$$a^2 + b^2$$"
+    LXParser.run displayMathDollar "$$a^2 + b^2$$"
     --> Ok (DisplayMath ("a^2 + b^2"))
 
 -}
-displayMathDollar : Parser LatexExpression
+displayMathDollar : LXParser LatexExpression
 displayMathDollar =
     -- inContext "display math $$" <|
     succeed DisplayMath
-        |. PH.spaces
-        |. symbol "$$"
+        |. spaces
+        |. symbol (Token "$$" ExpectingLeadingDollarSign)
         |= parseToSymbol "$$"
         |. ws
 
 {-|
 
-    import Parser
+    import LXParser
 
-    Parser.run displayMathBrackets "\\[a^2 + b^2\\]"
+    LXParser.run displayMathBrackets "\\[a^2 + b^2\\]"
     --> Ok (DisplayMath ("a^2 + b^2"))
 
 -}
-displayMathBrackets : Parser LatexExpression
+displayMathBrackets : LXParser LatexExpression
 displayMathBrackets =
     -- inContext "display math brackets" <|
     succeed DisplayMath
-        |. PH.spaces
-        |. symbol "\\["
+        |. spaces
+        |. symbol (Token "\\[" ExpectingEscapeAndLeftBracket)
         |= parseToSymbol "\\]"
         |. ws
 
@@ -437,39 +476,39 @@ displayMathBrackets =
 a \begin{ENV} ... \end{ENV}
 pair
 -}
-envName : Parser String
+envName : LXParser String
 envName =
     --  inContext "envName" <|
     succeed identity
-        |. PH.spaces
-        |. symbol "\\begin{"
+        |. spaces
+        |. symbol (Token "\\begin{" ExpectingBeginAndRightBrace)
         |= parseToSymbol "}"
 
 
 {-| Use to parse begin ... end blocks
 -}
-endWord : Parser String
+endWord : LXParser String
 endWord =
     succeed identity
-        |. PH.spaces
-        |. symbol "\\end{"
+        |. spaces
+        |. symbol (Token "\\end{" ExpectingEndAndRightBrace)
         |= parseToSymbol "}"
         |. ws
 
 {-|
 
-    import Parser
+    import LXParser
 
-    Parser.run environment "\\begin{theorem}\nFor all integers $i$, $j$, $i + j = j = i$.\n\\end{theorem}"
+    LXParser.run environment "\\begin{theorem}\nFor all integers $i$, $j$, $i + j = j = i$.\n\\end{theorem}"
     --> Ok (Environment "theorem" [] (LatexList [LXString ("For  all  integers "),InlineMath "i",LXString (", "),InlineMath "j",LXString (", "),InlineMath ("i + j = j = i"),LXString ".\n"]))
 
 -}
-environment : Parser LatexExpression
+environment : LXParser LatexExpression
 environment =
     envName |> andThen environmentOfType
 
 
-environmentOfType : String -> Parser LatexExpression
+environmentOfType : String -> LXParser LatexExpression
 environmentOfType envType =
     let
         theEndWord =
@@ -488,7 +527,7 @@ environmentOfType envType =
 {- DISPATCHER AND SUBPARSERS -}
 
 
-environmentParser : String -> String -> String -> Parser LatexExpression
+environmentParser : String -> String -> String -> LXParser LatexExpression
 environmentParser envKind theEndWord envType =
     case Dict.get envKind parseEnvironmentDict of
         Just p ->
@@ -498,7 +537,7 @@ environmentParser envKind theEndWord envType =
             standardEnvironmentBody theEndWord envType
 
 
-parseEnvironmentDict : Dict.Dict String (String -> String -> Parser LatexExpression)
+parseEnvironmentDict : Dict.Dict String (String -> String -> LXParser LatexExpression)
 parseEnvironmentDict =
     Dict.fromList
         [ ( "enumerate", \endWoord envType -> itemEnvironmentBody endWoord envType )
@@ -513,7 +552,7 @@ parseEnvironmentDict =
 -- Environment String (List LatexExpression) LatexExpression -- Environment name optArgs body
 
 
-standardEnvironmentBody : String -> String -> Parser LatexExpression
+standardEnvironmentBody : String -> String -> LXParser LatexExpression
 standardEnvironmentBody endWoord envType =
     succeed (Environment envType)
         |. ws
@@ -521,7 +560,7 @@ standardEnvironmentBody endWoord envType =
         |. ws
         |= (nonEmptyItemList latexExpression |> map LatexList)
         |. ws
-        |. symbol endWoord
+        |. symbol (Token endWoord ExpectingEndWord)
         |. ws
 
 
@@ -530,7 +569,7 @@ This parser is used for envronments whose body is to be
 passed to MathJax for processing and also for the verbatim
 environment.
 -}
-passThroughBody : String -> String -> Parser LatexExpression
+passThroughBody : String -> String -> LXParser LatexExpression
 passThroughBody endWoord envType =
     --  inContext "passThroughBody" <|
     succeed identity
@@ -544,27 +583,27 @@ passThroughBody endWoord envType =
 {- ITEMIZED LISTS -}
 
 
-itemEnvironmentBody : String -> String -> Parser LatexExpression
+itemEnvironmentBody : String -> String -> LXParser LatexExpression
 itemEnvironmentBody endWoord envType =
     ---  inContext "itemEnvironmentBody" <|
     succeed identity
         |. ws
         |= itemList (oneOf [ item, lazy (\_ -> environment) ])
         |. ws
-        |. symbol endWoord
+        |. symbol (Token endWoord ExpectingEndWord)
         |. ws
         |> map LatexList
         |> map (Environment envType [])
 
 
-biblioEnvironmentBody : String -> String -> Parser LatexExpression
+biblioEnvironmentBody : String -> String -> LXParser LatexExpression
 biblioEnvironmentBody endWoord envType =
     ---  inContext "itemEnvironmentBody" <|
     succeed identity
         |. ws
         |= itemList smacro
         |. ws
-        |. symbol endWoord
+        |. symbol (Token endWoord ExpectingEndWord)
         |. ws
         |> map LatexList
         |> map (Environment envType [])
@@ -582,15 +621,15 @@ biblioExample =
 """
 
 
-item : Parser LatexExpression
+item : LXParser LatexExpression
 item =
     ---  inContext "item" <|
     succeed identity
-        |. PH.spaces
-        |. symbol "\\item"
-        |. symbol " "
-        |. PH.spaces
-        |= itemList (oneOf [ words, inlineMath PH.ws, macro PH.ws ])
+        |. spaces
+        |. symbol (Token "\\item" ExpectingEscapedItem)
+        |. symbol (Token " " ExpectingSpace)
+        |. spaces
+        |= itemList (oneOf [ words, inlineMath ws, macro ws ])
         |. ws
         |> map (\x -> Item 1 (LatexList x))
 
@@ -599,7 +638,7 @@ item =
 {- TABLES -}
 
 
-tabularEnvironmentBody : String -> String -> Parser LatexExpression
+tabularEnvironmentBody : String -> String -> LXParser LatexExpression
 tabularEnvironmentBody endWoord envType =
     -- inContext "tabularEnvironmentBody" <|
     succeed (Environment envType)
@@ -607,11 +646,11 @@ tabularEnvironmentBody endWoord envType =
         |= itemList arg
         |= tableBody
         |. ws
-        |. symbol endWoord
+        |. symbol (Token endWoord ExpectingEndWord)
         |. ws
 
 
-tableBody : Parser LatexExpression
+tableBody : LXParser LatexExpression
 tableBody =
     --  inContext "tableBody" <|
     succeed identity
@@ -621,14 +660,14 @@ tableBody =
         |> map LatexList
 
 
-tableRow : Parser LatexExpression
+tableRow : LXParser LatexExpression
 tableRow =
     --- inContext "tableRow" <|
     succeed identity
-        |. PH.spaces
+        |. spaces
         |= andThen (\c -> tableCellHelp [ c ]) tableCell
-        |. PH.spaces
-        |. oneOf [ symbol "\n", symbol "\\\\\n" ]
+        |. spaces
+        |. oneOf [ symbol (Token "\n" ExpectingNewline), symbol (Token "\\\\\n" ExpectingDoubleEscapeAndNewline) ]
         |> map LatexList
 
 
@@ -636,14 +675,14 @@ tableRow =
 -- ###
 
 
-tableCell : Parser LatexExpression
+tableCell : LXParser LatexExpression
 tableCell =
     -- inContext "tableCell" <|
     succeed identity
-        |= oneOf [ displayMathBrackets, macro PH.ws, displayMathDollar, inlineMath PH.ws, tableCellWords ]
+        |= oneOf [ displayMathBrackets, macro ws, displayMathDollar, inlineMath ws, tableCellWords ]
 
 
-tableCellHelp : List LatexExpression -> Parser (List LatexExpression)
+tableCellHelp : List LatexExpression -> LXParser (List LatexExpression)
 tableCellHelp revCells =
     --  inContext "tableCellHelp" <|
     oneOf
@@ -653,15 +692,214 @@ tableCellHelp revCells =
         ]
 
 
-nextCell : Parser LatexExpression
+nextCell : LXParser LatexExpression
 nextCell =
     --  inContext "nextCell" <|
-    -- (delayedCommit PH.spaces <|
+    -- (delayedCommit spaces <|
     succeed identity
-        |. symbol "&"
-        |. PH.spaces
+        |. symbol (Token "&" ExpectingAmpersand)
+        |. spaces
         |= tableCell
 
 
 
---)
+-- 
+-- HELPERS
+--
+
+
+spaces : LXParser ()
+spaces =
+    chompWhile (\c -> c == ' ')
+
+
+ws : LXParser ()
+ws =
+    chompWhile (\c -> c == ' ' || c == '\n')
+
+
+parseUntil : String -> LXParser String
+parseUntil marker =
+    getChompedString <| chompUntil (Token marker ExpectingMarker)
+
+
+
+{-| chomp to end of the marker and return the
+chomped string minus the marker.
+-}
+parseToSymbol : String -> LXParser String
+parseToSymbol marker =
+    (getChompedString <|
+        succeed identity
+            |= chompUntilEndOr marker
+            |. symbol (Token marker ExpectingMarker)
+    )
+        |> map (String.dropRight (String.length marker))
+
+
+parseBetweenSymbols : String -> String -> LXParser String
+parseBetweenSymbols startSymbol endSymbol =
+    succeed identity
+        |. symbol (Token startSymbol ExpectingMarker)
+        |. spaces
+        |= parseUntil endSymbol
+
+
+
+{- ITEM LIST PARSERS -}
+
+
+nonEmptyItemList : LXParser a -> LXParser (List a)
+nonEmptyItemList itemParser =
+    itemParser
+        |> andThen (\x -> itemList_ [ x ] itemParser)
+
+
+itemList : LXParser a -> LXParser (List a)
+itemList itemParser =
+    itemList_ [] itemParser
+
+
+itemList_ : List a -> LXParser a -> LXParser (List a)
+itemList_ initialList itemParser =
+   loop initialList (itemListHelper itemParser)
+
+
+itemListHelper : LXParser a -> List a -> LXParser (Step (List a) (List a))
+itemListHelper itemParser revItems =
+    oneOf
+        [ succeed (\item_ -> Loop (item_ :: revItems))
+            |= itemParser
+        , succeed ()
+            |> map (\_ -> Done (List.reverse revItems))
+        ]
+
+
+
+-- itemListWithSeparator : Parser () -> Parser a -> Parser (List a)
+-- itemListWithSeparator separatorParser itemParser =
+--     Parser.loop [] (itemListWithSeparatorHelper separatorParser itemParser)
+-- itemListWithSeparatorHelper : Parser () -> Parser a -> List a -> Parser (Step (List a) (List a))
+-- itemListWithSeparatorHelper separatorParser itemParser revItems =
+--     oneOf
+--         [ succeed (\w -> Loop (w :: revItems))
+--             |= itemParser
+--             |. separatorParser
+--         , succeed ()
+--             |> Parser.map (\_ -> Done (List.reverse revItems))
+--         ]
+{-
+   notSpecialTableOrMacroCharacter : Char -> Bool
+   notSpecialTableOrMacroCharacter c =
+       not (c == ' ' || c == '\n' || c == '\\' || c == '$' || c == '}' || c == ']' || c == '&')
+
+
+   notMacroSpecialCharacter : Char -> Bool
+   notMacroSpecialCharacter c =
+       not (c == '{' || c == '[' || c == ' ' || c == '\n')
+
+-}
+
+
+{-| Transform special words
+-}
+transformWords : String -> String
+transformWords str =
+    if str == "--" then
+        "\\ndash"
+
+    else if str == "---" then
+        "\\mdash"
+
+    else
+        str
+
+
+
+{- From Punie/elm-parser-extras -}
+
+
+{-| Apply a parser zero or more times and return a list of the results.
+-}
+many : LXParser a -> LXParser (List a)
+many p =
+    loop [] (manyHelp p)
+
+
+{-| Apply a parser one or more times and return a tuple of the first result parsed
+and the list of the remaining results.
+-}
+some : LXParser a -> LXParser ( a, List a )
+some p =
+    succeed Tuple.pair
+        |= p
+        |. spaces
+        |= many p
+
+
+{-| Parse an expression between two other parser
+
+    import Parser exposing(symbol)
+
+    Parser.run (between (symbol "<<") (symbol ">>") Parser.int) "<<4>>"
+    --> Ok 4
+
+-}
+between : LXParser opening -> LXParser closing -> LXParser a -> LXParser a
+between opening closing p =
+    succeed identity
+        |. opening
+        |. spaces
+        |= p
+        |. spaces
+        |. closing
+
+
+{-| Parse an expression between parenthesis.
+
+    import Parser
+
+    Parser.run (parens Parser.int) "(4)"
+    --> Ok 4
+
+-}
+parens : LXParser a -> LXParser a
+parens =
+    between (symbol (Token "(" ExpectingLeftParen)) (symbol (Token ")" ExpectingRightParen))
+
+
+{-| Parse an expression between curly braces.
+
+    import Parser
+
+    Parser.run (braces Parser.int) "{4}"
+    --> Ok 4
+
+-}
+braces : LXParser a -> LXParser a
+braces =
+    between (symbol (Token "{" ExpectingLeftBrace)) (symbol (Token "}" ExpectingRightBrace))
+
+
+{-| Parse an expression between square brackets.
+brackets p == between (symbol "[") (symbol "]") p
+-}
+brackets : LXParser a -> LXParser a
+brackets =
+    between (symbol (Token "[" ExpectingLeftBracket)) (symbol (Token "]" ExpectingRightBracket))
+
+
+
+-- HELPERS
+
+
+manyHelp : LXParser a -> List a -> LXParser (Step (List a) (List a))
+manyHelp p vs =
+    oneOf
+        [ succeed (\v -> Loop (v :: vs))
+            |= p
+            |. spaces
+        , succeed ()
+            |> map (\_ -> Done (List.reverse vs))
+        ]
+

@@ -21,10 +21,7 @@ import Dict
 import Html exposing (Attribute, Html)
 import Html.Attributes as HA
 import Json.Encode
-import XConfiguration
-import Internal.ErrorMessages as ErrorMessages
 import Internal.Image as Image exposing (..)
-import Internal.JoinStrings as JoinStrings
 import Internal.LatexState
     exposing
         ( LatexState
@@ -36,8 +33,8 @@ import Internal.LatexState
         )
 import Internal.ListMachine as ListMachine
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import Internal.ParserTools as PT
 import Internal.Render
+import Internal.ErrorMessages2 as ErrorMessages
 import Internal.Utility as Utility
 import Parser exposing (DeadEnd, Problem(..))
 import Regex
@@ -161,7 +158,7 @@ render latexState latexExpression =
             Html.span [] []
 
         LXError error ->
-            Html.p [ HA.style "color" "red" ] [ Html.text <| String.join "\n---\n\n" (List.map errorReport error) ]
+            Html.p [ HA.style "color" "red" ] [ Html.text <| "\n---\n\n" ++ (ErrorMessages.renderErrors error) ]
 
 
 errorReport : DeadEnd -> String

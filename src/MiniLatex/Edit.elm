@@ -1,4 +1,4 @@
-module MiniLatex.Edit exposing (init, get, update, Data, emptyData, parse)
+module MiniLatex.Edit exposing (init, get, Data,  update, emptyData, parse)
 
 {-|
 
@@ -38,7 +38,7 @@ import Internal.Render2 as Render
 
 
 {-| Data for differential parsing and rendering -}
-type alias Data a = Differ.EditRecord a
+type alias Data a = EditRecord a
 
 {-| Create Data from a string of MiniLaTeX text and a version number.
 The version number should be different for each call of init.

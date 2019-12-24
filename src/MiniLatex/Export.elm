@@ -15,7 +15,7 @@ import Dict
 -- import List.Extra
 
 import Internal.ParserTools as ParserTools
-import Internal.ErrorMessages as ErrorMessages
+import Internal.ErrorMessages2 as ErrorMessages
 import Internal.Image as Image
 import Internal.JoinStrings as JoinStrings
 import Internal.Paragraph

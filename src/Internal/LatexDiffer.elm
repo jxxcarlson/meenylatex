@@ -58,10 +58,10 @@ update :
     -> EditRecord a
     -> String
     -> EditRecord a
-update seed renderLatexExpression renderString editRecord content =
+update seed renderLatexExpression renderString editRecord source =
     -- ### LatexDiffer.update
     if Differ.isEmpty editRecord then
-        init renderLatexExpression emptyLatexState content
+        init renderLatexExpression emptyLatexState source
     else
-        content
+        source
             |> Differ.update seed (renderString editRecord.latexState) editRecord

@@ -61,7 +61,7 @@ may be empty.
 -}
 render : String -> String -> Html msg
 render macroDefinitions text =
-    MiniLatexDiffer.createRecord Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
+    MiniLatexDiffer.init Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
         |> MiniLatex.Edit.get
         |> Html.div []
 
@@ -70,7 +70,7 @@ render macroDefinitions text =
 -}
 renderWithSeed : Int -> String -> String -> Html msg
 renderWithSeed seed macroDefinitions text =
-    MiniLatexDiffer.createRecordWithSeed seed Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
+    MiniLatexDiffer.initWithSeed seed Render.renderLatexList emptyLatexState (prependMacros macroDefinitions text)
         |> MiniLatex.Edit.get
         |> Html.div []
 

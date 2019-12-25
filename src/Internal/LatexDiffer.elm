@@ -1,4 +1,4 @@
-module Internal.LatexDiffer exposing (createRecord, createRecordWithSeed, update)
+module Internal.LatexDiffer exposing (init, initWithSeed, update)
 
 import Internal.Accumulator as Accumulator
 import Internal.Differ as Differ exposing (EditRecord)
@@ -8,13 +8,13 @@ import Internal.Parser exposing (LatexExpression)
 import Internal.Render2 as Render exposing (render)
 
 
-createRecord : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
-createRecord renderer latexState text =
-    createRecordWithSeed 0 renderer latexState text
+init : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
+init renderer latexState text =
+    initWithSeed 0 renderer latexState text
 
 
-createRecordWithSeed : Int -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
-createRecordWithSeed seed renderer latexState text =
+initWithSeed : Int -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
+initWithSeed seed renderer latexState text =
     let
         paragraphs =
             text
@@ -61,7 +61,7 @@ update :
 update seed renderLatexExpression renderString editRecord content =
     -- ### LatexDiffer.update
     if Differ.isEmpty editRecord then
-        createRecord renderLatexExpression emptyLatexState content
+        init renderLatexExpression emptyLatexState content
     else
         content
             |> Differ.update seed (renderString editRecord.latexState) editRecord

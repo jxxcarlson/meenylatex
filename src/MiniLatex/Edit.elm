@@ -30,15 +30,15 @@ different edits.
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Keyed as Keyed
-import Internal.Differ as Differ
-import Internal.LatexDiffer as MiniLatexDiffer
-import Internal.Paragraph as Paragraph
-import Internal.Parser as MiniLatexParser
-import Internal.Render2 as Render
+import Internal.Differ
+import Internal.LatexDiffer
+import Internal.Paragraph
+import Internal.Parser
+import Internal.Render2
 
 
 {-| Data for differential parsing and rendering -}
-type alias Data a = Differ.EditRecord a
+type alias Data a = Internal.Differ.EditRecord a
 
 {-| Create Data from a string of MiniLaTeX text and a version number.
 The version number should be different for each call of init.
@@ -46,14 +46,14 @@ The version number should be different for each call of init.
 -}
 init : Int -> String -> Data (Html msg)
 init version text =
-    MiniLatexDiffer.update version Render.renderLatexList Render.renderString Differ.emptyHtmlMsgRecord text
+      Internal.LatexDiffer.update version Internal.Render2.renderLatexList Internal.Render2.renderString Internal.Differ.emptyHtmlMsgRecord text
 
 
 {-| Update Data with modified text, re-parsing and re-rerendering changed elements.
 -}
 update : Int ->  String -> Data (Html msg) -> Data (Html msg)
 update version text editRecord  =
-    MiniLatexDiffer.update version Render.renderLatexList Render.renderString editRecord text
+      Internal.LatexDiffer.update version Internal.Render2.renderLatexList Internal.Render2.renderString editRecord text
 
 
 
@@ -78,15 +78,15 @@ get editRecord =
 -}
 emptyData : Data (Html msg)
 emptyData =
-    Differ.emptyHtmlMsgRecord
+    Internal.Differ.emptyHtmlMsgRecord
 
 {-| Parse the given text and return an AST representing it.
 -}
-parse : String -> (List String, List (List MiniLatexParser.LatexExpression))
+parse : String -> (List String, List (List Internal.Parser.LatexExpression))
 parse text =
     let
-        paragraphs = Paragraph.logicalParagraphify text
+        paragraphs = Internal.Paragraph.logicalParagraphify text
     in
-    (paragraphs, List.map MiniLatexParser.parse paragraphs)
+    (paragraphs, List.map Internal.Parser.parse paragraphs)
 
 

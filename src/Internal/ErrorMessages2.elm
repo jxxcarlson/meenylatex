@@ -22,53 +22,32 @@ renderErrors2 errorData =
 
 
 
-renderErrors : String -> List (DeadEnd Context Problem) -> String
+renderErrors : String -> List (DeadEnd Context Problem) -> (List String, String)
 renderErrors source errs =
     case List.head errs of
         Nothing ->
-            ""
+           ([], "")
 
         Just firstErr ->
-            String.fromInt firstErr.row
-                ++ "| "
-                ++ getLines firstErr.row source
-                ++ "\n"
-                ++ String.repeat (firstErr.col - 1 + 3) " "
-                ++ "^"
-                ++ "\n"
---                ++ case List.head errs of
---                    Nothing ->
---                        ""
---                    Just err ->
---                        let
---                            errMsg : String
---                            errMsg =
---                                displayExpected err
---                        in
---                        ( case errMsg of
---                            Expecting _ ->
---                                "Expecting "
---                            Rejecting _ ->
---                                ""
---                        )
---                        ++ (String.join " or "
---                            <|  List.map
---                                (\error ->
---                                    case displayExpected error of
---                                        Expecting msg ->
---                                            msg
---                                        Rejecting msg ->
---                                            msg
---                                )
---                                errs
---                        )
+            (getLines firstErr.row source, displayExpected firstErr.problem)
+
+--            String.fromInt firstErr.row
+--                ++ "| "
+--                ++ getLines firstErr.row source
+--                ++ "\n"
+--                ++ String.repeat (firstErr.col - 1 + 3) " "
+--                ++ "^"
+--                ++ "\n\n\n"
+--                ++ displayExpected firstErr.problem
 
 
-getLines : Int -> String -> String
+
+getLines : Int -> String -> List String
 getLines lineNumber str =
     List.range 1 lineNumber
       |> List.map (\i -> getLine i str)
-      |> String.join "\n"
+      |> List.take 1
+
 
 getLine : Int -> String -> String
 getLine lineNumber str =
@@ -84,9 +63,9 @@ getLine lineNumber str =
             )
 
 
-displayExpected : DeadEnd Context Problem -> String
-displayExpected err =
-    case err.problem of
+displayExpected : Problem -> String
+displayExpected problem =
+    case problem of
          ExpectingInWord -> "Expecting word"
          ExpectingMarker -> "Expecting marker"
          ExpectingLeftBrace -> "Expecting left brace"

@@ -82,7 +82,7 @@ renderString parser latexState str =
 
                 Err error ->
                    --  "Error: " ++ Parser.deadEndsToString error
-                    "Error: " ++ ErrorMessages.renderErrors error
+                    "Error: " ++ ErrorMessages.renderErrors str error
     in
         renderOutput
 

@@ -116,8 +116,8 @@ mathText content =
         []
 
 
-{-| The main rendering funcction. Compute an Html msg value
-from the current LatexState and a LatexExpresssion.
+{-| The main rendering function. Compute an Html msg value
+from the current LatexState and a LatexExpression.
 -}
 render : LatexState -> LatexExpression -> Html msg
 render latexState latexExpression =
@@ -157,8 +157,11 @@ render latexState latexExpression =
         NewCommand commandName numberOfArgs commandBody ->
             Html.span [] []
 
-        LXError error ->
-            Html.p [ HA.style "color" "red" ] [ Html.text <| "\n---\n\n" ++ (ErrorMessages.renderErrors error) ]
+        LXError  error ->
+            let
+              _ = Debug.log "YY:ERR" error
+            in
+            Html.p [ HA.style "color" "red" ] [ Html.text <| "\n---\n\n" ++ (ErrorMessages.renderErrors "YYY" error) ]
 
 
 errorReport : DeadEnd -> String

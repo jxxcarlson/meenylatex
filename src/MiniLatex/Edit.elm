@@ -30,15 +30,15 @@ different edits.
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Keyed as Keyed
-import Internal.Differ as Differ exposing (EditRecord)
+import Internal.Differ as Differ
 import Internal.LatexDiffer as MiniLatexDiffer
 import Internal.Paragraph as Paragraph
-import Internal.Parser as MiniLatexParser exposing (LatexExpression)
+import Internal.Parser as MiniLatexParser
 import Internal.Render2 as Render
 
 
 {-| Data for differential parsing and rendering -}
-type alias Data a = EditRecord a
+type alias Data a = Differ.EditRecord a
 
 {-| Create Data from a string of MiniLaTeX text and a version number.
 The version number should be different for each call of init.
@@ -82,7 +82,7 @@ emptyData =
 
 {-| Parse the given text and return an AST representing it.
 -}
-parse : String -> List (List LatexExpression)
+parse : String -> List (List MiniLatexParser.LatexExpression)
 parse text =
     text
         |> Paragraph.logicalParagraphify

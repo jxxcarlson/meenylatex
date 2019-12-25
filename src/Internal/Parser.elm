@@ -2,7 +2,7 @@ module Internal.Parser
     exposing
         (  macro
         , parse
-        , Problem
+        , Problem(..)
         , Context
         , LXParser
         , defaultLatexList
@@ -67,7 +67,8 @@ type LatexExpression
 type alias LXParser a = Parser.Advanced.Parser Context Problem a
 
 type Context
-    = Definition String
+    = CArg String
+    | List
 
 type Problem
     = ExpectingInWord
@@ -373,11 +374,12 @@ optionalArg =
 -}
 arg : LXParser LatexExpression
 arg =
-    succeed identity
+  inContext (CArg "arg") <|
+    (succeed identity
         |. symbol (Token "{" ExpectingLeftBrace)
         |= itemList (oneOf [ macroArgWords, inlineMath spaces, lazy (\_ -> macro spaces) ])
         |. symbol (Token "}" ExpectingRightBrace)
-        |> map LatexList
+        |> map LatexList)
 
 
 macroName : LXParser String

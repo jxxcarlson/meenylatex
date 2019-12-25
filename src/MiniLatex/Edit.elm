@@ -82,10 +82,11 @@ emptyData =
 
 {-| Parse the given text and return an AST representing it.
 -}
-parse : String -> List (List MiniLatexParser.LatexExpression)
+parse : String -> (List String, List (List MiniLatexParser.LatexExpression))
 parse text =
-    text
-        |> Paragraph.logicalParagraphify
-        |> List.map MiniLatexParser.parse
+    let
+        paragraphs = Paragraph.logicalParagraphify text
+    in
+    (paragraphs, List.map MiniLatexParser.parse paragraphs)
 
 

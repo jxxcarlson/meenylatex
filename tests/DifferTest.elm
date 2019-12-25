@@ -57,7 +57,7 @@ suite =
                         "a\n\nb\n\nc\n\nd\n\ne\n\nf\n\ng"
 
                     editRecord =
-                        createRecord String.toUpper text
+                        init String.toUpper text
                 in
                     Expect.equal editRecord.paragraphs [ "a\n\n", "b\n\n", "c\n\n", "d\n\n", "e\n\n", "f\n\n", "g\n\n" ]
         , test "(4) initialize generated the correct rendered paragraph list" <|
@@ -67,7 +67,7 @@ suite =
                         "a\n\nb\n\nc\n\nd\n\ne\n\nf\n\ng"
 
                     editRecord =
-                        createRecord String.toUpper text
+                        init String.toUpper text
                 in
                     Expect.equal editRecord.renderedParagraphs [ "A\n\n", "B\n\n", "C\n\n", "D\n\n", "E\n\n", "F\n\n", "G\n\n" ]
         , test "(5) identity diff" <|
@@ -77,7 +77,7 @@ suite =
                         "a\n\nb\n\nc\n\nd\n\ne\n\nf\n\ng"
 
                     editRecord =
-                        createRecord String.toUpper text
+                        init String.toUpper text
 
                     newEditRecord =
                         update 0 String.toUpper editRecord text

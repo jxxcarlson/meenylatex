@@ -4,7 +4,7 @@ module Internal.Differ
         , emptyStringRecord
         , emptyHtmlMsgRecord
         , isEmpty
-        , createRecord
+        , init
         , diff
         , simpleDifferentialRender
         , prefixer
@@ -16,9 +16,9 @@ comparing the old and new lists of paragraphs, noting the changes,
 then parsing and rendering the changed paragraphs.
 
 
-# APIw
+# API
 
-@docs EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, createRecord, diff, prefixer, update, simpleDifferentialRender
+@docs EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, init, diff, prefixer, update, simpleDifferentialRender
 
 -}
 
@@ -79,8 +79,8 @@ breaking the text in to pargraphs, (2) applying
 the transformer to each string in the resulting
 list of strings.
 -}
-createRecord : (String -> a) -> String -> EditRecord a
-createRecord transformer text =
+init : (String -> a) -> String -> EditRecord a
+init transformer text =
     let
         paragraphs =
             Paragraph.logicalParagraphify text
@@ -129,12 +129,11 @@ update seed transformer editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-        -- EditRecord newParagraphs newRenderedParagraphs emptyLatexState p.idList p.newIdsStart p.newIdsEnd
         EditRecord newParagraphs newRenderedParagraphs editRecord.latexState p.idList p.newIdsStart p.newIdsEnd
 
 
-{-| Update the renderedList by applying the transformer onlly to the
-changed source elments.
+{-| Update the renderedList by applying the transformer only to the
+changed source elements.
 -}
 simpleDifferentialRender : (String -> a) -> DiffRecord -> List a -> List a
 simpleDifferentialRender transformer diffRecord renderedList =

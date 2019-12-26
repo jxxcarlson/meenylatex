@@ -22,23 +22,24 @@ renderErrors2 errorData =
 
 
 
-renderErrors : String -> List (DeadEnd Context Problem) -> (List String, String)
+type alias ErrorReport = {
+   errorText : List String
+   , markerOffset  : Int
+   , explanation : String
+  }
+
+renderErrors : String -> List (DeadEnd Context Problem) -> ErrorReport
 renderErrors source errs =
     case List.head errs of
         Nothing ->
-           ([], "")
+          {errorText = [], markerOffset = 0, explanation = "no explanation"}
 
         Just firstErr ->
-            (getLines firstErr.row source, displayExpected firstErr.problem)
+            let
+               markerOffset = (Debug.log "FE col" firstErr.col)
+            in
+            {errorText = getLines firstErr.row source, markerOffset = markerOffset, explanation = displayExpected firstErr.problem}
 
---            String.fromInt firstErr.row
---                ++ "| "
---                ++ getLines firstErr.row source
---                ++ "\n"
---                ++ String.repeat (firstErr.col - 1 + 3) " "
---                ++ "^"
---                ++ "\n\n\n"
---                ++ displayExpected firstErr.problem
 
 
 
@@ -46,6 +47,7 @@ getLines : Int -> String -> List String
 getLines lineNumber str =
     List.range 1 lineNumber
       |> List.map (\i -> getLine i str)
+      |> List.filter (\line -> String.length line > 0)
       |> List.take 1
 
 
@@ -66,8 +68,17 @@ getLine lineNumber str =
 displayExpected : Problem -> String
 displayExpected problem =
     case problem of
-         ExpectingInWord -> "Expecting word"
-         ExpectingMarker -> "Expecting marker"
+         ExpectingEndForInlineMath -> "Expecting '$' to end inline math"
+         ExpectingEndOfEnvironmentName -> "Expecting complete environment name"
+         ExpectingBeginDisplayMathModeDollarSign -> "Expecting '$$' for displayed math"
+         ExpectingEndDisplayMathModeDollarSign -> "Expecting '$$' for displayed math"
+         ExpectingBeginDisplayMathModeBracket -> "Expecting '\\[' or '\\]' for displayed math"
+         ExpectingEndDisplayMathModeBracket -> "Expecting '\\[' or '\\]' for displayed math"
+         ExpectingEndForPassThroughBody -> "Expecting complete end for environment"
+         ExpectingValidTableCell -> "Something is to complete the table cell"
+         ExpectingValidOptionArgWord -> "Something is missing to complete the optional argument"
+         ExpectingValidMacroArgWord -> "Something is missing to complete the macro argument'"
+         ExpectingWords -> "Something is missing in this sequence of words"
          ExpectingLeftBrace -> "Expecting left brace"
          ExpectingRightBrace -> "Expecting right brace"
          ExpectingLeftBracket -> "Expecting left bracket"

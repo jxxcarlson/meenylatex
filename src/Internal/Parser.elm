@@ -71,8 +71,17 @@ type Context
     | List
 
 type Problem
-    = ExpectingInWord
-    | ExpectingMarker
+    =  ExpectingEndForInlineMath
+    | ExpectingEndOfEnvironmentName
+    | ExpectingBeginDisplayMathModeDollarSign
+    | ExpectingEndDisplayMathModeDollarSign
+    | ExpectingBeginDisplayMathModeBracket
+    | ExpectingEndDisplayMathModeBracket
+    | ExpectingEndForPassThroughBody
+    | ExpectingValidTableCell
+    | ExpectingValidOptionArgWord
+    | ExpectingValidMacroArgWord
+    | ExpectingWords
     | ExpectingLeftBrace
     | ExpectingRightBrace
     | ExpectingLeftBracket
@@ -176,14 +185,14 @@ words =
         [ blank
         , succeed identity
             |. ws
-            |= words_
+            |= words_ ExpectingWords
             |. ws
         ]
 
 
-words_ : LXParser LatexExpression
-words_ =
-    nonEmptyItemList (word notSpaceOrSpecialCharacters)
+words_ : Problem -> LXParser LatexExpression
+words_ problem =
+    nonEmptyItemList (word problem notSpaceOrSpecialCharacters)
         |> map (String.join " ")
         |> map LXString
 
@@ -208,12 +217,12 @@ notSpaceOrSpecialCharacters c =
    LXParser.run word "this is a test"
    --> Ok "this"
 -}
-word : (Char -> Bool) -> LXParser String
-word inWord =
+word : Problem -> (Char -> Bool) -> LXParser String
+word problem inWord =
     succeed String.slice
         |. ws
         |= getOffset
-        |. chompIf inWord ExpectingInWord
+        |. chompIf inWord problem
         |. chompWhile inWord
         |. ws
         |= getOffset
@@ -226,7 +235,7 @@ word inWord =
 
 macroArgWords : LXParser LatexExpression
 macroArgWords =
-    nonEmptyItemList (word inMacroArg)
+    nonEmptyItemList (word ExpectingValidMacroArgWord inMacroArg)
         |> map (String.join " ")
         |> map LXString
 
@@ -241,7 +250,7 @@ inMacroArg c =
 
 optionArgWords : LXParser LatexExpression
 optionArgWords =
-    nonEmptyItemList (word inOptionArgWord)
+    nonEmptyItemList (word ExpectingValidOptionArgWord inOptionArgWord)
         |> map (String.join " ")
         |> map LXString
 
@@ -257,7 +266,7 @@ inOptionArgWord c =
 
 tableCellWords : LXParser LatexExpression
 tableCellWords =
-    nonEmptyItemList (word inTableCellWord)
+    nonEmptyItemList (word ExpectingValidTableCell inTableCellWord)
         |> map (String.join " ")
         |> map String.trim
         |> map LXString
@@ -432,7 +441,7 @@ inlineMath : LXParser () -> LXParser LatexExpression
 inlineMath wsParser =
     succeed InlineMath
         |. symbol (Token "$" ExpectingLeadingDollarSign)
-        |= parseToSymbol "$"
+        |= parseToSymbol ExpectingEndForInlineMath "$"
         |. wsParser
 
 {-|
@@ -448,8 +457,8 @@ displayMathDollar =
     -- inContext "display math $$" <|
     succeed DisplayMath
         |. spaces
-        |. symbol (Token "$$" ExpectingLeadingDollarSign)
-        |= parseToSymbol "$$"
+        |. symbol (Token "$$" ExpectingBeginDisplayMathModeDollarSign)
+        |= parseToSymbol ExpectingEndDisplayMathModeDollarSign "$$"
         |. ws
 
 {-|
@@ -465,8 +474,8 @@ displayMathBrackets =
     -- inContext "display math brackets" <|
     succeed DisplayMath
         |. spaces
-        |. symbol (Token "\\[" ExpectingEscapeAndLeftBracket)
-        |= parseToSymbol "\\]"
+        |. symbol (Token "\\[" ExpectingBeginDisplayMathModeBracket)
+        |= parseToSymbol ExpectingEndDisplayMathModeBracket "\\]"
         |. ws
 
 
@@ -484,17 +493,18 @@ envName =
     succeed identity
         |. spaces
         |. symbol (Token "\\begin{" ExpectingBeginAndRightBrace)
-        |= parseToSymbol "}"
+        |= parseToSymbol ExpectingEndOfEnvironmentName "}"
 
 
 {-| Use to parse begin ... end blocks
+Todo -- XXX: IS THIS USED?
 -}
 endWord : LXParser String
 endWord =
     succeed identity
         |. spaces
         |. symbol (Token "\\end{" ExpectingEndAndRightBrace)
-        |= parseToSymbol "}"
+        |= parseToSymbol ExpectingEndAndRightBrace "}"
         |. ws
 
 {-|
@@ -572,10 +582,10 @@ passed to MathJax for processing and also for the verbatim
 environment.
 -}
 passThroughBody : String -> String -> LXParser LatexExpression
-passThroughBody endWoord envType =
+passThroughBody  endWoord envType =
     --  inContext "passThroughBody" <|
     succeed identity
-        |= parseToSymbol endWoord
+        |= parseToSymbol ExpectingEndForPassThroughBody endWoord
         |. ws
         |> map LXString
         |> map (Environment envType [])
@@ -720,31 +730,31 @@ ws =
     chompWhile (\c -> c == ' ' || c == '\n')
 
 
-parseUntil : String -> LXParser String
-parseUntil marker =
-    getChompedString <| chompUntil (Token marker ExpectingMarker)
+parseUntil : Problem -> String -> LXParser String
+parseUntil problem marker =
+    getChompedString <| chompUntil (Token marker problem)
 
 
 
 {-| chomp to end of the marker and return the
 chomped string minus the marker.
 -}
-parseToSymbol : String -> LXParser String
-parseToSymbol marker =
+parseToSymbol : Problem -> String -> LXParser String
+parseToSymbol problem marker =
     (getChompedString <|
         succeed identity
             |= chompUntilEndOr marker
-            |. symbol (Token marker ExpectingMarker)
+            |. symbol (Token marker problem)
     )
         |> map (String.dropRight (String.length marker))
 
 
-parseBetweenSymbols : String -> String -> LXParser String
-parseBetweenSymbols startSymbol endSymbol =
+parseBetweenSymbols : Problem -> Problem -> String -> String -> LXParser String
+parseBetweenSymbols problem1 problem2 startSymbol endSymbol =
     succeed identity
-        |. symbol (Token startSymbol ExpectingMarker)
+        |. symbol (Token startSymbol problem1)
         |. spaces
-        |= parseUntil endSymbol
+        |= parseUntil problem2 endSymbol
 
 
 

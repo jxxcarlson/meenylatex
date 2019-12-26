@@ -29,15 +29,15 @@ type alias KeyValuePair =
     ( String, String )
 
 
-keyValuePair : KVParser KeyValuePair
+keyValuePair :  KVParser KeyValuePair
 keyValuePair =
     succeed Tuple.pair
         |. spaces
-        |= word (\c -> (c /= ':'))
+        |= word ExpectingColon (\c -> (c /= ':'))
         |. spaces
         |. symbol (Token ":" ExpectingColon)
         |. spaces
-        |= word (\c -> (c /= ','))
+        |= word ExpectingComma (\c -> (c /= ','))
         |. oneOf [symbol (Token "," ExpectingComma), spaces]
         |> map (\( a, b ) -> ( String.trim a, String.trim b ))
 
@@ -79,12 +79,12 @@ getValue key kvpList =
    KVParser.run word "this is a test"
    --> Ok "this"
 -}
-word : (Char -> Bool) -> KVParser String
-word inWord =
+word : Problem -> (Char -> Bool) -> KVParser String
+word problem inWord =
     succeed String.slice
         |. ws
         |= getOffset
-        |. chompIf inWord ExpectingInWord
+        |. chompIf inWord problem
         |. chompWhile inWord
         |. ws
         |= getOffset

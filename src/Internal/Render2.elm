@@ -178,14 +178,14 @@ render source latexState latexExpression =
         LXError  error ->
             let
               _ = Debug.log "YY:ERR" error
-              (errorText_, message) = ErrorMessages.renderErrors source error
-
-              -- rrorText = List.map (\t -> Html.p [HA.style "margin" "0"] [Html.text t]) errorText_
-              errorText = Html.p [HA.style "margin" "0"] [Html.text ((String.join "\n" errorText_) ++ " ...")]
+              err = ErrorMessages.renderErrors source error
+              errorText = Html.p [HA.style "margin" "0"] [Html.text ((String.join "\n" err.errorText) ++ " ...")]
+              offset = (String.fromInt <| 5*err.markerOffset) ++ "px"
             in
-            Html.div [] [
-                Html.div [ HA.style "color" "blue" , HA.style "margin" "0"] [errorText]
-              , Html.p [ HA.style "color" "red", HA.style "margin" "0"] [Html.text message]
+            Html.div [HA.style  "font" "Courier", HA.style  "font-family" "Mono", HA.style "font-size" "15px"] [
+                 Html.div [ HA.style "color" "blue" , HA.style "margin" "0"] [errorText]
+              ,  Html.div [ HA.style "color" "blue" , HA.style "margin-left" offset] [Html.text "^"]
+              , Html.p [ HA.style "color" "red", HA.style "margin" "0"] [Html.text err.explanation]
               ]
 
 

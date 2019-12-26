@@ -183,6 +183,8 @@ getNextState line ( parserState, stack ) =
         ( InMathBlock, _ ) ->
             if String.endsWith "$$" (String.dropLeft 2 line) then
                 ( Start, stack )
+            else if line == "" then -- XXX: experiment to terminate math block if it contains blank lines
+                ( Start, stack )
             else
                 ( InMathBlock, stack )
 

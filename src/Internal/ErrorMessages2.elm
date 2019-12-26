@@ -48,7 +48,7 @@ getLines lineNumber str =
     List.range 1 lineNumber
       |> List.map (\i -> getLine i str)
       |> List.filter (\line -> String.length line > 0)
-      |> List.take 1
+      -- |> List.take 1
 
 
 getLine : Int -> String -> String
@@ -69,12 +69,12 @@ displayExpected : Problem -> String
 displayExpected problem =
     case problem of
          ExpectingEndForInlineMath -> "Expecting '$' to end inline math"
-         ExpectingEndOfEnvironmentName -> "Expecting complete environment name"
+         ExpectingEndOfEnvironmentName -> "Begin or end phrase messed up in environment"
          ExpectingBeginDisplayMathModeDollarSign -> "Expecting '$$' for displayed math"
          ExpectingEndDisplayMathModeDollarSign -> "Expecting '$$' for displayed math"
          ExpectingBeginDisplayMathModeBracket -> "Expecting '\\[' or '\\]' for displayed math"
          ExpectingEndDisplayMathModeBracket -> "Expecting '\\[' or '\\]' for displayed math"
-         ExpectingEndForPassThroughBody -> "Expecting complete end for environment"
+         ExpectingEndForPassThroughBody -> "Begin or end phrase messed up in environment"
          ExpectingValidTableCell -> "Something is to complete the table cell"
          ExpectingValidOptionArgWord -> "Something is missing to complete the optional argument"
          ExpectingValidMacroArgWord -> "Something is missing to complete the macro argument'"
@@ -101,4 +101,4 @@ displayExpected problem =
          ExpectingAmpersand -> "Expecting &"
          ExpectingDoubleEscapeAndNewline -> "Expecting \\\\\n"
          ExpectingEscapedNewcommandAndBrace -> "Expecting \\newcommand{"
-         ExpectingEndWord -> "Expecting end word"
+         ExpectingEndWord -> "Begin or end phrase messed up"

@@ -44,27 +44,26 @@ type alias Data a = Internal.Differ.EditRecord a
 The version number should be different for each call of init.
 
 -}
-init : Int -> String -> Data (Html msg)
-init version source =
+init : Bool -> Int -> String -> Data (Html msg)
+init delay version source =
       Internal.LatexDiffer.update
          version
-         (Internal.Render2.renderLatexList source)
-         Internal.Render2.renderString
+         (Internal.Render2.renderLatexList delay source)
+         (Internal.Render2.renderString delay)
          Internal.Differ.emptyHtmlMsgRecord
          source
 
 
 {-| Update Data with modified text, re-parsing and re-rerendering changed elements.
 -}
-update : Int ->  String -> Data (Html msg) -> Data (Html msg)
-update version source editRecord  =
+update : Bool -> Int ->  String -> Data (Html msg) -> Data (Html msg)
+update delay version source editRecord  =
       Internal.LatexDiffer.update
          version
-         (Internal.Render2.renderLatexList source)
-         Internal.Render2.renderString
+         (Internal.Render2.renderLatexList delay source)
+         (Internal.Render2.renderString delay)
          editRecord
          source
-
 
 
 {-| Retrieve Html from a Data object.

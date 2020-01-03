@@ -59,18 +59,18 @@ are prepended to this string and are used by MathJax
 to render purely mathematical text. The `macros` string
 may be empty.
 -}
-render : String -> String -> Html msg
-render macroDefinitions source =
-    MiniLatexDiffer.init (Render.renderLatexList source) emptyLatexState (prependMacros macroDefinitions source)
+render : Bool -> String -> String -> Html msg
+render delay macroDefinitions source =
+    MiniLatexDiffer.init (Render.renderLatexList delay source) emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
 
 
 {-| Like render, but used the `seed` to define the ids for each paragraph.
 -}
-renderWithSeed : Int -> String -> String -> Html msg
-renderWithSeed seed macroDefinitions source =
-    MiniLatexDiffer.initWithSeed seed (Render.renderLatexList source) emptyLatexState (prependMacros macroDefinitions source)
+renderWithSeed : Bool -> Int -> String -> String -> Html msg
+renderWithSeed delay seed macroDefinitions source =
+    MiniLatexDiffer.initWithSeed seed (Render.renderLatexList delay source) emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
 

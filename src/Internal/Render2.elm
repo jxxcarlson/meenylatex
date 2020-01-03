@@ -57,24 +57,10 @@ parseString parser str =
 
 
 
--- renderString latexList latexState text
-
-
-{-| Old version, keeping it around for a while.
-It does not execute `spacify`, which is a problem.
--}
-renderString1 : LatexState -> String -> Html msg
-renderString1 latexState str =
-    str
-        |> Internal.Parser.parse
-        |> List.map (render str latexState)
-        |> Html.div []
-
-
 {-| Parse a string, then render it.
 -}
-renderString : LatexState -> String -> Html msg
-renderString latexState source =
+renderString : Bool -> LatexState -> String -> Html msg
+renderString delay latexState source =
     let
         paragraphs : List String
         paragraphs = Paragraph.logicalParagraphify source
@@ -84,7 +70,7 @@ renderString latexState source =
 
         render_ : (String, List LatexExpression) -> Html msg
         render_ (source_, ast) =
-          renderLatexList source_ latexState ast
+          renderLatexList delay source_ latexState ast
 
     in
         paragraphs
@@ -133,36 +119,42 @@ mathText content =
         [ HA.property "content" (Json.Encode.string content) ]
         []
 
+mathTextDelayed : String -> Html msg
+mathTextDelayed content =
+    Html.node "math-text-delayed"
+        [ HA.property "content" (Json.Encode.string content) ]
+        []
+
 
 {-| The main rendering function. Compute an Html msg value
 from the current LatexState and a LatexExpression.
 -}
-render : String -> LatexState -> LatexExpression -> Html msg
-render source latexState latexExpression =
+render : Bool ->String -> LatexState -> LatexExpression -> Html msg
+render delay source latexState latexExpression =
     case latexExpression of
         Comment str ->
             Html.p [] [ Html.text <| "" ]
 
         Macro name optArgs args ->
-            renderMacro source latexState name optArgs args
+            renderMacro delay source latexState name optArgs args
 
         SMacro name optArgs args le ->
-            renderSMacro source latexState name optArgs args le
+            renderSMacro delay source latexState name optArgs args le
 
         Item level latexExpr ->
-            renderItem source latexState level latexExpr
+            renderItem delay source latexState level latexExpr
 
         InlineMath str ->
-            Html.span [] [ oneSpace, inlineMathText str ]
+            Html.span [] [ oneSpace, inlineMathText delay str ]
 
         DisplayMath str ->
-            displayMathText str
+            displayMathText delay str
 
         Environment name args body ->
-            renderEnvironment source latexState name args body
+            renderEnvironment delay source latexState name args body
 
         LatexList latexList ->
-            renderLatexList source latexState latexList
+            renderLatexList delay source latexState latexList
 
         LXString str ->
             case String.left 1 str of
@@ -223,18 +215,24 @@ reportProblem problem =
             "Other problem"
 
 
-inlineMathText : String -> Html msg
-inlineMathText str =
-    mathText <| "$ " ++ String.trim str ++ " $"
+inlineMathText : Bool -> String -> Html msg
+inlineMathText delay str =
+    if delay then
+      mathTextDelayed <| "$ " ++ String.trim str ++ " $"
+    else
+      mathText <| "$ " ++ String.trim str ++ " $"
 
 
-displayMathText : String -> Html msg
-displayMathText str =
+displayMathText : Bool ->String -> Html msg
+displayMathText delay str =
     let
         str2 =
             String.trim str
     in
-        mathText <| "$$\n" ++ str2 ++ "\n$$"
+      if delay then
+           mathTextDelayed <| "$$\n" ++ str2 ++ "\n$$"
+      else
+           mathText <| "$$\n" ++ str2 ++ "\n$$"
 
 
 
@@ -287,12 +285,12 @@ firstChar =
 {-| Like `render`, but renders a list of LatexExpressions
 to Html mgs
 -}
-renderLatexList : String -> LatexState -> List LatexExpression -> Html msg
-renderLatexList source latexState latexList =
+renderLatexList : Bool -> String -> LatexState -> List LatexExpression -> Html msg
+renderLatexList delay source latexState latexList =
     -- ### Render2.renderLatexList
     latexList
         |> spacify
-        |> List.map (render source latexState)
+        |> List.map (render delay source latexState)
         |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] list)
 
 
@@ -307,16 +305,16 @@ spacify latexList =
 {- RENDER MACRO -}
 
 
-renderMacro : String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
-renderMacro source latexState name optArgs args =
+renderMacro : Bool -> String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
+renderMacro delay source latexState name optArgs args =
     case Dict.get name renderMacroDict of
         Just f ->
-            f source latexState optArgs args
+            f delay source latexState optArgs args
 
         Nothing ->
             case Dict.get name latexState.macroDictionary of
                 Nothing ->
-                    reproduceMacro source name latexState optArgs args
+                    reproduceMacro delay source name latexState optArgs args
 
                 Just macroDefinition ->
                     let
@@ -326,19 +324,19 @@ renderMacro source latexState name optArgs args =
                         expr =
                             Macro.expandMacro macro macroDefinition
                     in
-                        render source latexState expr
+                        render delay source latexState expr
 
 
-renderArg : String -> Int -> LatexState -> List LatexExpression -> Html msg
-renderArg source k latexState args =
-    render source latexState (getElement k args)
+renderArg : Bool ->String -> Int -> LatexState -> List LatexExpression -> Html msg
+renderArg delay source k latexState args =
+    render delay source latexState (getElement k args)
 
 
-reproduceMacro : String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html msg
-reproduceMacro source name latexState optArgs args =
+reproduceMacro : Bool -> String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html msg
+reproduceMacro delay source name latexState optArgs args =
     let
         renderedArgs =
-            renderArgList source latexState args |> List.map enclose
+            renderArgList delay source latexState args |> List.map enclose
     in
         Html.span [ HA.style "color" "red" ]
             ([ Html.text <| "\\" ++ name ] ++ renderedArgs)
@@ -349,64 +347,64 @@ boost f =
     \x y z -> f x z
 
 
-renderMacroDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
+renderMacroDict : Dict.Dict String (Bool -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
 renderMacroDict =
     Dict.fromList
-        [ ( "bigskip", \s x y z -> renderBigSkip s x z )
-        , ( "medskip", \s x y z -> renderMedSkip s x z )
-        , ( "smallskip", \s x y z -> renderSmallSkip s x z )
-        , ( "cite", \s x y z -> renderCite s x z )
-        , ( "dollar", \s x y z -> renderDollar s x z )
-        , ( "texbegin", \s x y z -> renderBegin s x z )
-        , ( "texend", \s x y z -> renderEnd s x z )
-        , ( "percent", \s x y z -> renderPercent s x z )
-        , ( "code", \s x y z -> renderCode s x z )
-        , ( "ellie", \s x y z -> renderEllie s x z )
-        , ( "emph", \s x y z -> renderItalic s x z )
-        , ( "eqref", \s x y z -> renderEqRef s x z )
-        , ( "href", \s x y z -> renderHRef s x z )
-        , ( "iframe", \s x y z -> renderIFrame s x z )
-        , ( "image", \s x y z -> renderImage s x z )
-        , ( "imageref", \s x y z -> renderImageRef s x z )
-        , ( "index", \s x y z -> renderIndex s x z )
-        , ( "italic", \s x y z -> renderItalic s x z )
-        , ( "label", \s x y z -> renderLabel s x z )
-        , ( "maintableofcontents", \s x y z -> renderMainTableOfContents s x z )
-        , ( "maketitle", \s x y z -> renderMakeTitle s x z )
-        , ( "mdash", \s x y z -> renderMdash s x z )
-        , ( "ndash", \s x y z -> renderNdash s x z )
-        , ( "underscore", \s x y z -> renderUnderscore s x z )
-        , ( "backslash", \s x y z -> renderBackslash s x z )
-        , ( "texarg",  \s x y z -> renderTexArg s x z )
-        , ( "ref", \s x y z -> renderRef s x z )
-        , ( "medskip", \s x y z -> renderMedSkip s x z )
-        , ( "smallskip", \s x y z -> renderSmallSkip s x z )
-        , ( "section", \s x y z -> renderSection s x z )
-        , ( "section*", \s x y z -> renderSectionStar s x z )
-        , ( "subsection", \s x y z -> renderSubsection s x z )
-        , ( "subsection*", \s x y z -> renderSubsectionStar s x z )
-        , ( "subsubsection", \s x y z -> renderSubSubsection  s x z )
-        , ( "subsubsection*", \s x y z -> renderSubSubsectionStar s x z )
-        , ( "setcounter", \s x y z -> renderSetCounter s x z )
-        , ( "subheading", \s x y z -> renderSubheading s x z )
-        , ( "tableofcontents", \s x y z -> renderTableOfContents s x z )
-        , ( "innertableofcontents", \s x y z -> renderInnerTableOfContents s x z )
-        , ( "red", \s x y z -> renderRed s x z )
-        , ( "blue", \s x y z -> renderBlue s x z )
-        , ( "highlight", \s x y z -> renderHighlighted s x z )
-        , ( "strike", \s x y z -> renderStrikeThrough s x z )
-        , ( "term", \s x y z -> renderTerm s x z )
-        , ( "xlink", \s x y z -> renderXLink s x z )
-        , ( "xlinkPublic", \s x y z -> renderXLinkPublic s x z )
-        , ( "documentTitle", \s x y z -> renderDocumentTitle s x z )
-        , ( "title", \s x y z -> renderTitle x z )
-        , ( "author", \s x y z -> renderAuthor s x z )
-        , ( "date", \s x y z -> renderDate s x z )
-        , ( "revision", \s x y z -> renderRevision s x z )
-        , ( "email", \s x y z -> renderEmail s x z )
-        , ( "setdocid", \s x y z -> renderSetDocId s x z )
-        , ( "setclient", \s x y z -> renderSetClient s x z )
-        , ( "strong", \s x y z -> renderStrong s x z )
+        [ ( "bigskip", \d s x y z -> renderBigSkip s x z )
+        , ( "medskip", \d s x y z -> renderMedSkip s x z )
+        , ( "smallskip", \d s x y z -> renderSmallSkip s x z )
+        , ( "cite", \d s x y z -> renderCite s x z )
+        , ( "dollar", \d s x y z -> renderDollar s x z )
+        , ( "texbegin", \d s x y z -> renderBegin s x z )
+        , ( "texend", \d s x y z -> renderEnd s x z )
+        , ( "percent", \d s x y z -> renderPercent s x z )
+        , ( "code", \d s x y z -> renderCode d s x z )
+        , ( "ellie", \d s x y z -> renderEllie s x z )
+        , ( "emph", \d s x y z -> renderItalic d s x z )
+        , ( "eqref", \d s x y z -> renderEqRef s x z )
+        , ( "href", \d s x y z -> renderHRef s x z )
+        , ( "iframe", \d s x y z -> renderIFrame s x z )
+        , ( "image", \d s x y z -> renderImage s x z )
+        , ( "imageref", \d s x y z -> renderImageRef s x z )
+        , ( "index", \d s x y z -> renderIndex s x z )
+        , ( "italic", \d s x y z -> renderItalic d s x z )
+        , ( "label", \d s x y z -> renderLabel s x z )
+        , ( "maintableofcontents", \d s x y z -> renderMainTableOfContents s x z )
+        , ( "maketitle", \d s x y z -> renderMakeTitle s x z )
+        , ( "mdash", \d s x y z -> renderMdash s x z )
+        , ( "ndash", \d s x y z -> renderNdash s x z )
+        , ( "underscore", \d s x y z -> renderUnderscore s x z )
+        , ( "backslash", \d s x y z -> renderBackslash d s x z )
+        , ( "texarg",  \d s x y z -> renderTexArg d s x z )
+        , ( "ref", \d s x y z -> renderRef s x z )
+        , ( "medskip", \d s x y z -> renderMedSkip s x z )
+        , ( "smallskip", \d s x y z -> renderSmallSkip s x z )
+        , ( "section", \d s x y z -> renderSection s x z )
+        , ( "section*", \d s x y z -> renderSectionStar s x z )
+        , ( "subsection", \d s x y z -> renderSubsection s x z )
+        , ( "subsection*", \d s x y z -> renderSubsectionStar s x z )
+        , ( "subsubsection", \d s x y z -> renderSubSubsection  s x z )
+        , ( "subsubsection*", \d s x y z -> renderSubSubsectionStar s x z )
+        , ( "setcounter", \d s x y z -> renderSetCounter s x z )
+        , ( "subheading", \d s x y z -> renderSubheading s x z )
+        , ( "tableofcontents", \d s x y z -> renderTableOfContents s x z )
+        , ( "innertableofcontents", \d s x y z -> renderInnerTableOfContents s x z )
+        , ( "red", \d s x y z -> renderRed s x z )
+        , ( "blue", \d s x y z -> renderBlue s x z )
+        , ( "highlight", \d s x y z -> renderHighlighted s x z )
+        , ( "strike", \d s x y z -> renderStrikeThrough s x z )
+        , ( "term", \d s x y z -> renderTerm s x z )
+        , ( "xlink", \d s x y z -> renderXLink s x z )
+        , ( "xlinkPublic", \d s x y z -> renderXLinkPublic s x z )
+        , ( "documentTitle", \d s x y z -> renderDocumentTitle s x z )
+        , ( "title", \d s x y z -> renderTitle x z )
+        , ( "author", \d s x y z -> renderAuthor s x z )
+        , ( "date", \d s x y z -> renderDate s x z )
+        , ( "revision", \d s x y z -> renderRevision s x z )
+        , ( "email", \d s x y z -> renderEmail s x z )
+        , ( "setdocid", \d s x y z -> renderSetDocId s x z )
+        , ( "setclient", \d s x y z -> renderSetClient s x z )
+        , ( "strong", \d s x y z -> renderStrong d s x z )
         ]
 
 
@@ -430,9 +428,9 @@ renderPercent _ latexState args =
     Html.span [] [ Html.text "%" ]
 
 
-renderArgList : String -> LatexState -> List LatexExpression -> List (Html msg)
-renderArgList source latexState args =
-    args |> List.map (render source latexState)
+renderArgList : Bool ->String -> LatexState -> List LatexExpression -> List (Html msg)
+renderArgList delay source latexState args =
+    args |> List.map (render delay source latexState)
 
 
 enclose : Html msg -> Html msg
@@ -449,23 +447,23 @@ oneSpace =
 {- RENDER INDIVIDUAL MACROS -}
 
 
-renderBozo : String -> LatexState -> List LatexExpression -> Html msg
-renderBozo source latexState args =
+renderBozo : Bool -> String -> LatexState -> List LatexExpression -> Html msg
+renderBozo delay source latexState args =
     Html.span []
         [ Html.text <| "\\bozo"
-        , enclose <| renderArg source 0 latexState args
-        , enclose <| renderArg source 1 latexState args
+        , enclose <| renderArg delay source 0 latexState args
+        , enclose <| renderArg delay source 1 latexState args
         ]
 
 
-renderItalic : String -> LatexState -> List LatexExpression -> Html msg
-renderItalic source latexState args =
-    Html.i [] [ Html.text " ", renderArg source 0 latexState args ]
+renderItalic : Bool -> String -> LatexState -> List LatexExpression -> Html msg
+renderItalic delay source latexState args =
+    Html.i [] [ Html.text " ", renderArg delay source 0 latexState args ]
 
 
-renderStrong : String -> LatexState -> List LatexExpression -> Html msg
-renderStrong source latexState args =
-    Html.strong [] [ oneSpace, renderArg source 0 latexState args ]
+renderStrong : Bool -> String -> LatexState -> List LatexExpression -> Html msg
+renderStrong delay source latexState args =
+    Html.strong [] [ oneSpace, renderArg delay source 0 latexState args ]
 
 
 renderBigSkip : String -> LatexState -> List LatexExpression -> Html msg
@@ -505,11 +503,11 @@ renderCite _ latexState args =
             ]
 
 
-renderCode : String -> LatexState -> List LatexExpression -> Html msg
-renderCode source latexState args =
+renderCode : Bool ->String -> LatexState -> List LatexExpression -> Html msg
+renderCode delay source latexState args =
     let
         arg =
-            renderArg source 0 latexState args
+            renderArg delay source 0 latexState args
     in
         Html.code [] [ oneSpace, arg ]
 
@@ -829,14 +827,14 @@ renderUnderscore source latexState args =
     Html.span [] [ Html.text "_" ]
 
 
-renderBackslash : String -> LatexState -> List LatexExpression -> Html msg
-renderBackslash source latexState args =
-    Html.span [] [ Html.text "\\", renderArg source 0 latexState args ]
+renderBackslash : Bool ->String -> LatexState -> List LatexExpression -> Html msg
+renderBackslash delay source latexState args =
+    Html.span [] [ Html.text "\\", renderArg delay source 0 latexState args ]
 
 
-renderTexArg : String -> LatexState -> List LatexExpression -> Html msg
-renderTexArg source latexState args =
-    Html.span [] [ Html.text "{", renderArg source 0 latexState args, Html.text "}" ]
+renderTexArg : Bool ->String -> LatexState -> List LatexExpression -> Html msg
+renderTexArg delay source latexState args =
+    Html.span [] [ Html.text "{", renderArg delay source 0 latexState args, Html.text "}" ]
 
 
 renderRef : String -> LatexState -> List LatexExpression -> Html msg
@@ -1196,41 +1194,41 @@ renderXLinkPublic _ latexState args =
 {- SMACROS -}
 
 
-renderSMacroDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg)
+renderSMacroDict : Dict.Dict String (Bool -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg)
 renderSMacroDict =
     Dict.fromList
-        [ ( "bibitem", \source latexState optArgs args body -> renderBibItem source latexState optArgs args body )
+        [ ( "bibitem", \delay source latexState optArgs args body -> renderBibItem delay source latexState optArgs args body )
         ]
 
 
-renderSMacro : String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-renderSMacro source latexState name optArgs args le =
+renderSMacro : Bool -> String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderSMacro delay source latexState name optArgs args le =
     case Dict.get name renderSMacroDict of
         Just f ->
-            f source latexState optArgs args le
+            f delay source  latexState optArgs args le
 
         Nothing ->
-            reproduceSMacro source name latexState optArgs args le
+            reproduceSMacro delay source name latexState optArgs args le
 
 
-reproduceSMacro : String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-reproduceSMacro source name latexState optArgs args le =
+reproduceSMacro : Bool -> String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+reproduceSMacro delay source name latexState optArgs args le =
     let
         renderedOptArgs =
-            renderArgList source latexState optArgs |> List.map enclose
+            renderArgList delay source latexState optArgs |> List.map enclose
 
         renderedArgs =
-            renderArgList source latexState args |> List.map enclose
+            renderArgList delay source latexState args |> List.map enclose
 
         renderedLe =
-            render source latexState le |> enclose
+            render delay source latexState le |> enclose
     in
         Html.span []
             ([ Html.text <| "\\" ++ name ] ++ renderedOptArgs ++ renderedArgs ++ [ renderedLe ])
 
 
-renderBibItem : String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-renderBibItem source latexState optArgs args body =
+renderBibItem : Bool ->String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderBibItem delay source latexState optArgs args body =
     let
         label =
             if List.length optArgs == 1 then
@@ -1243,7 +1241,7 @@ renderBibItem source latexState optArgs args body =
     in
         Html.div []
             [ Html.strong [ HA.id id, HA.style "margin-right" "10px" ] [ Html.text <| "[" ++ label ++ "]" ]
-            , Html.span [] [ render source latexState body ]
+            , Html.span [] [ render delay source latexState body ]
             ]
 
 
@@ -1252,9 +1250,9 @@ renderBibItem source latexState optArgs args body =
 {- LISTS -}
 
 
-renderItem : String -> LatexState -> Int -> LatexExpression -> Html msg
-renderItem source latexState level latexExpression =
-    Html.li [ HA.style "margin-bottom" "8px" ] [ render source latexState latexExpression ]
+renderItem : Bool ->String -> LatexState -> Int -> LatexExpression -> Html msg
+renderItem delay source latexState level latexExpression =
+    Html.li [ HA.style "margin-bottom" "8px" ] [ render delay source latexState latexExpression ]
 
 
 
@@ -1262,19 +1260,20 @@ renderItem source latexState level latexExpression =
 {- BEGIN ENVIRONMENTS -}
 
 
-renderEnvironment : String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderEnvironment source latexState name args body =
-    environmentRenderer source name latexState args body
+renderEnvironment : Bool ->String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderEnvironment delay source latexState name args body =
+    environmentRenderer delay source name latexState args body
 
 
-environmentRenderer : String -> String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
-environmentRenderer source name =
+environmentRenderer : Bool ->String -> String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+environmentRenderer delay source name =
     case Dict.get name renderEnvironmentDict of
         Just f ->
-            f source
+
+            f delay source
 
         Nothing ->
-            renderDefaultEnvironment source name
+            renderDefaultEnvironment delay source name
 
 
 theoremLikeEnvironments : List String
@@ -1287,19 +1286,19 @@ theoremLikeEnvironments =
     ]
 
 
-renderDefaultEnvironment : String -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
-renderDefaultEnvironment source name latexState args body =
+renderDefaultEnvironment : Bool ->String -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment delay source name latexState args body =
     if List.member name theoremLikeEnvironments then
-        renderTheoremLikeEnvironment source latexState name args body
+        renderTheoremLikeEnvironment delay source latexState name args body
     else
-        renderDefaultEnvironment2 source latexState (Utility.capitalize name) args body
+        renderDefaultEnvironment2 delay source latexState (Utility.capitalize name) args body
 
 
-renderTheoremLikeEnvironment : String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderTheoremLikeEnvironment source latexState name args body =
+renderTheoremLikeEnvironment : Bool -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderTheoremLikeEnvironment delay source latexState name args body =
     let
         r =
-            render source latexState body
+            render delay source latexState body
 
         eqno =
             getCounter "eqno" latexState
@@ -1322,11 +1321,11 @@ renderTheoremLikeEnvironment source latexState name args body =
             ]
 
 
-renderDefaultEnvironment2 : String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderDefaultEnvironment2 source latexState name args body =
+renderDefaultEnvironment2 :  Bool -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment2 delay source latexState name args body =
     let
         r =
-            render source latexState body
+            render delay source latexState body
     in
         Html.div [ HA.class "environment" ]
             [ Html.strong [] [ Html.text name ]
@@ -1338,33 +1337,33 @@ renderDefaultEnvironment2 source latexState name args body =
 {- INDIVIDUAL ENVIRONMENT RENDERERS -}
 
 
-renderEnvironmentDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+renderEnvironmentDict : Dict.Dict String (Bool -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 renderEnvironmentDict =
     Dict.fromList
         [
-          ( "align", \s x a y -> renderAlignEnvironment s x y )
-        , ( "center", \s x a y -> renderCenterEnvironment s x y )
-        , ( "comment", \s x a y -> renderCommentEnvironment s x y )
-        , ( "defitem", \s x a y -> renderDefItemEnvironment s x a y )
-        , ( "enumerate", \s x a y -> renderEnumerate s x y )
-        , ( "eqnarray", \s x a y -> renderEqnArray s x y )
-        , ( "equation", \s x a y -> renderEquationEnvironment s x y )
-        , ( "indent", \s x a y -> renderIndentEnvironment s x y )
-        , ( "itemize", \s x a y -> renderItemize s x y )
-        , ( "listing", \s x a y -> renderListing s x y )
-        , ( "macros", \s x a y -> renderMacros s x y )
-        , ( "maskforweb", \s x a y -> renderCommentEnvironment s x y )
-        , ( "quotation", \s x a y -> renderQuotation s x y )
-        , ( "tabular", \s x a y -> renderTabular s x y )
-        , ( "thebibliography", \s x a y -> renderTheBibliography s x y )
-        , ( "useforweb", \s x a y -> renderUseForWeb s x y )
-        , ( "verbatim", \s x a y -> renderVerbatim s x y )
-        , ( "verse", \s x a y -> renderVerse s x y )
+          ( "align", \d s x a y -> renderAlignEnvironment d s x y )
+        , ( "center", \d s x a y -> renderCenterEnvironment d s x y )
+        , ( "comment", \d s x a y -> renderCommentEnvironment s x y )
+        , ( "defitem", \d s x a y -> renderDefItemEnvironment d s x a y )
+        , ( "enumerate", \d s x a y -> renderEnumerate d s x y )
+        , ( "eqnarray", \d s x a y -> renderEqnArray d s x y )
+        , ( "equation", \d s x a y -> renderEquationEnvironment d s x y )
+        , ( "indent", \d s x a y -> renderIndentEnvironment d s x y )
+        , ( "itemize", \d s x a y -> renderItemize d s x y )
+        , ( "listing", \d s x a y -> renderListing s x y )
+        , ( "macros", \d s x a y -> renderMacros d s x y )
+        , ( "maskforweb", \d s x a y -> renderCommentEnvironment s x y )
+        , ( "quotation", \d s x a y -> renderQuotation d s x y )
+        , ( "tabular", \d s x a y -> renderTabular d s x y )
+        , ( "thebibliography", \d s x a y -> renderTheBibliography d s x y )
+        , ( "useforweb", \d s x a y -> renderUseForWeb d s x y )
+        , ( "verbatim", \d s x a y -> renderVerbatim s x y )
+        , ( "verse", \d s x a y -> renderVerse s x y )
         ]
 
 
-renderAlignEnvironment : String -> LatexState -> LatexExpression -> Html msg
-renderAlignEnvironment source latexState body =
+renderAlignEnvironment : Bool ->String -> LatexState -> LatexExpression -> Html msg
+renderAlignEnvironment delay source latexState body =
     let
         r =
             Internal.Render.render latexState body
@@ -1387,14 +1386,14 @@ renderAlignEnvironment source latexState body =
         content =
             "\n\\begin{align*}\n" ++ addendum ++ r ++ "\n\\end{align*}\n"
     in
-        displayMathText content
+        displayMathText delay content
 
 
-renderCenterEnvironment : String -> LatexState -> LatexExpression -> Html msg
-renderCenterEnvironment source latexState body =
+renderCenterEnvironment : Bool ->String -> LatexState -> LatexExpression -> Html msg
+renderCenterEnvironment delay source latexState body =
     let
         r =
-            render source latexState body
+            render delay source latexState body
     in
         Html.div [ HA.class "center" ] [ r ]
 
@@ -1404,28 +1403,28 @@ renderCommentEnvironment source latexState body =
     Html.div [] []
 
 
-renderEnumerate : String -> LatexState -> LatexExpression -> Html msg
-renderEnumerate source latexState body =
-    Html.ol [ HA.style "margin-top" "0px" ] [ render source latexState body ]
+renderEnumerate : Bool ->String -> LatexState -> LatexExpression -> Html msg
+renderEnumerate delay source latexState body =
+    Html.ol [ HA.style "margin-top" "0px" ] [ render delay source latexState body ]
 
 
-renderDefItemEnvironment : String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
-renderDefItemEnvironment source latexState optArgs body =
+renderDefItemEnvironment : Bool ->String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefItemEnvironment delay source latexState optArgs body =
     Html.div []
         [ Html.strong [] [ Html.text <| Internal.Render.renderArg 0 latexState optArgs ]
-        , Html.div [ HA.style "margin-left" "25px", HA.style "margin-top" "10px" ] [ render source latexState body ]
+        , Html.div [ HA.style "margin-left" "25px", HA.style "margin-top" "10px" ] [ render delay source latexState body ]
         ]
 
 
 {-| XXX
 -}
-renderEqnArray : String -> LatexState -> LatexExpression -> Html msg
-renderEqnArray source latexState body =
-    displayMathText (Internal.Render.render latexState body)
+renderEqnArray : Bool ->String -> LatexState -> LatexExpression -> Html msg
+renderEqnArray delay source latexState body =
+    displayMathText delay (Internal.Render.render latexState body)
 
 
-renderEquationEnvironment : String -> LatexState -> LatexExpression -> Html msg
-renderEquationEnvironment source latexState body =
+renderEquationEnvironment : Bool -> String -> LatexState -> LatexExpression -> Html msg
+renderEquationEnvironment delay source latexState body =
     let
         eqno =
             getCounter "eqno" latexState
@@ -1445,21 +1444,21 @@ renderEquationEnvironment source latexState body =
         r =
             Internal.Render.render latexState body
     in
-        displayMathText <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
+        displayMathText delay <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
 
 
 
 -- "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
 
 
-renderIndentEnvironment : String -> LatexState -> LatexExpression -> Html msg
-renderIndentEnvironment source latexState body =
-    Html.div [ HA.style "margin-left" "2em" ] [ render source latexState body ]
+renderIndentEnvironment : Bool ->String -> LatexState -> LatexExpression -> Html msg
+renderIndentEnvironment delay source latexState body =
+    Html.div [ HA.style "margin-left" "2em" ] [ render delay source latexState body ]
 
 
-renderItemize : String -> LatexState -> LatexExpression -> Html msg
-renderItemize source latexState body =
-    Html.ul [ HA.style "margin-top" "0px" ] [ render source latexState body ]
+renderItemize : Bool ->String -> LatexState -> LatexExpression -> Html msg
+renderItemize delay source latexState body =
+    Html.ul [ HA.style "margin-top" "0px" ] [ render delay source latexState body ]
 
 
 renderListing : String -> LatexState -> LatexExpression -> Html msg
@@ -1474,70 +1473,70 @@ renderListing source latexState body =
         Html.pre [ HA.class "verbatim" ] [ Html.text lines ]
 
 
-renderMacros : String -> LatexState -> LatexExpression -> Html msg
-renderMacros source latexState body =
-    displayMathText (Internal.Render.render latexState body)
+renderMacros : Bool -> String -> LatexState -> LatexExpression -> Html msg
+renderMacros delay source latexState body =
+    displayMathText delay (Internal.Render.render latexState body)
 
 
-renderQuotation : String -> LatexState -> LatexExpression -> Html msg
-renderQuotation source latexState body =
-    Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render source latexState body ]
+renderQuotation : Bool ->String -> LatexState -> LatexExpression -> Html msg
+renderQuotation delay source latexState body =
+    Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render delay source latexState body ]
 
 
-renderTabular : String -> LatexState -> LatexExpression -> Html msg
-renderTabular source latexState body =
+renderTabular : Bool -> String -> LatexState -> LatexExpression -> Html msg
+renderTabular delay source latexState body =
     Html.table
         [ HA.style "border-spacing" "20px 10px"
         , HA.style "margin-left" "-20px"
         ]
-        [ renderTableBody source body ]
+        [ renderTableBody delay source body ]
 
 
-renderCell : String -> LatexExpression -> Html msg
-renderCell source cell =
+renderCell : Bool -> String -> LatexExpression -> Html msg
+renderCell delay source cell =
     case cell of
         LXString s ->
             Html.td [] [ Html.text s ]
 
         InlineMath s ->
-            Html.td [] [ inlineMathText s ]
+            Html.td [] [ inlineMathText delay s ]
 
         Macro s x y ->
-            Html.td [] [ renderMacro source emptyLatexState s x y ]
+            Html.td [] [ renderMacro delay source emptyLatexState s x y ]
 
         -- ###
         _ ->
             Html.td [] []
 
 
-renderRow : String -> LatexExpression -> Html msg
-renderRow source row =
+renderRow : Bool -> String -> LatexExpression -> Html msg
+renderRow delay source row =
     case row of
         LatexList row_ ->
-            Html.tr [] (row_ |> List.map (renderCell source))
+            Html.tr [] (row_ |> List.map (renderCell delay source))
 
         _ ->
             Html.tr [] []
 
 
-renderTableBody : String -> LatexExpression -> Html msg
-renderTableBody source body =
+renderTableBody : Bool -> String -> LatexExpression -> Html msg
+renderTableBody delay source body =
     case body of
         LatexList body_ ->
-            Html.tbody [] (body_ |> List.map (renderRow source))
+            Html.tbody [] (body_ |> List.map (renderRow delay source))
 
         _ ->
             Html.tbody [] []
 
 
-renderTheBibliography : String -> LatexState -> LatexExpression -> Html msg
-renderTheBibliography source latexState body =
-    Html.div [] [ render source latexState body ]
+renderTheBibliography : Bool ->String -> LatexState -> LatexExpression -> Html msg
+renderTheBibliography delay source latexState body =
+    Html.div [] [ render delay source latexState body ]
 
 
-renderUseForWeb : String -> LatexState -> LatexExpression -> Html msg
-renderUseForWeb source latexState body =
-    displayMathText (Internal.Render.render latexState body)
+renderUseForWeb : Bool -> String -> LatexState -> LatexExpression -> Html msg
+renderUseForWeb delay source latexState body =
+    displayMathText delay (Internal.Render.render latexState body)
 
 
 renderVerbatim : String -> LatexState -> LatexExpression -> Html msg

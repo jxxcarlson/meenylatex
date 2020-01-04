@@ -53,7 +53,7 @@ transform str =
         imageUrlList =
             parsand
                 --|> List.concat
-                |> List.map (ParserTools.macroValue_ "image")
+                |> List.map (PT.macroValue_ "image")
                 |> Maybe.Extra.values
     in
     ( latex, imageUrlList )

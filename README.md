@@ -29,16 +29,21 @@ done, see the code in `./demo`
 
 ## This release
 
-    type MathJaxRenderOption = Delay | NoDelay
+- Better LaTeX error reporting. 
+
+- The below is used to optimize rendering by MathJax
+
+        type MathJaxRenderOption = Delay | NoDelay
     
-is used for optimizing rendering by MathJax
+    This is necessitated by the single-threaded nature of Javascript.
 
 ## Acknowledgments
  
 
 I wish to acknowledge the generous help that 
 I have received throughout this project from 
-the community at http://elmlang.slack.com, with 
-special thanks to Ilias van Peer (@ilias), 
-Luke Westby (@luke), Davide Cervone (MathJax.org), and
-Evan Czaplicki (@evancz).
+the community at [elmlang.slack.com](http://elmlang.slack.com), with 
+special thanks to Evan Czaplicki, Ilias van Peer, and
+Luke Westby.  I  also wish to thank
+ Davide Cervone (MathJax.org) for indispensible help
+ with MathJax.

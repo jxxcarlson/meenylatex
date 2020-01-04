@@ -6,7 +6,7 @@ module MiniLatex
         , LatexState
         , TocEntry
         , TableOfContents
-        )
+       )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
 Most users will need only (1) the functions exposed in the `MiniLatex` module
@@ -35,6 +35,9 @@ import Internal.LatexDiffer as MiniLatexDiffer
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Render2 as Render
 import MiniLatex.Edit
+import MiniLatex.Render exposing(MathJaxRenderOption)
+
+
 
 {-| Auxiliary data compiled during parsing -}
 type alias LatexState = Internal.LatexState.LatexState
@@ -48,6 +51,7 @@ type alias TocEntry = Internal.LatexState.TocEntry
 type alias TableOfContents = Internal.LatexState.TableOfContents
 
 
+
 {-| Used for initialization -}
 emptyLatexState : LatexState
 emptyLatexState = Internal.LatexState.emptyLatexState
@@ -59,18 +63,18 @@ are prepended to this string and are used by MathJax
 to render purely mathematical text. The `macros` string
 may be empty.
 -}
-render : Bool -> String -> String -> Html msg
-render delay macroDefinitions source =
-    MiniLatexDiffer.init (Render.renderLatexList delay source) emptyLatexState (prependMacros macroDefinitions source)
+render : MathJaxRenderOption -> String -> String -> Html msg
+render mathJaxRenderOption macroDefinitions source =
+    MiniLatexDiffer.init (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
 
 
 {-| Like render, but used the `seed` to define the ids for each paragraph.
 -}
-renderWithSeed : Bool -> Int -> String -> String -> Html msg
-renderWithSeed delay seed macroDefinitions source =
-    MiniLatexDiffer.initWithSeed seed (Render.renderLatexList delay source) emptyLatexState (prependMacros macroDefinitions source)
+renderWithSeed : MathJaxRenderOption -> Int -> String -> String -> Html msg
+renderWithSeed mathJaxRenderOption seed macroDefinitions source =
+    MiniLatexDiffer.initWithSeed seed (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
 

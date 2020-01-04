@@ -41,10 +41,11 @@ import Regex
 import String
 import Internal.Macro as Macro
 import Internal.Paragraph as Paragraph
-
+import MiniLatex.Render exposing(MathJaxRenderOption(..))
 
 -- |> \str -> "\n<p>" ++ str ++ "</p>\n"
 {- FUNCTIONS FOR TESTING THINGS -}
+
 
 
 getElement : Int -> List LatexExpression -> LatexExpression
@@ -59,8 +60,8 @@ parseString parser str =
 
 {-| Parse a string, then render it.
 -}
-renderString : Bool -> LatexState -> String -> Html msg
-renderString delay latexState source =
+renderString : MathJaxRenderOption -> LatexState -> String -> Html msg
+renderString mathJaxRenderOption latexState source =
     let
         paragraphs : List String
         paragraphs = Paragraph.logicalParagraphify source
@@ -70,7 +71,7 @@ renderString delay latexState source =
 
         render_ : (String, List LatexExpression) -> Html msg
         render_ (source_, ast) =
-          renderLatexList delay source_ latexState ast
+          renderLatexList mathJaxRenderOption source_ latexState ast
 
     in
         paragraphs
@@ -129,32 +130,32 @@ mathTextDelayed content =
 {-| The main rendering function. Compute an Html msg value
 from the current LatexState and a LatexExpression.
 -}
-render : Bool ->String -> LatexState -> LatexExpression -> Html msg
-render delay source latexState latexExpression =
+render : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+render mathJaxRenderOption source latexState latexExpression =
     case latexExpression of
         Comment str ->
             Html.p [] [ Html.text <| "" ]
 
         Macro name optArgs args ->
-            renderMacro delay source latexState name optArgs args
+            renderMacro mathJaxRenderOption source latexState name optArgs args
 
         SMacro name optArgs args le ->
-            renderSMacro delay source latexState name optArgs args le
+            renderSMacro mathJaxRenderOption source latexState name optArgs args le
 
         Item level latexExpr ->
-            renderItem delay source latexState level latexExpr
+            renderItem mathJaxRenderOption source latexState level latexExpr
 
         InlineMath str ->
-            Html.span [] [ oneSpace, inlineMathText delay str ]
+            Html.span [] [ oneSpace, inlineMathText mathJaxRenderOption str ]
 
         DisplayMath str ->
-            displayMathText delay str
+            displayMathText mathJaxRenderOption str
 
         Environment name args body ->
-            renderEnvironment delay source latexState name args body
+            renderEnvironment mathJaxRenderOption source latexState name args body
 
         LatexList latexList ->
-            renderLatexList delay source latexState latexList
+            renderLatexList mathJaxRenderOption source latexState latexList
 
         LXString str ->
             case String.left 1 str of
@@ -215,24 +216,22 @@ reportProblem problem =
             "Other problem"
 
 
-inlineMathText : Bool -> String -> Html msg
-inlineMathText delay str =
-    if delay then
-      mathTextDelayed <| "$ " ++ String.trim str ++ " $"
-    else
-      mathText <| "$ " ++ String.trim str ++ " $"
+inlineMathText : MathJaxRenderOption -> String -> Html msg
+inlineMathText mathJaxRenderOption str =
+   case mathJaxRenderOption of
+       Delay -> mathTextDelayed <| "$ " ++ String.trim str ++ " $"
+       NoDelay -> mathText <| "$ " ++ String.trim str ++ " $"
 
 
-displayMathText : Bool ->String -> Html msg
-displayMathText delay str =
+displayMathText : MathJaxRenderOption ->String -> Html msg
+displayMathText mathJaxRenderOption str =
     let
         str2 =
             String.trim str
     in
-      if delay then
-           mathTextDelayed <| "$$\n" ++ str2 ++ "\n$$"
-      else
-           mathText <| "$$\n" ++ str2 ++ "\n$$"
+    case mathJaxRenderOption of
+        Delay -> mathTextDelayed <| "$$\n" ++ str2 ++ "\n$$"
+        NoDelay -> mathText <| "$$\n" ++ str2 ++ "\n$$"
 
 
 
@@ -285,12 +284,12 @@ firstChar =
 {-| Like `render`, but renders a list of LatexExpressions
 to Html mgs
 -}
-renderLatexList : Bool -> String -> LatexState -> List LatexExpression -> Html msg
-renderLatexList delay source latexState latexList =
+renderLatexList : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
+renderLatexList mathJaxRenderOption source latexState latexList =
     -- ### Render2.renderLatexList
     latexList
         |> spacify
-        |> List.map (render delay source latexState)
+        |> List.map (render mathJaxRenderOption source latexState)
         |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] list)
 
 
@@ -305,16 +304,16 @@ spacify latexList =
 {- RENDER MACRO -}
 
 
-renderMacro : Bool -> String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
-renderMacro delay source latexState name optArgs args =
+renderMacro : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
+renderMacro mathJaxRenderOption source latexState name optArgs args =
     case Dict.get name renderMacroDict of
         Just f ->
-            f delay source latexState optArgs args
+            f mathJaxRenderOption source latexState optArgs args
 
         Nothing ->
             case Dict.get name latexState.macroDictionary of
                 Nothing ->
-                    reproduceMacro delay source name latexState optArgs args
+                    reproduceMacro mathJaxRenderOption source name latexState optArgs args
 
                 Just macroDefinition ->
                     let
@@ -324,19 +323,19 @@ renderMacro delay source latexState name optArgs args =
                         expr =
                             Macro.expandMacro macro macroDefinition
                     in
-                        render delay source latexState expr
+                        render mathJaxRenderOption source latexState expr
 
 
-renderArg : Bool ->String -> Int -> LatexState -> List LatexExpression -> Html msg
-renderArg delay source k latexState args =
-    render delay source latexState (getElement k args)
+renderArg : MathJaxRenderOption ->String -> Int -> LatexState -> List LatexExpression -> Html msg
+renderArg mathJaxRenderOption source k latexState args =
+    render mathJaxRenderOption source latexState (getElement k args)
 
 
-reproduceMacro : Bool -> String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html msg
-reproduceMacro delay source name latexState optArgs args =
+reproduceMacro : MathJaxRenderOption -> String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html msg
+reproduceMacro mathJaxRenderOption source name latexState optArgs args =
     let
         renderedArgs =
-            renderArgList delay source latexState args |> List.map enclose
+            renderArgList mathJaxRenderOption source latexState args |> List.map enclose
     in
         Html.span [ HA.style "color" "red" ]
             ([ Html.text <| "\\" ++ name ] ++ renderedArgs)
@@ -347,7 +346,7 @@ boost f =
     \x y z -> f x z
 
 
-renderMacroDict : Dict.Dict String (Bool -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
+renderMacroDict : Dict.Dict String (MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
 renderMacroDict =
     Dict.fromList
         [ ( "bigskip", \d s x y z -> renderBigSkip s x z )
@@ -428,9 +427,9 @@ renderPercent _ latexState args =
     Html.span [] [ Html.text "%" ]
 
 
-renderArgList : Bool ->String -> LatexState -> List LatexExpression -> List (Html msg)
-renderArgList delay source latexState args =
-    args |> List.map (render delay source latexState)
+renderArgList : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> List (Html msg)
+renderArgList mathJaxRenderOption source latexState args =
+    args |> List.map (render mathJaxRenderOption source latexState)
 
 
 enclose : Html msg -> Html msg
@@ -447,23 +446,23 @@ oneSpace =
 {- RENDER INDIVIDUAL MACROS -}
 
 
-renderBozo : Bool -> String -> LatexState -> List LatexExpression -> Html msg
-renderBozo delay source latexState args =
+renderBozo : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
+renderBozo mathJaxRenderOption source latexState args =
     Html.span []
         [ Html.text <| "\\bozo"
-        , enclose <| renderArg delay source 0 latexState args
-        , enclose <| renderArg delay source 1 latexState args
+        , enclose <| renderArg mathJaxRenderOption source 0 latexState args
+        , enclose <| renderArg mathJaxRenderOption source 1 latexState args
         ]
 
 
-renderItalic : Bool -> String -> LatexState -> List LatexExpression -> Html msg
-renderItalic delay source latexState args =
-    Html.i [] [ Html.text " ", renderArg delay source 0 latexState args ]
+renderItalic : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
+renderItalic mathJaxRenderOption source latexState args =
+    Html.i [] [ Html.text " ", renderArg mathJaxRenderOption source 0 latexState args ]
 
 
-renderStrong : Bool -> String -> LatexState -> List LatexExpression -> Html msg
-renderStrong delay source latexState args =
-    Html.strong [] [ oneSpace, renderArg delay source 0 latexState args ]
+renderStrong : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
+renderStrong mathJaxRenderOption source latexState args =
+    Html.strong [] [ oneSpace, renderArg mathJaxRenderOption source 0 latexState args ]
 
 
 renderBigSkip : String -> LatexState -> List LatexExpression -> Html msg
@@ -503,11 +502,11 @@ renderCite _ latexState args =
             ]
 
 
-renderCode : Bool ->String -> LatexState -> List LatexExpression -> Html msg
-renderCode delay source latexState args =
+renderCode : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> Html msg
+renderCode mathJaxRenderOption source latexState args =
     let
         arg =
-            renderArg delay source 0 latexState args
+            renderArg mathJaxRenderOption source 0 latexState args
     in
         Html.code [] [ oneSpace, arg ]
 
@@ -827,14 +826,14 @@ renderUnderscore source latexState args =
     Html.span [] [ Html.text "_" ]
 
 
-renderBackslash : Bool ->String -> LatexState -> List LatexExpression -> Html msg
-renderBackslash delay source latexState args =
-    Html.span [] [ Html.text "\\", renderArg delay source 0 latexState args ]
+renderBackslash : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> Html msg
+renderBackslash mathJaxRenderOption source latexState args =
+    Html.span [] [ Html.text "\\", renderArg mathJaxRenderOption source 0 latexState args ]
 
 
-renderTexArg : Bool ->String -> LatexState -> List LatexExpression -> Html msg
-renderTexArg delay source latexState args =
-    Html.span [] [ Html.text "{", renderArg delay source 0 latexState args, Html.text "}" ]
+renderTexArg : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> Html msg
+renderTexArg mathJaxRenderOption source latexState args =
+    Html.span [] [ Html.text "{", renderArg mathJaxRenderOption source 0 latexState args, Html.text "}" ]
 
 
 renderRef : String -> LatexState -> List LatexExpression -> Html msg
@@ -1194,41 +1193,41 @@ renderXLinkPublic _ latexState args =
 {- SMACROS -}
 
 
-renderSMacroDict : Dict.Dict String (Bool -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg)
+renderSMacroDict : Dict.Dict String (MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg)
 renderSMacroDict =
     Dict.fromList
-        [ ( "bibitem", \delay source latexState optArgs args body -> renderBibItem delay source latexState optArgs args body )
+        [ ( "bibitem", \mathJaxRenderOption source latexState optArgs args body -> renderBibItem mathJaxRenderOption source latexState optArgs args body )
         ]
 
 
-renderSMacro : Bool -> String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-renderSMacro delay source latexState name optArgs args le =
+renderSMacro : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderSMacro mathJaxRenderOption source latexState name optArgs args le =
     case Dict.get name renderSMacroDict of
         Just f ->
-            f delay source  latexState optArgs args le
+            f mathJaxRenderOption source  latexState optArgs args le
 
         Nothing ->
-            reproduceSMacro delay source name latexState optArgs args le
+            reproduceSMacro mathJaxRenderOption source name latexState optArgs args le
 
 
-reproduceSMacro : Bool -> String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-reproduceSMacro delay source name latexState optArgs args le =
+reproduceSMacro : MathJaxRenderOption -> String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+reproduceSMacro mathJaxRenderOption source name latexState optArgs args le =
     let
         renderedOptArgs =
-            renderArgList delay source latexState optArgs |> List.map enclose
+            renderArgList mathJaxRenderOption source latexState optArgs |> List.map enclose
 
         renderedArgs =
-            renderArgList delay source latexState args |> List.map enclose
+            renderArgList mathJaxRenderOption source latexState args |> List.map enclose
 
         renderedLe =
-            render delay source latexState le |> enclose
+            render mathJaxRenderOption source latexState le |> enclose
     in
         Html.span []
             ([ Html.text <| "\\" ++ name ] ++ renderedOptArgs ++ renderedArgs ++ [ renderedLe ])
 
 
-renderBibItem : Bool ->String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-renderBibItem delay source latexState optArgs args body =
+renderBibItem : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderBibItem mathJaxRenderOption source latexState optArgs args body =
     let
         label =
             if List.length optArgs == 1 then
@@ -1241,7 +1240,7 @@ renderBibItem delay source latexState optArgs args body =
     in
         Html.div []
             [ Html.strong [ HA.id id, HA.style "margin-right" "10px" ] [ Html.text <| "[" ++ label ++ "]" ]
-            , Html.span [] [ render delay source latexState body ]
+            , Html.span [] [ render mathJaxRenderOption source latexState body ]
             ]
 
 
@@ -1250,9 +1249,9 @@ renderBibItem delay source latexState optArgs args body =
 {- LISTS -}
 
 
-renderItem : Bool ->String -> LatexState -> Int -> LatexExpression -> Html msg
-renderItem delay source latexState level latexExpression =
-    Html.li [ HA.style "margin-bottom" "8px" ] [ render delay source latexState latexExpression ]
+renderItem : MathJaxRenderOption ->String -> LatexState -> Int -> LatexExpression -> Html msg
+renderItem mathJaxRenderOption source latexState level latexExpression =
+    Html.li [ HA.style "margin-bottom" "8px" ] [ render mathJaxRenderOption source latexState latexExpression ]
 
 
 
@@ -1260,20 +1259,20 @@ renderItem delay source latexState level latexExpression =
 {- BEGIN ENVIRONMENTS -}
 
 
-renderEnvironment : Bool ->String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderEnvironment delay source latexState name args body =
-    environmentRenderer delay source name latexState args body
+renderEnvironment : MathJaxRenderOption ->String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderEnvironment mathJaxRenderOption source latexState name args body =
+    environmentRenderer mathJaxRenderOption source name latexState args body
 
 
-environmentRenderer : Bool ->String -> String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
-environmentRenderer delay source name =
+environmentRenderer : MathJaxRenderOption ->String -> String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+environmentRenderer mathJaxRenderOption source name =
     case Dict.get name renderEnvironmentDict of
         Just f ->
 
-            f delay source
+            f mathJaxRenderOption source
 
         Nothing ->
-            renderDefaultEnvironment delay source name
+            renderDefaultEnvironment mathJaxRenderOption source name
 
 
 theoremLikeEnvironments : List String
@@ -1286,19 +1285,19 @@ theoremLikeEnvironments =
     ]
 
 
-renderDefaultEnvironment : Bool ->String -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
-renderDefaultEnvironment delay source name latexState args body =
+renderDefaultEnvironment : MathJaxRenderOption ->String -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment mathJaxRenderOption source name latexState args body =
     if List.member name theoremLikeEnvironments then
-        renderTheoremLikeEnvironment delay source latexState name args body
+        renderTheoremLikeEnvironment mathJaxRenderOption source latexState name args body
     else
-        renderDefaultEnvironment2 delay source latexState (Utility.capitalize name) args body
+        renderDefaultEnvironment2 mathJaxRenderOption source latexState (Utility.capitalize name) args body
 
 
-renderTheoremLikeEnvironment : Bool -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderTheoremLikeEnvironment delay source latexState name args body =
+renderTheoremLikeEnvironment : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderTheoremLikeEnvironment mathJaxRenderOption source latexState name args body =
     let
         r =
-            render delay source latexState body
+            render mathJaxRenderOption source latexState body
 
         eqno =
             getCounter "eqno" latexState
@@ -1321,11 +1320,11 @@ renderTheoremLikeEnvironment delay source latexState name args body =
             ]
 
 
-renderDefaultEnvironment2 :  Bool -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderDefaultEnvironment2 delay source latexState name args body =
+renderDefaultEnvironment2 :  MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment2 mathJaxRenderOption source latexState name args body =
     let
         r =
-            render delay source latexState body
+            render mathJaxRenderOption source latexState body
     in
         Html.div [ HA.class "environment" ]
             [ Html.strong [] [ Html.text name ]
@@ -1337,7 +1336,7 @@ renderDefaultEnvironment2 delay source latexState name args body =
 {- INDIVIDUAL ENVIRONMENT RENDERERS -}
 
 
-renderEnvironmentDict : Dict.Dict String (Bool -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+renderEnvironmentDict : Dict.Dict String (MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 renderEnvironmentDict =
     Dict.fromList
         [
@@ -1362,8 +1361,8 @@ renderEnvironmentDict =
         ]
 
 
-renderAlignEnvironment : Bool ->String -> LatexState -> LatexExpression -> Html msg
-renderAlignEnvironment delay source latexState body =
+renderAlignEnvironment : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderAlignEnvironment mathJaxRenderOption source latexState body =
     let
         r =
             Internal.Render.render latexState body
@@ -1386,14 +1385,14 @@ renderAlignEnvironment delay source latexState body =
         content =
             "\n\\begin{align*}\n" ++ addendum ++ r ++ "\n\\end{align*}\n"
     in
-        displayMathText delay content
+        displayMathText mathJaxRenderOption content
 
 
-renderCenterEnvironment : Bool ->String -> LatexState -> LatexExpression -> Html msg
-renderCenterEnvironment delay source latexState body =
+renderCenterEnvironment : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderCenterEnvironment mathJaxRenderOption source latexState body =
     let
         r =
-            render delay source latexState body
+            render mathJaxRenderOption source latexState body
     in
         Html.div [ HA.class "center" ] [ r ]
 
@@ -1403,28 +1402,28 @@ renderCommentEnvironment source latexState body =
     Html.div [] []
 
 
-renderEnumerate : Bool ->String -> LatexState -> LatexExpression -> Html msg
-renderEnumerate delay source latexState body =
-    Html.ol [ HA.style "margin-top" "0px" ] [ render delay source latexState body ]
+renderEnumerate : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderEnumerate mathJaxRenderOption source latexState body =
+    Html.ol [ HA.style "margin-top" "0px" ] [ render mathJaxRenderOption source latexState body ]
 
 
-renderDefItemEnvironment : Bool ->String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
-renderDefItemEnvironment delay source latexState optArgs body =
+renderDefItemEnvironment : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefItemEnvironment mathJaxRenderOption source latexState optArgs body =
     Html.div []
         [ Html.strong [] [ Html.text <| Internal.Render.renderArg 0 latexState optArgs ]
-        , Html.div [ HA.style "margin-left" "25px", HA.style "margin-top" "10px" ] [ render delay source latexState body ]
+        , Html.div [ HA.style "margin-left" "25px", HA.style "margin-top" "10px" ] [ render mathJaxRenderOption source latexState body ]
         ]
 
 
 {-| XXX
 -}
-renderEqnArray : Bool ->String -> LatexState -> LatexExpression -> Html msg
-renderEqnArray delay source latexState body =
-    displayMathText delay (Internal.Render.render latexState body)
+renderEqnArray : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderEqnArray mathJaxRenderOption source latexState body =
+    displayMathText mathJaxRenderOption (Internal.Render.render latexState body)
 
 
-renderEquationEnvironment : Bool -> String -> LatexState -> LatexExpression -> Html msg
-renderEquationEnvironment delay source latexState body =
+renderEquationEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderEquationEnvironment mathJaxRenderOption source latexState body =
     let
         eqno =
             getCounter "eqno" latexState
@@ -1444,21 +1443,21 @@ renderEquationEnvironment delay source latexState body =
         r =
             Internal.Render.render latexState body
     in
-        displayMathText delay <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
+        displayMathText mathJaxRenderOption <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
 
 
 
 -- "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
 
 
-renderIndentEnvironment : Bool ->String -> LatexState -> LatexExpression -> Html msg
-renderIndentEnvironment delay source latexState body =
-    Html.div [ HA.style "margin-left" "2em" ] [ render delay source latexState body ]
+renderIndentEnvironment : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderIndentEnvironment mathJaxRenderOption source latexState body =
+    Html.div [ HA.style "margin-left" "2em" ] [ render mathJaxRenderOption source latexState body ]
 
 
-renderItemize : Bool ->String -> LatexState -> LatexExpression -> Html msg
-renderItemize delay source latexState body =
-    Html.ul [ HA.style "margin-top" "0px" ] [ render delay source latexState body ]
+renderItemize : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderItemize mathJaxRenderOption source latexState body =
+    Html.ul [ HA.style "margin-top" "0px" ] [ render mathJaxRenderOption source latexState body ]
 
 
 renderListing : String -> LatexState -> LatexExpression -> Html msg
@@ -1473,70 +1472,70 @@ renderListing source latexState body =
         Html.pre [ HA.class "verbatim" ] [ Html.text lines ]
 
 
-renderMacros : Bool -> String -> LatexState -> LatexExpression -> Html msg
-renderMacros delay source latexState body =
-    displayMathText delay (Internal.Render.render latexState body)
+renderMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderMacros mathJaxRenderOption source latexState body =
+    displayMathText mathJaxRenderOption (Internal.Render.render latexState body)
 
 
-renderQuotation : Bool ->String -> LatexState -> LatexExpression -> Html msg
-renderQuotation delay source latexState body =
-    Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render delay source latexState body ]
+renderQuotation : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderQuotation mathJaxRenderOption source latexState body =
+    Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render mathJaxRenderOption source latexState body ]
 
 
-renderTabular : Bool -> String -> LatexState -> LatexExpression -> Html msg
-renderTabular delay source latexState body =
+renderTabular : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderTabular mathJaxRenderOption source latexState body =
     Html.table
         [ HA.style "border-spacing" "20px 10px"
         , HA.style "margin-left" "-20px"
         ]
-        [ renderTableBody delay source body ]
+        [ renderTableBody mathJaxRenderOption source body ]
 
 
-renderCell : Bool -> String -> LatexExpression -> Html msg
-renderCell delay source cell =
+renderCell : MathJaxRenderOption -> String -> LatexExpression -> Html msg
+renderCell mathJaxRenderOption source cell =
     case cell of
         LXString s ->
             Html.td [] [ Html.text s ]
 
         InlineMath s ->
-            Html.td [] [ inlineMathText delay s ]
+            Html.td [] [ inlineMathText mathJaxRenderOption s ]
 
         Macro s x y ->
-            Html.td [] [ renderMacro delay source emptyLatexState s x y ]
+            Html.td [] [ renderMacro mathJaxRenderOption source emptyLatexState s x y ]
 
         -- ###
         _ ->
             Html.td [] []
 
 
-renderRow : Bool -> String -> LatexExpression -> Html msg
-renderRow delay source row =
+renderRow : MathJaxRenderOption -> String -> LatexExpression -> Html msg
+renderRow mathJaxRenderOption source row =
     case row of
         LatexList row_ ->
-            Html.tr [] (row_ |> List.map (renderCell delay source))
+            Html.tr [] (row_ |> List.map (renderCell mathJaxRenderOption source))
 
         _ ->
             Html.tr [] []
 
 
-renderTableBody : Bool -> String -> LatexExpression -> Html msg
-renderTableBody delay source body =
+renderTableBody : MathJaxRenderOption -> String -> LatexExpression -> Html msg
+renderTableBody mathJaxRenderOption source body =
     case body of
         LatexList body_ ->
-            Html.tbody [] (body_ |> List.map (renderRow delay source))
+            Html.tbody [] (body_ |> List.map (renderRow mathJaxRenderOption source))
 
         _ ->
             Html.tbody [] []
 
 
-renderTheBibliography : Bool ->String -> LatexState -> LatexExpression -> Html msg
-renderTheBibliography delay source latexState body =
-    Html.div [] [ render delay source latexState body ]
+renderTheBibliography : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderTheBibliography mathJaxRenderOption source latexState body =
+    Html.div [] [ render mathJaxRenderOption source latexState body ]
 
 
-renderUseForWeb : Bool -> String -> LatexState -> LatexExpression -> Html msg
-renderUseForWeb delay source latexState body =
-    displayMathText delay (Internal.Render.render latexState body)
+renderUseForWeb : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderUseForWeb mathJaxRenderOption source latexState body =
+    displayMathText mathJaxRenderOption (Internal.Render.render latexState body)
 
 
 renderVerbatim : String -> LatexState -> LatexExpression -> Html msg

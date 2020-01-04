@@ -2,8 +2,7 @@ module MiniLatex.Edit exposing (init, get, Data,  update, emptyData, parse)
 
 {-|
 
-Data structures and functions for managing interactive edits.
-The parse tree, rendered text, and other information needed
+Data structures and functions for managing interactive edits. The parse tree, rendered text, and other information needed
 for this is stored in a value of type
 
 ```
@@ -34,7 +33,9 @@ import Internal.Differ
 import Internal.LatexDiffer
 import Internal.Paragraph
 import Internal.Parser
+import MiniLatex.Render exposing(MathJaxRenderOption)
 import Internal.Render2
+
 
 
 {-| Data for differential parsing and rendering -}
@@ -44,24 +45,24 @@ type alias Data a = Internal.Differ.EditRecord a
 The version number should be different for each call of init.
 
 -}
-init : Bool -> Int -> String -> Data (Html msg)
-init delay version source =
+init : MathJaxRenderOption -> Int -> String -> Data (Html msg)
+init mathJaxRenderOption version source =
       Internal.LatexDiffer.update
          version
-         (Internal.Render2.renderLatexList delay source)
-         (Internal.Render2.renderString delay)
+         (Internal.Render2.renderLatexList mathJaxRenderOption source)
+         (Internal.Render2.renderString mathJaxRenderOption)
          Internal.Differ.emptyHtmlMsgRecord
          source
 
 
 {-| Update Data with modified text, re-parsing and re-rerendering changed elements.
 -}
-update : Bool -> Int ->  String -> Data (Html msg) -> Data (Html msg)
-update delay version source editRecord  =
+update : MathJaxRenderOption -> Int ->  String -> Data (Html msg) -> Data (Html msg)
+update mathJaxRenderOption version source editRecord  =
       Internal.LatexDiffer.update
          version
-         (Internal.Render2.renderLatexList delay source)
-         (Internal.Render2.renderString delay)
+         (Internal.Render2.renderLatexList mathJaxRenderOption source)
+         (Internal.Render2.renderString mathJaxRenderOption)
          editRecord
          source
 

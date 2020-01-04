@@ -1,8 +1,12 @@
-module Style exposing(..)
+module Style exposing (..)
 
 -- import Html exposing (..)
+
 import Html
 import Html.Attributes exposing (style)
+
+
+
 -- import Html.Events exposing (onClick, onInput)
 -- import Html.Keyed as Keyed
 

@@ -1,11 +1,4 @@
-module Internal.RenderToLatex
-    exposing
-        ( render
-        , renderBackToLatex
-        , renderBackToLatexTest
-        , renderBackToLatexTestModSpace
-        , renderLatexList
-        )
+module Internal.RenderToLatex exposing (render, renderBackToLatex, renderBackToLatexTest, renderBackToLatexTestModSpace, renderLatexList)
 
 {-| s
 
@@ -20,8 +13,8 @@ import Internal.ErrorMessages as ErrorMessages
 import Internal.JoinStrings as JoinStrings
 import Internal.Paragraph
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import Parser
 import Internal.Utility as Utility
+import Parser
 
 
 {-| parse a stringg and render it back into Latex

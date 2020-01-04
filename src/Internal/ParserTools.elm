@@ -106,10 +106,10 @@ decrementSetCounter macro =
         Macro "setcounter" [] args ->
             let
                 arg1 =
-                    (Macro "setcounter" [] args)
+                    Macro "setcounter" [] args
                         |> decrementArg1
             in
-                Macro "setcounter" [] [ LatexList [ LXString "section" ], LatexList arg1 ]
+            Macro "setcounter" [] [ LatexList [ LXString "section" ], LatexList arg1 ]
 
         _ ->
             macro
@@ -119,6 +119,7 @@ decrementSetCounter macro =
 
 > transformLXString (addToNumberAsString -1) (LXString "5")
 > LXString "4" : LatexExpression
+
 -}
 transformLXString : (String -> String) -> LatexExpression -> LatexExpression
 transformLXString f latexExpr =
@@ -134,7 +135,7 @@ transformLXList : (String -> String) -> LatexExpression -> LatexExpression
 transformLXList f latexExpr =
     case latexExpr of
         LatexList list ->
-            LatexList <| (List.map (transformLXString f) list)
+            LatexList <| List.map (transformLXString f) list
 
         _ ->
             latexExpr
@@ -181,6 +182,7 @@ getMacroArgs macroName latexExpression =
             if name == macroName then
                 args
                     |> List.map latexList2List
+
             else
                 []
 
@@ -197,12 +199,12 @@ getFirstMacroArg macroName latexExpression =
         arg =
             getSimpleMacroArgs macroName latexExpression |> List.head
     in
-        case arg of
-            Just value ->
-                value
+    case arg of
+        Just value ->
+            value
 
-            _ ->
-                ""
+        _ ->
+            ""
 
 
 list2LeadingString list =
@@ -218,12 +220,12 @@ list2LeadingString list =
                 Nothing ->
                     LXString ""
     in
-        case value of
-            LXString str ->
-                str
+    case value of
+        LXString str ->
+            str
 
-            _ ->
-                ""
+        _ ->
+            ""
 
 
 latexList2List latexExpression =
@@ -264,7 +266,7 @@ headLatexExpression list =
                 Nothing ->
                     LatexList []
     in
-        he
+    he
 
 
 valueOfLatexList : LatexExpression -> List LatexExpression

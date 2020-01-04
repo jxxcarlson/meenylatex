@@ -1,4 +1,4 @@
-module StringsV1 exposing (initialText, mathExampleText, macros)
+module StringsV1 exposing (initialText, macros, mathExampleText)
 
 
 macros =
@@ -10,8 +10,6 @@ macros =
 \\newcommand{\\sett}[2]{\\{\\ #1 \\ |\\ #2 \\}}
 \\newcommand{\\id}{\\mathbb{\\,I\\,}}
 """
-
-
 
 
 initialText =

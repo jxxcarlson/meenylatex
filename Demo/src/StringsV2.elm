@@ -1,8 +1,8 @@
-module StringsV2 exposing (initialText, mathExampleText, macros)
+module StringsV2 exposing (initialText, macros, mathExampleText)
 
 
 macros =
-        """
+    """
 \\def\\half{\\small\\frac{1}{2}}
 \\def\\bbR{\\mathbb{R}}
 \\def\\caA{\\mathcal{A}}
@@ -45,8 +45,6 @@ $$
 \\newcommand{\\id}{\\mathbb{\\,I\\,}}
 $$
 """
-
-
 
 
 initialText =

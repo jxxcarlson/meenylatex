@@ -1,4 +1,4 @@
-module Internal.Utility exposing (addLineNumbers, addLineNumbers_, getAt, capitalize)
+module Internal.Utility exposing (addLineNumbers, addLineNumbers_, capitalize, getAt)
 
 {-| From List.Extra
 -}
@@ -8,6 +8,7 @@ getAt : Int -> List a -> Maybe a
 getAt idx xs =
     if idx < 0 then
         Nothing
+
     else
         List.head <| List.drop idx xs
 
@@ -41,13 +42,14 @@ addNumberedLine line data =
         ( k, lines ) =
             data
     in
-        ( k + 1, [ numberedLine (k + 1) line ] ++ lines )
+    ( k + 1, [ numberedLine (k + 1) line ] ++ lines )
 
 
 numberedLine : Int -> String -> String
 numberedLine k line =
     String.padLeft 2 ' ' (String.fromInt k) ++ " " ++ line
 
-capitalize : String -> String 
-capitalize str = 
-  (String.left 1 str |> String.toUpper) ++ (String.dropLeft 1 str)
+
+capitalize : String -> String
+capitalize str =
+    (String.left 1 str |> String.toUpper) ++ String.dropLeft 1 str

@@ -1,4 +1,4 @@
-module Internal.Html exposing (div, img, a, h1, h2, h3)
+module Internal.Html exposing (a, div, h1, h2, h3, img)
 
 
 div : List String -> List String -> String
@@ -10,7 +10,7 @@ div attributes children =
         childrenString =
             children |> String.join "\n"
     in
-        "<div " ++ attributeString ++ " >\n" ++ childrenString ++ "\n</div>"
+    "<div " ++ attributeString ++ " >\n" ++ childrenString ++ "\n</div>"
 
 
 img url imageAttributs =

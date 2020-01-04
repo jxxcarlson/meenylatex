@@ -16,14 +16,16 @@ module Internal.ParserHelpers exposing
     , ws
     )
 
-
-
 import Parser.Advanced exposing (..)
 
-type alias HParser a = Parser.Advanced.Parser Context Problem a
+
+type alias HParser a =
+    Parser.Advanced.Parser Context Problem a
+
 
 type Context
     = Definition String
+
 
 type Problem
     = ExpectingMarker
@@ -33,6 +35,8 @@ type Problem
     | ExpectingRightBracket
     | ExpectingLeftParen
     | ExpectingRightParen
+
+
 
 {- PARSER HELPERS
 
@@ -59,7 +63,6 @@ ws =
 parseUntil : String -> HParser String
 parseUntil marker =
     getChompedString <| chompUntil (Token marker ExpectingMarker)
-
 
 
 {-| chomp to end of the marker and return the
@@ -100,7 +103,7 @@ itemList itemParser =
 
 itemList_ : List a -> HParser a -> HParser (List a)
 itemList_ initialList itemParser =
-   loop initialList (itemListHelper itemParser)
+    loop initialList (itemListHelper itemParser)
 
 
 itemListHelper : HParser a -> List a -> HParser (Step (List a) (List a))

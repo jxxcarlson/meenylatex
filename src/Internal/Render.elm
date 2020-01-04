@@ -1,12 +1,4 @@
-module Internal.Render
-    exposing
-        ( makeTableOfContents
-        , render
-        , renderLatexList
-        , renderString
-        , transformText
-        , renderArg
-        )
+module Internal.Render exposing (makeTableOfContents, render, renderLatexList, renderString, renderArg, transformText)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -17,13 +9,9 @@ module Internal.Render
 
 -}
 
-import Dict
-
-
 -- import List.Extra
 
-import XConfiguration
-import Parser.Advanced
+import Dict
 import Internal.ErrorMessages2 as ErrorMessages
 import Internal.Html as Html
 import Internal.Image as Image exposing (..)
@@ -37,11 +25,13 @@ import Internal.LatexState
         , getCrossReference
         , getDictionaryItem
         )
-import Internal.Parser exposing (LatexExpression(..), LXParser, defaultLatexList, latexList)
+import Internal.Parser exposing (LXParser, LatexExpression(..), defaultLatexList, latexList)
 import Internal.Utility as Utility
 import Parser
+import Parser.Advanced
 import Regex
 import String
+import XConfiguration
 
 
 {-| render a string representing Latex text into a string representing Html text
@@ -66,7 +56,6 @@ parseString parser str =
     Parser.run parser str
 
 
-
 {-| Parse a string, then render it.
 -}
 renderString : LXParser LatexExpression -> LatexState -> String -> String
@@ -81,10 +70,12 @@ renderString parser latexState str =
                     render latexState latexExpression |> postProcess
 
                 Err error ->
-                   --  "Error: " ++ Parser.deadEndsToString error
-                    "Error: " ++ "UUUU"  -- ErrorMessages.renderErrors str error
+                    --  "Error: " ++ Parser.deadEndsToString error
+                    "Error: " ++ "UUUU"
+
+        -- ErrorMessages.renderErrors str error
     in
-        renderOutput
+    renderOutput
 
 
 postProcess : String -> String
@@ -142,8 +133,8 @@ render latexState latexExpression =
         LXString str ->
             str
 
-        NewCommand  commandName numberOfArgs commandBody ->
-          "newCommand: " ++ commandName
+        NewCommand commandName numberOfArgs commandBody ->
+            "newCommand: " ++ commandName
 
         LXError error ->
             List.map ErrorMessages.renderError error |> String.join "; "
@@ -228,6 +219,7 @@ renderDefaultEnvironment : String -> LatexState -> List LatexExpression -> Latex
 renderDefaultEnvironment name latexState args body =
     if List.member name [ "theorem", "proposition", "corollary", "lemma", "definition" ] then
         renderTheoremLikeEnvironment latexState name args body
+
     else
         renderDefaultEnvironment2 latexState name args body
 
@@ -260,10 +252,11 @@ renderTheoremLikeEnvironment latexState name args body =
         tnoString =
             if s1 > 0 then
                 " " ++ String.fromInt s1 ++ "." ++ String.fromInt tno
+
             else
                 " " ++ String.fromInt tno
     in
-        "\n<div class=\"environment\">\n<strong>" ++ name ++ tnoString ++ "</strong>\n<div class=\"italic\">\n" ++ r ++ "\n</div>\n</div>\n"
+    "\n<div class=\"environment\">\n<strong>" ++ name ++ tnoString ++ "</strong>\n<div class=\"italic\">\n" ++ r ++ "\n</div>\n</div>\n"
 
 
 renderDefaultEnvironment2 : LatexState -> String -> List LatexExpression -> LatexExpression -> String
@@ -272,7 +265,7 @@ renderDefaultEnvironment2 latexState name args body =
         r =
             render latexState body
     in
-        "\n<div class=\"environment\">\n<strong>" ++ name ++ "</strong>\n<div>\n" ++ r ++ "\n</div>\n</div>\n"
+    "\n<div class=\"environment\">\n<strong>" ++ name ++ "</strong>\n<div>\n" ++ r ++ "\n</div>\n</div>\n"
 
 
 renderCenterEnvironment latexState body =
@@ -280,7 +273,7 @@ renderCenterEnvironment latexState body =
         r =
             render latexState body
     in
-        "\n<div class=\"center\" >\n" ++ r ++ "\n</div>\n"
+    "\n<div class=\"center\" >\n" ++ r ++ "\n</div>\n"
 
 
 renderCommentEnvironment latexState body =
@@ -299,15 +292,17 @@ renderEquationEnvironment latexState body =
             if eqno > 0 then
                 if s1 > 0 then
                     "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
+
                 else
                     "\\tag{" ++ String.fromInt eqno ++ "}"
+
             else
                 ""
 
         r =
             render latexState body
     in
-        "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
+    "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
 
 
 renderAlignEnvironment latexState body =
@@ -325,12 +320,14 @@ renderAlignEnvironment latexState body =
             if eqno > 0 then
                 if s1 > 0 then
                     "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
+
                 else
                     "\\tag{" ++ String.fromInt eqno ++ "}"
+
             else
                 ""
     in
-        "\n$$\n\\begin{align}\n" ++ addendum ++ r ++ "\n\\end{align}\n$$\n"
+    "\n$$\n\\begin{align}\n" ++ addendum ++ r ++ "\n\\end{align}\n$$\n"
 
 
 renderEqnArray latexState body =
@@ -404,7 +401,7 @@ renderVerbatim latexState body =
         body2 =
             render latexState body |> String.replace ">" "&gt;" |> String.replace "<" "&lt;"
     in
-        "\n<pre class=\"verbatim\">" ++ body2 ++ "</pre>\n"
+    "\n<pre class=\"verbatim\">" ++ body2 ++ "</pre>\n"
 
 
 renderListing latexState body =
@@ -412,7 +409,7 @@ renderListing latexState body =
         text =
             render latexState body
     in
-        "\n<pre class=\"verbatim\">" ++ Utility.addLineNumbers text ++ "</pre>\n"
+    "\n<pre class=\"verbatim\">" ++ Utility.addLineNumbers text ++ "</pre>\n"
 
 
 
@@ -538,9 +535,11 @@ reproduceMacro name latexState optArgs args =
 
 renderMacro : LatexState -> String -> List LatexExpression -> List LatexExpression -> String
 renderMacro latexState name optArgs args =
-    (macroRenderer name) latexState optArgs args
+    macroRenderer name latexState optArgs args
 
-{-| render an argument -}
+
+{-| render an argument
+-}
 renderArg : Int -> LatexState -> List LatexExpression -> String
 renderArg k latexState args =
     render latexState (getElement k args) |> String.trim
@@ -571,10 +570,11 @@ renderBibItem latexState optArgs args body =
         label =
             if List.length optArgs == 1 then
                 renderArg 0 latexState optArgs
+
             else
                 renderArg 0 latexState args
     in
-        " <p id=bibitem:" ++ label ++ ">[" ++ label ++ "] " ++ render latexState body ++ "</p>\n"
+    " <p id=bibitem:" ++ label ++ ">[" ++ label ++ "] " ++ render latexState body ++ "</p>\n"
 
 
 renderBigSkip : LatexState -> List LatexExpression -> String
@@ -606,10 +606,11 @@ renderCite latexState args =
         label =
             if ref /= "" then
                 ref
+
             else
                 label_
     in
-        " <span>[<a href=#bibitem:" ++ label ++ ">" ++ label ++ "</a>]</span>"
+    " <span>[<a href=#bibitem:" ++ label ++ ">" ++ label ++ "</a>]</span>"
 
 
 renderCode : LatexState -> List LatexExpression -> String
@@ -618,15 +619,13 @@ renderCode latexState args =
         arg =
             renderArg 0 latexState args
     in
-        " <span class=\"code\">" ++ arg ++ "</span>"
+    " <span class=\"code\">" ++ arg ++ "</span>"
 
 
 renderInlineComment : LatexState -> List LatexExpression -> String
 renderInlineComment latexState args =
     ""
 
-
-  
 
 renderEllie : LatexState -> List LatexExpression -> String
 renderEllie latexState args =
@@ -646,6 +645,7 @@ renderEllie latexState args =
         title =
             if title_ == "xxx" then
                 "Link to Ellie"
+
             else
                 title_
 
@@ -655,7 +655,7 @@ renderEllie latexState args =
         sandbox =
             " sandbox=\"allow-modals allow-forms allow-popups allow-scripts allow-same-origin\""
     in
-        "<iframe " ++ src ++ style ++ sandbox ++ " ></iframe>\n<center style=\"margin-top: -10px;\"><a href=\"" ++ url ++ "\" target=_blank>" ++ title ++ "</a></center>"
+    "<iframe " ++ src ++ style ++ sandbox ++ " ></iframe>\n<center style=\"margin-top: -10px;\"><a href=\"" ++ url ++ "\" target=_blank>" ++ title ++ "</a></center>"
 
 
 renderEqRef : LatexState -> List LatexExpression -> String
@@ -667,7 +667,7 @@ renderEqRef latexState args =
         ref =
             getCrossReference key latexState
     in
-        "$(" ++ ref ++ ")$"
+    "$(" ++ ref ++ ")$"
 
 
 renderHRef : LatexState -> List LatexExpression -> String
@@ -679,7 +679,7 @@ renderHRef latexState args =
         label =
             renderArg 1 emptyLatexState args
     in
-        "<a href=\"" ++ url ++ "\" target=_blank>" ++ label ++ "</a>"
+    "<a href=\"" ++ url ++ "\" target=_blank>" ++ label ++ "</a>"
 
 
 renderIFrame : LatexState -> List LatexExpression -> String
@@ -697,6 +697,7 @@ renderIFrame latexState args =
         title =
             if title_ == "xxx" then
                 "Link"
+
             else
                 title_
 
@@ -706,6 +707,7 @@ renderIFrame latexState args =
         height =
             if title_ == "xxx" || height_ == "xxx" then
                 "400px"
+
             else
                 height_
 
@@ -715,13 +717,12 @@ renderIFrame latexState args =
         style =
             " style = \"width:100%; height:" ++ height ++ "; border:1; border-radius: 3px; overflow:scroll;\""
     in
-        "<iframe scrolling=\"yes\" " ++ src ++ sandbox ++ style ++ " ></iframe>\n<center style=\"margin-top: 0px;\"><a href=\"" ++ url ++ "\" target=_blank>" ++ title ++ "</a></center>"
+    "<iframe scrolling=\"yes\" " ++ src ++ sandbox ++ style ++ " ></iframe>\n<center style=\"margin-top: 0px;\"><a href=\"" ++ url ++ "\" target=_blank>" ++ title ++ "</a></center>"
 
 
 renderItalic : LatexState -> List LatexExpression -> String
 renderItalic latexState args =
     " <span class=italic>" ++ renderArg 0 latexState args ++ "</span>"
-
 
 
 renderRef : LatexState -> List LatexExpression -> String
@@ -730,7 +731,7 @@ renderRef latexState args =
         key =
             renderArg 0 latexState args
     in
-        getCrossReference key latexState
+    getCrossReference key latexState
 
 
 makeId : String -> String -> String
@@ -764,7 +765,7 @@ idPhrase prefix name =
         compressedName =
             name |> String.toLower |> String.replace " " "_"
     in
-        String.join "" [ "id=\"_", makeId prefix name, "\"" ]
+    String.join "" [ "id=\"_", makeId prefix name, "\"" ]
 
 
 tag : String -> String -> String -> String
@@ -784,10 +785,11 @@ renderSection latexState args =
         label =
             if s1 > 0 then
                 String.fromInt s1 ++ " "
+
             else
                 ""
     in
-        tag "h2" (idPhrase "section" sectionName) (label ++ sectionName)
+    tag "h2" (idPhrase "section" sectionName) (label ++ sectionName)
 
 
 renderSectionStar : LatexState -> List LatexExpression -> String
@@ -796,7 +798,7 @@ renderSectionStar latexState args =
         sectionName =
             renderArg 0 latexState args
     in
-        tag "h2" (idPhrase "section" sectionName) sectionName
+    tag "h2" (idPhrase "section" sectionName) sectionName
 
 
 renderStrong : LatexState -> List LatexExpression -> String
@@ -824,10 +826,11 @@ renderSubsection latexState args =
         label =
             if s1 > 0 then
                 String.fromInt s1 ++ "." ++ String.fromInt s2 ++ " "
+
             else
                 ""
     in
-        tag "h3" (idPhrase "subsection" sectionName) (label ++ sectionName)
+    tag "h3" (idPhrase "subsection" sectionName) (label ++ sectionName)
 
 
 renderSubsectionStar : LatexState -> List LatexExpression -> String
@@ -836,7 +839,7 @@ renderSubsectionStar latexState args =
         sectionName =
             renderArg 0 latexState args
     in
-        tag "h3" (idPhrase "subsection" sectionName) sectionName
+    tag "h3" (idPhrase "subsection" sectionName) sectionName
 
 
 renderSubSubsection : LatexState -> List LatexExpression -> String
@@ -857,10 +860,11 @@ renderSubSubsection latexState args =
         label =
             if s1 > 0 then
                 String.fromInt s1 ++ "." ++ String.fromInt s2 ++ "." ++ String.fromInt s3 ++ " "
+
             else
                 ""
     in
-        tag "h4" (idPhrase "subsubsection" sectionName) (label ++ sectionName)
+    tag "h4" (idPhrase "subsubsection" sectionName) (label ++ sectionName)
 
 
 renderSubSubsectionStar : LatexState -> List LatexExpression -> String
@@ -869,7 +873,7 @@ renderSubSubsectionStar latexState args =
         sectionName =
             renderArg 0 latexState args
     in
-        tag "h4" (idPhrase "subsubsection" sectionName) sectionName
+    tag "h4" (idPhrase "subsubsection" sectionName) sectionName
 
 
 renderTerm : LatexState -> List LatexExpression -> String
@@ -878,7 +882,7 @@ renderTerm latexState args =
         arg =
             renderArg 0 latexState args
     in
-        " <span class=italic>" ++ arg ++ "</span>"
+    " <span class=italic>" ++ arg ++ "</span>"
 
 
 renderXLink : LatexState -> List LatexExpression -> String
@@ -890,7 +894,7 @@ renderXLink latexState args =
         label =
             renderArg 1 latexState args
     in
-        " <a href=\"" ++ XConfiguration.client ++ "##document/" ++ id ++ "\">" ++ label ++ "</a>"
+    " <a href=\"" ++ XConfiguration.client ++ "##document/" ++ id ++ "\">" ++ label ++ "</a>"
 
 
 renderXLinkPublic : LatexState -> List LatexExpression -> String
@@ -902,7 +906,7 @@ renderXLinkPublic latexState args =
         label =
             renderArg 1 latexState args
     in
-        " <a href=\"" ++ XConfiguration.client ++ "##public/" ++ id ++ "\">" ++ label ++ "</a>"
+    " <a href=\"" ++ XConfiguration.client ++ "##public/" ++ id ++ "\">" ++ label ++ "</a>"
 
 
 
@@ -930,6 +934,7 @@ renderTitle latexState list =
         revisionText =
             if revision /= "" then
                 "Last revised " ++ revision
+
             else
                 ""
 
@@ -943,7 +948,7 @@ renderTitle latexState list =
         bodyPart =
             String.join "\n" bodyParts
     in
-        String.join "\n" [ titlePart, bodyPart ]
+    String.join "\n" [ titlePart, bodyPart ]
 
 
 renderTableOfContents : LatexState -> List LatexExpression -> String
@@ -952,7 +957,8 @@ renderTableOfContents latexState list =
         innerPart =
             makeTableOfContents latexState
     in
-        "\n<p class=\"tocTitle\">Table of Contents</p>\n<ul class=\"ListEnvironment\">\n" ++ innerPart ++ "\n</ul>\n"
+    "\n<p class=\"tocTitle\">Table of Contents</p>\n<ul class=\"ListEnvironment\">\n" ++ innerPart ++ "\n</ul>\n"
+
 
 {-| Build a table of contents from the
 current LatexState
@@ -984,7 +990,7 @@ makeTocItem tocItem =
         innerTag =
             ti.label ++ " " ++ tag "a" href ti.name
     in
-        tag "li" classProperty innerTag
+    tag "li" classProperty innerTag
 
 
 sectionPrefix : Int -> String
@@ -1018,14 +1024,17 @@ renderImage latexState args =
         imageAttrs =
             parseImageAttributes attributeString
     in
-        if imageAttrs.float == "left" then
-            Html.div [ imageFloatLeftStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
-        else if imageAttrs.float == "right" then
-            Html.div [ imageFloatRightStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
-        else if imageAttrs.align == "center" then
-            Html.div [ imageCenterStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
-        else
-            "<image src=\"" ++ url ++ "\" " ++ imageAttributes imageAttrs attributeString ++ " >"
+    if imageAttrs.float == "left" then
+        Html.div [ imageFloatLeftStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
+
+    else if imageAttrs.float == "right" then
+        Html.div [ imageFloatRightStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
+
+    else if imageAttrs.align == "center" then
+        Html.div [ imageCenterStyle imageAttrs ] [ Html.img url imageAttrs, "<br>", label ]
+
+    else
+        "<image src=\"" ++ url ++ "\" " ++ imageAttributes imageAttrs attributeString ++ " >"
 
 
 renderImageRef : LatexState -> List LatexExpression -> String
@@ -1043,11 +1052,14 @@ renderImageRef latexState args =
         imageAttrs =
             parseImageAttributes attributeString
     in
-        if imageAttrs.float == "left" then
-            Html.a url (Html.div [ imageFloatLeftStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
-        else if imageAttrs.float == "right" then
-            Html.a url (Html.div [ imageFloatRightStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
-        else if imageAttrs.align == "center" then
-            Html.a url (Html.div [ imageCenterStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
-        else
-            Html.a url (Html.div [ imageCenterStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
+    if imageAttrs.float == "left" then
+        Html.a url (Html.div [ imageFloatLeftStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
+
+    else if imageAttrs.float == "right" then
+        Html.a url (Html.div [ imageFloatRightStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
+
+    else if imageAttrs.align == "center" then
+        Html.a url (Html.div [ imageCenterStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])
+
+    else
+        Html.a url (Html.div [ imageCenterStyle imageAttrs ] [ Html.img imageUrl imageAttrs ])

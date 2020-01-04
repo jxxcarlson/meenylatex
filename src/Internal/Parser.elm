@@ -1,28 +1,8 @@
-module Internal.Parser
-    exposing
-        (  macro
-        , parse
-        , Problem(..)
-        , Context
-        , LXParser
-        , defaultLatexList
-        , latexList
-        , newcommand
-        , endWord
-        , envName
-        , environment
-        , numberOfArgs
-        , word
-        , words
-        , inlineMath
-        , displayMathDollar
-        , displayMathBrackets
-        , texComment
-        , latexExpression
-        , LatexExpression(..)
-        , ws
-        , itemList
-        )
+module Internal.Parser exposing
+    ( LatexExpression(..), macro, parse, defaultLatexList
+    , latexList, endWord, envName, word, latexExpression
+    , Context, LXParser, Problem(..), displayMathBrackets, displayMathDollar, environment, inlineMath, itemList, newcommand, numberOfArgs, texComment, words, ws
+    )
 
 {-| This module is for quickly preparing latex for export.
 
@@ -34,10 +14,12 @@ module Internal.Parser
 
 -}
 
-import Dict
 -- import Internal.ParserHelpers as PH exposing (..)
+
+import Dict
 import Parser.Advanced exposing (..)
 import Set
+
 
 
 {- ELLIE: https://ellie-app.com/pcB5b3BPfa1/0
@@ -46,6 +28,7 @@ import Set
 
 -}
 {- End of Has Math code -}
+
 
 {-| The type for the Abstract syntax tree
 -}
@@ -63,15 +46,17 @@ type LatexExpression
     | LXError (List (DeadEnd Context Problem))
 
 
+type alias LXParser a =
+    Parser.Advanced.Parser Context Problem a
 
-type alias LXParser a = Parser.Advanced.Parser Context Problem a
 
 type Context
     = CArg String
     | List
 
+
 type Problem
-    =  ExpectingEndForInlineMath
+    = ExpectingEndForInlineMath
     | ExpectingEndOfEnvironmentName
     | ExpectingBeginDisplayMathModeDollarSign
     | ExpectingEndDisplayMathModeDollarSign
@@ -106,10 +91,12 @@ type Problem
     | ExpectingEscapedNewcommandAndBrace
     | ExpectingEndWord
 
+
 {-| Transform a string into a list of LatexExpressions
 
     parse "Pythagoras: $a^2 + b^2 = c^2$"
     --> [LXString ("Pythagoras: "),InlineMath ("a^2 + b^2 = c^2")]
+
 -}
 parse : String -> List LatexExpression
 parse text =
@@ -117,20 +104,18 @@ parse text =
         expr =
             Parser.Advanced.run latexList text
     in
-        case expr of
-            Ok (LatexList list) ->
-                list
+    case expr of
+        Ok (LatexList list) ->
+            list
 
-            Err error ->
-                [ LXError error ]
+        Err error ->
+            [ LXError error ]
 
-            _ ->
-                [ LXString "Dude! not great code here." ]
-
-
+        _ ->
+            [ LXString "Dude! not great code here." ]
 
 
-{-| Production: $ LatexList &\Rightarrow LatexExpression^+ $
+{-| Production: $ LatexList &\\Rightarrow LatexExpression^+ $
 -}
 latexList : LXParser LatexExpression
 latexList =
@@ -141,7 +126,7 @@ latexList =
         |> map LatexList
 
 
-{-| Production: $ LatexExpression &\Rightarrow Words\ |\ Comment\ |\ IMath\ |\ DMath\ |\ Macro\ |\ Env $
+{-| Production: $ LatexExpression &\\Rightarrow Words\\ |\\ Comment\\ |\\ IMath\\ |\\ DMath\\ |\\ Macro\\ |\\ Env $
 -}
 latexExpression : LXParser LatexExpression
 latexExpression =
@@ -173,7 +158,9 @@ defaultLatexExpression =
 
 {- WORDS -}
 
+
 {-|
+
     import Parser.Advanced
     LXParser.run words "one two three"
     --> Ok (LXString ("one  two  three"))
@@ -209,13 +196,14 @@ notSpaceOrSpecialCharacters c =
 
 {-| Use `inWord` to parse a word.
 
-   import Parser
+import Parser
 
-   inWord : Char -> Bool
-   inWord c = not (c == ' ')
+inWord : Char -> Bool
+inWord c = not (c == ' ')
 
-   LXParser.run word "this is a test"
-   --> Ok "this"
+LXParser.run word "this is a test"
+--> Ok "this"
+
 -}
 word : Problem -> (Char -> Bool) -> LXParser String
 word problem inWord =
@@ -238,6 +226,7 @@ macroArgWords =
     nonEmptyItemList (word ExpectingValidMacroArgWord inMacroArg)
         |> map (String.join " ")
         |> map LXString
+
 
 inMacroArg : Char -> Bool
 inMacroArg c =
@@ -280,7 +269,9 @@ inTableCellWord c =
 
 {- TEX COMMENTS -}
 
+
 {-|
+
     import LXParser
 
     LXParser.run texComment "% testing ...\n"
@@ -288,6 +279,7 @@ inTableCellWord c =
 
     LXParser.run texComment "% testing ..."
     --> Err [{ col = 14, problem = LXParser.UnexpectedChar, row = 1 }]
+
 -}
 texComment : LXParser LatexExpression
 texComment =
@@ -335,7 +327,9 @@ numberOfArgs_ =
         |= int ExpectingInt InvalidInt
         |. symbol (Token "]" ExpectingRightBracket)
 
+
 {-|
+
     import LXParser
 
     LXParser.run numberOfArgs "[3]"
@@ -383,12 +377,13 @@ optionalArg =
 -}
 arg : LXParser LatexExpression
 arg =
-  inContext (CArg "arg") <|
-    (succeed identity
-        |. symbol (Token "{" ExpectingLeftBrace)
-        |= itemList (oneOf [ macroArgWords, inlineMath spaces, lazy (\_ -> macro spaces) ])
-        |. symbol (Token "}" ExpectingRightBrace)
-        |> map LatexList)
+    inContext (CArg "arg") <|
+        (succeed identity
+            |. symbol (Token "{" ExpectingLeftBrace)
+            |= itemList (oneOf [ macroArgWords, inlineMath spaces, lazy (\_ -> macro spaces) ])
+            |. symbol (Token "}" ExpectingRightBrace)
+            |> map LatexList
+        )
 
 
 macroName : LXParser String
@@ -429,6 +424,7 @@ smacroName =
 {- Latex List and Expression -}
 {- MATHEMATICAL TEXT -}
 
+
 {-|
 
     import LXParser
@@ -436,6 +432,7 @@ smacroName =
 
     LXParser.run (inlineMath ws) "$a^2 + b^2$"
     --> Ok (InlineMath ("a^2 + b^2"))
+
 -}
 inlineMath : LXParser () -> LXParser LatexExpression
 inlineMath wsParser =
@@ -443,6 +440,7 @@ inlineMath wsParser =
         |. symbol (Token "$" ExpectingLeadingDollarSign)
         |= parseToSymbol ExpectingEndForInlineMath "$"
         |. wsParser
+
 
 {-|
 
@@ -460,6 +458,7 @@ displayMathDollar =
         |. symbol (Token "$$" ExpectingBeginDisplayMathModeDollarSign)
         |= parseToSymbol ExpectingEndDisplayMathModeDollarSign "$$"
         |. ws
+
 
 {-|
 
@@ -484,7 +483,7 @@ displayMathBrackets =
 
 
 {-| Capture the name of the environment in
-a \begin{ENV} ... \end{ENV}
+a \\begin{ENV} ... \\end{ENV}
 pair
 -}
 envName : LXParser String
@@ -506,6 +505,7 @@ endWord =
         |. symbol (Token "\\end{" ExpectingEndAndRightBrace)
         |= parseToSymbol ExpectingEndAndRightBrace "}"
         |. ws
+
 
 {-|
 
@@ -529,10 +529,11 @@ environmentOfType envType =
         envKind =
             if List.member envType [ "equation", "align", "eqnarray", "verbatim", "listing", "verse" ] then
                 "passThrough"
+
             else
                 envType
     in
-        environmentParser envKind theEndWord envType
+    environmentParser envKind theEndWord envType
 
 
 
@@ -582,7 +583,7 @@ passed to MathJax for processing and also for the verbatim
 environment.
 -}
 passThroughBody : String -> String -> LXParser LatexExpression
-passThroughBody  endWoord envType =
+passThroughBody endWoord envType =
     --  inContext "passThroughBody" <|
     succeed identity
         |= parseToSymbol ExpectingEndForPassThroughBody endWoord
@@ -715,7 +716,7 @@ nextCell =
 
 
 
--- 
+--
 -- HELPERS
 --
 
@@ -733,7 +734,6 @@ ws =
 parseUntil : Problem -> String -> LXParser String
 parseUntil problem marker =
     getChompedString <| chompUntil (Token marker problem)
-
 
 
 {-| chomp to end of the marker and return the
@@ -774,7 +774,7 @@ itemList itemParser =
 
 itemList_ : List a -> LXParser a -> LXParser (List a)
 itemList_ initialList itemParser =
-   loop initialList (itemListHelper itemParser)
+    loop initialList (itemListHelper itemParser)
 
 
 itemListHelper : LXParser a -> List a -> LXParser (Step (List a) (List a))
@@ -914,4 +914,3 @@ manyHelp p vs =
         , succeed ()
             |> map (\_ -> Done (List.reverse vs))
         ]
-

@@ -1,14 +1,13 @@
 module Internal.ErrorMessages exposing (renderError)
 
 import Dict
-import Parser exposing(DeadEnd, deadEndsToString)
-
+import Parser exposing (DeadEnd, deadEndsToString)
 
 
 renderError : DeadEnd -> String
 renderError error =
     "<div style=\"color: red\">ERROR: "
-        ++ deadEndsToString [error]
+        ++ deadEndsToString [ error ]
         ++ "</div>\n"
         ++ "<div style=\"color: blue\">"
         ++ "explanation_"
@@ -20,10 +19,13 @@ normalizeError str =
     str
         |> reduceBackslashes
         |> String.replace "\"" ""
-        -- |> String.softBreak 50
-        -- |> List.keep 5
-        -- |> String.join " "
-        -- |> (\x -> x ++ " ...")
+
+
+
+-- |> String.softBreak 50
+-- |> List.keep 5
+-- |> String.join " "
+-- |> (\x -> x ++ " ...")
 
 
 reduceBackslashes : String -> String
@@ -95,10 +97,13 @@ handleSecondWord error secondWord =
     in
     if String.startsWith "end{" secondWord then
         "You seem to have a mismatched begin-end pair."
+
     else if String.startsWith "}" secondWord then
         "You need a closing brance -- macro argument?"
+
     else if secondWord == "" && lead == "item" then
         "Is an \"\\item\" misspelled?"
+
     else
         stateProblem error
 
@@ -128,7 +133,7 @@ errorMessage2 error =
     "row: "
         ++ String.fromInt error.row
         ++ "\ncol: "
-        ++ String.fromInt  error.col
+        ++ String.fromInt error.col
         ++ "\nProblem: "
         ++ error.problem
         ++ "\nContext: "

@@ -1,15 +1,4 @@
-module Internal.Differ
-    exposing
-        ( EditRecord
-        , emptyStringRecord
-        , emptyHtmlMsgRecord
-        , isEmpty
-        , init
-        , diff
-        , simpleDifferentialRender
-        , prefixer
-        , update
-        )
+module Internal.Differ exposing (EditRecord, emptyStringRecord, emptyHtmlMsgRecord, isEmpty, init, diff, prefixer, update, simpleDifferentialRender)
 
 {-| This module is used to speed up parsing-rendering by
 comparing the old and new lists of paragraphs, noting the changes,
@@ -25,6 +14,7 @@ then parsing and rendering the changed paragraphs.
 import Html exposing (Html)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
+
 
 
 {- TYPES -}
@@ -94,7 +84,7 @@ init transformer text =
         renderedParagraphs =
             List.map transformer paragraphs
     in
-        EditRecord paragraphs renderedParagraphs emptyLatexState idList Nothing Nothing
+    EditRecord paragraphs renderedParagraphs emptyLatexState idList Nothing Nothing
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -129,7 +119,7 @@ update seed transformer editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-        EditRecord newParagraphs newRenderedParagraphs editRecord.latexState p.idList p.newIdsStart p.newIdsEnd
+    EditRecord newParagraphs newRenderedParagraphs editRecord.latexState p.idList p.newIdsStart p.newIdsEnd
 
 
 {-| Update the renderedList by applying the transformer only to the
@@ -150,7 +140,7 @@ simpleDifferentialRender transformer diffRecord renderedList =
         renderedSuffix =
             takeLast suffixLength renderedList
     in
-        renderedPrefix ++ (List.map transformer diffRecord.middleSegmentInTarget) ++ renderedSuffix
+    renderedPrefix ++ List.map transformer diffRecord.middleSegmentInTarget ++ renderedSuffix
 
 
 {-| Let u and v be two lists of strings. Write them as
@@ -181,18 +171,21 @@ diff u v =
         b =
             if la == List.length u then
                 []
+
             else
                 b_
     in
-        DiffRecord a b x y
+    DiffRecord a b x y
 
 
 commonInitialSegment : List String -> List String -> List String
 commonInitialSegment x y =
     if x == [] then
         []
+
     else if y == [] then
         []
+
     else
         let
             a =
@@ -201,10 +194,11 @@ commonInitialSegment x y =
             b =
                 List.take 1 y
         in
-            if a == b then
-                a ++ commonInitialSegment (List.drop 1 x) (List.drop 1 y)
-            else
-                []
+        if a == b then
+            a ++ commonInitialSegment (List.drop 1 x) (List.drop 1 y)
+
+        else
+            []
 
 
 
@@ -219,7 +213,7 @@ commonTerminalSegment x y =
         cis =
             commonInitialSegment x y
     in
-        commonTerminalSegmentAux cis x y
+    commonTerminalSegmentAux cis x y
 
 
 commonTerminalSegmentAux : List String -> List String -> List String -> List String
@@ -234,7 +228,7 @@ commonTerminalSegmentAux cis x y =
         yy =
             List.drop n y |> List.reverse
     in
-        commonInitialSegment xx yy |> List.reverse
+    commonInitialSegment xx yy |> List.reverse
 
 
 dropLast : Int -> List a -> List a
@@ -294,7 +288,7 @@ differentialRender renderer diffRecord editRecord =
         middleSegmentRendered =
             List.map renderer diffRecord.middleSegmentInTarget
     in
-        initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
+    initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
 
 
 differentialIdList : Int -> DiffRecord -> EditRecord a -> IdListPacket
@@ -327,13 +321,14 @@ differentialIdList seed diffRecord editRecord =
         ( newIdsStart, newIdsEnd ) =
             if nt == 0 then
                 ( Nothing, Nothing )
+
             else
                 ( Just ii, Just (ii + nt - 1) )
     in
-        { idList = idList
-        , newIdsStart = newIdsStart
-        , newIdsEnd = newIdsEnd
-        }
+    { idList = idList
+    , newIdsStart = newIdsStart
+    , newIdsEnd = newIdsEnd
+    }
 
 
 freshIdList : Int -> EditRecord a -> IdListPacket
@@ -343,12 +338,12 @@ freshIdList seed editRecord =
             0
 
         newIdsEnd =
-            (List.length editRecord.paragraphs) - 1
+            List.length editRecord.paragraphs - 1
 
         idList =
             List.range newIdsStart newIdsEnd |> List.map (prefixer seed)
     in
-        { idList = idList
-        , newIdsStart = Just newIdsStart
-        , newIdsEnd = Just newIdsEnd
-        }
+    { idList = idList
+    , newIdsStart = Just newIdsStart
+    , newIdsEnd = Just newIdsEnd
+    }

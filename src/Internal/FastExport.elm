@@ -34,28 +34,31 @@ processParagraph par =
         signature =
             if String.left 6 prefix == "\\begin" then
                 String.dropLeft 7 prefix |> String.dropRight 1
+
             else if String.contains "\\code" par then
                 "code"
+
             else if String.contains "\\href" par then
                 "href"
+
             else
                 String.left 6 prefix
     in
-        case signature of
-            "\\image" ->
-                Export.transform par |> Tuple.first
+    case signature of
+        "\\image" ->
+            Export.transform par |> Tuple.first
 
-            "listin" ->
-                Export.transform par |> Tuple.first
+        "listin" ->
+            Export.transform par |> Tuple.first
 
-            "code" ->
-                Export.transform par |> Tuple.first
+        "code" ->
+            Export.transform par |> Tuple.first
 
-            "href" ->
-                Export.transform par |> Tuple.first
+        "href" ->
+            Export.transform par |> Tuple.first
 
-            "usefor" ->
-                Export.transform par |> Tuple.first
+        "usefor" ->
+            Export.transform par |> Tuple.first
 
-            _ ->
-                Export.transform par |> Tuple.first
+        _ ->
+            Export.transform par |> Tuple.first

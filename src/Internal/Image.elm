@@ -4,6 +4,7 @@ import Internal.Html as Html
 import Internal.KeyValueUtilities as KeyValueUtilities
 
 
+
 {- IMAGE HELPERS -}
 
 
@@ -24,7 +25,7 @@ handleCenterImage url label imageAttr =
         width =
             imageAttr.width
     in
-        Html.div [ imageCenterStyle imageAttr ] [ Html.img url imageAttr, "<br>", label ]
+    Html.div [ imageCenterStyle imageAttr ] [ Html.img url imageAttr, "<br>", label ]
 
 
 floatImageRightDivLeftPart width =
@@ -36,7 +37,7 @@ handleFloatedImageRight url label imageAttr =
         width =
             imageAttr.width
     in
-        floatImageRightDivLeftPart width ++ "<img src=\"" ++ url ++ "\" width=" ++ String.fromInt width ++ "><br>" ++ label ++ "</div>"
+    floatImageRightDivLeftPart width ++ "<img src=\"" ++ url ++ "\" width=" ++ String.fromInt width ++ "><br>" ++ label ++ "</div>"
 
 
 floatImageLeftDivLeftPart width =
@@ -48,7 +49,7 @@ handleFloatedImageLeft url label imageAttr =
         width =
             imageAttr.width
     in
-        floatImageLeftDivLeftPart width ++ "<img src=\"" ++ url ++ "\" width=" ++ String.fromInt width ++ "><br>" ++ label ++ "</div>"
+    floatImageLeftDivLeftPart width ++ "<img src=\"" ++ url ++ "\" width=" ++ String.fromInt width ++ "><br>" ++ label ++ "</div>"
 
 
 type alias ImageAttributes =
@@ -58,10 +59,10 @@ type alias ImageAttributes =
 parseImageAttributes : String -> ImageAttributes
 parseImageAttributes attributeString =
     let
-        kvList = 
+        kvList =
             KeyValueUtilities.getKeyValueList attributeString
 
-        widthValue = 
+        widthValue =
             KeyValueUtilities.getValue "width" kvList |> String.toInt |> Maybe.withDefault 200
 
         floatValue =
@@ -70,7 +71,7 @@ parseImageAttributes attributeString =
         alignValue =
             KeyValueUtilities.getValue "align" kvList
     in
-        ImageAttributes widthValue floatValue alignValue
+    ImageAttributes widthValue floatValue alignValue
 
 
 imageAttributes : ImageAttributes -> String -> String
@@ -82,7 +83,8 @@ imageAttributes imageAttrs attributeString =
         widthElement =
             if widthValue /= "" then
                 "width=" ++ widthValue
+
             else
                 ""
     in
-        widthElement
+    widthElement

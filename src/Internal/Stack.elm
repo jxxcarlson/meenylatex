@@ -9,7 +9,9 @@ empty : Stack a
 empty =
     Stack []
 
+
 {-|
+
      isEmpty empty
      --> True
 
@@ -21,6 +23,7 @@ isEmpty : Stack a -> Bool
 isEmpty (Stack list) =
     List.length list == 0
 
+
 {-|
 
     depth empty
@@ -29,7 +32,7 @@ isEmpty (Stack list) =
     depth (push 1 empty)
     --> 1
 
- -}
+-}
 depth : Stack a -> Int
 depth (Stack list) =
     List.length list
@@ -58,12 +61,9 @@ popElement (Stack list) =
         Just tail ->
             ( Stack tail, List.head list )
 
-{-|
 
-   push 1 empty |> pop
-   empty
-
-
+{-| push 1 empty |> pop
+empty
 -}
 pop : Stack a -> Stack a
 pop (Stack list) =
@@ -74,7 +74,9 @@ pop (Stack list) =
         Just tail ->
             Stack tail
 
+
 {-|
+
     top (push 1 empty)
     --> Just 1
 

@@ -1,10 +1,4 @@
-module Internal.Render2
-    exposing
-        ( makeTableOfContents
-        , render
-        , renderLatexList
-        , renderString
-        )
+module Internal.Render2 exposing (makeTableOfContents, render, renderLatexList, renderString)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -20,7 +14,7 @@ module Internal.Render2
 import Dict
 import Html exposing (Attribute, Html)
 import Html.Attributes as HA
-import Json.Encode
+import Internal.ErrorMessages2 as ErrorMessages
 import Internal.Image as Image exposing (..)
 import Internal.LatexState
     exposing
@@ -32,20 +26,21 @@ import Internal.LatexState
         , getDictionaryItem
         )
 import Internal.ListMachine as ListMachine
+import Internal.Macro as Macro
+import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Internal.Render
-import Internal.ErrorMessages2 as ErrorMessages
 import Internal.Utility as Utility
+import Json.Encode
+import MiniLatex.Render exposing (MathJaxRenderOption(..))
 import Parser exposing (DeadEnd, Problem(..))
 import Regex
 import String
-import Internal.Macro as Macro
-import Internal.Paragraph as Paragraph
-import MiniLatex.Render exposing(MathJaxRenderOption(..))
+
+
 
 -- |> \str -> "\n<p>" ++ str ++ "</p>\n"
 {- FUNCTIONS FOR TESTING THINGS -}
-
 
 
 getElement : Int -> List LatexExpression -> LatexExpression
@@ -57,27 +52,29 @@ parseString parser str =
     Parser.run parser str
 
 
-
 {-| Parse a string, then render it.
 -}
 renderString : MathJaxRenderOption -> LatexState -> String -> Html msg
 renderString mathJaxRenderOption latexState source =
     let
         paragraphs : List String
-        paragraphs = Paragraph.logicalParagraphify source
+        paragraphs =
+            Paragraph.logicalParagraphify source
 
-        parse : String.String -> (String, List LatexExpression)
-        parse paragraph = (paragraph, Internal.Parser.parse paragraph |> spacify)
+        parse : String.String -> ( String, List LatexExpression )
+        parse paragraph =
+            ( paragraph, Internal.Parser.parse paragraph |> spacify )
 
-        render_ : (String, List LatexExpression) -> Html msg
-        render_ (source_, ast) =
-          renderLatexList mathJaxRenderOption source_ latexState ast
-
+        render_ : ( String, List LatexExpression ) -> Html msg
+        render_ ( source_, ast ) =
+            renderLatexList mathJaxRenderOption source_ latexState ast
     in
-        paragraphs
-            |> List.map  parse
-            |> List.map render_
-            |> Html.div []
+    paragraphs
+        |> List.map parse
+        |> List.map render_
+        |> Html.div []
+
+
 
 --renderString : LatexState -> String -> Html msg
 --renderString latexState str =
@@ -89,6 +86,7 @@ renderString mathJaxRenderOption latexState source =
 --        |> List.map (List.map (render latexState))
 --        |> List.map (\x -> Html.div [] x)
 --        |> Html.div []
+
 
 postProcess : String -> String
 postProcess str =
@@ -120,6 +118,7 @@ mathText content =
         [ HA.property "content" (Json.Encode.string content) ]
         []
 
+
 mathTextDelayed : String -> Html msg
 mathTextDelayed content =
     Html.node "math-text-delayed"
@@ -130,7 +129,7 @@ mathTextDelayed content =
 {-| The main rendering function. Compute an Html msg value
 from the current LatexState and a LatexExpression.
 -}
-render : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+render : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 render mathJaxRenderOption source latexState latexExpression =
     case latexExpression of
         Comment str ->
@@ -168,17 +167,22 @@ render mathJaxRenderOption source latexState latexExpression =
         NewCommand commandName numberOfArgs commandBody ->
             Html.span [] []
 
-        LXError  error ->
+        LXError error ->
             let
-              err = ErrorMessages.renderErrors source error
-              errorText = Html.p [HA.style "margin" "0"] [Html.text ((String.join "\n" err.errorText) ++ " ...")]
-              offset = (String.fromInt <| 5*err.markerOffset) ++ "px"
+                err =
+                    ErrorMessages.renderErrors source error
+
+                errorText =
+                    Html.p [ HA.style "margin" "0" ] [ Html.text (String.join "\n" err.errorText ++ " ...") ]
+
+                offset =
+                    (String.fromInt <| 5 * err.markerOffset) ++ "px"
             in
-            Html.div [HA.style  "font" "Courier", HA.style  "font-family" "Mono", HA.style "font-size" "15px"] [
-                 Html.div [ HA.style "color" "blue" , HA.style "margin" "0"] [errorText]
-              ,  Html.div [ HA.style "color" "blue" , HA.style "margin-left" offset] [Html.text "^"]
-              , Html.p [ HA.style "color" "red", HA.style "margin" "0"] [Html.text err.explanation]
-              ]
+            Html.div [ HA.style "font" "Courier", HA.style "font-family" "Mono", HA.style "font-size" "15px" ]
+                [ Html.div [ HA.style "color" "blue", HA.style "margin" "0" ] [ errorText ]
+                , Html.div [ HA.style "color" "blue", HA.style "margin-left" offset ] [ Html.text "^" ]
+                , Html.p [ HA.style "color" "red", HA.style "margin" "0" ] [ Html.text err.explanation ]
+                ]
 
 
 errorReport : DeadEnd -> String
@@ -217,20 +221,26 @@ reportProblem problem =
 
 inlineMathText : MathJaxRenderOption -> String -> Html msg
 inlineMathText mathJaxRenderOption str =
-   case mathJaxRenderOption of
-       Delay -> mathTextDelayed <| "$ " ++ String.trim str ++ " $"
-       NoDelay -> mathText <| "$ " ++ String.trim str ++ " $"
+    case mathJaxRenderOption of
+        Delay ->
+            mathTextDelayed <| "$ " ++ String.trim str ++ " $"
+
+        NoDelay ->
+            mathText <| "$ " ++ String.trim str ++ " $"
 
 
-displayMathText : MathJaxRenderOption ->String -> Html msg
+displayMathText : MathJaxRenderOption -> String -> Html msg
 displayMathText mathJaxRenderOption str =
     let
         str2 =
             String.trim str
     in
     case mathJaxRenderOption of
-        Delay -> mathTextDelayed <| "$$\n" ++ str2 ++ "\n$$"
-        NoDelay -> mathText <| "$$\n" ++ str2 ++ "\n$$"
+        Delay ->
+            mathTextDelayed <| "$$\n" ++ str2 ++ "\n$$"
+
+        NoDelay ->
+            mathText <| "$$\n" ++ str2 ++ "\n$$"
 
 
 
@@ -249,27 +259,30 @@ addSpace internalState =
         c =
             internalState.after |> Maybe.withDefault (LXString "")
     in
-        case ( a, b, c ) of
-            ( Macro _ _ _, LXString str, _ ) ->
-                if List.member (firstChar str) [ ".", ",", "?", "!", ";", ":" ] then
-                    LXString str
-                else
-                    LXString (" " ++ str)
+    case ( a, b, c ) of
+        ( Macro _ _ _, LXString str, _ ) ->
+            if List.member (firstChar str) [ ".", ",", "?", "!", ";", ":" ] then
+                LXString str
 
-            ( InlineMath _, LXString str, _ ) ->
-                if List.member (firstChar str) [ "-", ".", ",", "?", "!", ";", ":" ] then
-                    LXString str
-                else
-                    LXString (" " ++ str)
+            else
+                LXString (" " ++ str)
 
-            ( _, LXString str, _ ) ->
-                if List.member (lastChar str) [ ")", ".", ",", "?", "!", ";", ":" ] then
-                    LXString (str ++ " ")
-                else
-                    LXString str
+        ( InlineMath _, LXString str, _ ) ->
+            if List.member (firstChar str) [ "-", ".", ",", "?", "!", ";", ":" ] then
+                LXString str
 
-            ( _, _, _ ) ->
-                b
+            else
+                LXString (" " ++ str)
+
+        ( _, LXString str, _ ) ->
+            if List.member (lastChar str) [ ")", ".", ",", "?", "!", ";", ":" ] then
+                LXString (str ++ " ")
+
+            else
+                LXString str
+
+        ( _, _, _ ) ->
+            b
 
 
 lastChar =
@@ -322,10 +335,10 @@ renderMacro mathJaxRenderOption source latexState name optArgs args =
                         expr =
                             Macro.expandMacro macro macroDefinition
                     in
-                        render mathJaxRenderOption source latexState expr
+                    render mathJaxRenderOption source latexState expr
 
 
-renderArg : MathJaxRenderOption ->String -> Int -> LatexState -> List LatexExpression -> Html msg
+renderArg : MathJaxRenderOption -> String -> Int -> LatexState -> List LatexExpression -> Html msg
 renderArg mathJaxRenderOption source k latexState args =
     render mathJaxRenderOption source latexState (getElement k args)
 
@@ -336,8 +349,8 @@ reproduceMacro mathJaxRenderOption source name latexState optArgs args =
         renderedArgs =
             renderArgList mathJaxRenderOption source latexState args |> List.map enclose
     in
-        Html.span [ HA.style "color" "red" ]
-            ([ Html.text <| "\\" ++ name ] ++ renderedArgs)
+    Html.span [ HA.style "color" "red" ]
+        ([ Html.text <| "\\" ++ name ] ++ renderedArgs)
 
 
 boost : (x -> z -> output) -> (x -> y -> z -> output)
@@ -373,7 +386,7 @@ renderMacroDict =
         , ( "ndash", \d s x y z -> renderNdash s x z )
         , ( "underscore", \d s x y z -> renderUnderscore s x z )
         , ( "backslash", \d s x y z -> renderBackslash d s x z )
-        , ( "texarg",  \d s x y z -> renderTexArg d s x z )
+        , ( "texarg", \d s x y z -> renderTexArg d s x z )
         , ( "ref", \d s x y z -> renderRef s x z )
         , ( "medskip", \d s x y z -> renderMedSkip s x z )
         , ( "smallskip", \d s x y z -> renderSmallSkip s x z )
@@ -381,7 +394,7 @@ renderMacroDict =
         , ( "section*", \d s x y z -> renderSectionStar s x z )
         , ( "subsection", \d s x y z -> renderSubsection s x z )
         , ( "subsection*", \d s x y z -> renderSubsectionStar s x z )
-        , ( "subsubsection", \d s x y z -> renderSubSubsection  s x z )
+        , ( "subsubsection", \d s x y z -> renderSubSubsection s x z )
         , ( "subsubsection*", \d s x y z -> renderSubSubsectionStar s x z )
         , ( "setcounter", \d s x y z -> renderSetCounter s x z )
         , ( "subheading", \d s x y z -> renderSubheading s x z )
@@ -426,7 +439,7 @@ renderPercent _ latexState args =
     Html.span [] [ Html.text "%" ]
 
 
-renderArgList : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> List (Html msg)
+renderArgList : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List (Html msg)
 renderArgList mathJaxRenderOption source latexState args =
     args |> List.map (render mathJaxRenderOption source latexState)
 
@@ -491,23 +504,24 @@ renderCite _ latexState args =
         label =
             if ref /= "" then
                 ref
+
             else
                 label_
     in
-        Html.strong []
-            [ Html.span [] [ Html.text "[" ]
-            , Html.a [ HA.href ("#bibitem:" ++ label) ] [ Html.text label ]
-            , Html.span [] [ Html.text "] " ]
-            ]
+    Html.strong []
+        [ Html.span [] [ Html.text "[" ]
+        , Html.a [ HA.href ("#bibitem:" ++ label) ] [ Html.text label ]
+        , Html.span [] [ Html.text "] " ]
+        ]
 
 
-renderCode : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> Html msg
+renderCode : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
 renderCode mathJaxRenderOption source latexState args =
     let
         arg =
             renderArg mathJaxRenderOption source 0 latexState args
     in
-        Html.code [] [ oneSpace, arg ]
+    Html.code [] [ oneSpace, arg ]
 
 
 renderEllie : String -> LatexState -> List LatexExpression -> Html msg
@@ -525,10 +539,11 @@ renderEllie _ latexState args =
         title =
             if title_ == "xxx" then
                 "Link to Ellie"
+
             else
                 title_
     in
-        Html.iframe [ HA.src url, HA.width 500, HA.height 600 ] [ Html.text title ]
+    Html.iframe [ HA.src url, HA.width 500, HA.height 600 ] [ Html.text title ]
 
 
 renderIFrame : String -> LatexState -> List LatexExpression -> Html msg
@@ -540,14 +555,14 @@ renderIFrame _ latexState args =
         title =
             Internal.Render.renderArg 1 latexState args
     in
-        Html.iframe
-            [ HA.src url
-            , HA.width 400
-            , HA.height 500
-            , HA.attribute "Content-Type" "application/pdf"
-            , HA.attribute "Content-Disposition" "inline"
-            ]
-            [ Html.text title ]
+    Html.iframe
+        [ HA.src url
+        , HA.width 400
+        , HA.height 500
+        , HA.attribute "Content-Type" "application/pdf"
+        , HA.attribute "Content-Disposition" "inline"
+        ]
+        [ Html.text title ]
 
 
 renderEqRef : String -> LatexState -> List LatexExpression -> Html msg
@@ -559,7 +574,7 @@ renderEqRef source latexState args =
         ref =
             getCrossReference key latexState
     in
-        Html.i [] [ Html.text "(", Html.text ref, Html.text ")" ]
+    Html.i [] [ Html.text "(", Html.text ref, Html.text ")" ]
 
 
 renderHRef : String -> LatexState -> List LatexExpression -> Html msg
@@ -571,7 +586,7 @@ renderHRef source latexState args =
         label =
             Internal.Render.renderArg 1 emptyLatexState args
     in
-        Html.a [ HA.href url, HA.target "_blank" ] [ Html.text label ]
+    Html.a [ HA.href url, HA.target "_blank" ] [ Html.text label ]
 
 
 renderImage : String -> LatexState -> List LatexExpression -> Html msg
@@ -592,30 +607,33 @@ renderImage source latexState args =
         width =
             String.fromInt imageAttrs.width ++ "px"
     in
-        if imageAttrs.float == "left" then
-            Html.div [ HA.style "float" "left" ]
-                [ Html.img [ HA.src url, HA.alt label, HA.style "width" width, HA.style "margin-right" "12px" ] []
-                , Html.br [] []
-                , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] [ Html.text label ]
-                ]
-        else if imageAttrs.float == "right" then
-            Html.div [ HA.style "float" "right" ]
-                [ Html.img [ HA.src url, HA.alt label, HA.style "width" width, HA.style "margin-left" "12px" ] []
-                , Html.br [] []
-                , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] [ Html.text label ]
-                ]
-        else if imageAttrs.align == "center" then
-            Html.div [ HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width ]
-                [ Html.img [ HA.src url, HA.alt label, HA.style "width" width ] []
-                , Html.br [] []
-                , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] [ Html.text label ]
-                ]
-        else
-            Html.div [ HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width ]
-                [ Html.img [ HA.src url, HA.alt label, HA.style "width" width ] []
-                , Html.br [] []
-                , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] [ Html.text label ]
-                ]
+    if imageAttrs.float == "left" then
+        Html.div [ HA.style "float" "left" ]
+            [ Html.img [ HA.src url, HA.alt label, HA.style "width" width, HA.style "margin-right" "12px" ] []
+            , Html.br [] []
+            , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] [ Html.text label ]
+            ]
+
+    else if imageAttrs.float == "right" then
+        Html.div [ HA.style "float" "right" ]
+            [ Html.img [ HA.src url, HA.alt label, HA.style "width" width, HA.style "margin-left" "12px" ] []
+            , Html.br [] []
+            , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] [ Html.text label ]
+            ]
+
+    else if imageAttrs.align == "center" then
+        Html.div [ HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width ]
+            [ Html.img [ HA.src url, HA.alt label, HA.style "width" width ] []
+            , Html.br [] []
+            , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] [ Html.text label ]
+            ]
+
+    else
+        Html.div [ HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width ]
+            [ Html.img [ HA.src url, HA.alt label, HA.style "width" width ] []
+            , Html.br [] []
+            , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] [ Html.text label ]
+            ]
 
 
 renderImageRef : String -> LatexState -> List LatexExpression -> Html msg
@@ -643,18 +661,21 @@ renderImageRef source latexState args =
                     , Html.br [] []
                     , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] []
                     ]
+
             else if imageAttrs.float == "right" then
                 Html.div [ HA.style "float" "right" ]
                     [ Html.img [ HA.src imageUrl, HA.alt "image link", HA.style "width" width, HA.style "margin-left" "12px" ] []
                     , Html.br [] []
                     , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] []
                     ]
+
             else if imageAttrs.align == "center" then
                 Html.div [ HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width ]
                     [ Html.img [ HA.src imageUrl, HA.alt "image link", HA.style "width" width ] []
                     , Html.br [] []
                     , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] []
                     ]
+
             else
                 Html.div [ HA.style "margin-left" "auto", HA.style "margin-right" "auto", HA.style "width" width ]
                     [ Html.img [ HA.src imageUrl, HA.alt "image link", HA.style "width" width ] []
@@ -662,7 +683,7 @@ renderImageRef source latexState args =
                     , Html.div [ HA.style "width" width, HA.style "text-align" "center", HA.style "display" "block" ] []
                     ]
     in
-        Html.a [ HA.href url ] [ theImage ]
+    Html.a [ HA.href url ] [ theImage ]
 
 
 renderIndex : String -> LatexState -> List LatexExpression -> Html msg
@@ -685,10 +706,10 @@ renderTableOfContents _ latexState list =
         innerPart =
             makeTableOfContents latexState
     in
-        Html.div []
-            [ Html.h3 [] [ Html.text "Table of Contents" ]
-            , Html.ul [] innerPart
-            ]
+    Html.div []
+        [ Html.h3 [] [ Html.text "Table of Contents" ]
+        , Html.ul [] innerPart
+        ]
 
 
 renderInnerTableOfContents : String -> LatexState -> List LatexExpression -> Html msg
@@ -703,10 +724,10 @@ renderInnerTableOfContents _ latexState args =
         innerPart =
             makeInnerTableOfContents prefix latexState
     in
-        Html.div []
-            [ Html.h3 [] [ Html.text "Table of Contents" ]
-            , Html.ul [] innerPart
-            ]
+    Html.div []
+        [ Html.h3 [] [ Html.text "Table of Contents" ]
+        , Html.ul [] innerPart
+        ]
 
 
 {-| Build a table of contents from the
@@ -718,7 +739,7 @@ makeTableOfContents latexState =
         toc =
             List.filter (\item -> item.level == 1) latexState.tableOfContents
     in
-        List.foldl (\tocItem acc -> acc ++ [ makeTocItem "" tocItem ]) [] (List.indexedMap Tuple.pair toc)
+    List.foldl (\tocItem acc -> acc ++ [ makeTocItem "" tocItem ]) [] (List.indexedMap Tuple.pair toc)
 
 
 {-| Build a table of contents from the
@@ -730,7 +751,7 @@ makeInnerTableOfContents prefix latexState =
         toc =
             List.filter (\item -> item.level == 2) latexState.tableOfContents
     in
-        List.foldl (\tocItem acc -> acc ++ [ makeTocItem prefix tocItem ]) [] (List.indexedMap Tuple.pair toc)
+    List.foldl (\tocItem acc -> acc ++ [ makeTocItem prefix tocItem ]) [] (List.indexedMap Tuple.pair toc)
 
 
 makeTocItem : String -> ( Int, TocEntry ) -> Html msg
@@ -754,17 +775,17 @@ makeTocItem prefix tocItem =
         href =
             "#" ++ id
     in
-        Html.p
-            [ HA.style "font-size" "14px"
-            , HA.style "padding-bottom" "0px"
-            , HA.style "margin-bottom" "0px"
-            , HA.style "padding-top" "0px"
-            , HA.style "margin-top" "0px"
-            , HA.style "line-height" "20px"
-            ]
-            [ Html.text number
-            , Html.a [ HA.href href ] [ Html.text ti.name ]
-            ]
+    Html.p
+        [ HA.style "font-size" "14px"
+        , HA.style "padding-bottom" "0px"
+        , HA.style "margin-bottom" "0px"
+        , HA.style "padding-top" "0px"
+        , HA.style "margin-top" "0px"
+        , HA.style "line-height" "20px"
+        ]
+        [ Html.text number
+        , Html.a [ HA.href href ] [ Html.text ti.name ]
+        ]
 
 
 makeId : String -> String -> String
@@ -825,12 +846,12 @@ renderUnderscore source latexState args =
     Html.span [] [ Html.text "_" ]
 
 
-renderBackslash : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> Html msg
+renderBackslash : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
 renderBackslash mathJaxRenderOption source latexState args =
     Html.span [] [ Html.text "\\", renderArg mathJaxRenderOption source 0 latexState args ]
 
 
-renderTexArg : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> Html msg
+renderTexArg : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
 renderTexArg mathJaxRenderOption source latexState args =
     Html.span [] [ Html.text "{", renderArg mathJaxRenderOption source 0 latexState args, Html.text "}" ]
 
@@ -841,7 +862,7 @@ renderRef source latexState args =
         key =
             Internal.Render.renderArg 0 latexState args
     in
-        Html.span [] [ Html.text <| getCrossReference key latexState ]
+    Html.span [] [ Html.text <| getCrossReference key latexState ]
 
 
 docUrl : LatexState -> String
@@ -853,7 +874,7 @@ docUrl latexState =
         docId =
             getDictionaryItem "setdocid" latexState
     in
-        client ++ "/" ++ docId
+    client ++ "/" ++ docId
 
 
 idPhrase : String -> String -> String
@@ -862,7 +883,7 @@ idPhrase prefix name =
         compressedName =
             name |> String.toLower |> String.replace " " "_"
     in
-        makeId prefix name
+    makeId prefix name
 
 
 renderSection : String -> LatexState -> List LatexExpression -> Html msg
@@ -877,13 +898,14 @@ renderSection _ latexState args =
         label =
             if s1 > 0 then
                 String.fromInt s1 ++ " "
+
             else
                 ""
 
         ref =
             idPhrase "section" sectionName
     in
-        Html.h2 (headingStyle ref 24) [ Html.text <| label ++ sectionName ]
+    Html.h2 (headingStyle ref 24) [ Html.text <| label ++ sectionName ]
 
 
 
@@ -906,7 +928,7 @@ renderSectionStar _ latexState args =
         ref =
             idPhrase "section" sectionName
     in
-        Html.h2 (headingStyle ref 24) [ Html.text <| sectionName ]
+    Html.h2 (headingStyle ref 24) [ Html.text <| sectionName ]
 
 
 renderSubsection : String -> LatexState -> List LatexExpression -> Html msg
@@ -924,13 +946,14 @@ renderSubsection _ latexState args =
         label =
             if s1 > 0 then
                 String.fromInt s1 ++ "." ++ String.fromInt s2 ++ " "
+
             else
                 ""
 
         ref =
             idPhrase "subsection" sectionName
     in
-        Html.h3 (headingStyle ref 12) [ Html.text <| label ++ sectionName ]
+    Html.h3 (headingStyle ref 12) [ Html.text <| label ++ sectionName ]
 
 
 renderSubsectionStar : String -> LatexState -> List LatexExpression -> Html msg
@@ -942,7 +965,7 @@ renderSubsectionStar _ latexState args =
         ref =
             idPhrase "subsection" sectionName
     in
-        Html.h3 (headingStyle ref 12) [ Html.text <| sectionName ]
+    Html.h3 (headingStyle ref 12) [ Html.text <| sectionName ]
 
 
 renderSubSubsection : String -> LatexState -> List LatexExpression -> Html msg
@@ -963,13 +986,14 @@ renderSubSubsection _ latexState args =
         label =
             if s1 > 0 then
                 String.fromInt s1 ++ "." ++ String.fromInt s2 ++ "." ++ String.fromInt s3 ++ " "
+
             else
                 ""
 
         ref =
             idPhrase "subsubsection" sectionName
     in
-        Html.h4 [ HA.id ref ] [ Html.text <| label ++ sectionName ]
+    Html.h4 [ HA.id ref ] [ Html.text <| label ++ sectionName ]
 
 
 renderSubSubsectionStar : String -> LatexState -> List LatexExpression -> Html msg
@@ -981,7 +1005,7 @@ renderSubSubsectionStar _ latexState args =
         ref =
             idPhrase "subsubsection" sectionName
     in
-        Html.h4 [ HA.id ref ] [ Html.text <| sectionName ]
+    Html.h4 [ HA.id ref ] [ Html.text <| sectionName ]
 
 
 renderDocumentTitle : String -> LatexState -> List LatexExpression -> Html msg
@@ -1005,6 +1029,7 @@ renderDocumentTitle _ latexState list =
         revisionText =
             if revision /= "" then
                 "Last revised " ++ revision
+
             else
                 ""
 
@@ -1019,7 +1044,7 @@ renderDocumentTitle _ latexState list =
         bodyPart =
             Html.ul [] bodyParts
     in
-        Html.div [] [ titlePart, bodyPart ]
+    Html.div [] [ titlePart, bodyPart ]
 
 
 renderSetCounter : String -> LatexState -> List LatexExpression -> Html msg
@@ -1033,7 +1058,7 @@ renderSubheading _ latexState args =
         title =
             Internal.Render.renderArg 0 latexState args
     in
-        Html.p [ HA.style "font-weight" "bold", HA.style "margin-bottom" "0", HA.style "margin-left" "-2px" ] [ Html.text <| title ]
+    Html.p [ HA.style "font-weight" "bold", HA.style "margin-bottom" "0", HA.style "margin-left" "-2px" ] [ Html.text <| title ]
 
 
 renderMakeTitle : String -> LatexState -> List LatexExpression -> Html msg
@@ -1057,6 +1082,7 @@ renderMakeTitle source latexState list =
         revisionText =
             if revision /= "" then
                 "Last revised " ++ revision
+
             else
                 ""
 
@@ -1068,8 +1094,8 @@ renderMakeTitle source latexState list =
                 |> List.filter (\x -> x /= "")
                 |> List.map (\x -> Html.div [] [ Html.text x ])
     in
-        Html.div []
-            ([ titlePart ] ++ bodyParts)
+    Html.div []
+        ([ titlePart ] ++ bodyParts)
 
 
 renderTitle : LatexState -> List LatexExpression -> Html msg
@@ -1118,7 +1144,7 @@ renderRed _ latexState args =
         arg =
             Internal.Render.renderArg 0 latexState args
     in
-        Html.span [ HA.style "color" "red" ] [ Html.text <| arg ]
+    Html.span [ HA.style "color" "red" ] [ Html.text <| arg ]
 
 
 renderBlue : String -> LatexState -> List LatexExpression -> Html msg
@@ -1127,7 +1153,7 @@ renderBlue _ latexState args =
         arg =
             Internal.Render.renderArg 0 latexState args
     in
-        Html.span [ HA.style "color" "blue" ] [ Html.text <| arg ]
+    Html.span [ HA.style "color" "blue" ] [ Html.text <| arg ]
 
 
 renderHighlighted : String -> LatexState -> List LatexExpression -> Html msg
@@ -1136,7 +1162,7 @@ renderHighlighted _ latexState args =
         arg =
             Internal.Render.renderArg 0 latexState args
     in
-        Html.span [ HA.style "background-color" "yellow" ] [ Html.text <| arg ]
+    Html.span [ HA.style "background-color" "yellow" ] [ Html.text <| arg ]
 
 
 renderStrikeThrough : String -> LatexState -> List LatexExpression -> Html msg
@@ -1145,7 +1171,7 @@ renderStrikeThrough _ latexState args =
         arg =
             Internal.Render.renderArg 0 latexState args
     in
-        Html.span [ HA.style "text-decoration" "line-through" ] [ Html.text <| arg ]
+    Html.span [ HA.style "text-decoration" "line-through" ] [ Html.text <| arg ]
 
 
 renderTerm : String -> LatexState -> List LatexExpression -> Html msg
@@ -1154,7 +1180,7 @@ renderTerm _ latexState args =
         arg =
             Internal.Render.renderArg 0 latexState args
     in
-        Html.i [] [ Html.text <| arg ]
+    Html.i [] [ Html.text <| arg ]
 
 
 renderXLink : String -> LatexState -> List LatexExpression -> Html msg
@@ -1169,7 +1195,7 @@ renderXLink _ latexState args =
         label =
             Internal.Render.renderArg 1 latexState args
     in
-        Html.a [ HA.href ref ] [ Html.text label ]
+    Html.a [ HA.href ref ] [ Html.text label ]
 
 
 renderXLinkPublic : String -> LatexState -> List LatexExpression -> Html msg
@@ -1184,7 +1210,7 @@ renderXLinkPublic _ latexState args =
         label =
             Internal.Render.renderArg 1 latexState args
     in
-        Html.a [ HA.href ref ] [ Html.text label ]
+    Html.a [ HA.href ref ] [ Html.text label ]
 
 
 
@@ -1203,7 +1229,7 @@ renderSMacro : MathJaxRenderOption -> String -> LatexState -> String -> List Lat
 renderSMacro mathJaxRenderOption source latexState name optArgs args le =
     case Dict.get name renderSMacroDict of
         Just f ->
-            f mathJaxRenderOption source  latexState optArgs args le
+            f mathJaxRenderOption source latexState optArgs args le
 
         Nothing ->
             reproduceSMacro mathJaxRenderOption source name latexState optArgs args le
@@ -1221,26 +1247,27 @@ reproduceSMacro mathJaxRenderOption source name latexState optArgs args le =
         renderedLe =
             render mathJaxRenderOption source latexState le |> enclose
     in
-        Html.span []
-            ([ Html.text <| "\\" ++ name ] ++ renderedOptArgs ++ renderedArgs ++ [ renderedLe ])
+    Html.span []
+        ([ Html.text <| "\\" ++ name ] ++ renderedOptArgs ++ renderedArgs ++ [ renderedLe ])
 
 
-renderBibItem : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderBibItem : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
 renderBibItem mathJaxRenderOption source latexState optArgs args body =
     let
         label =
             if List.length optArgs == 1 then
                 Internal.Render.renderArg 0 latexState optArgs
+
             else
                 Internal.Render.renderArg 0 latexState args
 
         id =
             "bibitem:" ++ label
     in
-        Html.div []
-            [ Html.strong [ HA.id id, HA.style "margin-right" "10px" ] [ Html.text <| "[" ++ label ++ "]" ]
-            , Html.span [] [ render mathJaxRenderOption source latexState body ]
-            ]
+    Html.div []
+        [ Html.strong [ HA.id id, HA.style "margin-right" "10px" ] [ Html.text <| "[" ++ label ++ "]" ]
+        , Html.span [] [ render mathJaxRenderOption source latexState body ]
+        ]
 
 
 
@@ -1248,7 +1275,7 @@ renderBibItem mathJaxRenderOption source latexState optArgs args body =
 {- LISTS -}
 
 
-renderItem : MathJaxRenderOption ->String -> LatexState -> Int -> LatexExpression -> Html msg
+renderItem : MathJaxRenderOption -> String -> LatexState -> Int -> LatexExpression -> Html msg
 renderItem mathJaxRenderOption source latexState level latexExpression =
     Html.li [ HA.style "margin-bottom" "8px" ] [ render mathJaxRenderOption source latexState latexExpression ]
 
@@ -1258,16 +1285,15 @@ renderItem mathJaxRenderOption source latexState level latexExpression =
 {- BEGIN ENVIRONMENTS -}
 
 
-renderEnvironment : MathJaxRenderOption ->String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderEnvironment : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
 renderEnvironment mathJaxRenderOption source latexState name args body =
     environmentRenderer mathJaxRenderOption source name latexState args body
 
 
-environmentRenderer : MathJaxRenderOption ->String -> String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+environmentRenderer : MathJaxRenderOption -> String -> String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 environmentRenderer mathJaxRenderOption source name =
     case Dict.get name renderEnvironmentDict of
         Just f ->
-
             f mathJaxRenderOption source
 
         Nothing ->
@@ -1284,10 +1310,11 @@ theoremLikeEnvironments =
     ]
 
 
-renderDefaultEnvironment : MathJaxRenderOption ->String -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment : MathJaxRenderOption -> String -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
 renderDefaultEnvironment mathJaxRenderOption source name latexState args body =
     if List.member name theoremLikeEnvironments then
         renderTheoremLikeEnvironment mathJaxRenderOption source latexState name args body
+
     else
         renderDefaultEnvironment2 mathJaxRenderOption source latexState (Utility.capitalize name) args body
 
@@ -1310,25 +1337,26 @@ renderTheoremLikeEnvironment mathJaxRenderOption source latexState name args bod
         tnoString =
             if s1 > 0 then
                 " " ++ String.fromInt s1 ++ "." ++ String.fromInt tno
+
             else
                 " " ++ String.fromInt tno
     in
-        Html.div [ HA.class "environment" ]
-            [ Html.strong [] [ Html.text (Utility.capitalize name ++ tnoString) ]
-            , Html.div [ HA.class "italic" ] [ r ]
-            ]
+    Html.div [ HA.class "environment" ]
+        [ Html.strong [] [ Html.text (Utility.capitalize name ++ tnoString) ]
+        , Html.div [ HA.class "italic" ] [ r ]
+        ]
 
 
-renderDefaultEnvironment2 :  MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment2 : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
 renderDefaultEnvironment2 mathJaxRenderOption source latexState name args body =
     let
         r =
             render mathJaxRenderOption source latexState body
     in
-        Html.div [ HA.class "environment" ]
-            [ Html.strong [] [ Html.text name ]
-            , Html.div [] [ r ]
-            ]
+    Html.div [ HA.class "environment" ]
+        [ Html.strong [] [ Html.text name ]
+        , Html.div [] [ r ]
+        ]
 
 
 
@@ -1338,8 +1366,7 @@ renderDefaultEnvironment2 mathJaxRenderOption source latexState name args body =
 renderEnvironmentDict : Dict.Dict String (MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 renderEnvironmentDict =
     Dict.fromList
-        [
-          ( "align", \d s x a y -> renderAlignEnvironment d s x y )
+        [ ( "align", \d s x a y -> renderAlignEnvironment d s x y )
         , ( "center", \d s x a y -> renderCenterEnvironment d s x y )
         , ( "comment", \d s x a y -> renderCommentEnvironment s x y )
         , ( "defitem", \d s x a y -> renderDefItemEnvironment d s x a y )
@@ -1360,7 +1387,7 @@ renderEnvironmentDict =
         ]
 
 
-renderAlignEnvironment : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderAlignEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderAlignEnvironment mathJaxRenderOption source latexState body =
     let
         r =
@@ -1376,24 +1403,26 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
             if eqno > 0 then
                 if s1 > 0 then
                     "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
+
                 else
                     "\\tag{" ++ String.fromInt eqno ++ "}"
+
             else
                 ""
 
         content =
             "\n\\begin{align*}\n" ++ addendum ++ r ++ "\n\\end{align*}\n"
     in
-        displayMathText mathJaxRenderOption content
+    displayMathText mathJaxRenderOption content
 
 
-renderCenterEnvironment : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderCenterEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderCenterEnvironment mathJaxRenderOption source latexState body =
     let
         r =
             render mathJaxRenderOption source latexState body
     in
-        Html.div [ HA.class "center" ] [ r ]
+    Html.div [ HA.class "center" ] [ r ]
 
 
 renderCommentEnvironment : String -> LatexState -> LatexExpression -> Html msg
@@ -1401,12 +1430,12 @@ renderCommentEnvironment source latexState body =
     Html.div [] []
 
 
-renderEnumerate : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderEnumerate : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderEnumerate mathJaxRenderOption source latexState body =
     Html.ol [ HA.style "margin-top" "0px" ] [ render mathJaxRenderOption source latexState body ]
 
 
-renderDefItemEnvironment : MathJaxRenderOption ->String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefItemEnvironment : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
 renderDefItemEnvironment mathJaxRenderOption source latexState optArgs body =
     Html.div []
         [ Html.strong [] [ Html.text <| Internal.Render.renderArg 0 latexState optArgs ]
@@ -1416,7 +1445,7 @@ renderDefItemEnvironment mathJaxRenderOption source latexState optArgs body =
 
 {-| XXX
 -}
-renderEqnArray : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderEqnArray : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderEqnArray mathJaxRenderOption source latexState body =
     displayMathText mathJaxRenderOption (Internal.Render.render latexState body)
 
@@ -1434,27 +1463,29 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
             if eqno > 0 then
                 if s1 > 0 then
                     "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
+
                 else
                     "\\tag{" ++ String.fromInt eqno ++ "}"
+
             else
                 ""
 
         r =
             Internal.Render.render latexState body
     in
-        displayMathText mathJaxRenderOption <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
+    displayMathText mathJaxRenderOption <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
 
 
 
 -- "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
 
 
-renderIndentEnvironment : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderIndentEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderIndentEnvironment mathJaxRenderOption source latexState body =
     Html.div [ HA.style "margin-left" "2em" ] [ render mathJaxRenderOption source latexState body ]
 
 
-renderItemize : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderItemize : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderItemize mathJaxRenderOption source latexState body =
     Html.ul [ HA.style "margin-top" "0px" ] [ render mathJaxRenderOption source latexState body ]
 
@@ -1468,7 +1499,7 @@ renderListing source latexState body =
         lines =
             Utility.addLineNumbers text
     in
-        Html.pre [ HA.class "verbatim" ] [ Html.text lines ]
+    Html.pre [ HA.class "verbatim" ] [ Html.text lines ]
 
 
 renderMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
@@ -1476,7 +1507,7 @@ renderMacros mathJaxRenderOption source latexState body =
     displayMathText mathJaxRenderOption (Internal.Render.render latexState body)
 
 
-renderQuotation : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderQuotation : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderQuotation mathJaxRenderOption source latexState body =
     Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render mathJaxRenderOption source latexState body ]
 
@@ -1527,7 +1558,7 @@ renderTableBody mathJaxRenderOption source body =
             Html.tbody [] []
 
 
-renderTheBibliography : MathJaxRenderOption ->String -> LatexState -> LatexExpression -> Html msg
+renderTheBibliography : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderTheBibliography mathJaxRenderOption source latexState body =
     Html.div [] [ render mathJaxRenderOption source latexState body ]
 
@@ -1543,7 +1574,7 @@ renderVerbatim source latexState body =
         body2 =
             Internal.Render.render latexState body
     in
-        Html.pre [ HA.style "margin-top" "-14px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
+    Html.pre [ HA.style "margin-top" "-14px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 renderVerse : String -> LatexState -> LatexExpression -> Html msg

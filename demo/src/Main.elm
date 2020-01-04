@@ -61,7 +61,7 @@ debounceConfig =
 
 
 type alias Flags =
-    {seed: Int
+    { seed : Int
     , width : Int
     , height : Int
     }
@@ -72,8 +72,8 @@ init flags =
     let
         editRecord =
             MiniLatex.Edit.init NoDelay flags.seed initialText
---            MiniLatex.Edit.init NoDelay model.seed (prependMacros initialMacroText initialText)
 
+        --            MiniLatex.Edit.init NoDelay model.seed (prependMacros initialMacroText initialText)
         model =
             { sourceText = initialText
             , macroText = initialMacroText

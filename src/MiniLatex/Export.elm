@@ -9,21 +9,18 @@ module MiniLatex.Export exposing (transform)
 
 -}
 
-import Dict
-
-
 -- import List.Extra
 
-import Internal.ParserTools as ParserTools
+import Dict
 import Internal.ErrorMessages2 as ErrorMessages
 import Internal.Image as Image
 import Internal.JoinStrings as JoinStrings
 import Internal.Paragraph
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
-import Internal.Utility as Utility
-import String
-import Maybe.Extra
 import Internal.ParserTools as PT
+import Internal.Utility as Utility
+import Maybe.Extra
+import String
 
 
 table =
@@ -59,7 +56,7 @@ transform str =
                 |> List.map (ParserTools.macroValue_ "image")
                 |> Maybe.Extra.values
     in
-        ( latex, imageUrlList )
+    ( latex, imageUrlList )
 
 
 foo str =
@@ -153,12 +150,12 @@ renderSpecialArgList args =
         renderedTail =
             Maybe.map renderCleanedArgList tail
     in
-        case ( renderedHead, renderedTail ) of
-            ( Just h, Just t ) ->
-                "{" ++ h ++ "}" ++ t
+    case ( renderedHead, renderedTail ) of
+        ( Just h, Just t ) ->
+            "{" ++ h ++ "}" ++ t
 
-            _ ->
-                ""
+        _ ->
+            ""
 
 
 fixBadChars : String -> String
@@ -199,7 +196,7 @@ renderDefaultEnvironment name args body =
         slimBody =
             String.trim <| render body
     in
-        "\\begin{" ++ name ++ "}" ++ renderArgList args ++ "\n" ++ slimBody ++ "\n\\end{" ++ name ++ "}\n"
+    "\\begin{" ++ name ++ "}" ++ renderArgList args ++ "\n" ++ slimBody ++ "\n\\end{" ++ name ++ "}\n"
 
 
 renderEnvironmentDict : Dict.Dict String (List LatexExpression -> LatexExpression -> String)
@@ -217,7 +214,7 @@ renderListing body =
         text =
             render body
     in
-        "\n\\begin{verbatim}\n" ++ Utility.addLineNumbers text ++ "\n\\end{verbatim}\n"
+    "\n\\begin{verbatim}\n" ++ Utility.addLineNumbers text ++ "\n\\end{verbatim}\n"
 
 
 renderTheBibliography body =
@@ -231,15 +228,15 @@ renderTabular args body =
         format =
             renderArg 0 args
     in
-        case body of
-            LatexList rows ->
-                rows
-                    |> List.map renderRow
-                    |> String.join "\n"
-                    |> (\x -> "\\begin{tabular}{" ++ format ++ "}\n" ++ x ++ "\n\\end{tabular}\n")
+    case body of
+        LatexList rows ->
+            rows
+                |> List.map renderRow
+                |> String.join "\n"
+                |> (\x -> "\\begin{tabular}{" ++ format ++ "}\n" ++ x ++ "\n\\end{tabular}\n")
 
-            _ ->
-                "renderTabular: error"
+        _ ->
+            "renderTabular: error"
 
 
 renderRow : LatexExpression -> String
@@ -307,7 +304,7 @@ renderSetCounter optArgs args =
         argValue =
             PT.getDecrementedSetCounterArg args |> Maybe.withDefault "0"
     in
-        " \\setcounter{section}" ++ "{" ++ argValue ++ "}"
+    " \\setcounter{section}" ++ "{" ++ argValue ++ "}"
 
 
 
@@ -330,7 +327,7 @@ getExportUrl url =
         lastPart =
             parts |> List.drop (n - 1) |> List.head |> Maybe.withDefault "xxx"
     in
-        "image/" ++ lastPart
+    "image/" ++ lastPart
 
 
 renderImage : List LatexExpression -> String
@@ -355,20 +352,20 @@ renderImage args =
             imageAttrs.width |> toFloat |> (\x -> 4.5 * x)
 
         width =
-            (String.fromFloat (3.0 * width_ / 1400.0)) ++ "in"
+            String.fromFloat (3.0 * width_ / 1400.0) ++ "in"
     in
-        case ( imageAttrs.float, imageAttrs.align ) of
-            ( "left", _ ) ->
-                imageFloatLeft exportUrl label width
+    case ( imageAttrs.float, imageAttrs.align ) of
+        ( "left", _ ) ->
+            imageFloatLeft exportUrl label width
 
-            ( "right", _ ) ->
-                imageFloatRight exportUrl label width
+        ( "right", _ ) ->
+            imageFloatRight exportUrl label width
 
-            ( _, "center" ) ->
-                imageAlignCenter exportUrl label width
+        ( _, "center" ) ->
+            imageAlignCenter exportUrl label width
 
-            ( _, _ ) ->
-                imageAlignCenter exportUrl label width
+        ( _, _ ) ->
+            imageAlignCenter exportUrl label width
 
 
 imageFloatLeft exportUrl label width =

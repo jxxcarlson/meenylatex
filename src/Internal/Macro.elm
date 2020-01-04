@@ -1,13 +1,12 @@
-module Internal.Macro exposing(expandMacro)
+module Internal.Macro exposing (expandMacro)
 
-import Internal.Parser exposing(LatexExpression(..))
-import Internal.LatexState exposing(emptyLatexState)
+import Internal.LatexState exposing (emptyLatexState)
+import Internal.Parser exposing (LatexExpression(..))
 import Internal.Render
 import Parser
 
-{-|
 
-EXAMPLE
+{-| EXAMPLE
 
     import Parser exposing(run)
     import Internal.Parser exposing(..)
@@ -30,14 +29,17 @@ EXAMPLE
 
 -}
 expandMacro : LatexExpression -> LatexExpression -> LatexExpression
-expandMacro  macro macroDef = 
-  case expandMacro_  macro macroDef of 
-    NewCommand _ _ latexList -> latexList
-    _ -> LXString "error"
-    
+expandMacro macro macroDef =
+    case expandMacro_ macro macroDef of
+        NewCommand _ _ latexList ->
+            latexList
 
-expandMacro_ :  LatexExpression -> LatexExpression -> LatexExpression
-expandMacro_  macro macroDef =
+        _ ->
+            LXString "error"
+
+
+expandMacro_ : LatexExpression -> LatexExpression -> LatexExpression
+expandMacro_ macro macroDef =
     case macroDef of
         Comment str ->
             Comment str
@@ -46,7 +48,7 @@ expandMacro_  macro macroDef =
             Macro name optArgs (List.map (expandMacro_ macro) args)
 
         SMacro name optArgs args le ->
-             SMacro name optArgs (List.map (expandMacro_ macro) args) (expandMacro_ macro le) 
+            SMacro name optArgs (List.map (expandMacro_ macro) args) (expandMacro_ macro le)
 
         Item level latexExpr ->
             Item level (expandMacro_ macro latexExpr)
@@ -67,44 +69,57 @@ expandMacro_  macro macroDef =
             LXString (substitute macro str)
 
         NewCommand commandName numberOfArgs commandBody ->
-          NewCommand commandName numberOfArgs (expandMacro_  macro commandBody)
+            NewCommand commandName numberOfArgs (expandMacro_ macro commandBody)
 
         LXError error ->
             LXError error
 
 
+
 -- SUBSTITUTION
 
-substitute : LatexExpression -> String -> String 
-substitute macro str = 
-  substituteMany (nArgs macro) macro str 
+
+substitute : LatexExpression -> String -> String
+substitute macro str =
+    substituteMany (nArgs macro) macro str
 
 
-substituteOne : Int -> LatexExpression -> String -> String 
-substituteOne k macro str = 
-  let 
-    arg =  renderArg k macro
-    hashK = "#" ++ String.fromInt k
-  in
+substituteOne : Int -> LatexExpression -> String -> String
+substituteOne k macro str =
+    let
+        arg =
+            renderArg k macro
+
+        hashK =
+            "#" ++ String.fromInt k
+    in
     String.replace hashK arg str
 
-nArgs : LatexExpression -> Int 
-nArgs latexExpression =  
-  case latexExpression of 
-    Macro name optArgs args -> List.length args 
-    _ -> 0  
 
-substituteMany : Int -> LatexExpression -> String -> String 
-substituteMany k macro str = 
-  if k == 0 then
-    str 
-  else 
-    substituteMany (k - 1) macro (substituteOne k macro str)
+nArgs : LatexExpression -> Int
+nArgs latexExpression =
+    case latexExpression of
+        Macro name optArgs args ->
+            List.length args
+
+        _ ->
+            0
+
+
+substituteMany : Int -> LatexExpression -> String -> String
+substituteMany k macro str =
+    if k == 0 then
+        str
+
+    else
+        substituteMany (k - 1) macro (substituteOne k macro str)
+
 
 renderArg : Int -> LatexExpression -> String
-renderArg k macro = 
-  case macro of 
-    Macro name optArgs args ->
-          Internal.Render.renderArg (k-1) emptyLatexState args
-    _ -> ""
+renderArg k macro =
+    case macro of
+        Macro name optArgs args ->
+            Internal.Render.renderArg (k - 1) emptyLatexState args
 
+        _ ->
+            ""

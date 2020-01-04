@@ -1,29 +1,35 @@
 module Internal.LatexState exposing (..)
 
 import Dict
-import Internal.Parser exposing(LatexExpression)
+import Internal.Parser exposing (LatexExpression)
+
+
 
 {- TYPES AND DEFAULT VALJUES -}
-
 
 
 type alias Counters =
     Dict.Dict String Int
 
+
 type alias CrossReferences =
     Dict.Dict String String
+
 
 type alias TableOfContents =
     List TocEntry
 
+
 type alias TocEntry =
     { name : String, label : String, level : Int }
+
 
 type alias Dictionary =
     Dict.Dict String String
 
+
 type alias MacroDictionary =
-  Dict.Dict String LatexExpression
+    Dict.Dict String LatexExpression
 
 
 emptyDict : Dict.Dict k v
@@ -81,6 +87,7 @@ getDictionaryItem key latexState =
         Nothing ->
             ""
 
+
 setDictionaryItem : String -> String -> LatexState -> LatexState
 setDictionaryItem key value latexState =
     let
@@ -128,9 +135,10 @@ setCrossReference label value latexState =
     in
     { latexState | crossReferences = newCrossReferences }
 
+
 setMacroDefinition : String -> LatexExpression -> LatexState -> LatexState
-setMacroDefinition macroName macroDefinition latexState  =
-  let
+setMacroDefinition macroName macroDefinition latexState =
+    let
         macroDictionary =
             latexState.macroDictionary
 
@@ -138,7 +146,7 @@ setMacroDefinition macroName macroDefinition latexState  =
             Dict.insert macroName macroDefinition macroDictionary
     in
     { latexState | macroDictionary = newMacroDictionary }
-  
+
 
 initialCounters : Dict.Dict String number
 initialCounters =

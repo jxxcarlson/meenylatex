@@ -1,13 +1,7 @@
-module Internal.StateReducerHelpers2 exposing(..)
-
-import Internal.Parser as LXParser exposing(LatexExpression(..))
-import Internal.Utility as Utility
-import Parser as P 
-import Internal.ParserHelpers as ParserHelpers
-import Parser.Advanced
+module Internal.StateReducerHelpers2 exposing (..)
 
 import Internal.LatexState
-    exposing 
+    exposing
         ( Counters
         , CrossReferences
         , LatexState
@@ -18,23 +12,28 @@ import Internal.LatexState
         , setDictionaryItem
         , updateCounter
         )
-
+import Internal.Parser as LXParser exposing (LatexExpression(..))
+import Internal.ParserHelpers as ParserHelpers
 import Internal.ParserTools as PT
+import Internal.Utility as Utility
+import Parser as P
+import Parser.Advanced
 
-updateSectionNumber : (List LatexExpression) -> LatexState -> LatexState
+
+updateSectionNumber : List LatexExpression -> LatexState -> LatexState
 updateSectionNumber macroArgs latexState =
     let
         label =
             getCounter "s1" latexState |> (\x -> x + 1) |> String.fromInt
     in
-        latexState
-            |> incrementCounter "s1"
-            |> updateCounter "s2" 0
-            |> updateCounter "s3" 0
-            |> addSection (PT.unpackString macroArgs) label 1
+    latexState
+        |> incrementCounter "s1"
+        |> updateCounter "s2" 0
+        |> updateCounter "s3" 0
+        |> addSection (PT.unpackString macroArgs) label 1
 
 
-updateSubsectionNumber : (List LatexExpression) -> LatexState -> LatexState
+updateSubsectionNumber : List LatexExpression -> LatexState -> LatexState
 updateSubsectionNumber macroArgs latexState =
     let
         s1 =
@@ -46,13 +45,13 @@ updateSubsectionNumber macroArgs latexState =
         label =
             s1 ++ "." ++ s2
     in
-        latexState
-            |> incrementCounter "s2"
-            |> updateCounter "s3" 0
-            |> addSection (PT.unpackString macroArgs) label 2
+    latexState
+        |> incrementCounter "s2"
+        |> updateCounter "s3" 0
+        |> addSection (PT.unpackString macroArgs) label 2
 
 
-updateSubsubsectionNumber : (List LatexExpression) -> LatexState -> LatexState
+updateSubsubsectionNumber : List LatexExpression -> LatexState -> LatexState
 updateSubsubsectionNumber macroArgs latexState =
     let
         s1 =
@@ -67,11 +66,12 @@ updateSubsubsectionNumber macroArgs latexState =
         label =
             s1 ++ "." ++ s2 ++ "." ++ s3
     in
-        latexState
-            |> incrementCounter "s3"
-            |> addSection (PT.unpackString macroArgs) label 2
+    latexState
+        |> incrementCounter "s3"
+        |> addSection (PT.unpackString macroArgs) label 2
 
-setSectionCounters : (List LatexExpression) -> LatexState -> LatexState
+
+setSectionCounters : List LatexExpression -> LatexState -> LatexState
 setSectionCounters macroArgs latexState =
     let
         argList =
@@ -86,33 +86,39 @@ setSectionCounters macroArgs latexState =
         initialSectionNumber =
             if arg1 == "section" then
                 arg2 |> String.toInt |> Maybe.withDefault 0
+
             else
                 -1
     in
-        if initialSectionNumber > -1 then
-            latexState
-                |> updateCounter "s1" (initialSectionNumber - 1)
-                |> updateCounter "s2" 0
-                |> updateCounter "s3" 0
-        else
-            latexState
+    if initialSectionNumber > -1 then
+        latexState
+            |> updateCounter "s1" (initialSectionNumber - 1)
+            |> updateCounter "s2" 0
+            |> updateCounter "s3" 0
+
+    else
+        latexState
 
 
-setDictionaryItemForMacro : String -> (List LatexExpression) -> LatexState -> LatexState
+setDictionaryItemForMacro : String -> List LatexExpression -> LatexState -> LatexState
 setDictionaryItemForMacro name args latexState =
     let
         value =
             PT.unpackString args
     in
-        setDictionaryItem name value latexState
+    setDictionaryItem name value latexState
 
 
 setTheoremNumber : LatexExpression -> LatexState -> LatexState
 setTheoremNumber body latexState =
     let
-        label =  case body |> PT.macroValue "label" of 
-          Just str -> str 
-          Nothing -> ""
+        label =
+            case body |> PT.macroValue "label" of
+                Just str ->
+                    str
+
+                Nothing ->
+                    ""
 
         latexState1 =
             incrementCounter "tno" latexState
@@ -126,10 +132,12 @@ setTheoremNumber body latexState =
         latexState2 =
             if label /= "" then
                 setCrossReference label (String.fromInt s1 ++ "." ++ String.fromInt tno) latexState1
+
             else
                 latexState1
     in
-        latexState2
+    latexState2
+
 
 setEquationNumber : LatexExpression -> LatexState -> LatexState
 setEquationNumber body latexState =
@@ -139,7 +147,8 @@ setEquationNumber body latexState =
                 LXString str ->
                     getLabel str
 
-                _ -> ""
+                _ ->
+                    ""
 
         latexState1 =
             incrementCounter "eqno" latexState
@@ -153,10 +162,12 @@ setEquationNumber body latexState =
         latexState2 =
             if label /= "" then
                 setCrossReference label (String.fromInt s1 ++ "." ++ String.fromInt eqno) latexState1
+
             else
                 latexState1
     in
-        latexState2
+    latexState2
+
 
 setBibItemXRef : List LatexExpression -> List LatexExpression -> LatexState -> LatexState
 setBibItemXRef optionalArgs args latexState =
@@ -165,23 +176,25 @@ setBibItemXRef optionalArgs args latexState =
             PT.unpackString args
 
         value =
-            if optionalArgs== [] then
+            if optionalArgs == [] then
                 label
+
             else
                 PT.unpackString optionalArgs
     in
-        setDictionaryItem ("bibitem:" ++ label) value latexState
+    setDictionaryItem ("bibitem:" ++ label) value latexState
+
 
 setMacroDefinition : String -> LatexExpression -> LatexState -> LatexState
 setMacroDefinition name body latexState =
---    let 
---      maybeDefinition = body -- |> PT.latexList2List |> List.head |> Maybe.map PT.getString
---    in
-    --  case maybeDefinition of 
-    --    Nothing -> latexState 
-    --    Just definition -> 
-          Internal.LatexState.setMacroDefinition name (NewCommand name 0 body) latexState
-  
+    --    let
+    --      maybeDefinition = body -- |> PT.latexList2List |> List.head |> Maybe.map PT.getString
+    --    in
+    --  case maybeDefinition of
+    --    Nothing -> latexState
+    --    Just definition ->
+    Internal.LatexState.setMacroDefinition name (NewCommand name 0 body) latexState
+
 
 
 {- Helpers -}
@@ -198,12 +211,12 @@ getElement k list =
         lxString =
             Utility.getAt k list |> Maybe.withDefault (LXString "xxx")
     in
-        case lxString of
-            LXString str ->
-                str
+    case lxString of
+        LXString str ->
+            str
 
-            _ ->
-                "yyy"
+        _ ->
+            "yyy"
 
 
 getLabel str =
@@ -213,9 +226,9 @@ getLabel str =
                 |> String.trim
                 |> Parser.Advanced.run (LXParser.macro LXParser.ws)
     in
-        case maybeMacro of
-            Ok macro ->
-                macro |> PT.getFirstMacroArg "label"
+    case maybeMacro of
+        Ok macro ->
+            macro |> PT.getFirstMacroArg "label"
 
-            _ ->
-                ""
+        _ ->
+            ""

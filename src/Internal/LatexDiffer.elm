@@ -38,7 +38,7 @@ initWithSeed seed renderer latexState text =
         idList =
             makeIdListWithSeed seed paragraphs
     in
-        EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
+    EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
 
 
 makeIdList : List String -> List String
@@ -62,6 +62,7 @@ update seed renderLatexExpression renderString editRecord source =
     -- ### LatexDiffer.update
     if Differ.isEmpty editRecord then
         init renderLatexExpression emptyLatexState source
+
     else
         source
             |> Differ.update seed (renderString editRecord.latexState) editRecord

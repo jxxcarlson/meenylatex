@@ -17,8 +17,8 @@ import Internal.LatexState
 import Internal.Parser as Parser exposing (LatexExpression(..))
 import Internal.ParserHelpers as ParserHelpers
 import Internal.ParserTools as PT
-import Parser as P
 import Internal.Utility as Utility
+import Parser as P
 
 
 type alias LatexInfo =
@@ -27,11 +27,11 @@ type alias LatexInfo =
 
 setMacroDefinition : LatexInfo -> LatexState -> LatexState
 setMacroDefinition info latexState =
-   let 
-     definition = List.head info.value |> Maybe.withDefault (LXString "no macro definition")
-   in
-     Internal.LatexState.setMacroDefinition info.name (NewCommand info.name 0 definition) latexState
-  
+    let
+        definition =
+            List.head info.value |> Maybe.withDefault (LXString "no macro definition")
+    in
+    Internal.LatexState.setMacroDefinition info.name (NewCommand info.name 0 definition) latexState
 
 
 setSectionCounters : LatexInfo -> LatexState -> LatexState
@@ -49,16 +49,18 @@ setSectionCounters info latexState =
         initialSectionNumber =
             if arg1 == "section" then
                 arg2 |> String.toInt |> Maybe.withDefault 0
+
             else
                 -1
     in
-        if initialSectionNumber > -1 then
-            latexState
-                |> updateCounter "s1" (initialSectionNumber - 1)
-                |> updateCounter "s2" 0
-                |> updateCounter "s3" 0
-        else
-            latexState
+    if initialSectionNumber > -1 then
+        latexState
+            |> updateCounter "s1" (initialSectionNumber - 1)
+            |> updateCounter "s2" 0
+            |> updateCounter "s3" 0
+
+    else
+        latexState
 
 
 updateSectionNumber : LatexInfo -> LatexState -> LatexState
@@ -67,11 +69,11 @@ updateSectionNumber info latexState =
         label =
             getCounter "s1" latexState |> (\x -> x + 1) |> String.fromInt
     in
-        latexState
-            |> incrementCounter "s1"
-            |> updateCounter "s2" 0
-            |> updateCounter "s3" 0
-            |> addSection (PT.unpackString info.value) label 1
+    latexState
+        |> incrementCounter "s1"
+        |> updateCounter "s2" 0
+        |> updateCounter "s3" 0
+        |> addSection (PT.unpackString info.value) label 1
 
 
 updateSubsectionNumber : LatexInfo -> LatexState -> LatexState
@@ -86,10 +88,10 @@ updateSubsectionNumber info latexState =
         label =
             s1 ++ "." ++ s2
     in
-        latexState
-            |> incrementCounter "s2"
-            |> updateCounter "s3" 0
-            |> addSection (PT.unpackString info.value) label 2
+    latexState
+        |> incrementCounter "s2"
+        |> updateCounter "s3" 0
+        |> addSection (PT.unpackString info.value) label 2
 
 
 updateSubsubsectionNumber : LatexInfo -> LatexState -> LatexState
@@ -107,9 +109,9 @@ updateSubsubsectionNumber info latexState =
         label =
             s1 ++ "." ++ s2 ++ "." ++ s3
     in
-        latexState
-            |> incrementCounter "s3"
-            |> addSection (PT.unpackString info.value) label 2
+    latexState
+        |> incrementCounter "s3"
+        |> addSection (PT.unpackString info.value) label 2
 
 
 setDictionaryItemForMacro : LatexInfo -> LatexState -> LatexState
@@ -118,7 +120,7 @@ setDictionaryItemForMacro latexInfo latexState =
         value =
             PT.unpackString latexInfo.value
     in
-        setDictionaryItem latexInfo.name value latexState
+    setDictionaryItem latexInfo.name value latexState
 
 
 setBibItemXRef : LatexInfo -> LatexState -> LatexState
@@ -130,10 +132,11 @@ setBibItemXRef latexInfo latexState =
         value =
             if latexInfo.options == [] then
                 label
+
             else
                 PT.unpackString latexInfo.options
     in
-        setDictionaryItem ("bibitem:" ++ label) value latexState
+    setDictionaryItem ("bibitem:" ++ label) value latexState
 
 
 setTheoremNumber : LatexInfo -> LatexState -> LatexState
@@ -157,10 +160,11 @@ setTheoremNumber info latexState =
         latexState2 =
             if label /= "" then
                 setCrossReference label (String.fromInt s1 ++ "." ++ String.fromInt tno) latexState1
+
             else
                 latexState1
     in
-        latexState2
+    latexState2
 
 
 setEquationNumber : LatexInfo -> LatexState -> LatexState
@@ -191,10 +195,11 @@ setEquationNumber info latexState =
         latexState2 =
             if label /= "" then
                 setCrossReference label (String.fromInt s1 ++ "." ++ String.fromInt eqno) latexState1
+
             else
                 latexState1
     in
-        latexState2
+    latexState2
 
 
 
@@ -212,12 +217,12 @@ getElement k list =
         lxString =
             Utility.getAt k list |> Maybe.withDefault (LXString "xxx")
     in
-        case lxString of
-            LXString str ->
-                str
+    case lxString of
+        LXString str ->
+            str
 
-            _ ->
-                "yyy"
+        _ ->
+            "yyy"
 
 
 getLabel str =
@@ -227,9 +232,9 @@ getLabel str =
                 |> String.trim
                 |> P.run (Parser.macro ParserHelpers.ws)
     in
-        case maybeMacro of
-            Ok macro ->
-                macro |> PT.getFirstMacroArg "label"
+    case maybeMacro of
+        Ok macro ->
+            macro |> PT.getFirstMacroArg "label"
 
-            _ ->
-                ""
+        _ ->
+            ""

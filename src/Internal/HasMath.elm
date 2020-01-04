@@ -13,6 +13,7 @@ has mathmode t4ext
 import Internal.Parser exposing (LatexExpression(..))
 
 
+
 {- Has Math code -}
 
 
@@ -56,8 +57,8 @@ hasMath expr =
             list |> List.foldr (\x acc -> hasMath x || acc) False
 
         NewCommand _ _ _ ->
-          False
-          
+            False
+
         LXError _ ->
             False
 

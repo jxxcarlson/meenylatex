@@ -56,9 +56,12 @@ joinType l r =
     in
     if l == "" then
         NoSpace
+
     else if List.member lastCharLeft [ "(" ] then
         NoSpace
+
     else if List.member firstCharRight [ ")", ".", ",", "?", "!", ";", ":" ] then
         NoSpace
+
     else
         Space

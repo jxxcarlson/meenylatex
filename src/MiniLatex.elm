@@ -56,12 +56,21 @@ type alias TableOfContents = Internal.LatexState.TableOfContents
 emptyLatexState : LatexState
 emptyLatexState = Internal.LatexState.emptyLatexState
 
-{-| The function call `render macros sourceTest` produces
-an HTML element or Html msg value corresponding to the MiniLatex source text
-`sourceText`. The macro definitions in `macros`
+{-| The function call
+
+    render NoDelay macros sourceTest
+
+produces an HTML value corresponding to the given MiniLaTeX source text.
+The macro definitions in `macros`
 are prepended to this string and are used by MathJax
 to render purely mathematical text. The `macros` string
-may be empty.
+may be empty.  In this example, the first parameter is
+`noDelay`, meaning that MathJax will set about typesetting
+the content passed to it immediately.  Use `NoDelay` for
+documents with not too many math elements and for
+editing all documents, since only changed text is re-rendered.
+Use `Delay` for loading document containing many
+math elements.
 -}
 render : MathJaxRenderOption -> String -> String -> Html msg
 render mathJaxRenderOption macroDefinitions source =
@@ -70,9 +79,12 @@ render mathJaxRenderOption macroDefinitions source =
         |> Html.div []
 
 
-{-| Like render, but used the `seed` to define the ids for each paragraph.
+{-| Like render, but used the `seed` to define the ids for each paragraph:
+
+    render NoDelay seed macros sourceTest
 -}
-renderWithSeed : MathJaxRenderOption -> Int -> String -> String -> Html msg
+renderWithSeed : MathJaxRenderOption -> Int
+                 -> String -> String -> Html msg
 renderWithSeed mathJaxRenderOption seed macroDefinitions source =
     MiniLatexDiffer.initWithSeed seed (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get

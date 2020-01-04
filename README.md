@@ -11,23 +11,27 @@ see the Hackernoon article, [Towards LaTeX in the Browser](https://hackernoon.co
 
 ```
 import MiniLatex
+import MiniLatex.Render exposing(MathJaxRenderOption(..))
+
 
 text = "Pythagoras says: $a^2 + b^2 = c^2$"
 
 macros = "" -- your macro definitions
 
-MiniLatex.render macros text
+MiniLatex.render NoDelay macros text
 
 ```
 
 For interactive editors and live rendering, you may want to use
 the functions in `MiniLaTeX.Edit`. For an example of how this is 
-done, see XXX.
+done, see the code in `./demo`
 
 
 ## This release
 
-A simplified API.
+    type MathJaxRenderOption = Delay | NoDelay
+    
+is used for optimizing rendering by MathJax
 
 ## Acknowledgments
  

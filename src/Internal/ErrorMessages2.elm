@@ -36,7 +36,7 @@ renderErrors source errs =
 
         Just firstErr ->
             let
-               markerOffset = (Debug.log "FE col" firstErr.col)
+               markerOffset =  firstErr.col
             in
             {errorText = getLines firstErr.row source, markerOffset = markerOffset, explanation = displayExpected firstErr.problem}
 

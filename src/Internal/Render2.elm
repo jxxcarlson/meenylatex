@@ -170,7 +170,6 @@ render mathJaxRenderOption source latexState latexExpression =
 
         LXError  error ->
             let
-              _ = Debug.log "YY:ERR" error
               err = ErrorMessages.renderErrors source error
               errorText = Html.p [HA.style "margin" "0"] [Html.text ((String.join "\n" err.errorText) ++ " ...")]
               offset = (String.fromInt <| 5*err.markerOffset) ++ "px"

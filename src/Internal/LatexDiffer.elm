@@ -6,6 +6,8 @@ import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression)
 import Internal.Render2 as Render exposing (render)
+import Internal.SourceMap as SourceMap
+import Dict
 
 
 init : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
@@ -38,7 +40,7 @@ initWithSeed seed renderer latexState text =
         idList =
             makeIdListWithSeed seed paragraphs
     in
-    EditRecord paragraphs renderedParagraphs latexState2 idList
+    EditRecord paragraphs renderedParagraphs latexState2 idList Dict.empty
 
 
 makeIdList : List String -> List String

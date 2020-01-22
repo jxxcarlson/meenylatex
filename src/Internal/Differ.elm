@@ -14,6 +14,8 @@ then parsing and rendering the changed paragraphs.
 import Html exposing (Html)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
+import Internal.SourceMap as SourceMap exposing(SourceMap)
+import Dict
 
 
 
@@ -44,6 +46,7 @@ type alias EditRecord a =
     , renderedParagraphs : List a
     , latexState : LatexState
     , idList : List String
+    , sourceMap : SourceMap
     }
 
 
@@ -51,7 +54,7 @@ type alias EditRecord a =
 -}
 emptyStringRecord : EditRecord String
 emptyStringRecord =
-    EditRecord [] [] emptyLatexState []
+    EditRecord [] [] emptyLatexState [] Dict.empty
 
 
 {-| An empty EditRecord -- like the integer 0 in another context. For
@@ -59,7 +62,7 @@ renderers with `Html a` as target.
 -}
 emptyHtmlMsgRecord : EditRecord (Html msg)
 emptyHtmlMsgRecord =
-    EditRecord [] [] emptyLatexState []
+    EditRecord [] [] emptyLatexState [] Dict.empty
 
 
 {-| createRecord: Create an edit record by (1)
@@ -82,7 +85,7 @@ init transformer text =
         renderedParagraphs =
             List.map transformer paragraphs
     in
-    EditRecord paragraphs renderedParagraphs emptyLatexState idList
+    EditRecord paragraphs renderedParagraphs emptyLatexState idList Dict.empty
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -117,7 +120,7 @@ update seed transformer editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-    EditRecord newParagraphs newRenderedParagraphs editRecord.latexState p.idList
+    EditRecord newParagraphs newRenderedParagraphs editRecord.latexState p.idList Dict.empty
 
 
 {-| Update the renderedList by applying the transformer only to the

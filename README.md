@@ -22,6 +22,14 @@ MiniLatex.render NoDelay macros text
 
 ```
 
+See the code in `./example`
+
+**NOTE:** (a) macro definitions can be either the empty 
+string or a multiline string of definitions. (b)  With the
+transition to MathJax 3, macro definitions are not working.
+I will have a fix soon.
+
+
 For interactive editors and live rendering, you may want to use
 the functions in `MiniLaTeX.Edit`. For an example of how this is 
 done, see the code in `./demo`
@@ -29,7 +37,17 @@ done, see the code in `./demo`
 
 ## This release
 
-- Better LaTeX error reporting. 
+- Added a **source map**. This is a dictionary whose
+keys are pieces of source text and whose values are
+the ids of the corresponding rendered text.  With a little
+more work, this will allow one to have bidirectional
+sync between source and rendered text: click on something
+in one to bring the corresponding part of the
+other into focus.
+
+## Recent releases
+
+- Better LaTeX error reporting (to be still further improved).
 
 - The below is used to optimize rendering by MathJax
 

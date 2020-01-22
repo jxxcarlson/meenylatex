@@ -42,12 +42,10 @@ sourceText = "Pythagoras says: $a^2 + b^2 = c^2$"
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
+    div [style "margin"  "50px"]
+        [  h1 [] [ text "Example" ]
         , div [style "font-size" "18px"] [MiniLatex.render NoDelay macros sourceText]
         ]
-
 
 
 ---- PROGRAM ----

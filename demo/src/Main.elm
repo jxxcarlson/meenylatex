@@ -12,8 +12,8 @@ import Random
 import StringsV1
 import StringsV2
 import Style exposing (..)
-import Task
-import Internal.Differ
+import Task exposing(Task)
+import Browser.Dom as Dom
 
 
 initialText = StringsV2.initialText
@@ -43,7 +43,8 @@ type alias Model a =
 
 
 type Msg
-    = Clear
+    = NoOp
+    | Clear
     | Render String
     | GetContent String
     | GetMacroText String
@@ -53,6 +54,8 @@ type Msg
     | FullRender
     | RestoreText
     | ExampleText
+    | SetViewPortForElement (Result Dom.Error ( Dom.Element, Dom.Viewport ))
+
 
 
 debounceConfig : Debounce.Config Msg
@@ -74,6 +77,8 @@ init flags =
     let
         editRecord =
             MiniLatex.Edit.init NoDelay flags.seed initialText
+
+        _ = Debug.log "SMAP" editRecord.sourceMap
 
         --            MiniLatex.Edit.init NoDelay model.seed (prependMacros initialMacroText initialText)
         model =
@@ -101,6 +106,8 @@ subscriptions model =
 update : Msg -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
 update msg model =
     case msg of
+        NoOp -> (model, Cmd.none)
+
         GetContent str ->
             let
                 ( debounce, cmd ) =
@@ -204,6 +211,15 @@ update msg model =
             , Cmd.none
             )
 
+        SetViewPortForElement result ->
+            case result of
+                Ok ( element, viewport ) ->
+                    ( model, setViewPortForSelectedLine element viewport )
+
+                Err _ ->
+                    ( model , Cmd.none )
+
+
 
 normalize : String -> String
 normalize str =
@@ -304,10 +320,30 @@ macroPanel model =
 
 renderedSource : Model (Html msg) -> Html msg
 renderedSource model =
-    Html.div (renderedSourceStyle ++ [ HA.class "rhs" ])
+    Html.div (renderedSourceStyle ++ [ HA.class "rhs", HA.attribute "id" "__rendered_text__" ])
         [ model.renderedText ]
 
+setViewportForElement : String -> Cmd Msg
+setViewportForElement id =
+    Dom.getViewportOf "__rendered_text__"
+        |> Task.andThen (\vp -> getElementWithViewPort vp id)
+        |> Task.attempt SetViewPortForElement
 
+
+setViewPortForSelectedLine : Dom.Element -> Dom.Viewport -> Cmd Msg
+setViewPortForSelectedLine element viewport =
+    let
+        y =
+            viewport.viewport.y + element.element.y - element.element.height - 100
+    in
+    Task.attempt (\_ -> NoOp) (Dom.setViewportOf "__rendered_text__" 0 y)
+
+
+
+getElementWithViewPort : Dom.Viewport -> String -> Task Dom.Error ( Dom.Element, Dom.Viewport )
+getElementWithViewPort vp id =
+    Dom.getElement id
+        |> Task.map (\el -> ( el, vp ))
 
 --
 -- BUTTONS

@@ -16,6 +16,7 @@ import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
 import Internal.SourceMap as SourceMap exposing(SourceMap)
 import Dict
+import Internal.Parser exposing(LatexExpression(..))
 
 
 
@@ -45,6 +46,7 @@ type alias EditRecord a =
     { paragraphs : List String
     , renderedParagraphs : List a
     , latexState : LatexState
+    , astList : List (List LatexExpression)
     , idList : List String
     , sourceMap : SourceMap
     }
@@ -54,7 +56,7 @@ type alias EditRecord a =
 -}
 emptyStringRecord : EditRecord String
 emptyStringRecord =
-    EditRecord [] [] emptyLatexState [] Dict.empty
+    EditRecord [] [] emptyLatexState [] [] Dict.empty
 
 
 {-| An empty EditRecord -- like the integer 0 in another context. For
@@ -62,7 +64,7 @@ renderers with `Html a` as target.
 -}
 emptyHtmlMsgRecord : EditRecord (Html msg)
 emptyHtmlMsgRecord =
-    EditRecord [] [] emptyLatexState [] Dict.empty
+    EditRecord [] [] emptyLatexState [] [] Dict.empty
 
 
 {-| createRecord: Create an edit record by (1)
@@ -70,8 +72,8 @@ breaking the text in to pargraphs, (2) applying
 the transformer to each string in the resulting
 list of strings.
 -}
-init : (String -> a) -> String -> EditRecord a
-init transformer text =
+init : (String -> List LatexExpression) -> (String -> a) -> String -> EditRecord a
+init parser renderer text =
     let
         paragraphs =
             Paragraph.logicalParagraphify text
@@ -82,10 +84,14 @@ init transformer text =
         idList =
             List.range 1 n |> List.map (prefixer 0)
 
+        astList = List.map parser paragraphs
+
+        sourceMap = SourceMap.generate (List.concat astList) idList
+
         renderedParagraphs =
-            List.map transformer paragraphs
+            List.map renderer paragraphs
     in
-    EditRecord paragraphs renderedParagraphs emptyLatexState idList Dict.empty
+    EditRecord paragraphs renderedParagraphs emptyLatexState astList idList sourceMap
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -105,8 +111,8 @@ accomplishes this using the transformer. The seed is used to produces
 a differential idList. This last step is perhaps unnecessary. To investigate.
 (This was part of an optimization scheme.)
 -}
-update : Int -> (String -> a) -> EditRecord a -> String -> EditRecord a
-update seed transformer editRecord text =
+update : Int -> (String -> List LatexExpression) -> (String -> a) -> EditRecord a -> String -> EditRecord a
+update seed parser renderer editRecord text =
     let
         newParagraphs =
             Paragraph.logicalParagraphify text
@@ -115,12 +121,17 @@ update seed transformer editRecord text =
             diff editRecord.paragraphs newParagraphs
 
         newRenderedParagraphs =
-            differentialRender transformer diffRecord editRecord
+            differentialRender renderer diffRecord editRecord
 
         p =
             differentialIdList seed diffRecord editRecord
+
+        astList = List.map parser newParagraphs
+
+        sourceMap = SourceMap.generate (List.concat astList) p.idList
+
     in
-    EditRecord newParagraphs newRenderedParagraphs editRecord.latexState p.idList Dict.empty
+    EditRecord newParagraphs newRenderedParagraphs editRecord.latexState astList p.idList sourceMap
 
 
 {-| Update the renderedList by applying the transformer only to the

@@ -28,6 +28,7 @@ for an explanation of the theory behind the MiniLatex package.
 import Html exposing (Html)
 import Internal.LatexDiffer as MiniLatexDiffer
 import Internal.LatexState exposing (LatexState, emptyLatexState)
+import Internal.Parser
 import Internal.Render2 as Render
 import MiniLatex.Edit
 import MiniLatex.Render exposing (MathJaxRenderOption)
@@ -77,7 +78,7 @@ math elements.
 -}
 render : MathJaxRenderOption -> String -> String -> Html msg
 render mathJaxRenderOption macroDefinitions source =
-    MiniLatexDiffer.init (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
+    MiniLatexDiffer.init Internal.Parser.parse (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
 
@@ -94,7 +95,7 @@ renderWithSeed :
     -> String
     -> Html msg
 renderWithSeed mathJaxRenderOption seed macroDefinitions source =
-    MiniLatexDiffer.initWithSeed seed (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
+    MiniLatexDiffer.initWithSeed seed Internal.Parser.parse (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
 

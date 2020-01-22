@@ -13,6 +13,7 @@ import StringsV1
 import StringsV2
 import Style exposing (..)
 import Task
+import Internal.Differ
 
 
 initialText =
@@ -71,7 +72,8 @@ init : Flags -> ( Model (Html msg), Cmd Msg )
 init flags =
     let
         editRecord =
-            MiniLatex.Edit.init NoDelay flags.seed initialText
+            -- MiniLatex.Edit.init NoDelay flags.seed initialText
+            Internal.Differ.emptyHtmlMsgRecord
 
         --            MiniLatex.Edit.init NoDelay model.seed (prependMacros initialMacroText initialText)
         model =
@@ -155,7 +157,7 @@ update msg model =
             ( { model
                 | sourceText = ""
                 , editRecord = editRecord
-                , renderedText = renderFromEditRecord model.counter editRecord
+                , renderedText = Html.div [] []  -- renderFromEditRecord model.counter editRecord
                 , counter = model.counter + 1
               }
             , Cmd.none

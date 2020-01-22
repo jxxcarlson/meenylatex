@@ -10,13 +10,13 @@ import Internal.SourceMap as SourceMap
 import Dict
 
 
-init : (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
-init renderer latexState text =
-    initWithSeed 0 renderer latexState text
+init : (String -> List LatexExpression) -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
+init parser renderer latexState text =
+    initWithSeed 0 parser renderer latexState text
 
 
-initWithSeed : Int -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
-initWithSeed seed renderer latexState text =
+initWithSeed : Int -> (String -> List LatexExpression) -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
+initWithSeed seed parser renderer latexState text =
     let
         paragraphs =
             text
@@ -37,10 +37,14 @@ initWithSeed seed renderer latexState text =
             latexExpressionList
                 |> Accumulator.render renderer latexState2
 
+        astList = List.map parser paragraphs
+
         idList =
             makeIdListWithSeed seed paragraphs
+
+        sourceMap = SourceMap.generate (List.concat astList) idList
     in
-    EditRecord paragraphs renderedParagraphs latexState2 idList Dict.empty
+    EditRecord paragraphs renderedParagraphs latexState2 astList idList sourceMap
 
 
 makeIdList : List String -> List String
@@ -55,16 +59,17 @@ makeIdListWithSeed seed paragraphs =
 
 update :
     Int
+    -> (String -> List LatexExpression)
     -> (LatexState -> List LatexExpression -> a)
     -> (LatexState -> String -> a)
     -> EditRecord a
     -> String
     -> EditRecord a
-update seed renderLatexExpression renderString editRecord source =
+update seed parser renderLatexExpression renderString editRecord source =
     -- ### LatexDiffer.update
     if Differ.isEmpty editRecord then
-        init renderLatexExpression emptyLatexState source
+        init parser renderLatexExpression emptyLatexState source
 
     else
         source
-            |> Differ.update seed (renderString editRecord.latexState) editRecord
+            |> Differ.update seed parser (renderString editRecord.latexState) editRecord

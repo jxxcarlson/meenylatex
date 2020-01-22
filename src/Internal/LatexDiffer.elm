@@ -38,7 +38,7 @@ initWithSeed seed renderer latexState text =
         idList =
             makeIdListWithSeed seed paragraphs
     in
-    EditRecord paragraphs renderedParagraphs latexState2 idList Nothing Nothing
+    EditRecord paragraphs renderedParagraphs latexState2 idList
 
 
 makeIdList : List String -> List String

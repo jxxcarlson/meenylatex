@@ -19,7 +19,7 @@ text expr =
         DisplayMath str -> [str]
         SMacro _ _ _ expr2 -> text expr2
         Macro _ _ _ -> ["Macro"]
-        Environment _ _ expr2 -> text expr2
+        Environment name _ expr2 -> name :: text expr2
         LatexList list -> List.map text list |> List.concat
         NewCommand _ _ _ -> ["NewCommand"]
         LXError _ -> ["LXError"]

@@ -44,8 +44,6 @@ type alias EditRecord a =
     , renderedParagraphs : List a
     , latexState : LatexState
     , idList : List String
-    , newIdsStart : Maybe Int
-    , newIdsEnd : Maybe Int
     }
 
 
@@ -53,7 +51,7 @@ type alias EditRecord a =
 -}
 emptyStringRecord : EditRecord String
 emptyStringRecord =
-    EditRecord [] [] emptyLatexState [] Nothing Nothing
+    EditRecord [] [] emptyLatexState []
 
 
 {-| An empty EditRecord -- like the integer 0 in another context. For
@@ -61,7 +59,7 @@ renderers with `Html a` as target.
 -}
 emptyHtmlMsgRecord : EditRecord (Html msg)
 emptyHtmlMsgRecord =
-    EditRecord [] [] emptyLatexState [] Nothing Nothing
+    EditRecord [] [] emptyLatexState []
 
 
 {-| createRecord: Create an edit record by (1)
@@ -84,7 +82,7 @@ init transformer text =
         renderedParagraphs =
             List.map transformer paragraphs
     in
-    EditRecord paragraphs renderedParagraphs emptyLatexState idList Nothing Nothing
+    EditRecord paragraphs renderedParagraphs emptyLatexState idList
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -119,7 +117,7 @@ update seed transformer editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-    EditRecord newParagraphs newRenderedParagraphs editRecord.latexState p.idList p.newIdsStart p.newIdsEnd
+    EditRecord newParagraphs newRenderedParagraphs editRecord.latexState p.idList
 
 
 {-| Update the renderedList by applying the transformer only to the

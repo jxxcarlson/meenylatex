@@ -1,4 +1,4 @@
-module Internal.Render2 exposing (makeTableOfContents, render, renderLatexList, renderString)
+module Internal.Render2 exposing (makeTableOfContents, render, renderLatexList, renderString, renderString2, parseString)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -48,8 +48,38 @@ getElement k list =
     Utility.getAt k list |> Maybe.withDefault (LXString "xxx")
 
 
-parseString parser str =
+parseString_ parser str =
     Parser.run parser str
+
+parseString : MathJaxRenderOption -> LatexState -> String -> List (String, List LatexExpression)
+parseString mathJaxRenderOption latexState source =
+    let
+        paragraphs : List String
+        paragraphs =
+            Paragraph.logicalParagraphify source
+
+        parse__ : String.String -> ( String, List LatexExpression )
+        parse__ paragraph =
+            ( paragraph, Internal.Parser.parse paragraph |> spacify )
+
+    in
+    paragraphs
+        |> List.map parse__
+
+{-| Parse a string, then render it.
+-}
+renderString2 : MathJaxRenderOption -> LatexState -> String -> Html msg
+renderString2 mathJaxRenderOption latexState source =
+    let
+
+        render_ : ( String, List LatexExpression ) -> Html msg
+        render_ ( source_, ast ) =
+            renderLatexList mathJaxRenderOption source_ latexState ast
+    in
+    source
+        |> parseString mathJaxRenderOption latexState
+        |> List.map render_
+        |> Html.div []
 
 
 {-| Parse a string, then render it.

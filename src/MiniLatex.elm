@@ -101,4 +101,10 @@ renderWithSeed mathJaxRenderOption seed macroDefinitions source =
 
 
 prependMacros macros_ sourceText =
-    "$$\n" ++ String.trim macros_ ++ "\n$$\n\n" ++ sourceText
+    let
+        macros = case macros_ == "" of
+            True -> "\\newcommand{\\dummy}{Dummy!}"
+            _ -> macros_
+    in
+        "$$\n" ++ String.trim macros_ ++ "\n$$\n\n" ++ sourceText
+

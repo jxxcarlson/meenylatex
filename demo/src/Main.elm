@@ -16,8 +16,9 @@ import Task
 import Internal.Differ
 
 
-initialText =
-    StringsV2.initialText
+initialText = StringsV2.initialText
+  -- "Test: $a^2 = 1$\n\nooo\n\niii"
+    --
 
 
 main : Program Flags (Model (Html Msg)) Msg
@@ -72,8 +73,7 @@ init : Flags -> ( Model (Html msg), Cmd Msg )
 init flags =
     let
         editRecord =
-            -- MiniLatex.Edit.init NoDelay flags.seed initialText
-            Internal.Differ.emptyHtmlMsgRecord
+            MiniLatex.Edit.init NoDelay flags.seed initialText
 
         --            MiniLatex.Edit.init NoDelay model.seed (prependMacros initialMacroText initialText)
         model =
@@ -157,7 +157,7 @@ update msg model =
             ( { model
                 | sourceText = ""
                 , editRecord = editRecord
-                , renderedText = Html.div [] []  -- renderFromEditRecord model.counter editRecord
+                , renderedText = renderFromEditRecord model.counter editRecord
                 , counter = model.counter + 1
               }
             , Cmd.none

@@ -1,7 +1,9 @@
 module StringsV1 exposing (initialText, macros, mathExampleText)
 
 
-macros =
+macros = "\\newcommand{\\bra}{\\langle}"
+
+macros2 =
     """
 \\newcommand{\\bra}{\\langle}
 \\newcommand{\\ket}{\\rangle}

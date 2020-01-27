@@ -1,7 +1,7 @@
 module MiniLatex exposing
     ( render, renderWithSeed
     , LatexState, TocEntry, TableOfContents
-    , emptyLatexState
+    , emptyLatexState, parse
     )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
@@ -28,7 +28,7 @@ for an explanation of the theory behind the MiniLatex package.
 import Html exposing (Html)
 import Internal.LatexDiffer as MiniLatexDiffer
 import Internal.LatexState exposing (LatexState, emptyLatexState)
-import Internal.Parser
+import Internal.Parser exposing(LatexExpression)
 import Internal.Render2 as Render
 import MiniLatex.Edit
 import MiniLatex.Render exposing (MathJaxRenderOption)
@@ -82,6 +82,8 @@ render mathJaxRenderOption macroDefinitions source =
         |> MiniLatex.Edit.get
         |> Html.div []
 
+parse : String -> List LatexExpression
+parse = Internal.Parser.parse
 
 {-| Like render, but used the `seed` to define the ids for each paragraph:
 

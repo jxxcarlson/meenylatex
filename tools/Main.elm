@@ -104,8 +104,8 @@ transform str_ =
 
        indicator = (equal, weaklyEqual) |> Debug.toString
 
-       diff = "DIFF: ":: (Diff.diffLines str latex |> List.map Debug.toString)
+       diff = ""::"DIFF: ":: (Diff.diffLines str latex |> List.map Debug.toString)
     in
-      "EQ: "::indicator::"SOURCE: "::latex :: "AST: "::ast ++ diff
+      "EQ: "::indicator::"SOURCE1: "::str ::"SOURCE2: "::latex :: ""::"AST: "::ast ++ diff
 
 

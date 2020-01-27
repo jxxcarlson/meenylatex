@@ -224,7 +224,7 @@ getLabel str =
         maybeMacro =
             str
                 |> String.trim
-                |> Parser.Advanced.run (LXParser.macro LXParser.ws)
+                |> Parser.Advanced.run (LXParser.macro LXParser.eatWhiteSpace)
     in
     case maybeMacro of
         Ok macro ->

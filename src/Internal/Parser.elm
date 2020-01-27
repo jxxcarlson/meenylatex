@@ -1,7 +1,7 @@
 module Internal.Parser exposing
     ( LatexExpression(..), macro, parse, defaultLatexList
     , latexList, endWord, envName, word, latexExpression
-    , Context, LXParser, Problem(..), displayMathBrackets, displayMathDollar, environment, inlineMath, itemList, newcommand, numberOfArgs, texComment, words, ws
+    , Context, LXParser, Problem(..), displayMathBrackets, displayMathDollar, environment, inlineMath, itemList, newcommand, numberOfArgs, texComment, words, eatWhiteSpace
     )
 
 {-| This module is for quickly preparing latex for export.
@@ -121,7 +121,7 @@ latexList : LXParser LatexExpression
 latexList =
     -- inContext "latexList" <|
     succeed identity
-        |. ws
+        |. eatWhiteSpace
         |= itemList latexExpression
         |> map LatexList
 
@@ -134,9 +134,9 @@ latexExpression =
         [ texComment
         , displayMathDollar
         , displayMathBrackets
-        , inlineMath ws
+        , inlineMath eatWhiteSpace
         , newcommand
-        , macro ws
+        , macro eatWhiteSpace
         , smacro
         , words
         , lazy (\_ -> environment)
@@ -159,6 +159,18 @@ defaultLatexExpression =
 {- WORDS -}
 
 
+type alias Phrase =
+    { leadingWhiteSpace : String
+     , body : String
+     , trailingWhiteSpace : String
+     }
+
+phraseToLatexExpression : Phrase -> LatexExpression
+phraseToLatexExpression p =
+  LXString (p.leadingWhiteSpace ++ p.body ++ p.trailingWhiteSpace)
+
+
+
 {-|
 
     import Parser.Advanced
@@ -170,11 +182,16 @@ words : LXParser LatexExpression
 words =
     oneOf
         [ blank
-        , succeed identity
-            |. ws
-            |= words_ ExpectingWords
-            |. ws
+        , (succeed Phrase
+            |= whiteSpace
+            |= words__ ExpectingWords
+            |= whiteSpace) |> map phraseToLatexExpression
         ]
+
+words__ : Problem -> LXParser String
+words__ problem =
+    nonEmptyItemList (word problem notSpaceOrSpecialCharacters)
+        |> map (String.join " ")
 
 
 words_ : Problem -> LXParser LatexExpression
@@ -208,14 +225,24 @@ LXParser.run word "this is a test"
 word : Problem -> (Char -> Bool) -> LXParser String
 word problem inWord =
     succeed String.slice
-        |. ws
         |= getOffset
+        |. eatWhiteSpace
         |. chompIf inWord problem
         |. chompWhile inWord
-        |. ws
+        |. eatWhiteSpace
         |= getOffset
         |= getSource
 
+--word : Problem -> (Char -> Bool) -> LXParser String
+--word problem inWord =
+--    succeed String.slice
+--        |. eatWhiteSpace
+--        |= getOffset
+--        |. chompIf inWord problem
+--        |. chompWhile inWord
+--        |. eatWhiteSpace
+--        |= getOffset
+--        |= getSource
 
 
 {- MACRO WORDS -}
@@ -288,7 +315,7 @@ texComment =
             |. chompIf (\c -> c == '%') ExpectingPercent
             |. chompWhile (\c -> c /= '\n')
             |. chompIf (\c -> c == '\n') ExpectingNewline
-            |. ws
+            |. eatWhiteSpace
     )
         |> map Comment
 
@@ -317,7 +344,7 @@ newcommand =
         |. symbol (Token "}" ExpectingRightBrace)
         |= numberOfArgs
         |= arg
-        |. ws
+        |. eatWhiteSpace
 
 
 numberOfArgs_ : LXParser Int
@@ -368,7 +395,7 @@ optionalArg : LXParser LatexExpression
 optionalArg =
     succeed identity
         |. symbol (Token "[" ExpectingLeftBracket)
-        |= itemList (oneOf [ optionArgWords, inlineMath spaces ])
+        |= itemList (oneOf [ optionArgWords, inlineMath eatSpaces ])
         |. symbol (Token "]" ExpectingRightBracket)
         |> map LatexList
 
@@ -380,7 +407,7 @@ arg =
     inContext (CArg "arg") <|
         (succeed identity
             |. symbol (Token "{" ExpectingLeftBrace)
-            |= itemList (oneOf [ macroArgWords, inlineMath spaces, lazy (\_ -> macro spaces) ])
+            |= itemList (oneOf [ macroArgWords, inlineMath eatSpaces, lazy (\_ -> macro eatSpaces) ])
             |. symbol (Token "}" ExpectingRightBrace)
             |> map LatexList
         )
@@ -454,10 +481,10 @@ displayMathDollar : LXParser LatexExpression
 displayMathDollar =
     -- inContext "display math $$" <|
     succeed DisplayMath
-        |. spaces
+        |. eatSpaces
         |. symbol (Token "$$" ExpectingBeginDisplayMathModeDollarSign)
         |= parseToSymbol ExpectingEndDisplayMathModeDollarSign "$$"
-        |. ws
+        |. eatWhiteSpace
 
 
 {-|
@@ -472,10 +499,10 @@ displayMathBrackets : LXParser LatexExpression
 displayMathBrackets =
     -- inContext "display math brackets" <|
     succeed DisplayMath
-        |. spaces
+        |. eatSpaces
         |. symbol (Token "\\[" ExpectingBeginDisplayMathModeBracket)
         |= parseToSymbol ExpectingEndDisplayMathModeBracket "\\]"
-        |. ws
+        |. eatWhiteSpace
 
 
 
@@ -490,7 +517,7 @@ envName : LXParser String
 envName =
     --  inContext "envName" <|
     succeed identity
-        |. spaces
+        |. eatSpaces
         |. symbol (Token "\\begin{" ExpectingBeginAndRightBrace)
         |= parseToSymbol ExpectingEndOfEnvironmentName "}"
 
@@ -501,10 +528,10 @@ Todo -- XXX: IS THIS USED?
 endWord : LXParser String
 endWord =
     succeed identity
-        |. spaces
+        |. eatSpaces
         |. symbol (Token "\\end{" ExpectingEndAndRightBrace)
         |= parseToSymbol ExpectingEndAndRightBrace "}"
-        |. ws
+        |. eatWhiteSpace
 
 
 {-|
@@ -568,13 +595,13 @@ parseEnvironmentDict =
 standardEnvironmentBody : String -> String -> LXParser LatexExpression
 standardEnvironmentBody endWoord envType =
     succeed (Environment envType)
-        |. ws
+        |. eatWhiteSpace
         |= itemList optionalArg
-        |. ws
+        |. eatWhiteSpace
         |= (nonEmptyItemList latexExpression |> map LatexList)
-        |. ws
+        |. eatWhiteSpace
         |. symbol (Token endWoord ExpectingEndWord)
-        |. ws
+        |. eatWhiteSpace
 
 
 {-| The body of the environment is parsed as an LXString.
@@ -587,7 +614,7 @@ passThroughBody endWoord envType =
     --  inContext "passThroughBody" <|
     succeed identity
         |= parseToSymbol ExpectingEndForPassThroughBody endWoord
-        |. ws
+        |. eatWhiteSpace
         |> map LXString
         |> map (Environment envType [])
 
@@ -600,11 +627,11 @@ itemEnvironmentBody : String -> String -> LXParser LatexExpression
 itemEnvironmentBody endWoord envType =
     ---  inContext "itemEnvironmentBody" <|
     succeed identity
-        |. ws
+        |. eatWhiteSpace
         |= itemList (oneOf [ item, lazy (\_ -> environment) ])
-        |. ws
+        |. eatWhiteSpace
         |. symbol (Token endWoord ExpectingEndWord)
-        |. ws
+        |. eatWhiteSpace
         |> map LatexList
         |> map (Environment envType [])
 
@@ -613,11 +640,11 @@ biblioEnvironmentBody : String -> String -> LXParser LatexExpression
 biblioEnvironmentBody endWoord envType =
     ---  inContext "itemEnvironmentBody" <|
     succeed identity
-        |. ws
+        |. eatWhiteSpace
         |= itemList smacro
-        |. ws
+        |. eatWhiteSpace
         |. symbol (Token endWoord ExpectingEndWord)
-        |. ws
+        |. eatWhiteSpace
         |> map LatexList
         |> map (Environment envType [])
 
@@ -638,12 +665,12 @@ item : LXParser LatexExpression
 item =
     ---  inContext "item" <|
     succeed identity
-        |. spaces
+        |. eatSpaces
         |. symbol (Token "\\item" ExpectingEscapedItem)
         |. symbol (Token " " ExpectingSpace)
-        |. spaces
-        |= itemList (oneOf [ words, inlineMath ws, macro ws ])
-        |. ws
+        |. eatSpaces
+        |= itemList (oneOf [ words, inlineMath eatWhiteSpace, macro eatWhiteSpace ])
+        |. eatWhiteSpace
         |> map (\x -> Item 1 (LatexList x))
 
 
@@ -655,12 +682,12 @@ tabularEnvironmentBody : String -> String -> LXParser LatexExpression
 tabularEnvironmentBody endWoord envType =
     -- inContext "tabularEnvironmentBody" <|
     succeed (Environment envType)
-        |. ws
+        |. eatWhiteSpace
         |= itemList arg
         |= tableBody
-        |. ws
+        |. eatWhiteSpace
         |. symbol (Token endWoord ExpectingEndWord)
-        |. ws
+        |. eatWhiteSpace
 
 
 tableBody : LXParser LatexExpression
@@ -668,7 +695,7 @@ tableBody =
     --  inContext "tableBody" <|
     succeed identity
         --|. repeat zeroOrMore arg
-        |. ws
+        |. eatWhiteSpace
         |= nonEmptyItemList tableRow
         |> map LatexList
 
@@ -677,9 +704,9 @@ tableRow : LXParser LatexExpression
 tableRow =
     --- inContext "tableRow" <|
     succeed identity
-        |. spaces
+        |. eatSpaces
         |= andThen (\c -> tableCellHelp [ c ]) tableCell
-        |. spaces
+        |. eatSpaces
         |. oneOf [ symbol (Token "\n" ExpectingNewline), symbol (Token "\\\\\n" ExpectingDoubleEscapeAndNewline) ]
         |> map LatexList
 
@@ -692,7 +719,7 @@ tableCell : LXParser LatexExpression
 tableCell =
     -- inContext "tableCell" <|
     succeed identity
-        |= oneOf [ displayMathBrackets, macro ws, displayMathDollar, inlineMath ws, tableCellWords ]
+        |= oneOf [ displayMathBrackets, macro eatWhiteSpace, displayMathDollar, inlineMath eatWhiteSpace, tableCellWords ]
 
 
 tableCellHelp : List LatexExpression -> LXParser (List LatexExpression)
@@ -711,7 +738,7 @@ nextCell =
     -- (delayedCommit spaces <|
     succeed identity
         |. symbol (Token "&" ExpectingAmpersand)
-        |. spaces
+        |. eatSpaces
         |= tableCell
 
 
@@ -721,15 +748,22 @@ nextCell =
 --
 
 
-spaces : LXParser ()
-spaces =
+eatSpaces : LXParser ()
+eatSpaces =
     chompWhile (\c -> c == ' ')
 
 
-ws : LXParser ()
-ws =
+spaces : LXParser String
+spaces =
+  getChompedString <| chompWhile (\c -> c == ' ')
+
+eatWhiteSpace : LXParser ()
+eatWhiteSpace =
     chompWhile (\c -> c == ' ' || c == '\n')
 
+whiteSpace : LXParser String
+whiteSpace =
+    getChompedString <| chompWhile (\c -> c == ' ' || c == '\n')
 
 parseUntil : Problem -> String -> LXParser String
 parseUntil problem marker =
@@ -753,7 +787,7 @@ parseBetweenSymbols : Problem -> Problem -> String -> String -> LXParser String
 parseBetweenSymbols problem1 problem2 startSymbol endSymbol =
     succeed identity
         |. symbol (Token startSymbol problem1)
-        |. spaces
+        |. eatSpaces
         |= parseUntil problem2 endSymbol
 
 
@@ -845,7 +879,7 @@ some : LXParser a -> LXParser ( a, List a )
 some p =
     succeed Tuple.pair
         |= p
-        |. spaces
+        |. eatSpaces
         |= many p
 
 
@@ -861,9 +895,9 @@ between : LXParser opening -> LXParser closing -> LXParser a -> LXParser a
 between opening closing p =
     succeed identity
         |. opening
-        |. spaces
+        |. eatSpaces
         |= p
-        |. spaces
+        |. eatSpaces
         |. closing
 
 
@@ -910,7 +944,7 @@ manyHelp p vs =
     oneOf
         [ succeed (\v -> Loop (v :: vs))
             |= p
-            |. spaces
+            |. eatSpaces
         , succeed ()
             |> map (\_ -> Done (List.reverse vs))
         ]

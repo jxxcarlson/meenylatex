@@ -8,3 +8,4 @@ src/Internal/Example.elm
 tests/VerifyExamples/
 tools/main.js
 demo/node_modules/
+demo-package/

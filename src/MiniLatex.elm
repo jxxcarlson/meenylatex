@@ -1,6 +1,6 @@
 module MiniLatex exposing
     ( render, renderWithSeed
-    , LatexState, TocEntry, TableOfContents
+    , LatexState, LatexExpression, TocEntry, TableOfContents
     , emptyLatexState, parse
     )
 
@@ -17,11 +17,11 @@ for an explanation of the theory behind the MiniLatex package.
 
 # API
 
-@docs render, renderWithSeed
+@docs parse, render, renderWithSeed
 
-@docs LatexState, TocEntry, TableOfContents
+@docs LatexExpression, LatexState, emptyLatexState
 
-@docs emptyLatexState
+@docs TocEntry, TableOfContents
 
 -}
 
@@ -33,6 +33,9 @@ import Internal.Render2 as Render
 import MiniLatex.Edit
 import MiniLatex.Render exposing (MathJaxRenderOption)
 
+
+{-| Type of the syntax tree -}
+type alias LatexExpression = Internal.Parser.LatexExpression
 
 {-| Auxiliary data compiled during parsing
 -}
@@ -57,6 +60,10 @@ type alias TableOfContents =
 emptyLatexState : LatexState
 emptyLatexState =
     Internal.LatexState.emptyLatexState
+
+{-| parse a string of LaTeX text and return its syntax tree -}
+parse : String -> List LatexExpression
+parse = Internal.Parser.parse
 
 
 {-| The function call
@@ -84,9 +91,6 @@ render mathJaxRenderOption macroDefinitions source =
       emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
-
-parse : String -> List LatexExpression
-parse = Internal.Parser.parse
 
 {-| Like render, but used the `seed` to define the ids for each paragraph:
 

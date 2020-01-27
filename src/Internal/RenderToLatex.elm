@@ -41,7 +41,12 @@ original string, but ignore spaces in the comparison.
 -}
 renderBackToLatexTestModSpace : String -> Bool
 renderBackToLatexTestModSpace str =
-    (str |> String.replace " " "") == (renderBackToLatex str |> String.replace " " "")
+    let
+      a = str |> String.replace " " "" |> String.trim
+
+      b = renderBackToLatex str |> String.trim |> String.replace " " ""
+    in
+    a == b
 
 
 {-| Render a string into LaTeX

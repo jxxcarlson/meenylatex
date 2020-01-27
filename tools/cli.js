@@ -17,6 +17,10 @@ function eval(cmd, _, __, callback) {
   main.ports.get.send(cmd)
 }
 
-repl.start({ prompt: '> ', eval: eval });
+function myWriter(output) {
+  return output.toUpperCase();
+}
+
+repl.start({ prompt: '> ', eval: eval});
 
 

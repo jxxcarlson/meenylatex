@@ -78,7 +78,10 @@ math elements.
 -}
 render : MathJaxRenderOption -> String -> String -> Html msg
 render mathJaxRenderOption macroDefinitions source =
-    MiniLatexDiffer.init Internal.Parser.parse (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
+    MiniLatexDiffer.init
+      Internal.Parser.parse
+      (Render.renderLatexList mathJaxRenderOption source)
+      emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
 

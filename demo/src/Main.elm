@@ -78,7 +78,7 @@ init flags =
         editRecord =
             MiniLatex.Edit.init NoDelay flags.seed initialText
 
-        _ = Debug.log "SMAP" editRecord.sourceMap
+        -- _ = Debug.log "SMAP" editRecord.sourceMap
 
         --            MiniLatex.Edit.init NoDelay model.seed (prependMacros initialMacroText initialText)
         model =

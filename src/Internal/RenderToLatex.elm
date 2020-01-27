@@ -37,14 +37,14 @@ renderBackToLatexTest str =
 
 
 {-| return true if a string rendered back to latex is the
-original string, but ignore spaces in the compariosn.
+original string, but ignore spaces in the comparison.
 -}
 renderBackToLatexTestModSpace : String -> Bool
 renderBackToLatexTestModSpace str =
     (str |> String.replace " " "") == (renderBackToLatex str |> String.replace " " "")
 
 
-{-| Redner a string into LaTeX
+{-| Render a string into LaTeX
 -}
 render : LatexExpression -> String
 render latexExpression =
@@ -77,8 +77,13 @@ render latexExpression =
             str
 
         LXError error ->
-            List.map ErrorMessages.renderError error |> String.join "; "
+            -- ist.map ErrorMessages.renderError error |> String.join "; "
+            -- Debug.toString error
+            "LXError"
 
+        NewCommand name args body ->
+            -- "NewCommand "  ++ name ++ "["  ++ (String.fromInt args) ++ "]" ++ "{" ++ (Debug.toString body) ++ "} "
+            "NewCommand"
 
 {-| Render a list of LatexExpressions
 -}

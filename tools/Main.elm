@@ -26,6 +26,8 @@ the `transform` function in `Main.elm`.
 
 import Platform exposing (Program)
 import MiniLatex
+import Internal.RenderToLatex as L
+import Diff
 
 
 
@@ -36,7 +38,7 @@ import MiniLatex
 
 
 type alias InputType = String
-type alias OutputType = String
+type alias OutputType = List String
 
 port get : (InputType -> msg) -> Sub msg
 
@@ -87,8 +89,23 @@ subscriptions _ =
 -}
 
 transform : InputType -> OutputType
-transform str =
-   MiniLatex.parse  str
-      |> List.map Debug.toString
-      |> String.join "\n"
+transform str_ =
+    let
+       str = String.trim str_
+
+       ast =  MiniLatex.parse  str
+                   |> List.map Debug.toString
+
+       latex = L.renderBackToLatex str |> String.trim
+
+       equal = L.renderBackToLatexTest str
+
+       weaklyEqual = L.renderBackToLatexTestModSpace str
+
+       indicator = (equal, weaklyEqual) |> Debug.toString
+
+       diff = "DIFF: ":: (Diff.diffLines str latex |> List.map Debug.toString)
+    in
+      "EQ: "::indicator::"SOURCE: "::latex :: "AST: "::ast ++ diff
+
 

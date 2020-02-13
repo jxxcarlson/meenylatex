@@ -26,6 +26,7 @@ for an explanation of the theory behind the MiniLatex package.
 -}
 
 import Html exposing (Html)
+import Html.Attributes as HA
 import Internal.LatexDiffer as MiniLatexDiffer
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Parser exposing(LatexExpression)
@@ -90,7 +91,7 @@ render mathJaxRenderOption macroDefinitions source =
       (Render.renderLatexList mathJaxRenderOption source)
       emptyLatexState (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
-        |> Html.div []
+        |> Html.div [HA.attribute "id" "__RENDERED_TEXT__"]
 
 {-| Like render, but used the `seed` to define the ids for each paragraph:
 

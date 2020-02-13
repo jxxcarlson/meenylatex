@@ -325,7 +325,7 @@ renderedSource model =
 
 setViewportForElement : String -> Cmd Msg
 setViewportForElement id =
-    Dom.getViewportOf "__rendered_text__"
+    Dom.getViewportOf "__RENDERED_TEXT__"
         |> Task.andThen (\vp -> getElementWithViewPort vp id)
         |> Task.attempt SetViewPortForElement
 
@@ -336,7 +336,7 @@ setViewPortForSelectedLine element viewport =
         y =
             viewport.viewport.y + element.element.y - element.element.height - 100
     in
-    Task.attempt (\_ -> NoOp) (Dom.setViewportOf "__rendered_text__" 0 y)
+    Task.attempt (\_ -> NoOp) (Dom.setViewportOf "__RENDERED_TEXT__" 0 y)
 
 
 

@@ -44,7 +44,7 @@ init : MathJaxRenderOption -> Int -> String -> Data (Html msg)
 init mathJaxRenderOption version source =
     Internal.LatexDiffer.update
         version
-        (Internal.Parser.parse)
+        Internal.Parser.parse
         (Internal.Render2.renderLatexList mathJaxRenderOption source)
         (Internal.Render2.renderString mathJaxRenderOption)
         Internal.Differ.emptyHtmlMsgRecord
@@ -57,7 +57,7 @@ update : MathJaxRenderOption -> Int -> String -> Data (Html msg) -> Data (Html m
 update mathJaxRenderOption version source editRecord =
     Internal.LatexDiffer.update
         version
-        (Internal.Parser.parse)
+        Internal.Parser.parse
         (Internal.Render2.renderLatexList mathJaxRenderOption source)
         (Internal.Render2.renderString mathJaxRenderOption)
         editRecord

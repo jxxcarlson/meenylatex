@@ -11,12 +11,12 @@ then parsing and rendering the changed paragraphs.
 
 -}
 
+import Dict
 import Html exposing (Html)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
-import Internal.SourceMap as SourceMap exposing(SourceMap)
-import Dict
-import Internal.Parser exposing(LatexExpression(..))
+import Internal.Parser exposing (LatexExpression(..))
+import Internal.SourceMap as SourceMap exposing (SourceMap)
 
 
 
@@ -40,14 +40,14 @@ type alias IdListPacket =
 
 {-| An EditRecord records a list of (logical) newParagraphs
 correspoing to the text to be rendered as well as corresponding
-list of rendered parapgraphs. We need to reveiw this strucure.
+list of rendered paragraphs. We need to reveiw this strucure.
 -}
 type alias EditRecord a =
     { paragraphs : List String
-    , renderedParagraphs : List a
-    , latexState : LatexState
     , astList : List (List LatexExpression)
     , idList : List String
+    , renderedParagraphs : List a
+    , latexState : LatexState
     , sourceMap : SourceMap
     }
 
@@ -56,7 +56,7 @@ type alias EditRecord a =
 -}
 emptyStringRecord : EditRecord String
 emptyStringRecord =
-    EditRecord [] [] emptyLatexState [] [] Dict.empty
+    EditRecord [] [] [] [] emptyLatexState Dict.empty
 
 
 {-| An empty EditRecord -- like the integer 0 in another context. For
@@ -64,7 +64,7 @@ renderers with `Html a` as target.
 -}
 emptyHtmlMsgRecord : EditRecord (Html msg)
 emptyHtmlMsgRecord =
-    EditRecord [] [] emptyLatexState [] [] Dict.empty
+    EditRecord [] [] [] [] emptyLatexState Dict.empty
 
 
 {-| createRecord: Create an edit record by (1)
@@ -82,16 +82,20 @@ init parser renderer text =
             List.length paragraphs
 
         idList =
-            List.range 1 n |> List.map (prefixer 0)
+            List.range 1 n |> List.map (prefixer 0) |> List.map (\i -> "X." ++ i)
 
-        astList = List.map parser paragraphs
+        astList =
+            List.map parser paragraphs
 
-        sourceMap = SourceMap.generate (List.concat astList) idList
+        sourceMap =
+            -- SourceMap.generate (List.concat astList) idList
+            -- TODO: this can be improved by diffing
+            SourceMap.generateSimple paragraphs idList
 
         renderedParagraphs =
             List.map renderer paragraphs
     in
-    EditRecord paragraphs renderedParagraphs emptyLatexState astList idList sourceMap
+    EditRecord paragraphs astList idList renderedParagraphs emptyLatexState sourceMap
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -120,18 +124,21 @@ update seed parser renderer editRecord text =
         diffRecord =
             diff editRecord.paragraphs newParagraphs
 
-        newRenderedParagraphs =
-            differentialRender renderer diffRecord editRecord
+        ( astList, newRenderedParagraphs ) =
+            differentialCompiler parser renderer diffRecord editRecord
 
         p =
             differentialIdList seed diffRecord editRecord
 
-        astList = List.map parser newParagraphs
+        sourceMap : SourceMap
+        sourceMap =
+            -- SourceMap.generate (List.concat astList) p.idList
+            -- TODO: this can be improved by diffing
+            SourceMap.generateSimple newParagraphs p.idList
 
-        sourceMap = SourceMap.generate (List.concat astList) p.idList
-
+        --     List.map2 (\para id -> Keyed.node "p" [ HA.id id, HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
     in
-    EditRecord newParagraphs newRenderedParagraphs editRecord.latexState astList p.idList sourceMap
+    EditRecord newParagraphs astList p.idList newRenderedParagraphs editRecord.latexState sourceMap
 
 
 {-| Update the renderedList by applying the transformer only to the
@@ -301,6 +308,65 @@ differentialRender renderer diffRecord editRecord =
             List.map renderer diffRecord.middleSegmentInTarget
     in
     initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
+
+
+differentialParser : (String -> List LatexExpression) -> DiffRecord -> EditRecord a -> List (List LatexExpression)
+differentialParser parser diffRecord editRecord =
+    let
+        ii =
+            List.length diffRecord.commonInitialSegment
+
+        it =
+            List.length diffRecord.commonTerminalSegment
+
+        initialSegmentParsed =
+            List.take ii editRecord.astList
+
+        terminalSegmentParsed =
+            takeLast it editRecord.astList
+
+        middleSegmentParsed =
+            List.map parser diffRecord.middleSegmentInTarget
+    in
+    initialSegmentParsed ++ middleSegmentParsed ++ terminalSegmentParsed
+
+
+differentialCompiler :
+    (String -> List LatexExpression)
+    -> (String -> a)
+    -> DiffRecord
+    -> EditRecord a
+    -> ( List (List LatexExpression), List a )
+differentialCompiler parser renderer diffRecord editRecord =
+    let
+        ii =
+            List.length diffRecord.commonInitialSegment
+
+        it =
+            List.length diffRecord.commonTerminalSegment
+
+        initialSegmentParsed =
+            List.take ii editRecord.astList
+
+        terminalSegmentParsed =
+            takeLast it editRecord.astList
+
+        middleSegmentParsed =
+            List.map parser diffRecord.middleSegmentInTarget
+
+        initialSegmentRendered =
+            List.take ii editRecord.renderedParagraphs
+
+        terminalSegmentRendered =
+            takeLast it editRecord.renderedParagraphs
+
+        middleSegmentRendered =
+            -- TODO: to improve!
+            List.map renderer diffRecord.middleSegmentInTarget
+    in
+    ( initialSegmentParsed ++ middleSegmentParsed ++ terminalSegmentParsed
+    , initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
+    )
 
 
 differentialIdList : Int -> DiffRecord -> EditRecord a -> IdListPacket

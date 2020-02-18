@@ -1,13 +1,13 @@
 module Internal.LatexDiffer exposing (init, initWithSeed, update)
 
+import Dict
 import Internal.Accumulator as Accumulator
-import Internal.Differ as Differ exposing (EditRecord)
+import Internal.Differ exposing (EditRecord)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression)
 import Internal.Render2 as Render exposing (render)
 import Internal.SourceMap as SourceMap
-import Dict
 
 
 init : (String -> List LatexExpression) -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
@@ -37,24 +37,24 @@ initWithSeed seed parser renderer latexState text =
             latexExpressionList
                 |> Accumulator.render renderer latexState2
 
-        astList = List.map parser paragraphs
-
         idList =
             makeIdListWithSeed seed paragraphs
 
-        sourceMap = SourceMap.generate (List.concat astList) idList
+        sourceMap =
+            -- TODO: this can be improved by diffing
+            SourceMap.generateSimple paragraphs idList
     in
-    EditRecord paragraphs renderedParagraphs latexState2 astList idList sourceMap
+    EditRecord paragraphs latexExpressionList idList renderedParagraphs latexState2 sourceMap
 
 
 makeIdList : List String -> List String
 makeIdList paragraphs =
-    List.range 1 (List.length paragraphs) |> List.map (Differ.prefixer 0)
+    List.range 1 (List.length paragraphs) |> List.map (Internal.Differ.prefixer 0)
 
 
 makeIdListWithSeed : Int -> List String -> List String
 makeIdListWithSeed seed paragraphs =
-    List.range 1 (List.length paragraphs) |> List.map (Differ.prefixer seed)
+    List.range 1 (List.length paragraphs) |> List.map (Internal.Differ.prefixer seed)
 
 
 update :
@@ -67,9 +67,9 @@ update :
     -> EditRecord a
 update seed parser renderLatexExpression renderString editRecord source =
     -- ### LatexDiffer.update
-    if Differ.isEmpty editRecord then
+    if Internal.Differ.isEmpty editRecord then
         init parser renderLatexExpression emptyLatexState source
 
     else
         source
-            |> Differ.update seed parser (renderString editRecord.latexState) editRecord
+            |> Internal.Differ.update seed parser (renderString editRecord.latexState) editRecord

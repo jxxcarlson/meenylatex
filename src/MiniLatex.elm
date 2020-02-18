@@ -1,7 +1,7 @@
 module MiniLatex exposing
-    ( render, renderWithSeed
-    , LatexState, LatexExpression, TocEntry, TableOfContents
-    , emptyLatexState, parse
+    ( parse, render, renderWithSeed
+    , LatexExpression, LatexState, emptyLatexState
+    , TocEntry, TableOfContents
     )
 
 {-| This library exposes functions for rendering MiniLaTeX text into HTML.
@@ -27,16 +27,19 @@ for an explanation of the theory behind the MiniLatex package.
 
 import Html exposing (Html)
 import Html.Attributes as HA
-import Internal.LatexDiffer as MiniLatexDiffer
+import Internal.LatexDiffer
 import Internal.LatexState exposing (LatexState, emptyLatexState)
-import Internal.Parser exposing(LatexExpression)
+import Internal.Parser exposing (LatexExpression)
 import Internal.Render2 as Render
 import MiniLatex.Edit
 import MiniLatex.Render exposing (MathJaxRenderOption)
 
 
-{-| Type of the syntax tree -}
-type alias LatexExpression = Internal.Parser.LatexExpression
+{-| Type of the syntax tree
+-}
+type alias LatexExpression =
+    Internal.Parser.LatexExpression
+
 
 {-| Auxiliary data compiled during parsing
 -}
@@ -62,9 +65,12 @@ emptyLatexState : LatexState
 emptyLatexState =
     Internal.LatexState.emptyLatexState
 
-{-| parse a string of LaTeX text and return its syntax tree -}
+
+{-| parse a string of LaTeX text and return its syntax tree
+-}
 parse : String -> List LatexExpression
-parse = Internal.Parser.parse
+parse =
+    Internal.Parser.parse
 
 
 {-| The function call
@@ -86,12 +92,14 @@ math elements.
 -}
 render : MathJaxRenderOption -> String -> String -> Html msg
 render mathJaxRenderOption macroDefinitions source =
-    MiniLatexDiffer.init
-      Internal.Parser.parse
-      (Render.renderLatexList mathJaxRenderOption source)
-      emptyLatexState (prependMacros macroDefinitions source)
+    Internal.LatexDiffer.init
+        Internal.Parser.parse
+        (Render.renderLatexList mathJaxRenderOption source)
+        emptyLatexState
+        (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
-        |> Html.div [HA.attribute "id" "__RENDERED_TEXT__"]
+        |> Html.div [ HA.attribute "id" "__RENDERED_TEXT__" ]
+
 
 {-| Like render, but used the `seed` to define the ids for each paragraph:
 
@@ -105,16 +113,24 @@ renderWithSeed :
     -> String
     -> Html msg
 renderWithSeed mathJaxRenderOption seed macroDefinitions source =
-    MiniLatexDiffer.initWithSeed seed Internal.Parser.parse (Render.renderLatexList mathJaxRenderOption source) emptyLatexState (prependMacros macroDefinitions source)
+    Internal.LatexDiffer.initWithSeed
+        seed
+        Internal.Parser.parse
+        (Render.renderLatexList mathJaxRenderOption source)
+        emptyLatexState
+        (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get
         |> Html.div []
 
 
 prependMacros macros_ sourceText =
     let
-        macros = case macros_ == "" of
-            True -> "\\newcommand{\\dummy}{Dummy!}"
-            _ -> macros_
-    in
-        "$$\n" ++ String.trim macros_ ++ "\n$$\n\n" ++ sourceText
+        macros =
+            case macros_ == "" of
+                True ->
+                    "\\newcommand{\\dummy}{Dummy!}"
 
+                _ ->
+                    macros_
+    in
+    "$$\n" ++ String.trim macros_ ++ "\n$$\n\n" ++ sourceText

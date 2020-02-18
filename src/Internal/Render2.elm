@@ -102,7 +102,7 @@ renderString mathJaxRenderOption latexState source =
     paragraphs
         |> List.map parse
         |> List.map render_
-        |> Html.div [HA.attribute "id" "__RENDERED_TEXT__"]
+        |> Html.div []
 
 
 

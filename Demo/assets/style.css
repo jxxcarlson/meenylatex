@@ -9,9 +9,10 @@ body { font-size: 13px;
 
 
 
-Fiddle
+#__RENDERED_TEXT__ {
+  overflow-y: scroll;
+  }
 
-Try a system like this instead:
 
 .container {
     width: 100%;

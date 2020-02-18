@@ -68,7 +68,7 @@ emptyHtmlMsgRecord =
 
 
 {-| createRecord: Create an edit record by (1)
-breaking the text in to pargraphs, (2) applying
+breaking the text in to paragraphs, (2) applying
 the transformer to each string in the resulting
 list of strings.
 -}

@@ -320,7 +320,7 @@ macroPanel model =
 
 renderedSource : Model (Html msg) -> Html msg
 renderedSource model =
-    Html.div (renderedSourceStyle ++ [ HA.class "rhs", HA.attribute "id" "__rendered_text__" ])
+    Html.div (renderedSourceStyle ++ [ HA.class "rhs" ])
         [ model.renderedText ]
 
 setViewportForElement : String -> Cmd Msg

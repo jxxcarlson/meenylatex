@@ -1,4 +1,7 @@
-module MiniLatex.Export exposing (transform)
+module MiniLatex.Export exposing
+    ( transform
+    , toLaTeX
+    )
 
 {-| This module is for preparing latex for export.
 
@@ -18,6 +21,7 @@ import Internal.JoinStrings as JoinStrings
 import Internal.Paragraph
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Internal.ParserTools as PT
+import Internal.Source
 import Internal.Utility as Utility
 import Maybe.Extra
 import String
@@ -30,6 +34,22 @@ A & B \\\\
 C & D \\\\
 \\end{tabular}
 """
+
+
+toLaTeX : String -> String
+toLaTeX str =
+    let
+        parsand =
+            str
+                |> Internal.Paragraph.logicalParagraphify
+                |> List.map Internal.Parser.parse
+
+        latex_ =
+            parsand
+                |> List.map renderLatexList
+                |> List.foldl (\par acc -> acc ++ "\n\n" ++ par) ""
+    in
+    [ Internal.Source.texPrefix, latex_, Internal.Source.texSuffix ] |> String.join "\n\n"
 
 
 {-| Parse a string and render it as a tuple,

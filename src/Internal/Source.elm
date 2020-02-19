@@ -94,6 +94,8 @@ texPrefix =
   {\\begin{adjustwidth}{2cm}{} \\footnotesize}
   {\\end{adjustwidth}}
 
+\\newcommand{\\innertableofcontents}{}
+
 
 \\parindent0pt
 \\parskip10pt

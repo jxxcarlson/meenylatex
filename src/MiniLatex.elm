@@ -31,7 +31,7 @@ import Internal.LatexDiffer
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Parser exposing (LatexExpression)
 import Internal.Render2 as Render
-import MiniLatex.Edit
+import MiniLatex.Edit exposing (LaTeXMsg)
 import MiniLatex.Render exposing (MathJaxRenderOption)
 
 
@@ -90,7 +90,7 @@ Use `Delay` for loading document containing many
 math elements.
 
 -}
-render : MathJaxRenderOption -> String -> String -> Html msg
+render : MathJaxRenderOption -> String -> String -> Html LaTeXMsg
 render mathJaxRenderOption macroDefinitions source =
     Internal.LatexDiffer.init
         Internal.Parser.parse
@@ -111,7 +111,7 @@ renderWithSeed :
     -> Int
     -> String
     -> String
-    -> Html msg
+    -> Html LaTeXMsg
 renderWithSeed mathJaxRenderOption seed macroDefinitions source =
     Internal.LatexDiffer.initWithSeed
         seed

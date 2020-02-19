@@ -21,7 +21,7 @@ initialText = StringsV2.initialText
     --
 
 
-main : Program Flags (Model (Html Msg)) Msg
+main : Program Flags Model Msg
 main =
     Browser.element
         { view = view
@@ -31,14 +31,15 @@ main =
         }
 
 
-type alias Model a =
+type alias Model =
     { sourceText : String
-    , renderedText : a
+    , renderedText : Html Msg
     , macroText : String
-    , editRecord : Data a
+    , editRecord : Data (Html MiniLatex.Edit.LaTeXMsg)
     , debounce : Debounce String
     , counter : Int
     , seed : Int
+    , message : String
     }
 
 
@@ -55,6 +56,7 @@ type Msg
     | RestoreText
     | ExampleText
     | SetViewPortForElement (Result Dom.Error ( Dom.Element, Dom.Viewport ))
+    | LaTeXMsg MiniLatex.Edit.LaTeXMsg
 
 
 
@@ -72,7 +74,7 @@ type alias Flags =
     }
 
 
-init : Flags -> ( Model (Html msg), Cmd Msg )
+init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
         editRecord =
@@ -87,6 +89,7 @@ init flags =
             , debounce = Debounce.init
             , counter = 0
             , seed = flags.seed
+            , message = "No message yet ..."
             }
     in
     ( model, Cmd.none )
@@ -96,12 +99,12 @@ initialMacroText =
     normalize StringsV1.macros
 
 
-subscriptions : Model (Html msg) -> Sub Msg
+subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
 
-update : Msg -> Model (Html msg) -> ( Model (Html msg), Cmd Msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NoOp -> (model, Cmd.none)
@@ -217,6 +220,11 @@ update msg model =
                 Err _ ->
                     ( model , Cmd.none )
 
+        LaTeXMsg laTeXMsg ->
+            case laTeXMsg of
+                MiniLatex.Edit.IDClicked id ->
+                  ({model | message = "Clicked: " ++ id}, Cmd.none)
+
 
 
 normalize : String -> String
@@ -229,9 +237,10 @@ prependMacros macros_ sourceText =
     "$$\n" ++ (macros_ |> normalize) ++ "\n$$\n\n" ++ sourceText
 
 
-renderFromEditRecord : Int -> Data (Html msg) -> Html msg
+renderFromEditRecord : Int -> Data (Html MiniLatex.Edit.LaTeXMsg) -> Html Msg
 renderFromEditRecord counter editRecord =
     MiniLatex.Edit.get editRecord
+        |> List.map (Html.map LaTeXMsg)
         |> List.map (\x -> Html.div [ HA.style "margin-bottom" "0.65em" ] [ x ])
         |> Html.div []
 
@@ -241,13 +250,13 @@ render_ str =
     Task.perform Render (Task.succeed str)
 
 
-render : String -> Html msg
+render : String -> Html Msg
 render sourceText =
     let
         macroDefinitions =
             initialMacroText
     in
-    MiniLatex.render NoDelay macroDefinitions sourceText
+    MiniLatex.render NoDelay macroDefinitions sourceText |> Html.map LaTeXMsg
 
 
 
@@ -256,7 +265,7 @@ render sourceText =
 ---
 
 
-view : Model (Html Msg) -> Html Msg
+view : Model -> Html Msg
 view model =
     div (outerStyle ++ [ HA.class "container" ])
         [ lhs model
@@ -273,25 +282,17 @@ lhs model =
             [ text "For more information about MiniLaTeX, please go to  "
             , a [ href "https://minilatex.io", target "_blank" ] [ text "minilatex.io" ]
             ]
+         , p [style "margin-left" "20px"] [text model.message]
         ]
 
 
-display : Model (Html Msg) -> Html Msg
+display : Model -> Html Msg
 display model =
     div []
         [ h1 [ style "margin-left" "20px" ] [ text "MiniLatex Demo" ]
         , label "Edit or write new LaTeX below. It will be rendered in real time."
         , editor model
         , div [] [ renderedSource model ]
-
-        -- , macroPanel model
-        --        , p [ style "margin-left" "20px", style "font-style" "italic" ]
-        --                    [ text "This app is a demo of the ongoing MiniLatex research project."
-        --                    , br [] []
-        --                    , text "See "
-        --                    , a [ href "https://knode.io", target "_blank" ] [ text "knode.io" ]
-        --                    , text " for a more substantial use of this technology."
-        --                    ]]
         ]
 
 
@@ -299,7 +300,7 @@ label text_ =
     p labelStyle [ text text_ ]
 
 
-editor : Model (Html msg) -> Html Msg
+editor : Model -> Html Msg
 editor model =
     div []
         [ textarea (editorTextStyle ++ [ onInput GetContent, value model.sourceText ]) []
@@ -307,7 +308,7 @@ editor model =
         ]
 
 
-macroPanel : Model (Html msg) -> Html Msg
+macroPanel : Model -> Html Msg
 macroPanel model =
     Html.div []
         [ textarea (macroPanelStyle ++ [ onInput GetMacroText, value model.macroText ]) []
@@ -316,10 +317,10 @@ macroPanel model =
         ]
 
 
-renderedSource : Model (Html msg) -> Html msg
+renderedSource : Model -> Html Msg
 renderedSource model =
     Html.div (renderedSourceStyle ++ [ HA.class "rhs" ])
-        [ model.renderedText ]
+        [ model.renderedText]
 
 setViewportForElement : String -> Cmd Msg
 setViewportForElement id =

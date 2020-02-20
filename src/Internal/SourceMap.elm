@@ -1,7 +1,13 @@
-module Internal.SourceMap exposing (SourceMap, generate, generateSimple)
+module Internal.SourceMap exposing (SourceMap, generate)
 
 import Dict exposing (Dict)
+import BiDict exposing(BiDict)
 import Internal.Parser exposing (LatexExpression(..))
+
+
+type alias SourceMap =
+    BiDict String String
+
 
 
 getText : List LatexExpression -> List String
@@ -48,34 +54,13 @@ text expr =
             [ "LXError" ]
 
 
-type alias SourceMap =
-    Dict String String
-
-
-{-|
-
-    lexpr = parse "Ho ho ho: $a^2 = 7$"
-    --> [LXString ("Ho  ho  ho: "),InlineMath ("a^2 = 7")]
-
-    idList = ["1", "2"]
-    --> ["1","2"]
-
-    generate lexpr idList
-    --> Dict.fromList [("Ho  ho  ho: ","1"),("a^2 = 7","2")]
-
--}
-generate : List LatexExpression -> List String -> SourceMap
-generate listExpr listId =
-    List.map2 (\a b -> ( a, b )) (getText listExpr) listId
-        |> Dict.fromList
-
 
 
 --
 -- generateSimple : a -> b -> List c -> List d -> List (c, d)
 
 
-generateSimple : List String -> List String -> SourceMap
-generateSimple paragraphs idList =
-    List.map2 (\p id -> ( p, id )) paragraphs idList
-        |> Dict.fromList
+generate : List String -> List String -> SourceMap
+generate  idList paragraphs =
+    List.map2 (\id p -> ( id, p )) paragraphs idList
+        |> BiDict.fromList

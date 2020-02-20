@@ -1,11 +1,13 @@
 {
     "type": "application",
     "source-directories": [
-        "src", "../src"
+        "src",
+        "../src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
         "direct": {
+            "Janiczek/elm-bidict": "2.0.1",
             "elm/browser": "1.0.2",
             "elm/core": "1.0.4",
             "elm/html": "1.0.0",
@@ -17,17 +19,22 @@
             "mdgriffith/elm-ui": "1.1.5"
         },
         "indirect": {
-            "elm/bytes": "1.0.8",
-            "elm/file": "1.0.5",
-            "elm/http": "2.0.0",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
             "elm/virtual-dom": "1.0.2",
-            "elm-community/maybe-extra": "5.1.0"
+            "elm-community/dict-extra": "2.4.0",
+            "erlandsona/assoc-set": "1.1.0",
+            "pzp1997/assoc-list": "1.0.0",
+            "skyqrose/assoc-list-extra": "1.0.0"
         }
     },
     "test-dependencies": {
         "direct": {},
-        "indirect": {}
+        "indirect": {
+            "elm/bytes": "1.0.8",
+            "elm/file": "1.0.5",
+            "elm/http": "2.0.0",
+            "elm-community/maybe-extra": "5.1.0"
+        }
     }
 }

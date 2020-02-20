@@ -17,6 +17,7 @@ import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression(..))
 import Internal.SourceMap as SourceMap exposing (SourceMap)
+import BiDict exposing(BiDict)
 
 
 
@@ -56,7 +57,7 @@ type alias EditRecord a =
 -}
 emptyStringRecord : EditRecord String
 emptyStringRecord =
-    EditRecord [] [] [] [] emptyLatexState Dict.empty
+    EditRecord [] [] [] [] emptyLatexState BiDict.empty
 
 
 {-| An empty EditRecord -- like the integer 0 in another context. For
@@ -64,7 +65,7 @@ renderers with `Html a` as target.
 -}
 emptyHtmlMsgRecord : EditRecord (Html msg)
 emptyHtmlMsgRecord =
-    EditRecord [] [] [] [] emptyLatexState Dict.empty
+    EditRecord [] [] [] [] emptyLatexState BiDict.empty
 
 
 {-| createRecord: Create an edit record by (1)
@@ -90,7 +91,7 @@ init parser renderer text =
         sourceMap =
             -- SourceMap.generate (List.concat astList) idList
             -- TODO: this can be improved by diffing
-            SourceMap.generateSimple paragraphs idList
+            SourceMap.generate paragraphs idList
 
         renderedParagraphs =
             List.map renderer paragraphs
@@ -134,7 +135,7 @@ update seed parser renderer editRecord text =
         sourceMap =
             -- SourceMap.generate (List.concat astList) p.idList
             -- TODO: this can be improved by diffing
-            SourceMap.generateSimple newParagraphs p.idList
+            SourceMap.generate newParagraphs p.idList
 
         --     List.map2 (\para id -> Keyed.node "p" [ HA.id id, HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
     in

@@ -42,7 +42,7 @@ initWithSeed seed parser renderer latexState text =
 
         sourceMap =
             -- TODO: this can be improved by diffing
-            SourceMap.generateSimple paragraphs idList
+            SourceMap.generate paragraphs idList
     in
     EditRecord paragraphs latexExpressionList idList renderedParagraphs latexState2 sourceMap
 

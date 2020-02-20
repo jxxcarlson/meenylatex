@@ -46,19 +46,19 @@ processParagraph par =
     in
     case signature of
         "\\image" ->
-            Export.transform par |> Tuple.first
+            Export.toLaTeXWithImages par |> Tuple.first
 
         "listin" ->
-            Export.transform par |> Tuple.first
+            Export.toLaTeXWithImages par |> Tuple.first
 
         "code" ->
-            Export.transform par |> Tuple.first
+            Export.toLaTeXWithImages par |> Tuple.first
 
         "href" ->
-            Export.transform par |> Tuple.first
+            Export.toLaTeXWithImages par |> Tuple.first
 
         "usefor" ->
-            Export.transform par |> Tuple.first
+            Export.toLaTeXWithImages par |> Tuple.first
 
         _ ->
-            Export.transform par |> Tuple.first
+            Export.toLaTeXWithImages par |> Tuple.first

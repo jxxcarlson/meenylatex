@@ -1,14 +1,11 @@
-module MiniLatex.Export exposing
-    ( transform
-    , toLaTeX
-    )
+module MiniLatex.Export exposing (toLaTeX, toLaTeXWithImages)
 
 {-| This module is for preparing latex for export.
 
 
 # API
 
-@docs transform
+@docs toLaTeX, toLaTeXWithImages
 
 -}
 
@@ -36,6 +33,8 @@ C & D \\\\
 """
 
 
+{-| Map MiniLaTeX source text to standard LaTeX
+-}
 toLaTeX : String -> String
 toLaTeX str =
     let
@@ -52,13 +51,13 @@ toLaTeX str =
     [ Internal.Source.texPrefix, latex_, Internal.Source.texSuffix ] |> String.join "\n\n"
 
 
-{-| Parse a string and render it as a tuple,
-where the first element is the string rendered
-back into Latex, and where the second element is a list
-of image urls.
+{-| Map MiniLaTeX source text to a tuple,
+where the first is a LaTeX version of the source
+text, and where the second element is a list
+of the image urls in the source text.
 -}
-transform : String -> ( String, List String )
-transform str =
+toLaTeXWithImages : String -> ( String, List String )
+toLaTeXWithImages str =
     let
         parsand =
             str

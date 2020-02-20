@@ -1,7 +1,4 @@
-module MiniLatex.Edit exposing
-    ( Data, emptyData, init, update, get, parse
-    , LaTeXMsg(..)
-    )
+module MiniLatex.Edit exposing (Data, emptyData, init, update, get, parse, LaTeXMsg(..))
 
 {-| Data structures and functions for managing interactive edits. The parse tree, rendered text, and other information needed
 for this is stored in a value of type
@@ -19,7 +16,7 @@ different edits.
 
 # API
 
-@docs Data, emptyData, init, update, get, parse
+@docs Data, emptyData, init, update, get, parse, LaTeXMsg
 
 -}
 
@@ -41,6 +38,8 @@ type alias Data a =
     Internal.Differ.EditRecord a
 
 
+{-| Use this type so that clicks in the rendered text can be detected
+-}
 type LaTeXMsg
     = IDClicked String
 

@@ -5,12 +5,14 @@ import Parser.Advanced exposing (..)
 import Set
 import Dict exposing(Dict)
 import List.Extra
+import Maybe.Extra
 
 {-| The type for the Abstract syntax tree
 -}
 type MathExpression
     = MathText String
     | Macro String (List MathExpression)
+    | NewCommand String String (List MathExpression)
     | MathList (List MathExpression)
 
 
@@ -41,6 +43,8 @@ type Problem
     | ExpectingRightBracket
     | InvalidInt
     | ExpectingStuff
+    | ExpectingNewCommand
+    | ExpectingBackslash
 
 {-|
 
@@ -57,6 +61,56 @@ check str =
         Ok (result) -> text result
         Err _ -> "error"
 
+
+-- "\\bf{#1}{#2}"
+
+--makeFunction : Int -> String -> (List String -> String)
+--makeFunction arity pattern =
+
+
+-- xxx : String -> MacroDict -- List (String, List String -> String)
+{-|
+    xxx "\\newcommand{\\btt}[2]{\\bf{#1}{#2}}"
+    -> [Just ("btt","\\bf{#1}{#2}")]
+-}
+xxx str =
+    case parse str of
+        Ok list -> List.map makeEntry list
+        Err _ -> []
+
+-- makeEntry : MathExpression -> Maybe (String, List String -> String)
+makeEntry : MathExpression -> Maybe (String, String)
+makeEntry expr =
+    case expr of
+        NewCommand name nargs args -> Just (makeEntry_ name nargs args)
+        _ -> Nothing
+
+-- makeEntry_  : String -> String -> List MathExpression -> (String, List String -> String)
+makeEntry_ : String -> String -> List MathExpression -> (String,  String)
+makeEntry_ name nargs args =
+    (name, transform args)
+
+transform args =
+     List.map text_ args
+       |> List.head
+       |> Maybe.withDefault "XXX"
+
+{-|
+    f0 = \list -> "\\bf{#1}"
+    --> <function> : a -> String
+
+    f1 = replaceArg 0 f0
+    --> <function> : List String -> String
+
+    f1 ["a"]
+    --> "\\bf{a}"
+-}
+replaceArg : Int -> (List String -> String) -> (List String -> String)
+replaceArg k f =
+    \list ->   String.replace ("#" ++ String.fromInt (k + 1)) (getArg k list) (f list)
+
+
+-- \list -> "{\\bf " ++ (getArg 0 list) ++ "}"
 
 {-|
     macroDict = Dict.fromList [("bb", \list -> "{\\bf B}"), ("bt", \list -> "{\\bf " ++ (getArg 1 list) ++ "}")]
@@ -84,6 +138,7 @@ evalExpr macroDict_ expr =
     case expr of
         MathText str -> str
         Macro name args -> evalMacro macroDict_ name args
+        NewCommand name nargs args-> evalNewCommand name nargs args
         MathList list -> List.map text_ list |> String.join " "
 
 
@@ -92,6 +147,10 @@ evalMacro macroDict_ name args =
     case Dict.get name macroDict_ of
         Nothing -> "\\" ++ name ++ (List.map (text_ >> enclose) args |> String.join "")
         Just definition -> definition (List.map text_ args)
+
+evalNewCommand : String -> String -> List MathExpression -> String
+evalNewCommand name nargs args =
+     "\\newcommand{\\" ++ name ++ "}[" ++ nargs ++ "]"  ++ (List.map (text_ >> enclose) args |> String.join "")
 
 
 
@@ -114,7 +173,8 @@ text_ expr =
     case expr of
         MathText str -> str
         Macro name args -> "\\" ++ name ++ (List.map (text_ >> enclose) args |> String.join "")
-        MathList list -> List.map text_ list |> String.join "||"
+        MathList list -> List.map text_ list |> String.join " "
+        NewCommand name nargs args -> evalNewCommand name nargs args
 
 enclose : String -> String
 enclose arg_ =
@@ -123,8 +183,9 @@ enclose arg_ =
 mathExpression : MXParser MathExpression
 mathExpression =
     oneOf
-        [
-           macro
+        [ backtrackable newCommand
+         ,  macro
+
          , mathStuff
          ]
 
@@ -187,7 +248,14 @@ macro  =
         |= itemList arg
         -- |. wsParser
 
-
+newCommand =
+    succeed NewCommand
+      |. symbol (Token "\\newcommand" ExpectingNewCommand)
+      |= newMacroName
+      |. symbol (Token "[" ExpectingLeftBracket)
+      |= word ExpectingRightBracket (\c -> c /= ']')
+      |. symbol (Token "]" ExpectingRightBracket)
+      |= itemList arg
 
 {-| Use to parse arguments for macros
 -}
@@ -199,6 +267,16 @@ arg =
             |= itemList (oneOf [ macroArgWords, lazy (\_ -> macro) ])
             |. symbol (Token "}" ExpectingRightBrace)
             |> map MathList
+        )
+
+newMacroName : MXParser String
+newMacroName =
+    inContext (CArg "arg") <|
+        (succeed identity
+            |. symbol (Token "{" ExpectingLeftBrace)
+            |. symbol (Token "\\" ExpectingBackslash)
+            |= word ExpectingRightBrace (\c -> c /= '}')
+            |. symbol (Token "}" ExpectingRightBrace)
         )
 
 

@@ -102,6 +102,11 @@ transform args =
        |> replaceArg 1
        |> replaceArg 2
 
+
+
+replaceArgs : Int -> (List String -> String) -> (List String -> String)
+replaceArgs n f =
+    List.foldl replaceArg f (List.range 0 (n - 1)) 
 {-|
     f0 = \list -> "\\bf{#1}"
     --> <function> : a -> String

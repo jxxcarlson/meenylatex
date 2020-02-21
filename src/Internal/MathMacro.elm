@@ -73,20 +73,23 @@ check str =
     xxx "\\newcommand{\\btt}[2]{\\bf{#1}{#2}}"
     -> [Just ("btt","\\bf{#1}{#2}")]
 -}
-xxx str =
+makeMacroDict : String -> MacroDict
+makeMacroDict str =
     case parse str of
         Ok list -> List.map makeEntry list
-        Err _ -> []
+           |> Maybe.Extra.values
+           |> Dict.fromList
+        Err _ -> Dict.empty
 
 -- makeEntry : MathExpression -> Maybe (String, List String -> String)
-makeEntry : MathExpression -> Maybe (String, String)
+makeEntry : MathExpression -> Maybe (String, List String -> String)
 makeEntry expr =
     case expr of
         NewCommand name nargs args -> Just (makeEntry_ name nargs args)
         _ -> Nothing
 
 -- makeEntry_  : String -> String -> List MathExpression -> (String, List String -> String)
-makeEntry_ : String -> String -> List MathExpression -> (String,  String)
+makeEntry_ : String -> String -> List MathExpression -> (String,  List String -> String)
 makeEntry_ name nargs args =
     (name, transform args)
 
@@ -94,6 +97,10 @@ transform args =
      List.map text_ args
        |> List.head
        |> Maybe.withDefault "XXX"
+       |> (\str -> \list -> str)
+       |> replaceArg 0
+       |> replaceArg 1
+       |> replaceArg 2
 
 {-|
     f0 = \list -> "\\bf{#1}"
@@ -120,6 +127,12 @@ replaceArg k f =
 
     evalStr macroDict "\\int_0^1 x^n dx + \\bt{Z}"
     --> "\\int_0^1 x^n dx + {\\bf Z}"
+
+    dd = makeMacroDict "\\newcommand{\\btt}[2]{\\bf{#1}{#2}}"
+    --> Dict.fromList [("btt",<function>)]
+        : MacroDict
+    evalStr dd "\\int_0^1 x^n dx + \\bt{Z}"
+    --> "\\int_0^1 x^n dx + \\bt{Z}"
 -}
 evalStr : MacroDict ->  String -> String
 evalStr macroDict_ str =

@@ -7,7 +7,7 @@ import Dict exposing(Dict)
 import List.Extra
 import Maybe.Extra
 
-{-| The type for the Abstract syntax tree
+{-| The type for the syntax tree
 -}
 type MathExpression
     = MathText String
@@ -62,17 +62,16 @@ check str =
         Err _ -> "error"
 
 
--- "\\bf{#1}{#2}"
-
---makeFunction : Int -> String -> (List String -> String)
---makeFunction arity pattern =
-
-
--- xxx : String -> MacroDict -- List (String, List String -> String)
 {-|
-    xxx "\\newcommand{\\btt}[2]{\\bf{#1}{#2}}"
-    -> [Just ("btt","\\bf{#1}{#2}")]
--}
+      d2 = makeMacroDict "\\newcommand{\\bb}[0]{\\bf{B}} \\newcommand{\\bt}[1]{\\bf{#1}}"
+      --> Dict.fromList [("bb",<function>),("bt",<function>)]
+
+      evalStr d2 "\\int_0^1 x^n dx + \\bt{Z}"
+      --> "\\int_0^1 x^n dx + \\bf{Z}"
+
+      evalStr d2 "\\int_0^1 x^n dx + \\bb"
+      --> "\\int_0^1 x^n dx + \\bf{B}"
+  -}
 makeMacroDict : String -> MacroDict
 makeMacroDict str =
     case parse str of
@@ -81,7 +80,6 @@ makeMacroDict str =
            |> Dict.fromList
         Err _ -> Dict.empty
 
--- makeEntry : MathExpression -> Maybe (String, List String -> String)
 makeEntry : MathExpression -> Maybe (String, List String -> String)
 makeEntry expr =
     case expr of
@@ -91,22 +89,22 @@ makeEntry expr =
 -- makeEntry_  : String -> String -> List MathExpression -> (String, List String -> String)
 makeEntry_ : String -> String -> List MathExpression -> (String,  List String -> String)
 makeEntry_ name nargs args =
-    (name, transform args)
+    let
+        n = String.toInt nargs |> Maybe.withDefault 0
+    in
+    (name, transform n args)
 
-transform args =
+transform n args =
      List.map text_ args
        |> List.head
        |> Maybe.withDefault "XXX"
        |> (\str -> \list -> str)
-       |> replaceArg 0
-       |> replaceArg 1
-       |> replaceArg 2
-
+       |> replaceArgs n
 
 
 replaceArgs : Int -> (List String -> String) -> (List String -> String)
 replaceArgs n f =
-    List.foldl replaceArg f (List.range 0 (n - 1)) 
+    List.foldl replaceArg f (List.range 0 (n - 1))
 {-|
     f0 = \list -> "\\bf{#1}"
     --> <function> : a -> String

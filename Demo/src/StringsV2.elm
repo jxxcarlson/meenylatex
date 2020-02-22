@@ -51,9 +51,7 @@ initialText =
     """
 
 \\title{Sample MiniLaTeX Doc}
-% \\author{James Carlson}
-% \\email{jxxcarlson@gmail.com}
-% \\date{August 5, 2018}s
+
 
 
 
@@ -118,6 +116,61 @@ An improper integral:
 \\label{integral:exp}
 \\int_0^\\infty e^{-x} dx = 1
 \\end{equation}
+
+\\section{Math-mode macros}
+
+\\begin{mathmacro}
+\\newcommand{\\bt}[1]{\\bf{#1}}
+\\newcommand{\\mca}[0]{\\mathcal{A}}
+\\end{mathmacro}
+
+
+You can add math mode macros to your document
+as in the example below.
+
+\\begin{verbatim}
+\\begin{mathmacro}
+\\newcommand{\\bt}[1]{\\bf{#1}}
+\\newcommand{\\mca}[0]{\\mathcal{A}}
+\\end{mathmacro}
+\\end{verbatim}
+
+Then saying
+
+\\begin{verbatim}
+ $$
+ a^2 = \\bt{Z}/\\mca
+ $$
+\\end{verbatim}
+
+yields
+
+$$
+a^2 = \\bt{Z}/\\mca
+$$
+
+There are some restrictions:
+
+\\begin{verbatim}
+1. No regions, e.g, use \\bf{#1},
+   not {\\bf #1}
+
+2. Macros with no arguments:
+   Say \\newcommand{\\mca}[0]{\\mathcal{A}},
+   not \\newcommand{\\mca}{\\mathcal{A}}
+
+3. No recursion: the body of the macro
+   cannot refer to other macros defined
+   in the mathmacro environment.
+
+4. Put the mathmacro environment at
+   the beginning of the document
+\\end{verbatim}
+
+
+Items 1—3 will be eliminated in a
+future release.
+
 
 
 \\section{Text-mode Macros}
@@ -228,14 +281,20 @@ Beryllium& Be& 4& 9.012 \\\\
 
 \\section{Errors and related matters}
 
-\\href{http://nytimes.com}{NYT
+Errors, as illustrated below, are rendered in real time and are reported in red, in place. For example, suppose the user types the  text
 
-Pythagoras is said to have said that $z^2 + b^2 = c^2
+\\begin{verbatim}
+  $$
+  a^2 + b^2 = c^2
+\\end{verbatim}
 
-Errors, as illustrated above, are rendered in real time and are reported in red, in place. Compare
-with the source text on the left.
+Then she will see this:
 
-We plan to make error reporting still better, giving detailed context.  Note, by the way, what happens when a nonexistent macro like \\italic{hohoho } is used:
+\\image{http://jxxcarlson.s3.amazonaws.com/miniLaTeXErrorMsg-2020-02-22.png}{Fig 2. Error message}{width: 200}
+
+
+We plan to make further improvements in error reporting.
+Note, by the way, what happens when a nonexistent macro like \\italic{hohoho } is used:
 
 \\begin{indent}
 \\hohoho{123}
@@ -247,18 +306,22 @@ This is intentional.  Note also what happens when we use a nonexistent environme
 Did you hear the one about the mathematician, the philosopher, and the engineer?
 \\end{joke}
 
-This default treatment of unkown environments is also intentional, and can even be useful.
+This default treatment of unknown environments is also intentional, and can be useful placeholders: an
+exported MiniLaTeX document can, of course, define such environments to suit the author's needs.
 
 \\section{Technology}
 
 MiniLatex is written in \\href{http://elm-lang.org}{Elm}, the statically typed functional
-programming language created by Evan Czaplicki.  Because of its excellent
-\\href{http://package.elm-lang.org/packages/elm-tools/parser/latest}{parser combinator library}, Elm is an ideal choice for a project like the present one.
+programming language created by Evan Czaplicki for building web applications.  Because of its excellent
+\\href{http://package.elm-lang.org/packages/elm-tools/parser/latest}{parser combinator library},
+Elm is a good fit for a project like the present one.
 
 
 For an overview of the design of MiniLatex, see
 \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}.
 Briefly, \\href{https://www.mathjax.org/}{MathJax} is used inside dollar signs, and Elm is used outside.
+
+\\href{https://github.com/jxxcarlson/meenylatex}{Github repo}
 
 \\bigskip
 

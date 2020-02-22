@@ -2,7 +2,7 @@ module Internal.LatexState exposing (..)
 
 import Dict
 import Internal.Parser exposing (LatexExpression)
-
+import Internal.MathMacro exposing(MathMacroDict)
 
 
 {- TYPES AND DEFAULT VALJUES -}
@@ -43,6 +43,7 @@ type alias LatexState =
     , tableOfContents : TableOfContents
     , dictionary : Dictionary
     , macroDictionary : MacroDictionary
+    , mathMacroDictionary : MathMacroDict
     }
 
 
@@ -99,6 +100,10 @@ setDictionaryItem key value latexState =
     in
     { latexState | dictionary = newDictionary }
 
+
+setMathMacroDictionary : String -> LatexState -> LatexState
+setMathMacroDictionary str latexState =
+   { latexState | mathMacroDictionary = Internal.MathMacro.makeMacroDict str }
 
 incrementCounter : String -> LatexState -> LatexState
 incrementCounter name latexState =
@@ -160,4 +165,5 @@ emptyLatexState =
     , dictionary = Dict.empty
     , tableOfContents = []
     , macroDictionary = Dict.empty
+    , mathMacroDictionary = Dict.empty
     }

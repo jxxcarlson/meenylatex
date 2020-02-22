@@ -1,4 +1,4 @@
-module Internal.MathMacro exposing (evalStr, makeMacroDict)
+module Internal.MathMacro exposing (evalStr, makeMacroDict,  MathMacroDict)
 
 import Dict
 import Parser.Advanced exposing (..)
@@ -16,13 +16,13 @@ type MathExpression
     | MathList (List MathExpression)
 
 
-type alias MacroDict = Dict String (List String -> String)
+type alias MathMacroDict = Dict String (List String -> String)
 
 {-|
       d2 = makeMacroDict "\\newcommand{\\bb}[0]{\\bf{B}} \\newcommand{\\bt}[1]{\\bf{#1}}"
       --> Dict.fromList [("bb",<function>),("bt",<function>)]
   -}
-makeMacroDict : String -> MacroDict
+makeMacroDict : String -> MathMacroDict
 makeMacroDict str =
     case parse str of
         Ok list -> List.map makeEntry list
@@ -37,7 +37,7 @@ makeMacroDict str =
     evalStr d2 "\\int_0^1 x^n dx + \\bb + \\bt{R}"
     --> "\\int_0^1 x^n dx + \\bf{B}+ \\bf{R}"
 -}
-evalStr : MacroDict ->  String -> String
+evalStr : MathMacroDict ->  String -> String
 evalStr macroDict_ str =
     case parse str of
         Ok (result) -> evalList macroDict_ result
@@ -123,12 +123,12 @@ replaceArg k f =
 getArg : Int -> List String -> String
 getArg k list = List.Extra.getAt k list |> Maybe.withDefault ""
 
-evalList :  MacroDict -> List MathExpression -> String
+evalList :  MathMacroDict -> List MathExpression -> String
 evalList macroDict_ list =
   List.map (evalMathExpr macroDict_) list
-  |> String.join ""
+  |> String.join " "
 
-evalMathExpr :  MacroDict -> MathExpression -> String
+evalMathExpr :  MathMacroDict -> MathExpression -> String
 evalMathExpr macroDict_ expr =
     case expr of
         MathText str -> str
@@ -137,7 +137,7 @@ evalMathExpr macroDict_ expr =
         MathList list -> List.map toText_ list |> String.join " "
 
 
-evalMacro : MacroDict -> String -> List MathExpression -> String
+evalMacro : MathMacroDict -> String -> List MathExpression -> String
 evalMacro macroDict_ name args =
     case Dict.get name macroDict_ of
         Nothing -> "\\" ++ name ++ (List.map (toText_ >> enclose) args |> String.join "")

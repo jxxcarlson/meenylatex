@@ -12,6 +12,7 @@ module Internal.Render2 exposing (makeTableOfContents, render, renderLatexList, 
 -- import List.Extra
 
 import Dict
+import Internal.MathMacro
 import Html exposing (Attribute, Html)
 import Html.Attributes as HA
 import Internal.ErrorMessages2 as ErrorMessages
@@ -176,10 +177,10 @@ render mathJaxRenderOption source latexState latexExpression =
             renderItem mathJaxRenderOption source latexState level latexExpr
 
         InlineMath str ->
-            Html.span [] [ oneSpace, inlineMathText mathJaxRenderOption str ]
+            Html.span [] [ oneSpace, inlineMathText latexState mathJaxRenderOption str ]
 
         DisplayMath str ->
-            displayMathText mathJaxRenderOption str
+            displayMathText latexState mathJaxRenderOption str
 
         Environment name args body ->
             renderEnvironment mathJaxRenderOption source latexState name args body
@@ -250,8 +251,11 @@ reportProblem problem =
             "Other problem"
 
 
-inlineMathText : MathJaxRenderOption -> String -> Html msg
-inlineMathText mathJaxRenderOption str =
+inlineMathText : LatexState -> MathJaxRenderOption -> String -> Html msg
+inlineMathText latexState mathJaxRenderOption str_ =
+    let
+        str = Internal.MathMacro.evalStr latexState.mathMacroDictionary str_
+    in
     case mathJaxRenderOption of
         Delay ->
             mathTextDelayed <| "$ " ++ String.trim str ++ " $"
@@ -260,11 +264,12 @@ inlineMathText mathJaxRenderOption str =
             mathText <| "$ " ++ String.trim str ++ " $"
 
 
-displayMathText : MathJaxRenderOption -> String -> Html msg
-displayMathText mathJaxRenderOption str =
+displayMathText : LatexState -> MathJaxRenderOption -> String -> Html msg
+displayMathText latexState mathJaxRenderOption str =
     let
         str2 =
             String.trim str
+            |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
     in
     case mathJaxRenderOption of
         Delay ->
@@ -1444,7 +1449,7 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
         content =
             "\n\\begin{align*}\n" ++ addendum ++ r ++ "\n\\end{align*}\n"
     in
-    displayMathText mathJaxRenderOption content
+    displayMathText latexState mathJaxRenderOption content
 
 
 renderCenterEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
@@ -1478,7 +1483,7 @@ renderDefItemEnvironment mathJaxRenderOption source latexState optArgs body =
 -}
 renderEqnArray : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderEqnArray mathJaxRenderOption source latexState body =
-    displayMathText mathJaxRenderOption (Internal.Render.render latexState body)
+    displayMathText latexState mathJaxRenderOption (Internal.Render.render latexState body)
 
 
 renderEquationEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
@@ -1504,7 +1509,7 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
         r =
             Internal.Render.render latexState body
     in
-    displayMathText mathJaxRenderOption <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
+    displayMathText latexState mathJaxRenderOption <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
 
 
 
@@ -1535,7 +1540,7 @@ renderListing source latexState body =
 
 renderMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderMacros mathJaxRenderOption source latexState body =
-    displayMathText mathJaxRenderOption (Internal.Render.render latexState body)
+    displayMathText latexState mathJaxRenderOption (Internal.Render.render latexState body)
 
 
 renderQuotation : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
@@ -1549,17 +1554,17 @@ renderTabular mathJaxRenderOption source latexState body =
         [ HA.style "border-spacing" "20px 10px"
         , HA.style "margin-left" "-20px"
         ]
-        [ renderTableBody mathJaxRenderOption source body ]
+        [ renderTableBody mathJaxRenderOption source latexState body ]
 
 
-renderCell : MathJaxRenderOption -> String -> LatexExpression -> Html msg
-renderCell mathJaxRenderOption source cell =
+renderCell :  MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderCell  mathJaxRenderOption source latexState  cell =
     case cell of
         LXString s ->
             Html.td [] [ Html.text s ]
 
         InlineMath s ->
-            Html.td [] [ inlineMathText mathJaxRenderOption s ]
+            Html.td [] [ inlineMathText latexState mathJaxRenderOption s ]
 
         Macro s x y ->
             Html.td [] [ renderMacro mathJaxRenderOption source emptyLatexState s x y ]
@@ -1569,21 +1574,21 @@ renderCell mathJaxRenderOption source cell =
             Html.td [] []
 
 
-renderRow : MathJaxRenderOption -> String -> LatexExpression -> Html msg
-renderRow mathJaxRenderOption source row =
+renderRow : MathJaxRenderOption -> String -> LatexState ->  LatexExpression -> Html msg
+renderRow mathJaxRenderOption source latexState row =
     case row of
         LatexList row_ ->
-            Html.tr [] (row_ |> List.map (renderCell mathJaxRenderOption source))
+            Html.tr [] (row_ |> List.map (renderCell mathJaxRenderOption source latexState))
 
         _ ->
             Html.tr [] []
 
 
-renderTableBody : MathJaxRenderOption -> String -> LatexExpression -> Html msg
-renderTableBody mathJaxRenderOption source body =
+renderTableBody : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderTableBody mathJaxRenderOption source latexState body =
     case body of
         LatexList body_ ->
-            Html.tbody [] (body_ |> List.map (renderRow mathJaxRenderOption source))
+            Html.tbody [] (body_ |> List.map (renderRow mathJaxRenderOption source latexState))
 
         _ ->
             Html.tbody [] []
@@ -1596,7 +1601,7 @@ renderTheBibliography mathJaxRenderOption source latexState body =
 
 renderUseForWeb : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderUseForWeb mathJaxRenderOption source latexState body =
-    displayMathText mathJaxRenderOption (Internal.Render.render latexState body)
+    displayMathText latexState mathJaxRenderOption (Internal.Render.render latexState body)
 
 
 renderVerbatim : String -> LatexState -> LatexExpression -> Html msg

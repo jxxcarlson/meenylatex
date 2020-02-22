@@ -15,6 +15,7 @@ import Internal.LatexState
         )
 import Internal.Parser as Parser exposing (LatexExpression(..), macro)
 import Internal.Render2 as Render exposing (renderLatexList)
+import Internal.MathMacro
 import Internal.StateReducerHelpers2 as SRH2
 
 
@@ -31,7 +32,7 @@ type alias Reducer a b =
 
 {-| parse: Using a given LatexState, take a list of strings,
 i.e., paragraphs, and compute a tuple consisting of the parsed
-paragraphs and ad upodated LatexState.
+paragraphs and ad updated LatexState.
 
 parse : LatexState -> List String -> ( List (List LatexExpression), LatexState )
 
@@ -147,6 +148,17 @@ envReducer name optonalArgs body state =
 
             "align" ->
                 SRH2.setEquationNumber body state
+
+            "mathmacro" ->
+                case body of
+                    LXString str ->
+                        let
+                           _ = Debug.log "STR" (String.trim str)
+                           mathDict = Internal.MathMacro.makeMacroDict (String.trim str) |> Debug.log "DICT"
+                        in
+                          -- Internal.LatexState.setMathMacroDictionary str state |> Debug.log "LTXSTATE"
+                          {state | mathMacroDictionary = mathDict} |> Debug.log "LTXSTATE"
+                    _ -> state
 
             _ ->
                 state

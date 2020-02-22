@@ -1,4 +1,4 @@
-module Internal.MathMacro exposing (..)
+module Internal.MathMacro exposing (evalStr, makeMacroDict)
 
 import Dict
 import Parser.Advanced exposing (..)
@@ -18,11 +18,30 @@ type MathExpression
 
 type alias MacroDict = Dict String (List String -> String)
 
-macroDict : Dict.Dict String ( List String -> String)
-macroDict = Dict.fromList [("bb", \list -> "{\\bf B}"), ("bt", \list -> "{\\bf " ++ (getArg 0 list) ++ "}")]
+{-|
+      d2 = makeMacroDict "\\newcommand{\\bb}[0]{\\bf{B}} \\newcommand{\\bt}[1]{\\bf{#1}}"
+      --> Dict.fromList [("bb",<function>),("bt",<function>)]
+  -}
+makeMacroDict : String -> MacroDict
+makeMacroDict str =
+    case parse str of
+        Ok list -> List.map makeEntry list
+           |> Maybe.Extra.values
+           |> Dict.fromList
+        Err _ -> Dict.empty
 
-getArg : Int -> List String -> String
-getArg k list = List.Extra.getAt k list |> Maybe.withDefault ""
+{-|
+    d2 = makeMacroDict "\\newcommand{\\bb}[0]{\\bf{B}}\n\\newcommand{\\bt}[1]{\\bf{#1}}"
+    --> Dict.fromList [("bb",<function>),("bt",<function>)]
+
+    evalStr d2 "\\int_0^1 x^n dx + \\bb + \\bt{R}"
+    --> "\\int_0^1 x^n dx + \\bf{B}+ \\bf{R}"
+-}
+evalStr : MacroDict ->  String -> String
+evalStr macroDict_ str =
+    case parse str of
+        Ok (result) -> evalList macroDict_ result
+        Err _ -> "error"
 
 
 type alias MXParser a =
@@ -58,27 +77,9 @@ parse str =
 check : String -> String
 check str =
     case parse str of
-        Ok (result) -> text result
+        Ok (result) -> toText result
         Err _ -> "error"
 
-
-{-|
-      d2 = makeMacroDict "\\newcommand{\\bb}[0]{\\bf{B}} \\newcommand{\\bt}[1]{\\bf{#1}}"
-      --> Dict.fromList [("bb",<function>),("bt",<function>)]
-
-      evalStr d2 "\\int_0^1 x^n dx + \\bt{Z}"
-      --> "\\int_0^1 x^n dx + \\bf{Z}"
-
-      evalStr d2 "\\int_0^1 x^n dx + \\bb"
-      --> "\\int_0^1 x^n dx + \\bf{B}"
-  -}
-makeMacroDict : String -> MacroDict
-makeMacroDict str =
-    case parse str of
-        Ok list -> List.map makeEntry list
-           |> Maybe.Extra.values
-           |> Dict.fromList
-        Err _ -> Dict.empty
 
 makeEntry : MathExpression -> Maybe (String, List String -> String)
 makeEntry expr =
@@ -95,7 +96,7 @@ makeEntry_ name nargs args =
     (name, transform n args)
 
 transform n args =
-     List.map text_ args
+     List.map toText_ args
        |> List.head
        |> Maybe.withDefault "XXX"
        |> (\str -> \list -> str)
@@ -119,89 +120,64 @@ replaceArg : Int -> (List String -> String) -> (List String -> String)
 replaceArg k f =
     \list ->   String.replace ("#" ++ String.fromInt (k + 1)) (getArg k list) (f list)
 
-
--- \list -> "{\\bf " ++ (getArg 0 list) ++ "}"
-
-{-|
-    macroDict = Dict.fromList [("bb", \list -> "{\\bf B}"), ("bt", \list -> "{\\bf " ++ (getArg 1 list) ++ "}")]
-
-    evalStr macroDict "\\int_0^1 x^n dx + \\bb"
-    --> "\\int_0^1 x^n dx + {\\bf B}"
-
-    evalStr macroDict "\\int_0^1 x^n dx + \\bt{Z}"
-    --> "\\int_0^1 x^n dx + {\\bf Z}"
-
-    dd = makeMacroDict "\\newcommand{\\btt}[2]{\\bf{#1}{#2}}"
-    --> Dict.fromList [("btt",<function>)]
-        : MacroDict
-    evalStr dd "\\int_0^1 x^n dx + \\bt{Z}"
-    --> "\\int_0^1 x^n dx + \\bt{Z}"
--}
-evalStr : MacroDict ->  String -> String
-evalStr macroDict_ str =
-    case parse str of
-        Ok (result) -> evalList macroDict_ result
-        Err _ -> "error"
-
+getArg : Int -> List String -> String
+getArg k list = List.Extra.getAt k list |> Maybe.withDefault ""
 
 evalList :  MacroDict -> List MathExpression -> String
 evalList macroDict_ list =
-  List.map (evalExpr macroDict_) list
+  List.map (evalMathExpr macroDict_) list
   |> String.join ""
 
-evalExpr :  MacroDict -> MathExpression -> String
-evalExpr macroDict_ expr =
+evalMathExpr :  MacroDict -> MathExpression -> String
+evalMathExpr macroDict_ expr =
     case expr of
         MathText str -> str
         Macro name args -> evalMacro macroDict_ name args
         NewCommand name nargs args-> evalNewCommand name nargs args
-        MathList list -> List.map text_ list |> String.join " "
+        MathList list -> List.map toText_ list |> String.join " "
 
 
 evalMacro : MacroDict -> String -> List MathExpression -> String
 evalMacro macroDict_ name args =
     case Dict.get name macroDict_ of
-        Nothing -> "\\" ++ name ++ (List.map (text_ >> enclose) args |> String.join "")
-        Just definition -> definition (List.map text_ args)
+        Nothing -> "\\" ++ name ++ (List.map (toText_ >> enclose) args |> String.join "")
+        Just definition -> definition (List.map toText_ args)
 
 evalNewCommand : String -> String -> List MathExpression -> String
 evalNewCommand name nargs args =
-     "\\newcommand{\\" ++ name ++ "}[" ++ nargs ++ "]"  ++ (List.map (text_ >> enclose) args |> String.join "")
+     "\\newcommand{\\" ++ name ++ "}[" ++ nargs ++ "]"  ++ (List.map (toText_ >> enclose) args |> String.join "")
 
 
 
-evalMacro1 : MacroDict -> String -> List MathExpression -> String
-evalMacro1 macroDict_ name args =
-    "\\" ++ name ++ (List.map (text_ >> enclose) args |> String.join "")
+-- MAP PARSE EXPR TO TEXT
 
-
-
--- TEXT
-
-text : List MathExpression -> String
-text list =
-    List.map text_ list
+toText : List MathExpression -> String
+toText list =
+    List.map toText_ list
     |> String.join ""
 
 
-text_ : MathExpression -> String
-text_ expr =
+toText_ : MathExpression -> String
+toText_ expr =
     case expr of
         MathText str -> str
-        Macro name args -> "\\" ++ name ++ (List.map (text_ >> enclose) args |> String.join "")
-        MathList list -> List.map text_ list |> String.join " "
+        Macro name args -> "\\" ++ name ++ (List.map (toText_ >> enclose) args |> String.join "")
+        MathList list -> List.map toText_ list |> String.join " "
         NewCommand name nargs args -> evalNewCommand name nargs args
 
 enclose : String -> String
 enclose arg_ =
     "{" ++ arg_ ++ "}"
 
+
+
+-- PARSER
+
 mathExpression : MXParser MathExpression
 mathExpression =
     oneOf
         [ backtrackable newCommand
-         ,  macro
-
+         , macro
          , mathStuff
          ]
 
@@ -230,6 +206,7 @@ stuff problem inWord =
         |. ws
         |= getOffset
         |= getSource
+
  
 {-|
 
@@ -272,6 +249,8 @@ newCommand =
       |= word ExpectingRightBracket (\c -> c /= ']')
       |. symbol (Token "]" ExpectingRightBracket)
       |= itemList arg
+      |. ws
+
 
 {-| Use to parse arguments for macros
 -}
@@ -353,9 +332,8 @@ numberOfArgs_ =
         |. symbol (Token "]" ExpectingRightBracket)
 
 
---
+
 -- HELPERS
---
 
 
 spaces : MXParser ()
@@ -392,10 +370,6 @@ parseBetweenSymbols problem1 problem2 startSymbol endSymbol =
         |. symbol (Token startSymbol problem1)
         |. spaces
         |= parseUntil problem2 endSymbol
-
-
-
-{- ITEM LIST PARSERS -}
 
 
 nonEmptyItemList : MXParser a -> MXParser (List a)

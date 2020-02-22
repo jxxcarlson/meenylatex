@@ -81,10 +81,10 @@ displayExpected problem =
             "Begin or end phrase messed up in environment"
 
         ExpectingBeginDisplayMathModeDollarSign ->
-            "Expecting '$$' for displayed math"
+            "Expecting '$$' to begin displayed math"
 
         ExpectingEndDisplayMathModeDollarSign ->
-            "Expecting '$$' for displayed math"
+            "Expecting '$$' to end displayed math"
 
         ExpectingBeginDisplayMathModeBracket ->
             "Expecting '\\[' or '\\]' for displayed math"

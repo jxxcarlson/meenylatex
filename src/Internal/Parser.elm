@@ -527,7 +527,7 @@ environmentOfType envType =
             "\\end{" ++ envType ++ "}"
 
         envKind =
-            if List.member envType [ "equation", "align", "eqnarray", "verbatim", "listing", "verse" ] then
+            if List.member envType [ "equation", "align", "eqnarray", "verbatim", "mathmacro", "listing", "verse" ] then
                 "passThrough"
 
             else
@@ -578,7 +578,7 @@ standardEnvironmentBody endWoord envType =
 
 
 {-| The body of the environment is parsed as an LXString.
-This parser is used for envronments whose body is to be
+This parser is used for environments whose body is to be
 passed to MathJax for processing and also for the verbatim
 environment.
 -}

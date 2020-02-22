@@ -83,8 +83,8 @@ init flags =
 
         model =
             { sourceText = initialText
-            , macroText = initialMacroText
-            , renderedText = render (prependMacros initialMacroText initialText)
+            , macroText = ""
+            , renderedText = render  initialText
             , editRecord = editRecord
             , debounce = Debounce.init
             , counter = 0

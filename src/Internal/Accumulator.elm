@@ -153,11 +153,9 @@ envReducer name optonalArgs body state =
                 case body of
                     LXString str ->
                         let
-                           _ = Debug.log "STR" (String.trim str)
-                           mathDict = Internal.MathMacro.makeMacroDict (String.trim str) |> Debug.log "DICT"
+                           mathDict = Internal.MathMacro.makeMacroDict (String.trim str)
                         in
-                          -- Internal.LatexState.setMathMacroDictionary str state |> Debug.log "LTXSTATE"
-                          {state | mathMacroDictionary = mathDict} |> Debug.log "LTXSTATE"
+                          {state | mathMacroDictionary = mathDict}
                     _ -> state
 
             _ ->

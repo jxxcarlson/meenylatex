@@ -1,8 +1,7 @@
 {
     "type": "application",
     "source-directories": [
-        "src",
-        "../src"
+        "src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
@@ -18,9 +17,13 @@
             "elm-community/list-extra": "8.2.3",
             "elm-community/maybe-extra": "5.1.0",
             "jinjor/elm-debounce": "3.0.0",
+            "jxxcarlson/meenylatex": "10.0.2",
             "mdgriffith/elm-ui": "1.1.5"
         },
         "indirect": {
+            "elm/bytes": "1.0.8",
+            "elm/file": "1.0.5",
+            "elm/http": "2.0.0",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
             "elm/virtual-dom": "1.0.2",
@@ -32,10 +35,6 @@
     },
     "test-dependencies": {
         "direct": {},
-        "indirect": {
-            "elm/bytes": "1.0.8",
-            "elm/file": "1.0.5",
-            "elm/http": "2.0.0"
-        }
+        "indirect": {}
     }
 }

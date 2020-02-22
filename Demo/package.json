@@ -10,7 +10,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "elm-live -p 8011 src/Main.elm -- --output Main.js"
+    "start": "elm-live -p 8011 -d public/ src/Main.elm -- --output public/Main.js",
+    "publish": "sh script/publish.sh"
   },
   "keywords": [],
   "author": "",

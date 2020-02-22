@@ -260,8 +260,7 @@ A list
 
 \\item Items can be nested
 
-\\item And you can do this:
-$ \\frac{1}{1 + \\frac{2}{3}} $
+\\item And you can do this: $ \\frac{1}{1 + \\frac{2}{3}} $
 
 \\end{itemize}
 

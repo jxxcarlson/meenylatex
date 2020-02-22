@@ -42,7 +42,7 @@ makeMacroDict str =
 -}
 evalStr : MathMacroDict ->  String -> String
 evalStr macroDict_ str =
-    case parse str of
+    case parse (String.trim str) of
         Ok (result) -> evalList macroDict_ result
         Err _ -> "error"
 

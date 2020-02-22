@@ -1,4 +1,7 @@
-module Internal.MathMacro exposing (evalStr, makeMacroDict,  MathMacroDict)
+module Internal.MathMacro exposing (..)
+
+
+-- (evalStr, makeMacroDict,  MathMacroDict)
 
 import Dict
 import Parser.Advanced exposing (..)
@@ -119,6 +122,9 @@ replaceArgs n f =
 replaceArg : Int -> (List String -> String) -> (List String -> String)
 replaceArg k f =
     \list ->   String.replace ("#" ++ String.fromInt (k + 1)) (getArg k list) (f list)
+
+
+-- [NewCommand "bt" "1" [MathList [MathText "{",Macro "bf" [],MathText "#1"]],MathText "}"]
 
 getArg : Int -> List String -> String
 getArg k list = List.Extra.getAt k list |> Maybe.withDefault ""

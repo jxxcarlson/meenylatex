@@ -1,4 +1,4 @@
-module StringsV2 exposing (initialText, macros, mathExampleText)
+module StringsV2 exposing (initialText, macros, mathExampleText, anharmonic)
 
 
 macros =
@@ -495,4 +495,354 @@ f(x) = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^\\infty \\hat f(k) e^{ikx} dk
 \\href{http://www.physics.rutgers.edu/~steves/501/Lectures_Final/Lec06_Propagator.pdf}{Free particle propagator}
 
 
+"""
+
+anharmonic =
+    """
+\\setcounter{section}{6}
+
+\\section{Anharmonic Oscillator}
+
+\\innertableofcontents
+
+The classical anharmonic oscillator is one
+with a "non-linear spring". By this we mean
+that the standard force law $F = -kx$ has
+additional terms, e.g., $F = -kx - \\ell x^3$
+. In this case the corresponding potential is
+a quartic:
+
+\\begin{equation}
+V(x) = (1/2)kx^2 + (\\ell/4)x^4
+\\end{equation}
+
+In this section we study the quantum anharmonic
+oscillator with a quartic term in the
+potential. Our first task is to find the
+energy of the ground state when a small quartic
+term is added to the potential. For this
+we need some basic perturbation theory. An
+approximation to the ground state energy in
+two ways: (i) by doing a Gaussian integral
+(ii) by working out the expression $(a +
+a^\\dagger)^4$ as a noncommutative polynomial
+using the harmonic oscillator operator calculus.
+
+\\subsection{Perturbation theory}
+
+Let us suppose given a quantum mechanical
+system with Hamiltonian of the form $H =
+H_0 + \\epsilon V$ , where a complete set of
+non-degenerate eigenstates for $H_0$ is known.
+Let us call these states $\\psi^{(m)}$ . By
+nondegenerate, we mean that all eigenspaces
+have dimension one. The second term is a small
+multiple of an operator which we generally take
+to be a potential. We use this setup to find
+solutions of the time-ndependent Schroedinger
+equation $H\\psi = E\\psi$ up to terms of order
+epsilon, where we imagine that true solutions
+have an expansion $\\psi = \\psi_0 + \\epsilon
+\\psi_1 + \\epsilon^2 \\psi_2 + \\cdots$ .
+Substituting into the Schroedinger equation
+and ignoring terms in $\\epsilon^2$ or higher
+powers, we have
+
+\\begin{equation}
+H_0\\psi_0 + \\epsilon H_0 \\psi_1 + \\epsilon V\\psi_0
+ =
+E_0\\psi_0 + \\epsilon E_0 \\psi_1 + \\epsilon E_1 \\psi_0
+\\end{equation}
+
+The $\\epsilon^0$ component of this equation is
+
+\\begin{equation}
+H_0\\psi_0 =
+E_0\\psi_0
+\\end{equation}
+
+Therefore $\\psi_0$ , the zeroth term in the
+perturbation expansion, is an eigenfunction of
+the unperturbed Hamiltonian. That is, $\\psi_0
+= \\psi^{(m)}$ up to a constant.
+
+The $\\epsilon^1$ component of the equation reads
+
+\\begin{equation}
+\\label{foperturbationequation}
+ H_0 \\psi_1 + V\\psi_0
+ =
+ E_0 \\psi_1 +  E_1 \\psi_0
+\\end{equation}
+
+Take the inner product with $\\psi_0$ :
+
+\\begin{equation}
+\\left< \\psi_0 | H_0  | \\psi_1\\right> +  \\left< \\psi_0  | V | \\psi_0 \\right>
+ =
+ E_0 \\left< \\psi_0  |  \\psi_1 \\right> +  E_1 \\left< \\psi_0  |  \\psi_0 \\right>
+\\end{equation}
+
+Because $\\psi_0$ is an eigenfunction of $H_0$
+, the first term on the left is equal to the
+first term on the right, so that
+
+\\begin{equation}
+\\label{perturbation_of_energy}
+E_1 =\\frac{\\left<\\psi_0 | V | \\psi_0 \\right>}{ ||\\psi_0||^2 }
+\\end{equation}
+
+In other words, if $E^{(m)}$ is the energy of
+the unperturbed Hamiltonian, then the energy
+of the corresponding state of the perturbed
+system is $E^{(m)} + \\epsilon \\Delta E^{(m)}$
+, where
+
+\\begin{equation}
+\\label{perturbation_of_En}
+\\Delta E^{(m)} =\\frac{\\left<\\psi^{(m)} | V | \\psi^{(m)} \\right>}{ || \\psi^{(m)} ||^2 }
+\\end{equation}
+
+To find the wave functions for the perturbed
+system, assume that $\\psi_0 = \\psi^{(n)}$
+and take the inner product of
+\\eqref{foperturbationequation} with
+$\\psi^{(m)}$ for $m \\ne n$ . One obtains
+
+\\begin{equation}
+\\left< \\psi^{(m)} | H_0 | \\psi_1 \\right> + \\left< \\psi^{(m)} | V | \\psi_0 \\right>
+  =
+E_0\\left< \\psi^{(m)} | \\psi_1 \\right> + E_1\\left< \\psi^{(m)} | \\psi_0 \\right>
+\\end{equation}
+
+The first term on the left is $E_m\\left<
+\\psi^{(m)} | \\psi_1 \\right>$ and the last term
+on the right vanishes, so that we obtain
+
+\\begin{equation}
+\\label{perturbation_fourier_coefficients}
+  \\left< \\psi^{(m)} | \\psi_1 \\right>
+  = \\frac{\\left< \\psi^{(m)} | V | \\psi_1 \\right>}{E_0 - E_m}
+\\end{equation}
+
+The numbers are the Fourier coefficients of
+the expansion of $\\psi$ :
+
+\\begin{equation}
+\\label{perturbation_fourier_expansion}
+  \\psi = \\psi^{(n)}
++ \\epsilon \\sum_{m \\ne n} \\frac{\\left< \\psi^{(n)} | V | \\psi^{(m)} \\right>}{  E^{(n)} - E^{(m)}  }\\psi^{(m)}
+\\end{equation}
+
+\\subsection{Quartic perturbation by Gaussian
+integrals}
+
+Let us consider a quartic perturbation of the
+harmonic oscillator, where
+
+\\begin{equation}
+H_0 = \\frac{1}{2m}(\\hat p^2 + m^2 \\omega^2 x^2) +  \\lambda g x^4,
+\\end{equation}
+
+where $\\lambda$ is a small dimensionless
+parameter. Now $p^2/2m$ is a kinetic energy
+term, so $[gx^4] = [E]$ , where $E$ is an
+energy and $[\\ ]$ means "units of". Solving,
+we have $[g] = [Ex^{-4}]$ . Let us try to cook
+up a "natural value" for $g$ . A natural energy
+is the zero point energy of the oscillator,
+$\\omega\\hbar/2$ . In addition, we need a
+natural length scale for $x$ . To this end,
+consider the ground state wave function, which
+is proportional to $e^{-m\\omega x^2/2\\hbar}$
+. Solve for $m\\omega x^2/2\\hbar = 1$ . One
+obtains $x_0^2 = 2\\hbar/m\\omega$ . At disance
+$x = x_0$ , the value of the wave function
+has decreased from its maximum at $x = 0$ by
+a factor of $1/e$ . Thus a natural choice is
+
+\\begin{equation}
+g = \\frac{\\omega\\hbar}{2}\\left(\\frac{2\\hbar}{m\\omega}\\right)^{-2} = \\frac{m^2 \\omega^3}{8\\hbar}
+\\end{equation}
+
+Writing $H= H_0 + \\lambda g x^4$ , we find
+ourselves in the context of perturbation
+theory. Then the shift in the $n$ -th energy
+level is given by
+
+\\begin{equation}
+\\label{DeltaEn]}
+\\Delta E_n = \\lambda g \\left< \\psi_n | x^4 | \\psi_n \\right> ,
+\\end{equation}
+
+and where the $\\psi_n$ are normalized wave
+functions for the harmonic oscillator.
+Referring to the definition of the normalized
+ground state wave function, we find that the
+shift in energy levels is given by a Gaussian
+integral:
+
+\\begin{equation}
+\\Delta E_0 = \\lambda g \\left(\\frac{m\\omega}{\\pi\\hbar}\\right)^{ 1/2 } \\int_{-\\infty}^\\infty x^4 e^{-m\\omega x^2 / \\hbar} dx
+\\end{equation}
+
+The integral to be evaluated has the form
+
+\\begin{equation}
+I_2 = \\int_{-\\infty}^\\infty x^2 e^{-\\alpha x^2} dx
+\\end{equation}
+
+To compute it, recall that
+
+\\begin{equation}
+\\int_{-\\infty}^\\infty e^{-\\alpha x^2} dx
+= \\left( \\frac{\\pi}{\\alpha} \\right)^{1/2}
+\\end{equation}
+
+Now compare this derivative computation
+
+\\begin{equation}
+\\frac{d}{d\\alpha} \\int_{-\\infty}^\\infty e^{-\\alpha x^2} dx = - \\int_{-\\infty}^\\infty x^2 e^{-\\alpha x^2} dx
+\\end{equation}
+
+with this one:
+
+\\begin{equation}
+\\frac{d}{d\\alpha} \\left(\\frac{\\pi}{\\alpha}\\right)^{1/2} = -\\frac{1}{2}\\left(\\frac{\\pi}{ \\alpha^3 } \\right)^{1/2}
+\\end{equation}
+
+to conclude that
+
+\\begin{equation}
+\\int_{-\\infty}^\\infty x^2 e^{-\\alpha x^2} dx =  \\frac{1}{2}\\left(\\frac{\\pi}{ \\alpha^3 } \\right)^{1/2}
+\\end{equation}
+
+Similarly, one obtains
+
+\\begin{equation}
+\\int_{-\\infty}^\\infty x^4 e^{-\\alpha x^2} dx =  \\frac{3}{4}\\left(\\frac{\\pi}{ \\alpha^5 } \\right)^{1/2}
+\\end{equation}
+
+Working through the constants, one obtains at
+long last the first order energy shift:
+
+\\begin{equation}
+\\label{anharmonic_correction}
+\\Delta E_0 = \\frac{3}{16}\\,\\left( \\frac{\\omega \\hbar}{2}\\right)  \\lambda
+\\end{equation}
+
+\\subsection{Quartic perturbation by operator
+calculus}
+
+The operator "multiplication by $x$ " can
+also be written in terms of creation and
+annihilation operators. Adding the expressions
+for these operators in the xref::225[last
+section], we find that
+
+\\begin{equation}
+x = \\left(\\frac{ \\hbar }{  2m \\omega} \\right)^{1/2} (a + a^\\dagger )
+\\end{equation}
+
+Substituting this into (<<DeltaEn>>), we find
+that
+
+\\begin{align}
+\\label{aa4}
+\\Delta E_0 &= \\lambda g \\left(\\frac{ \\hbar }{  2m \\omega} \\right)^{2} \\left< \\psi_0 | ( a + a^\\dagger )^4 | \\psi_0 \\right> \\\\
+&= \\lambda \\frac{1}{16}\\,\\frac{\\omega \\hbar}{2}\\,\\left< \\psi_0 | ( a + a^\\dagger )^4 | \\psi_0 \\right>
+\\end{align}
+
+The operator $(a + a^\\dagger)^4$ is a sum of
+sixteen noncommutative monomials which can be
+listed in lexicographical order as
+
+\\begin{align}
+& a^\\dagger a^\\dagger a^\\dagger a^\\dagger \\\\
+& a^\\dagger a^\\dagger a^\\dagger a \\\\
+& a^\\dagger a^\\dagger a  a^\\dagger \\\\
+& a^\\dagger  a  a^\\dagger a^\\dagger \\\\
+& etc
+\\end{align}
+
+We say that a monomial is in \\term{normal
+order} if all of the creation operators appear
+before the annihilation operators. In the list
+above, the first, second, and fourth entries
+are in normal order. Using the identity
+$[a,a^\\dagger] = 1$ , any monomial can be
+expressed as a sum of monomials in normal
+order. One has, for instance, $aa^\\dagger =
+a^\\dagger a + 1$ . Now consider the monomials
+$M$ that might enter into the formula (<<aa4>>)
+with nonzero coefficient. A bit of reflection
+tells us that such a monomial must consist of
+two creation operators and two annihilation
+operators. This is because the expression
+$M\\psi_0$ must be be a multiple of $\\psi_0$ .
+That is, $M$ must raise the eigenvalue twice
+and also lower it twice. There are six such
+monomials. The monomial $M$ must also have a
+creation operator on the right, since otherwise
+$M\\psi_0 = 0$ . For essentially the same
+reasons, it must have an annihilation operator
+on the left. This constraint reduces the number
+of admissible monomials to two: $aa^\\dagger
+aa^\\dagger$ and $aaa^\\dagger a^\\dagger$ . Let
+us give the beginning of the computation for
+the first of these so that you see the pattern.
+Then we will state the result. The computation
+is a kind of game in which we move $a$ 's to
+the right using the relation $ a a^\\dagger
+= a^\\dagger a + 1$ . To win the game is to
+express the monomial as a sum of monomials in
+normal order. The first move is $aaa^\\dagger
+a^\\dagger = aa^\\dagger a a^\\dagger +
+aa^\\dagger$ . After a sequence of such moves,
+you will find that
+
+\\begin{equation}
+aaa^\\dagger a^\\dagger = a^\\dagger a^\\dagger  aa + 4a^\\dagger a + 2
+\\end{equation}
+
+For the second monomial, you will find that
+
+\\begin{equation}
+aa^\\dagger a a^\\dagger =  a^\\dagger a^\\dagger  aa + 2a^\\dagger a + 1
+\\end{equation}
+
+We are led to the conclusion that
+
+\\begin{equation}
+(a + a^\\dagger )^4 = M' + 3,
+\\end{equation}
+
+where $M'$ is a sum of monomials different from
+1. Now think about expressions $\\left< \\psi_0 |
+M | \\psi_0 \\right>$ , where $M$ is a monomial in
+normal order. It is zero if $M \\ne 1$ and is
+1 if $M = 1$ . We can therefore read off the
+value of the perturbation term for the energy:
+
+\\begin{equation}
+\\Delta E_0 = \\frac{3}{16}\\,\\left( \\frac{\\omega \\hbar}{2}\\right)  \\lambda
+\\end{equation}
+
+This is in agreement with the value computed
+by doing a Gaussian integral.
+
+\\begin{remark}
+Let   $P(a,a^\\dagger)$  be  a  polynomial  in  the  creation  and  annihilation  operators.   Let   $m_M(P)$  be  the  multiplicity  with  which   $M$  appears  in  the  normal  order  expression  for   $P$ .  Then   $\\left< \\psi_0 | P(a,a^\\dagger) | \\psi_0 \\right> = m_1(P)$
+\\end{remark}
+
+Note the combinatorial flavor of the
+computation of the energy shift by this method.
+We will encounter it again in the theory of
+Feynman diagrams.
+
+\\subsection{References}
+
+\\href{http://www2.ph.ed.ac.uk/~ldeldebb/docs/QM/lect17.pdf}{Perturbation Theory, Edinburgh}
+
+\\href{http://www.cavendishscience.org/phys/tyoung/tyoung.htm}{Two-slit experiment}
 """

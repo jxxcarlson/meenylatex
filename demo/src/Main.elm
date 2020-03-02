@@ -16,7 +16,7 @@ import Task exposing(Task)
 import Browser.Dom as Dom
 
 
-initialText = StringsV2.initialText
+initialText = StringsV2.anharmonic
   -- "Test: $a^2 = 1$\n\nooo\n\niii"
     --
 

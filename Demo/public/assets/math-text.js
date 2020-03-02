@@ -13,6 +13,7 @@ class MathText extends HTMLElement {
     this.shadowRoot.innerHTML =
       '<mjx-doc><mjx-head></mjx-head><mjx-body>' + this.innerHTML + '</mjx-body></mjx-doc>';
        MathJax.typesetShadow(this.shadowRoot)
+       // setTimeout(() => MathJax.typesetShadow(this.shadowRoot), 1);
   }
 }
 

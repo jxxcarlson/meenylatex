@@ -37,6 +37,12 @@ done, see the code in `./demo`
 
 ## This release
 
+New method for using math-mode macros.  See
+[MiniLaTeX Demo](https://demo.minilatex.app/), section
+on math-mode macros.
+
+## Recent releases
+
 - Added a **source map**. This is a dictionary whose
 keys are pieces of source text and whose values are
 the ids of the corresponding rendered text.  With a little
@@ -44,8 +50,6 @@ more work, this will allow one to have bidirectional
 sync between source and rendered text: click on something
 in one to bring the corresponding part of the
 other into focus.
-
-## Recent releases
 
 - Better LaTeX error reporting (to be still further improved).
 

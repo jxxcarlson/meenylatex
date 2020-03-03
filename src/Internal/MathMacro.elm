@@ -76,6 +76,7 @@ parseMany : String -> Result (List (DeadEnd Context Problem)) (List MathExpressi
 parseMany str =
     str
       |> String.lines
+      |> List.map String.trim
       |> List.map parse
       |> Result.Extra.combine
       |> Result.map List.concat

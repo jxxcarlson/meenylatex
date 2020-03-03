@@ -9,6 +9,7 @@ import Set
 import Dict exposing(Dict)
 import List.Extra
 import Maybe.Extra
+import Result.Extra
 
 {-| The type for the syntax tree
 -}
@@ -42,7 +43,7 @@ makeMacroDict str =
 -}
 evalStr : MathMacroDict ->  String -> String
 evalStr macroDict_ str =
-    case parse (String.trim str) of
+    case parseMany (String.trim str) of
         Ok (result) -> evalList macroDict_ result
         Err _ -> "error"
 
@@ -67,6 +68,19 @@ type Problem
     | ExpectingStuff
     | ExpectingNewCommand
     | ExpectingBackslash
+
+
+
+
+parseMany : String -> Result (List (DeadEnd Context Problem)) (List MathExpression)
+parseMany str =
+    str
+      |> String.lines
+      |> List.map parse
+      |> Result.Extra.combine
+      |> Result.map List.concat
+
+
 
 {-|
 

@@ -5,7 +5,11 @@ import Internal.Parser exposing (LatexExpression)
 import Internal.MathMacro exposing(MathMacroDict)
 
 
-{- TYPES AND DEFAULT VALJUES -}
+{- TYPES AND DEFAULT VALUES -}
+
+
+type alias InitialData =
+    { mathMacroDictionary : MathMacroDict}
 
 
 type alias Counters =

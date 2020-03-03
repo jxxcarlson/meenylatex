@@ -1448,8 +1448,14 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
             else
                 ""
 
+        innerContents = case body of
+            LXString str -> str
+              |> String.trim
+              |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
+            _ -> "Parser error in render align environment"
+
         content =
-            "\n\\begin{align*}\n" ++ addendum ++ r ++ "\n\\end{align*}\n"
+            "\n\\begin{align*}\n" ++ addendum ++ innerContents ++ "\n\\end{align*}\n"
     in
     displayMathText latexState mathJaxRenderOption content
 
@@ -1508,10 +1514,13 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
             else
                 ""
 
-        r =
-            Internal.Render.render latexState body
+        contents = case body of
+            LXString str -> str
+              |> String.trim
+              |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
+            _ -> "Parser error in render equation environment"
     in
-    displayMathText latexState mathJaxRenderOption <| "\\begin{equation}" ++ r ++ addendum ++ "\\end{equation}"
+    displayMathText latexState mathJaxRenderOption <| "\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}"
 
 
 

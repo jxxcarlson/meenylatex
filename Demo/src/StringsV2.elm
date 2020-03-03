@@ -52,6 +52,10 @@ initialText =
 
 \\title{Sample MiniLaTeX Doc}
 
+\\begin{mathmacro}
+\\newcommand{\\bt}[1]{\\bf{#1}}
+\\newcommand{\\mca}[0]{\\mathcal{A}}
+\\end{mathmacro}
 
 
 
@@ -119,10 +123,6 @@ An improper integral:
 
 \\section{Math-mode macros}
 
-\\begin{mathmacro}
-\\newcommand{\\bt}[1]{\\bf{#1}}
-\\newcommand{\\mca}[0]{\\mathcal{A}}
-\\end{mathmacro}
 
 
 You can add math mode macros to your document

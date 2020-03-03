@@ -137,7 +137,6 @@ update seed parser renderer editRecord text =
             -- TODO: this can be improved by diffing
             SourceMap.generate newParagraphs p.idList
 
-        --     List.map2 (\para id -> Keyed.node "p" [ HA.id id, HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
     in
     EditRecord newParagraphs astList p.idList newRenderedParagraphs editRecord.latexState sourceMap
 

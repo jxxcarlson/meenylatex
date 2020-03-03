@@ -1,4 +1,7 @@
-module Internal.Render2 exposing (makeTableOfContents, render, renderLatexList, renderString, renderString2, parseString)
+module Internal.Render2 exposing
+    ( makeTableOfContents, render, renderLatexList, renderString
+    , parseString, renderString2
+    )
 
 {-| This module is for quickly preparing latex for export.
 
@@ -12,7 +15,6 @@ module Internal.Render2 exposing (makeTableOfContents, render, renderLatexList, 
 -- import List.Extra
 
 import Dict
-import Internal.MathMacro
 import Html exposing (Attribute, Html)
 import Html.Attributes as HA
 import Internal.ErrorMessages2 as ErrorMessages
@@ -28,6 +30,7 @@ import Internal.LatexState
         )
 import Internal.ListMachine as ListMachine
 import Internal.Macro as Macro
+import Internal.MathMacro
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Internal.Render
@@ -52,7 +55,8 @@ getElement k list =
 parseString_ parser str =
     Parser.run parser str
 
-parseString : MathJaxRenderOption -> LatexState -> String -> List (String, List LatexExpression)
+
+parseString : MathJaxRenderOption -> LatexState -> String -> List ( String, List LatexExpression )
 parseString mathJaxRenderOption latexState source =
     let
         paragraphs : List String
@@ -62,17 +66,16 @@ parseString mathJaxRenderOption latexState source =
         parse__ : String.String -> ( String, List LatexExpression )
         parse__ paragraph =
             ( paragraph, Internal.Parser.parse paragraph |> spacify )
-
     in
     paragraphs
         |> List.map parse__
+
 
 {-| Parse a string, then render it.
 -}
 renderString2 : MathJaxRenderOption -> LatexState -> String -> Html msg
 renderString2 mathJaxRenderOption latexState source =
     let
-
         render_ : ( String, List LatexExpression ) -> Html msg
         render_ ( source_, ast ) =
             renderLatexList mathJaxRenderOption source_ latexState ast
@@ -104,7 +107,6 @@ renderString mathJaxRenderOption latexState source =
         |> List.map parse
         |> List.map render_
         |> Html.div []
-
 
 
 
@@ -254,7 +256,8 @@ reportProblem problem =
 inlineMathText : LatexState -> MathJaxRenderOption -> String -> Html msg
 inlineMathText latexState mathJaxRenderOption str_ =
     let
-        str = Internal.MathMacro.evalStr latexState.mathMacroDictionary str_
+        str =
+            Internal.MathMacro.evalStr latexState.mathMacroDictionary str_
     in
     case mathJaxRenderOption of
         Delay ->
@@ -269,7 +272,8 @@ displayMathText latexState mathJaxRenderOption str =
     let
         str2 =
             String.trim str
-             --  TODO: FIX |> Internal.MathMacro.evalStr latexState.mathMacroDictionary)
+
+        --  TODO: FIX |> Internal.MathMacro.evalStr latexState.mathMacroDictionary)
     in
     case mathJaxRenderOption of
         Delay ->
@@ -1420,8 +1424,7 @@ renderEnvironmentDict =
         , ( "useforweb", \d s x a y -> renderUseForWeb d s x y )
         , ( "verbatim", \d s x a y -> renderVerbatim s x y )
         , ( "verse", \d s x a y -> renderVerse s x y )
-        , ( "mathmacro", \d s x a y -> renderMathMacros d s x y)
-
+        , ( "mathmacro", \d s x a y -> renderMathMacros d s x y )
         ]
 
 
@@ -1429,7 +1432,7 @@ renderAlignEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExp
 renderAlignEnvironment mathJaxRenderOption source latexState body =
     let
         r =
-            Internal.Render.render latexState  body
+            Internal.Render.render latexState body
 
         eqno =
             getCounter "eqno" latexState
@@ -1448,11 +1451,15 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
             else
                 ""
 
-        innerContents = case body of
-            LXString str -> str
-              |> String.trim
-              |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
-            _ -> "Parser error in render align environment"
+        innerContents =
+            case body of
+                LXString str ->
+                    str
+                        |> String.trim
+                        |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
+
+                _ ->
+                    "Parser error in render align environment"
 
         content =
             "\n\\begin{align*}\n" ++ addendum ++ innerContents ++ "\n\\end{align*}\n"
@@ -1514,11 +1521,16 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
             else
                 ""
 
-        contents = case body of
-            LXString str -> str
-              |> String.trim
-              |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
-            _ -> "Parser error in render equation environment"
+        contents =
+            case body of
+                LXString str ->
+                    str
+                        |> String.trim
+                        |> Debug.log "STR"
+                        |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
+
+                _ ->
+                    "Parser error in render equation environment"
     in
     displayMathText latexState mathJaxRenderOption <| "\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}"
 
@@ -1553,9 +1565,11 @@ renderMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression ->
 renderMacros mathJaxRenderOption source latexState body =
     displayMathText latexState mathJaxRenderOption (Internal.Render.render latexState body)
 
+
 renderMathMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderMathMacros mathJaxRenderOption source latexState body =
     Html.div [] []
+
 
 renderQuotation : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderQuotation mathJaxRenderOption source latexState body =
@@ -1571,8 +1585,8 @@ renderTabular mathJaxRenderOption source latexState body =
         [ renderTableBody mathJaxRenderOption source latexState body ]
 
 
-renderCell :  MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderCell  mathJaxRenderOption source latexState  cell =
+renderCell : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderCell mathJaxRenderOption source latexState cell =
     case cell of
         LXString s ->
             Html.td [] [ Html.text s ]
@@ -1588,7 +1602,7 @@ renderCell  mathJaxRenderOption source latexState  cell =
             Html.td [] []
 
 
-renderRow : MathJaxRenderOption -> String -> LatexState ->  LatexExpression -> Html msg
+renderRow : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderRow mathJaxRenderOption source latexState row =
     case row of
         LatexList row_ ->

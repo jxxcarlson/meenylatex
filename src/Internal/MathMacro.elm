@@ -1,15 +1,14 @@
-module Internal.MathMacro exposing (..)
-
+module Internal.MathMacro exposing (Context(..), MXParser, MathExpression(..), MathMacroDict, Problem(..), arg, between, check, enclose, evalList, evalMacro, evalMathExpr, evalNewCommand, evalStr, getArg, inMacroArg, inStuff, itemList, itemListHelper, itemList_, macro, macroArgWords, macroName, makeEntry, makeEntry_, makeMacroDict, many, manyHelp, mathExpression, mathStuff, newCommand, newMacroName, nonEmptyItemList, numberOfArgs, numberOfArgs_, parse, parseBetweenSymbols, parseMany, parseToSymbol, parseUntil, replaceArg, replaceArgs, some, spaces, stuff, toText, toText_, transform, word, ws)
 
 -- (evalStr, makeMacroDict,  MathMacroDict)
 
-import Dict
-import Parser.Advanced exposing (..)
-import Set
-import Dict exposing(Dict)
+import Dict exposing (Dict)
 import List.Extra
 import Maybe.Extra
+import Parser.Advanced exposing (..)
 import Result.Extra
+import Set
+
 
 {-| The type for the syntax tree
 -}
@@ -20,37 +19,51 @@ type MathExpression
     | MathList (List MathExpression)
 
 
-type alias MathMacroDict = Dict String (List String -> String)
+type alias MathMacroDict =
+    Dict String (List String -> String)
+
 
 {-|
+
       d2 = makeMacroDict "\\newcommand{\\bb}[0]{\\bf{B}} \\newcommand{\\bt}[1]{\\bf{#1}}"
       --> Dict.fromList [("bb",<function>),("bt",<function>)]
-  -}
+
+-}
 makeMacroDict : String -> MathMacroDict
 makeMacroDict str =
     case parse str of
-        Ok list -> List.map makeEntry list
-           |> Maybe.Extra.values
-           |> Dict.fromList
-        Err _ -> Dict.empty
+        Ok list ->
+            List.map makeEntry list
+                |> Maybe.Extra.values
+                |> Dict.fromList
+
+        Err _ ->
+            Dict.empty
+
 
 {-|
+
     d2 = makeMacroDict "\\newcommand{\\bb}[0]{\\bf{B}}\n\\newcommand{\\bt}[1]{\\bf{#1}}"
     --> Dict.fromList [("bb",<function>),("bt",<function>)]
 
     evalStr d2 "\\int_0^1 x^n dx + \\bb + \\bt{R}"
     --> "\\int_0^1 x^n dx + \\bf{B}+ \\bf{R}"
+
 -}
-evalStr : MathMacroDict ->  String -> String
+evalStr : MathMacroDict -> String -> String
 evalStr macroDict_ str =
     case parseMany (String.trim str) of
-        Ok (result) -> evalList macroDict_ result
-        Err _ -> "error"
+        Ok result ->
+            evalList macroDict_ result
+
+        Err _ ->
+            "error"
 
 
 type alias MXParser a =
     Parser.Advanced.Parser Context Problem a
-    
+
+
 type Context
     = CArg String
     | List
@@ -70,62 +83,76 @@ type Problem
     | ExpectingBackslash
 
 
-
-
 parseMany : String -> Result (List (DeadEnd Context Problem)) (List MathExpression)
 parseMany str =
     str
-      |> String.trim
-      |> String.lines
-      |> List.map String.trim
-      |> List.map parse
-      |> Result.Extra.combine
-      |> Result.map List.concat
-
+        |> String.trim
+        |> String.lines
+        |> List.map String.trim
+        |> List.map parse
+        |> Result.Extra.combine
+        |> Result.map List.concat
 
 
 {-|
 
     parse "x + y = \\foo{bar} + z"
     --> Ok [MathText ("x + y = "),Macro "foo" [MathList [MathText "bar"]],MathText ("+ z")]
+
 -}
 parse : String -> Result (List (DeadEnd Context Problem)) (List MathExpression)
 parse str =
     run (many mathExpression) str
 
+
 check : String -> String
 check str =
     case parse str of
-        Ok (result) -> toText result
-        Err _ -> "error"
+        Ok result ->
+            toText result
+
+        Err _ ->
+            "error"
 
 
-makeEntry : MathExpression -> Maybe (String, List String -> String)
+makeEntry : MathExpression -> Maybe ( String, List String -> String )
 makeEntry expr =
     case expr of
-        NewCommand name nargs args -> Just (makeEntry_ name nargs args)
-        _ -> Nothing
+        NewCommand name nargs args ->
+            Just (makeEntry_ name nargs args)
+
+        _ ->
+            Nothing
+
+
 
 -- makeEntry_  : String -> String -> List MathExpression -> (String, List String -> String)
-makeEntry_ : String -> String -> List MathExpression -> (String,  List String -> String)
+
+
+makeEntry_ : String -> String -> List MathExpression -> ( String, List String -> String )
 makeEntry_ name nargs args =
     let
-        n = String.toInt nargs |> Maybe.withDefault 0
+        n =
+            String.toInt nargs |> Maybe.withDefault 0
     in
-    (name, transform n args)
+    ( name, transform n args )
+
 
 transform n args =
-     List.map toText_ args
-       |> List.head
-       |> Maybe.withDefault "XXX"
-       |> (\str -> \list -> str)
-       |> replaceArgs n
+    List.map toText_ args
+        |> List.head
+        |> Maybe.withDefault "XXX"
+        |> (\str -> \list -> str)
+        |> replaceArgs n
 
 
 replaceArgs : Int -> (List String -> String) -> (List String -> String)
 replaceArgs n f =
     List.foldl replaceArg f (List.range 0 (n - 1))
+
+
 {-|
+
     f0 = \list -> "\\bf{#1}"
     --> <function> : a -> String
 
@@ -134,58 +161,84 @@ replaceArgs n f =
 
     f1 ["a"]
     --> "\\bf{a}"
+
 -}
 replaceArg : Int -> (List String -> String) -> (List String -> String)
 replaceArg k f =
-    \list ->   String.replace ("#" ++ String.fromInt (k + 1)) (getArg k list) (f list)
+    \list -> String.replace ("#" ++ String.fromInt (k + 1)) (getArg k list) (f list)
+
 
 
 -- [NewCommand "bt" "1" [MathList [MathText "{",Macro "bf" [],MathText "#1"]],MathText "}"]
 
+
 getArg : Int -> List String -> String
-getArg k list = List.Extra.getAt k list |> Maybe.withDefault ""
+getArg k list =
+    List.Extra.getAt k list |> Maybe.withDefault ""
 
-evalList :  MathMacroDict -> List MathExpression -> String
+
+evalList : MathMacroDict -> List MathExpression -> String
 evalList macroDict_ list =
-  List.map (evalMathExpr macroDict_) list
-  |> String.join " "
+    List.map (evalMathExpr macroDict_) list
+        |> String.join " "
 
-evalMathExpr :  MathMacroDict -> MathExpression -> String
+
+evalMathExpr : MathMacroDict -> MathExpression -> String
 evalMathExpr macroDict_ expr =
     case expr of
-        MathText str -> str
-        Macro name args -> evalMacro macroDict_ name args
-        NewCommand name nargs args-> evalNewCommand name nargs args
-        MathList list -> List.map toText_ list |> String.join " "
+        MathText str ->
+            str
+
+        Macro name args ->
+            evalMacro macroDict_ name args
+
+        NewCommand name nargs args ->
+            evalNewCommand name nargs args
+
+        MathList list ->
+            List.map toText_ list |> String.join " "
 
 
 evalMacro : MathMacroDict -> String -> List MathExpression -> String
 evalMacro macroDict_ name args =
     case Dict.get name macroDict_ of
-        Nothing -> "\\" ++ name ++ (List.map (toText_ >> enclose) args |> String.join "")
-        Just definition -> definition (List.map toText_ args)
+        Nothing ->
+            "\\" ++ name ++ (List.map (toText_ >> enclose) args |> String.join "")
+
+        Just definition ->
+            definition (List.map toText_ args)
+
 
 evalNewCommand : String -> String -> List MathExpression -> String
 evalNewCommand name nargs args =
-     "\\newcommand{\\" ++ name ++ "}[" ++ nargs ++ "]"  ++ (List.map (toText_ >> enclose) args |> String.join "")
+    "\\newcommand{\\" ++ name ++ "}[" ++ nargs ++ "]" ++ (List.map (toText_ >> enclose) args |> String.join "")
 
 
 
 -- MAP PARSE EXPR TO TEXT
 
+
 toText : List MathExpression -> String
 toText list =
     List.map toText_ list
-    |> String.join ""
+        |> String.join ""
 
 
 toText_ : MathExpression -> String
 toText_ expr =
     case expr of
-        MathText str -> str
-        Macro name args -> "\\" ++ name ++ (List.map (toText_ >> enclose) args |> String.join "")
-        MathList list -> List.map toText_ list |> String.join " "
-        NewCommand name nargs args -> evalNewCommand name nargs args
+        MathText str ->
+            str
+
+        Macro name args ->
+            "\\" ++ name ++ (List.map (toText_ >> enclose) args |> String.join "")
+
+        MathList list ->
+            List.map toText_ list |> String.join " "
+
+        NewCommand name nargs args ->
+            evalNewCommand name nargs args
+
 
 enclose : String -> String
 enclose arg_ =
@@ -195,28 +248,37 @@ enclose arg_ =
 
 -- PARSER
 
+
 mathExpression : MXParser MathExpression
 mathExpression =
     oneOf
         [ backtrackable newCommand
-         , macro
-         , mathStuff
-         ]
+        , macro
+        , mathStuff
+        ]
+
 
 {-|
+
     run mathStuff "x + y = \\foo"
     --> Ok (MathText ("x + y = "))
+
 -}
 mathStuff : MXParser MathExpression
 mathStuff =
     stuff ExpectingStuff inStuff |> map MathText
 
+
 inStuff : Char -> Bool
-inStuff c = not (c == '\\')
+inStuff c =
+    not (c == '\\')
+
 
 {-|
+
     run (stuff ExpectingStuff inStuff) "x + y = \\foo"
     --> Ok ("x + y = ")
+
 -}
 stuff : Problem -> (Char -> Bool) -> MXParser String
 stuff problem inWord =
@@ -229,7 +291,7 @@ stuff problem inWord =
         |= getOffset
         |= getSource
 
- 
+
 {-|
 
     import MXParser
@@ -255,23 +317,28 @@ zero or more more arguments.
     --> Ok (Macro "foo" [])
 
 -}
-macro :  MXParser MathExpression
-
-macro  =
+macro : MXParser MathExpression
+macro =
     succeed Macro
         |= macroName
+        -- |= itemList (oneOf [ lazy (\_ -> many mathExpression |> map MathList), arg ])
         |= itemList arg
-        -- |. wsParser
+        |. ws
+
+
+
+-- |. wsParser
+
 
 newCommand =
     succeed NewCommand
-      |. symbol (Token "\\newcommand" ExpectingNewCommand)
-      |= newMacroName
-      |. symbol (Token "[" ExpectingLeftBracket)
-      |= word ExpectingRightBracket (\c -> c /= ']')
-      |. symbol (Token "]" ExpectingRightBracket)
-      |= itemList arg
-      |. ws
+        |. symbol (Token "\\newcommand" ExpectingNewCommand)
+        |= newMacroName
+        |. symbol (Token "[" ExpectingLeftBracket)
+        |= word ExpectingRightBracket (\c -> c /= ']')
+        |. symbol (Token "]" ExpectingRightBracket)
+        |= itemList arg
+        |. ws
 
 
 {-| Use to parse arguments for macros
@@ -281,10 +348,21 @@ arg =
     inContext (CArg "arg") <|
         (succeed identity
             |. symbol (Token "{" ExpectingLeftBrace)
-            |= itemList (oneOf [ macroArgWords, lazy (\_ -> macro) ])
+            -- |= itemList (oneOf [ macroArgWords, lazy (\_ -> macro) ])
+            |= argList
             |. symbol (Token "}" ExpectingRightBrace)
             |> map MathList
         )
+
+
+argList : MXParser (List MathExpression)
+argList =
+    itemList (oneOf [ macroArgWords, lazy (\_ -> macro) ])
+
+
+
+-- itemList (oneOf [ mathStuff, lazy (\_ -> macro) ])
+
 
 newMacroName : MXParser String
 newMacroName =
@@ -308,10 +386,11 @@ macroName =
         |> map (String.dropLeft 1)
 
 
+
 {- MACRO WORDS -}
 
 
-macroArgWords :  MXParser MathExpression
+macroArgWords : MXParser MathExpression
 macroArgWords =
     nonEmptyItemList (word ExpectingValidMacroArgWord inMacroArg)
         |> map (String.join " ")
@@ -436,6 +515,7 @@ manyHelp p vs =
         , succeed ()
             |> map (\_ -> Done (List.reverse vs))
         ]
+
 
 {-| Apply a parser one or more times and return a tuple of the first result parsed
 and the list of the remaining results.

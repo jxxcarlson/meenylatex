@@ -75,6 +75,7 @@ type Problem
 parseMany : String -> Result (List (DeadEnd Context Problem)) (List MathExpression)
 parseMany str =
     str
+      |> String.trim
       |> String.lines
       |> List.map String.trim
       |> List.map parse

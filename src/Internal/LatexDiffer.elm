@@ -19,6 +19,7 @@ init parser renderer latexState text =
 initWithSeed : Int -> (String -> List LatexExpression) -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
 initWithSeed seed parser renderer latexState text =
     let
+
         paragraphs =
             text
                 |> Paragraph.logicalParagraphify
@@ -32,6 +33,7 @@ initWithSeed seed parser renderer latexState text =
                 | crossReferences = latexState1.crossReferences
                 , tableOfContents = latexState1.tableOfContents
                 , dictionary = latexState1.dictionary
+                , mathMacroDictionary = latexState1.mathMacroDictionary
             }
 
         ( _, renderedParagraphs ) =
@@ -67,7 +69,6 @@ update :
     -> String
     -> EditRecord a
 update seed parser renderLatexExpression renderString editRecord source =
-    -- ### LatexDiffer.update
     if Internal.Differ.isEmpty editRecord then
         init parser renderLatexExpression emptyLatexState source
 

@@ -8,6 +8,7 @@ import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression)
 import Internal.Render2 as Render exposing (render)
 import Internal.SourceMap as SourceMap
+import Internal.MathMacro
 
 
 init : (String -> List LatexExpression) -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a

@@ -501,6 +501,16 @@ anharmonic =
     """
 \\setcounter{section}{6}
 
+\\begin{mathmacro}
+\\newcommand{\\bt}[1]{\\bf{#1}}
+\\newcommand{\\mca}[0]{\\mathcal{A}}
+\\end{mathmacro}
+
+$$
+a^2 = \\bt{Z}/\\mca
+$$
+
+
 \\section{Anharmonic Oscillator}
 
 \\innertableofcontents

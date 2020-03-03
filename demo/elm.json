@@ -1,7 +1,8 @@
 {
     "type": "application",
     "source-directories": [
-        "src"
+        "src",
+        "../src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
@@ -17,7 +18,6 @@
             "elm-community/list-extra": "8.2.3",
             "elm-community/maybe-extra": "5.1.0",
             "jinjor/elm-debounce": "3.0.0",
-            "jxxcarlson/meenylatex": "10.0.2",
             "mdgriffith/elm-ui": "1.1.5"
         },
         "indirect": {

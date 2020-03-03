@@ -177,10 +177,10 @@ render mathJaxRenderOption source latexState latexExpression =
             renderItem mathJaxRenderOption source latexState level latexExpr
 
         InlineMath str ->
-            Html.span [] [ oneSpace, inlineMathText latexState mathJaxRenderOption str ]
+            Html.span [] [ oneSpace, inlineMathText latexState mathJaxRenderOption (Internal.MathMacro.evalStr latexState.mathMacroDictionary str) ]
 
         DisplayMath str ->
-            displayMathText latexState mathJaxRenderOption str
+            displayMathText latexState mathJaxRenderOption (Internal.MathMacro.evalStr latexState.mathMacroDictionary str)
 
         Environment name args body ->
             renderEnvironment mathJaxRenderOption source latexState name args body
@@ -269,7 +269,7 @@ displayMathText latexState mathJaxRenderOption str =
     let
         str2 =
             String.trim str
-            |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
+             --  TODO: FIX |> Internal.MathMacro.evalStr latexState.mathMacroDictionary)
     in
     case mathJaxRenderOption of
         Delay ->
@@ -1429,7 +1429,7 @@ renderAlignEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExp
 renderAlignEnvironment mathJaxRenderOption source latexState body =
     let
         r =
-            Internal.Render.render latexState body
+            Internal.Render.render latexState  body
 
         eqno =
             getCounter "eqno" latexState

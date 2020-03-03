@@ -32,6 +32,7 @@ makeMacroDict str =
         Ok list -> List.map makeEntry list
            |> Maybe.Extra.values
            |> Dict.fromList
+           -- |> Debug.log "MAKE DICT"
         Err _ -> Dict.empty
 
 {-|

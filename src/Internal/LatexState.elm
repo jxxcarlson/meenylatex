@@ -8,9 +8,6 @@ import Internal.MathMacro exposing(MathMacroDict)
 {- TYPES AND DEFAULT VALUES -}
 
 
-type alias InitialData =
-    { mathMacroDictionary : MathMacroDict}
-
 
 type alias Counters =
     Dict.Dict String Int

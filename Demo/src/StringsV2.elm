@@ -75,9 +75,7 @@ rendered text.
 
 \\strong{Note.} This version of the MiniLaTeX demo uses MathJax 3,
 which is much faster than the 2.7.* versions and which gives
-a much better experience when doing live editing.  There is one
-temporary downside \\mdash some more work needs to be done
-to enable math-mode macros.  Coming soon!
+a much better experience when doing live editing.
 
 \\section{Introduction}
 
@@ -149,6 +147,24 @@ $$
 a^2 = \\bt{Z}/\\mca
 $$
 
+Likewise, saying
+
+\\begin{verbatim}
+\\begin{equation}
+\\label{eq:function.type}
+\\mca^{\\bt{Z}} = \\bt{Z} \\to \\mca
+\\end{equation}
+
+\\end{verbatim}
+
+yields
+
+\\begin{equation}
+\\label{eq:function.type}
+\\mca^{\\bt{Z}} = \\bt{Z} \\to \\mca
+\\end{equation}
+
+
 There are some restrictions:
 
 \\begin{verbatim}
@@ -163,15 +179,12 @@ There are some restrictions:
    cannot refer to other macros defined
    in the mathmacro environment.
 
-4. Only works in $ .. $,  $$ .. $$ and
-   \\[ .. \\] elements — no environments yet.
-
-5. Put the mathmacro environment at
+4. Put the mathmacro environment at
    the beginning of the document
 \\end{verbatim}
 
 
-Items 1—4 will be eliminated in a
+Items 1—3 will be eliminated in a
 future release.
 
 

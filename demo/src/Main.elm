@@ -175,7 +175,7 @@ update msg model =
         FullRender ->
             let
                 editRecord =
-                    MiniLatex.Edit.init NoDelay model.seed (prependMacros model.macroText model.sourceText)
+                    MiniLatex.Edit.init NoDelay model.seed model.sourceText
             in
             ( { model
                 | counter = model.counter + 1

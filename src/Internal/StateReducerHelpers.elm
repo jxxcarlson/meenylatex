@@ -225,3 +225,29 @@ getLabel str =
 
         _ ->
             ""
+
+
+-- FOR TEXTMACRO DICTONARY
+
+{-|  Take a string of text-mode macro definitions, parse them,
+and add them to latexState.macrodictionary
+
+-}
+setDictionary : String -> LatexState -> LatexState
+setDictionary str latexState =
+       setDictionaryAux (LXParser.parse str ) latexState
+
+setDictionaryAux : List LatexExpression -> LatexState -> LatexState
+setDictionaryAux list latexState =
+    List.foldl macroDictReducer latexState list
+
+
+macroDictReducer: LatexExpression -> LatexState -> LatexState
+macroDictReducer lexpr state =
+    case lexpr of
+
+        NewCommand name nArgs body ->
+            setMacroDefinition name body state
+
+        _ ->
+            state

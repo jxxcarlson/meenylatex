@@ -141,7 +141,8 @@ update msg model =
                     String.fromInt model.counter
 
                 newEditRecord =
-                    MiniLatex.Edit.update NoDelay model.seed (prependMacros model.macroText str) model.editRecord
+                    -- MiniLatex.Edit.update NoDelay model.seed (prependMacros model.macroText str) model.editRecord
+                    MiniLatex.Edit.update NoDelay model.seed str model.editRecord
             in
             ( { model
                 | editRecord = newEditRecord

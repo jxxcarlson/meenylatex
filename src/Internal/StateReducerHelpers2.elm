@@ -187,14 +187,7 @@ setBibItemXRef optionalArgs args latexState =
 
 setMacroDefinition : String -> LatexExpression -> LatexState -> LatexState
 setMacroDefinition name body latexState =
-    --    let
-    --      maybeDefinition = body -- |> PT.latexList2List |> List.head |> Maybe.map PT.getString
-    --    in
-    --  case maybeDefinition of
-    --    Nothing -> latexState
-    --    Just definition ->
     Internal.LatexState.setMacroDefinition name (NewCommand name 0 body) latexState
-
 
 
 {- Helpers -}

@@ -24,10 +24,12 @@ initWithSeed seed parser renderer latexState text =
             text
                 |> Paragraph.logicalParagraphify
 
+        -- Compute
         ( latexState1, latexExpressionList ) =
             paragraphs
                 |> Accumulator.parse emptyLatexState
 
+        -- Save computed LatexState
         latexState2 =
             { emptyLatexState
                 | crossReferences = latexState1.crossReferences
@@ -37,6 +39,7 @@ initWithSeed seed parser renderer latexState text =
                 , mathMacroDictionary = latexState1.mathMacroDictionary
             }
 
+        -- Use latexExpression list to compute renderedParagraphs
         ( _, renderedParagraphs ) =
             latexExpressionList
                 |> Accumulator.render renderer latexState2

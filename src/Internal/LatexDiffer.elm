@@ -33,6 +33,7 @@ initWithSeed seed parser renderer latexState text =
                 | crossReferences = latexState1.crossReferences
                 , tableOfContents = latexState1.tableOfContents
                 , dictionary = latexState1.dictionary
+                , macroDictionary = latexState1.macroDictionary
                 , mathMacroDictionary = latexState1.mathMacroDictionary
             }
 

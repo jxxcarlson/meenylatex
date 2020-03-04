@@ -57,7 +57,9 @@ initialText =
 \\newcommand{\\mca}[0]{\\mathcal{A}}
 \\end{mathmacro}
 
-
+\\begin{textmacro}
+\\newcommand{\\fc}{J.S. Bach}
+\\end{textmacro}
 
 \\maketitle
 
@@ -72,6 +74,8 @@ rendered text.
 
 
 \\tableofcontents
+
+\\fc
 
 \\strong{Note.} This version of the MiniLaTeX demo uses MathJax 3,
 which is much faster than the 2.7.* versions and which gives

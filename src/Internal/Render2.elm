@@ -1526,7 +1526,6 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
                 LXString str ->
                     str
                         |> String.trim
-                        |> Debug.log "STR"
                         |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
 
                 _ ->

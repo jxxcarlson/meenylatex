@@ -57,7 +57,7 @@ evalStr macroDict_ str =
             evalList macroDict_ result
 
         Err _ ->
-            "error"
+            str
 
 
 type alias MXParser a =
@@ -348,6 +348,7 @@ arg =
     inContext (CArg "arg") <|
         (succeed identity
             |. symbol (Token "{" ExpectingLeftBrace)
+            |. ws
             -- |= itemList (oneOf [ macroArgWords, lazy (\_ -> macro) ])
             |= argList
             |. symbol (Token "}" ExpectingRightBrace)

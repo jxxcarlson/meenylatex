@@ -59,6 +59,7 @@ initialText =
 
 \\begin{textmacro}
 \\newcommand{\\fc}{J.S. Bach}
+\\newcommand{\\fc2}{Fredérique Chopin}
 \\end{textmacro}
 
 \\maketitle
@@ -75,16 +76,11 @@ rendered text.
 
 \\tableofcontents
 
-\\fc
-
-\\strong{Note.} This version of the MiniLaTeX demo uses MathJax 3,
-which is much faster than the 2.7.* versions and which gives
-a much better experience when doing live editing.
 
 \\section{Introduction}
 
 MiniLatex is a subset of LaTeX that can be
-rendered live in the browser using a custom parser.
+rendered live in the browser using a custom just-in-time compiler.
 Mathematical text is rendered by \\href{https://mathjax.org}{MathJax}:
 
 $$
@@ -106,8 +102,11 @@ the MiniLaTeX project, please go to
 or write to jxxcarlson at gmail.
 
 
+\\section{Try it out}
 
 \\italic{Try editing formula \\eqref{integral:xn} or \\eqref{integral:exp} below.}
+Note, e.g., from the source text, that the formulas are written inside
+equation environments.
 
 The most basic integral:
 
@@ -197,9 +196,9 @@ future release.
 
 \\newcommand{\\hello}[1]{Hello \\strong{#1}!}
 
-As illustrated by the examples below, one can define new text-mode macros
+As illustrated by the examples below, you can define new text-mode macros
 in MiniLaTeX.
-For example, if we add the text
+For example, if you add the text
 
 \\newcommand{\\boss}{Phineas Fogg}
 
@@ -214,7 +213,7 @@ then saying
 \\end{verbatim}
 
 produces \\italic{My boss is \\boss.}
-Likewise, if one says
+Likewise, if you say
 
 \\begin{verbatim}
 \\newcommand{\\hello}[1]{Hello \\strong{#1}!}
@@ -231,8 +230,23 @@ For one more example,  make the definition
 
 Then \\backslash{reverseconcat}\\texarg{A}\\texarg{B}\\texarg{C} = \\reverseconcat{A}{B}{C}
 
-The macro expansion feature will need a lot more work and testing.
-We also plan to add a feature so that authors can define new environments.
+You can add a set of text-mode macros in your document like this:
+
+\\begin{verbatim}
+\\begin{textmacro}
+\\newcommand{\\fc}{J.S. Bach}
+\\newcommand{\\fc2}{Fredérique Chopin}
+\\end{textmacro}
+\\end{verbatim}
+
+Then if you say
+
+\\begin{verbatim}
+My favorite composer is \\fc,
+but \\fc2 is a close second.
+\\end{verbatim}
+
+you get the text \\italic{My favorite composer is \\fc, but \\fc2 is a close second.}
 
 
 
@@ -300,14 +314,15 @@ Beryllium& Be& 4& 9.012 \\\\
 
 \\section{Errors and related matters}
 
-Errors, as illustrated below, are rendered in real time and are reported in red, in place. For example, suppose the user types the  text
+Errors, as illustrated below, are rendered in real time and are reported in red, in place.
+For example, suppose you type the  text
 
 \\begin{verbatim}
   $$
   a^2 + b^2 = c^2
 \\end{verbatim}
 
-Then she will see this:
+Then you will see this:
 
 \\image{http://jxxcarlson.s3.amazonaws.com/miniLaTeXErrorMsg-2020-02-22.png}{Fig 2. Error message}{width: 200}
 
@@ -325,8 +340,9 @@ This is intentional.  Note also what happens when we use a nonexistent environme
 Did you hear the one about the mathematician, the philosopher, and the engineer?
 \\end{joke}
 
-This default treatment of unknown environments is also intentional, and can be useful placeholders: an
-exported MiniLaTeX document can, of course, define such environments to suit the author's needs.
+This default treatment of unknown environments is also intentional, and can be useful,
+yielding handy placeholders. You can
+ redefine default environments in the document you export to standard LaTeX.
 
 \\section{Technology}
 

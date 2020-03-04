@@ -16,7 +16,7 @@ import Internal.LatexState
 import Internal.Parser as Parser exposing (LatexExpression(..), macro)
 import Internal.Render2 as Render exposing (renderLatexList)
 import Internal.MathMacro
-import Internal.StateReducerHelpers2 as SRH2
+import Internal.StateReducerHelpers as SRH2
 
 
 {-| Given an initial state and list of inputs of type a,

@@ -1,4 +1,4 @@
-module Internal.StateReducerHelpers2 exposing (..)
+module Internal.StateReducerHelpers exposing (..)
 
 import Internal.LatexState
     exposing

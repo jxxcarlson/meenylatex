@@ -1425,6 +1425,8 @@ renderEnvironmentDict =
         , ( "verbatim", \d s x a y -> renderVerbatim s x y )
         , ( "verse", \d s x a y -> renderVerse s x y )
         , ( "mathmacro", \d s x a y -> renderMathMacros d s x y )
+        , ( "textmacro", \d s x a y -> renderTextMacros d s x y )
+
         ]
 
 
@@ -1567,6 +1569,10 @@ renderMacros mathJaxRenderOption source latexState body =
 
 renderMathMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderMathMacros mathJaxRenderOption source latexState body =
+    Html.div [] []
+
+renderTextMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderTextMacros mathJaxRenderOption source latexState body =
     Html.div [] []
 
 

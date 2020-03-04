@@ -1,4 +1,4 @@
-module Internal.MathMacro exposing (Context(..), MXParser, MathExpression(..), MathMacroDict, Problem(..), arg, between, check, enclose, evalList, evalMacro, evalMathExpr, evalNewCommand, evalStr, getArg, inMacroArg, inStuff, itemList, itemListHelper, itemList_, macro, macroArgWords, macroName, makeEntry, makeEntry_, makeMacroDict, many, manyHelp, mathExpression, mathStuff, newCommand, newMacroName, nonEmptyItemList, numberOfArgs, numberOfArgs_, parse, parseBetweenSymbols, parseMany, parseToSymbol, parseUntil, replaceArg, replaceArgs, some, spaces, stuff, toText, toText_, transform, word, ws)
+module Internal.MathMacro exposing (evalStr, makeMacroDict, MathMacroDict)
 
 -- (evalStr, makeMacroDict,  MathMacroDict)
 

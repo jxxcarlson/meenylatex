@@ -1,4 +1,4 @@
-module Internal.Accumulator exposing (latexStateReducer, latexStateReducerAux, parse, render)
+module Internal.Accumulator exposing (parse, render)
 
 import Dict
 import Internal.LatexState

@@ -527,7 +527,7 @@ environmentOfType envType =
             "\\end{" ++ envType ++ "}"
 
         envKind =
-            if List.member envType [ "equation", "align", "eqnarray", "verbatim", "mathmacro", "listing", "verse" ] then
+            if List.member envType [ "equation", "align", "eqnarray", "verbatim", "mathmacro", "textmacro", "listing", "verse" ] then
                 "passThrough"
 
             else

@@ -1,7 +1,5 @@
 module Internal.MathMacro exposing (evalStr, makeMacroDict, MathMacroDict)
 
--- (evalStr, makeMacroDict,  MathMacroDict)
-
 import Dict exposing (Dict)
 import List.Extra
 import Maybe.Extra

@@ -158,6 +158,15 @@ envReducer name optonalArgs body state =
                           {state | mathMacroDictionary = mathDict}
                     _ -> state
 
+            "textmacro" ->
+                case body of
+                    LXString str ->
+                        let
+                           -- mathDict = Internal.MathMacro.makeMacroDict (String.trim str)
+                           foo = 1
+                        in
+                          {state | macroDictionary = Dict.empty}
+                    _ -> state
             _ ->
                 state
 

@@ -30,6 +30,7 @@ main =
         , subscriptions = subscriptions
         }
 
+-- MODEL
 
 type alias Model =
     { sourceText : String
@@ -39,6 +40,7 @@ type alias Model =
     , debounce : Debounce String
     , counter : Int
     , seed : Int
+    , selectedId : String
     , message : String
     }
 
@@ -84,11 +86,12 @@ init flags =
         model =
             { sourceText = initialText
             , macroText = ""
-            , renderedText = render  initialText
+            , renderedText = render  "" initialText
             , editRecord = editRecord
             , debounce = Debounce.init
             , counter = 0
             , seed = flags.seed
+            , selectedId  = ""
             , message = "No message yet ..."
             }
     in
@@ -146,7 +149,7 @@ update msg model =
             in
             ( { model
                 | editRecord = newEditRecord
-                , renderedText = renderFromEditRecord model.counter newEditRecord
+                , renderedText = renderFromEditRecord model.selectedId model.counter newEditRecord
                 , counter = model.counter + 2
               }
             , Random.generate NewSeed (Random.int 1 10000)
@@ -166,7 +169,7 @@ update msg model =
             ( { model
                 | sourceText = ""
                 , editRecord = editRecord
-                , renderedText = renderFromEditRecord model.counter editRecord
+                , renderedText = renderFromEditRecord model.selectedId model.counter editRecord
                 , counter = model.counter + 1
               }
             , Cmd.none
@@ -180,7 +183,7 @@ update msg model =
             ( { model
                 | counter = model.counter + 1
                 , editRecord = editRecord
-                , renderedText = renderFromEditRecord model.counter editRecord
+                , renderedText = renderFromEditRecord model.selectedId model.counter editRecord
               }
             , Cmd.none
             )
@@ -194,7 +197,7 @@ update msg model =
                 | counter = model.counter + 1
                 , editRecord = editRecord
                 , sourceText = initialText
-                , renderedText = renderFromEditRecord model.counter editRecord
+                , renderedText = renderFromEditRecord model.selectedId model.counter editRecord
               }
             , Cmd.none
             )
@@ -208,7 +211,7 @@ update msg model =
                 | counter = model.counter + 1
                 , editRecord = editRecord
                 , sourceText = StringsV1.mathExampleText
-                , renderedText = renderFromEditRecord model.counter editRecord
+                , renderedText = renderFromEditRecord model.selectedId model.counter editRecord
               }
             , Cmd.none
             )
@@ -224,7 +227,10 @@ update msg model =
         LaTeXMsg laTeXMsg ->
             case laTeXMsg of
                 MiniLatex.Edit.IDClicked id ->
-                  ({model | message = "Clicked: " ++ id}, Cmd.none)
+                  ({model | message = "Clicked: " ++ id
+                    , selectedId = id
+                    , counter = model.counter + 2
+                    , renderedText = renderFromEditRecord id model.counter model.editRecord}, Cmd.none)
 
 
 
@@ -238,9 +244,9 @@ prependMacros macros_ sourceText =
     "$$\n" ++ (macros_ |> normalize) ++ "\n$$\n\n" ++ sourceText
 
 
-renderFromEditRecord : Int -> Data (Html MiniLatex.Edit.LaTeXMsg) -> Html Msg
-renderFromEditRecord counter editRecord =
-    MiniLatex.Edit.get editRecord
+renderFromEditRecord : String -> Int -> Data (Html MiniLatex.Edit.LaTeXMsg) -> Html Msg
+renderFromEditRecord selectedId counter editRecord =
+    MiniLatex.Edit.get selectedId  editRecord
         |> List.map (Html.map LaTeXMsg)
         |> List.map (\x -> Html.div [ HA.style "margin-bottom" "0.65em" ] [ x ])
         |> Html.div []
@@ -251,13 +257,13 @@ render_ str =
     Task.perform Render (Task.succeed str)
 
 
-render : String -> Html Msg
-render sourceText =
+render : String -> String -> Html Msg
+render selectedId sourceText =
     let
         macroDefinitions =
             initialMacroText
     in
-    MiniLatex.render NoDelay macroDefinitions sourceText |> Html.map LaTeXMsg
+    MiniLatex.render selectedId NoDelay macroDefinitions sourceText |> Html.map LaTeXMsg
 
 
 

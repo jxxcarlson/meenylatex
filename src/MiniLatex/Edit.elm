@@ -73,17 +73,48 @@ update mathJaxRenderOption version source editRecord =
 
 {-| Retrieve Html from a Data object.
 -}
-get : Data (Html LaTeXMsg) -> List (Html LaTeXMsg)
-get editRecord =
+get : String -> Data (Html LaTeXMsg) -> List (Html LaTeXMsg)
+get selectedId editRecord =
     let
         paragraphs =
             editRecord.renderedParagraphs
 
+        mark selectedId_ id_ =
+            if selectedId == id_ then
+                 "select:" ++ id_
+            else if String.left 7 id_ == "selected:" then
+                 String.dropLeft 7 id_
+            else
+                id_
+
+
         ids =
             editRecord.idList
-    in
-    List.map2 (\para id -> Keyed.node "p" [ HA.id id, HE.onClick (IDClicked id), HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
+            |> List.map (mark selectedId)
 
+        keyedNode : String -> Html LaTeXMsg -> Html LaTeXMsg
+        keyedNode  id para = Keyed.node "p"
+            [ HA.id id, selectedStyle_ ("select:" ++ selectedId) id
+            , HE.onClick (IDClicked id)
+            , HA.style "margin-bottom" "10px"
+            ]
+            [ ( id, para ) ]
+    in
+    -- List.map2 (\para id -> Keyed.node "p" [ HA.id id, selectedStyle_ ("select:" ++ selectedId) id, HE.onClick (IDClicked id), HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
+    List.map2 keyedNode  ids paragraphs
+
+
+selectedStyle_ : String -> String -> Html.Attribute LaTeXMsg
+selectedStyle_ targetId currentId =
+    case targetId == currentId of
+        True ->
+            HA.style "background-color" highlightColor
+
+        False ->
+            HA.style "background-color" "#fff"
+
+highlightColor =
+    "#8d9ffe"
 
 {-| Used for initialization.
 -}

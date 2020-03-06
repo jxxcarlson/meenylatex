@@ -90,14 +90,14 @@ Use `Delay` for loading document containing many
 math elements.
 
 -}
-render : MathJaxRenderOption -> String -> String -> Html LaTeXMsg
-render mathJaxRenderOption macroDefinitions source =
+render : String -> MathJaxRenderOption -> String -> String -> Html LaTeXMsg
+render selectedId  mathJaxRenderOption macroDefinitions source =
     Internal.LatexDiffer.init
         Internal.Parser.parse
         (Render.renderLatexList mathJaxRenderOption source)
         emptyLatexState
         (prependMacros macroDefinitions source)
-        |> MiniLatex.Edit.get
+        |> MiniLatex.Edit.get selectedId
         |> Html.div [ HA.attribute "id" "__RENDERED_TEXT__" ]
 
 
@@ -107,19 +107,20 @@ render mathJaxRenderOption macroDefinitions source =
 
 -}
 renderWithSeed :
-    MathJaxRenderOption
+   String
+    -> MathJaxRenderOption
     -> Int
     -> String
     -> String
     -> Html LaTeXMsg
-renderWithSeed mathJaxRenderOption seed macroDefinitions source =
+renderWithSeed selectedId mathJaxRenderOption seed macroDefinitions source =
     Internal.LatexDiffer.initWithSeed
         seed
         Internal.Parser.parse
         (Render.renderLatexList mathJaxRenderOption source)
         emptyLatexState
         (prependMacros macroDefinitions source)
-        |> MiniLatex.Edit.get
+        |> MiniLatex.Edit.get selectedId
         |> Html.div []
 
 

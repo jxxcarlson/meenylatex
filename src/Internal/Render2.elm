@@ -110,18 +110,6 @@ renderString mathJaxRenderOption latexState source =
 
 
 
---renderString : LatexState -> String -> Html msg
---renderString latexState str =
---    -- ### Render2.renderString
---    str
---        |> Paragraph.logicalParagraphify
---        |> List.map Internal.Parser.parse
---        |> List.map spacify
---        |> List.map (List.map (render latexState))
---        |> List.map (\x -> Html.div [] x)
---        |> Html.div []
-
-
 postProcess : String -> String
 postProcess str =
     str
@@ -131,7 +119,7 @@ postProcess str =
 
 
 
-{- TYPES AND DEFAULT VALJUES -}
+{- TYPES AND DEFAULT VALUES -}
 
 
 extractList : LatexExpression -> List LatexExpression

@@ -1,4 +1,4 @@
-module Internal.Render exposing (makeTableOfContents, render, renderLatexList, renderString, renderArg, transformText)
+module Internal.Render exposing (renderArg, render)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -8,8 +8,6 @@ module Internal.Render exposing (makeTableOfContents, render, renderLatexList, r
 @docs makeTableOfContents, render, renderLatexList, renderString, renderArg, transformText
 
 -}
-
--- import List.Extra
 
 import Dict
 import Internal.ErrorMessages2 as ErrorMessages
@@ -174,7 +172,7 @@ renderComment str =
 
 
 
-{- ENVIROMENTS -}
+{- ENVIRONMENTS -}
 
 
 renderEnvironmentDict : Dict.Dict String (LatexState -> List LatexExpression -> LatexExpression -> String)

@@ -6,7 +6,7 @@ import Internal.Differ exposing (EditRecord)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression)
-import Internal.Render2 as Render exposing (render)
+import Internal.Render as Render exposing (render)
 import Internal.SourceMap as SourceMap
 import Internal.MathMacro
 

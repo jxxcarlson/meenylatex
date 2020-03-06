@@ -30,7 +30,7 @@ import Html.Attributes as HA
 import Internal.LatexDiffer
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Parser exposing (LatexExpression)
-import Internal.Render2 as Render
+import Internal.Render as Render
 import MiniLatex.Edit exposing (LaTeXMsg)
 import MiniLatex.Render exposing (MathJaxRenderOption)
 

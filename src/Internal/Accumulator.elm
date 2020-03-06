@@ -14,7 +14,7 @@ import Internal.LatexState
         , updateCounter
         )
 import Internal.Parser as Parser exposing (LatexExpression(..), macro)
-import Internal.Render2 as Render exposing (renderLatexList)
+import Internal.Render as Render exposing (renderLatexList)
 import Internal.MathMacro
 import Internal.StateReducerHelpers as SRH2
 

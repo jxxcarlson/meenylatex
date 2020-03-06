@@ -28,7 +28,7 @@ import Internal.Differ
 import Internal.LatexDiffer
 import Internal.Paragraph
 import Internal.Parser
-import Internal.Render2
+import Internal.Render
 import MiniLatex.Render exposing (MathJaxRenderOption)
 
 
@@ -52,8 +52,8 @@ init mathJaxRenderOption version source =
     Internal.LatexDiffer.update
         version
         Internal.Parser.parse
-        (Internal.Render2.renderLatexList mathJaxRenderOption source)
-        (Internal.Render2.renderString mathJaxRenderOption)
+        (Internal.Render.renderLatexList mathJaxRenderOption source)
+        (Internal.Render.renderString mathJaxRenderOption)
         Internal.Differ.emptyHtmlMsgRecord
         source
 
@@ -65,8 +65,8 @@ update mathJaxRenderOption version source editRecord =
     Internal.LatexDiffer.update
         version
         Internal.Parser.parse
-        (Internal.Render2.renderLatexList mathJaxRenderOption source)
-        (Internal.Render2.renderString mathJaxRenderOption)
+        (Internal.Render.renderLatexList mathJaxRenderOption source)
+        (Internal.Render.renderString mathJaxRenderOption)
         editRecord
         source
 

@@ -144,7 +144,6 @@ update msg model =
                     String.fromInt model.counter
 
                 newEditRecord =
-                    -- MiniLatex.Edit.update NoDelay model.seed (prependMacros model.macroText str) model.editRecord
                     MiniLatex.Edit.update NoDelay model.seed str model.editRecord
             in
             ( { model
@@ -246,7 +245,7 @@ prependMacros macros_ sourceText =
 
 renderFromEditRecord : String -> Int -> Data (Html MiniLatex.Edit.LaTeXMsg) -> Html Msg
 renderFromEditRecord selectedId counter editRecord =
-    MiniLatex.Edit.get selectedId  editRecord
+    MiniLatex.Edit.get selectedId editRecord
         |> List.map (Html.map LaTeXMsg)
         |> List.map (\x -> Html.div [ HA.style "margin-bottom" "0.65em" ] [ x ])
         |> Html.div []

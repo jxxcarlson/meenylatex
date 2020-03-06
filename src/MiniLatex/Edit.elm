@@ -79,7 +79,7 @@ get selectedId editRecord =
         paragraphs =
             editRecord.renderedParagraphs
 
-        mark selectedId_ id_ =
+        mark id_ =
             if selectedId == id_ then
                  "select:" ++ id_
             else if String.left 7 id_ == "selected:" then
@@ -90,7 +90,7 @@ get selectedId editRecord =
 
         ids =
             editRecord.idList
-            |> List.map (mark selectedId)
+            |> List.map mark
 
         keyedNode : String -> Html LaTeXMsg -> Html LaTeXMsg
         keyedNode  id para = Keyed.node "p"
@@ -100,7 +100,6 @@ get selectedId editRecord =
             ]
             [ ( id, para ) ]
     in
-    -- List.map2 (\para id -> Keyed.node "p" [ HA.id id, selectedStyle_ ("select:" ++ selectedId) id, HE.onClick (IDClicked id), HA.style "margin-bottom" "10px" ] [ ( id, para ) ]) paragraphs ids
     List.map2 keyedNode  ids paragraphs
 
 

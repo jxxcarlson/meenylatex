@@ -98,7 +98,7 @@ extractList latexExpression =
             []
 
 
-{-| The main rendering funcction. Compute an Html msg value
+{-| Compute a string value
 from the current LatexState and a LatexExpresssion.
 -}
 render : LatexState -> LatexExpression -> String

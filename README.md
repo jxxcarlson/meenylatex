@@ -37,11 +37,27 @@ done, see the code in `./demo`
 
 ## This release
 
-New method for using math-mode macros.  See
-[MiniLaTeX Demo](https://demo.minilatex.app/), section
-on math-mode macros.
+- Changed `MiniLatex.Edit.get` so as to be able to 
+highlight paragraphs in the rendered tex.  There are two 
+parts to this.  First, when `get` retrieves rendered text
+from a `Data` value, it adds click handlers to each paragraph.
+When a paragraph is clicked, it sends the message `IDClicked id`,
+where a typical `ID` is a string like "p.1.10", meaning paragaph 10,
+version 1. The version of a paragraph is incremented when it is edited.
+Second, a call to `MiniLatex.Edit.get` takes the form 
+`get selectedId data`.  If the `selectedId` is found in the data,
+the corresponding paragraph is highlighted.  The `get` function is
+used in conjunction with a host app to synchronize source  and rendered text.
+
+- Both math-mode and text-mode macros can be defined in the source text
+using `\begin{mathmacro} ... \end{mathmacro}` and 
+ `\begin{textmacro} ... \end{textmacro}`
 
 ## Recent releases
+
+- New method for using math-mode macros.  See
+  [MiniLaTeX Demo](https://demo.minilatex.app/), section
+  on math-mode macros.
 
 - Added a **source map**. This is a dictionary whose
 keys are pieces of source text and whose values are

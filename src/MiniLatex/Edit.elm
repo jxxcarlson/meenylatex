@@ -72,8 +72,15 @@ update mathJaxRenderOption version source editRecord =
 
 
 {-| Retrieve Html from a Data object and construct
-click handler used to highlight the selected element
-if any.
+the click handlers used to highlight the selected paragraph
+(if any).  Example:
+
+    get "p.1.10" data
+
+will retrieve the rendered text and will hightlight the paragraph
+with ID "p.1.10".  The ID decodes
+as "paragraph 10, version 1".  The version number
+of a paragraph is incremented when it is edited.
 -}
 get : String -> Data (Html LaTeXMsg) -> List (Html LaTeXMsg)
 get selectedId editRecord =

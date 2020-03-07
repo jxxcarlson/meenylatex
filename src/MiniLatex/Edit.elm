@@ -71,7 +71,9 @@ update mathJaxRenderOption version source editRecord =
         source
 
 
-{-| Retrieve Html from a Data object.
+{-| Retrieve Html from a Data object and construct
+click handler used to highlight the selected element
+if any.
 -}
 get : String -> Data (Html LaTeXMsg) -> List (Html LaTeXMsg)
 get selectedId editRecord =
@@ -94,7 +96,7 @@ get selectedId editRecord =
 
         keyedNode : String -> Html LaTeXMsg -> Html LaTeXMsg
         keyedNode  id para = Keyed.node "p"
-            [ HA.id id, selectedStyle_ ("select:" ++ selectedId) id
+            [ HA.id id, selectedStyle selectedId id
             , HE.onClick (IDClicked id)
             , HA.style "margin-bottom" "10px"
             ]
@@ -103,9 +105,9 @@ get selectedId editRecord =
     List.map2 keyedNode  ids paragraphs
 
 
-selectedStyle_ : String -> String -> Html.Attribute LaTeXMsg
-selectedStyle_ targetId currentId =
-    case targetId == currentId of
+selectedStyle : String -> String -> Html.Attribute LaTeXMsg
+selectedStyle targetId currentId =
+    case  ("select:" ++ targetId) == currentId of
         True ->
             HA.style "background-color" highlightColor
 
@@ -113,7 +115,7 @@ selectedStyle_ targetId currentId =
             HA.style "background-color" "#fff"
 
 highlightColor =
-    "#8d9ffe"
+    "#d7d6ff"
 
 {-| Used for initialization.
 -}

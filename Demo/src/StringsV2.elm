@@ -1,4 +1,4 @@
-module StringsV2 exposing (initialText, macros, mathExampleText, anharmonic)
+module StringsV2 exposing (anharmonic, initialText, macros, mathExampleText)
 
 
 macros =
@@ -58,8 +58,9 @@ initialText =
 \\end{mathmacro}
 
 \\begin{textmacro}
-\\newcommand{\\fc}{J.S. Bach}
-\\newcommand{\\fc2}{Fredérique Chopin}
+\\newcommand{\\boss}{Phineas Fogg}
+\\newcommand{\\hello}[1]{Hello \\strong{#1}!}
+\\newcommand{\\reverseconcat}[3]{#3#2#1}
 \\end{textmacro}
 
 \\maketitle
@@ -122,12 +123,56 @@ An improper integral:
 \\int_0^\\infty e^{-x} dx = 1
 \\end{equation}
 
+
+\\section{Theorems}
+
+\\begin{theorem}
+There are infinitely many prime numbers.
+\\end{theorem}
+
+\\begin{theorem}
+There are infinitley many prime numbers
+$p$ such that $p \\equiv 1\\ mod\\ 4$.
+\\end{theorem}
+
+\\section{Images}
+
+\\image{http://psurl.s3.amazonaws.com/images/jc/beats-eca1.png}{Figure 1. Two-frequency beats}{width: 350, align: center}
+
+\\section{Lists}
+
+\\begin{itemize}
+
+\\item This is \\strong{just} a test.
+
+\\item \\italic{And so is this:} $a^2 + b^2 = c^2$
+
+\\begin{itemize}
+
+\\item Items can be nested
+
+\\item And you can do this: $ \\frac{1}{1 + \\frac{2}{3}} $
+
+\\end{itemize}
+
+\\end{itemize}
+
+\\section{Tables}
+
+\\begin{indent}
+\\begin{tabular}{ l l l l }
+Hydrogen & H & 1 & 1.008 \\\\
+Helium & He & 2 & 4.003 \\\\
+Lithium& Li & 3 & 6.94 \\\\
+Beryllium& Be& 4& 9.012 \\\\
+\\end{tabular}
+\\end{indent}
+
+
+
 \\section{Math-mode macros}
 
-
-
-You can add math mode macros to your document
-as in the example below.
+Math-mode macros are added using the \\code{mathmacro} environment:
 
 \\begin{verbatim}
 \\begin{mathmacro}
@@ -194,59 +239,30 @@ future release.
 
 \\section{Text-mode Macros}
 
-\\newcommand{\\hello}[1]{Hello \\strong{#1}!}
-
-As illustrated by the examples below, you can define new text-mode macros
-in MiniLaTeX.
-For example, if you add the text
-
-\\newcommand{\\boss}{Phineas Fogg}
+Text-mode macros are defined in a \\code{textmacro} environment:
 
 \\begin{verbatim}
+\\begin{textmacro}
 \\newcommand{\\boss}{Phineas Fogg}
+\\newcommand{\\hello}[1]{Hello \\strong{#1}!}
+\\newcommand{\\reverseconcat}[3]{#3#2#1}
+\\end{textmacro}
 \\end{verbatim}
 
-then saying
+Then
 
 \\begin{verbatim}
 \\italic{My boss is \\boss.}
 \\end{verbatim}
 
 produces \\italic{My boss is \\boss.}
-Likewise, if you say
+Likewise, the text
 
 \\begin{verbatim}
-\\newcommand{\\hello}[1]{Hello \\strong{#1}!}
+\\hello{John}
 \\end{verbatim}
 
-then the macro \\backslash{hello}\\texarg{John} renders as \\hello{John}
-For one more example,  make the definition
-
-\\begin{verbatim}
-\\newcommand{\\reverseconcat}[3]{#3#2#1}
-\\end{verbatim}
-
-\\newcommand{\\reverseconcat}[3]{#3#2#1}
-
-Then \\backslash{reverseconcat}\\texarg{A}\\texarg{B}\\texarg{C} = \\reverseconcat{A}{B}{C}
-
-You can add a set of text-mode macros in your document like this:
-
-\\begin{verbatim}
-\\begin{textmacro}
-\\newcommand{\\fc}{J.S. Bach}
-\\newcommand{\\fc2}{Fredérique Chopin}
-\\end{textmacro}
-\\end{verbatim}
-
-Then if you say
-
-\\begin{verbatim}
-My favorite composer is \\fc,
-but \\fc2 is a close second.
-\\end{verbatim}
-
-you get the text \\italic{My favorite composer is \\fc, but \\fc2 is a close second.}
+yields \\hello{John}.
 
 
 
@@ -265,52 +281,6 @@ and can \\strike{also be struck}. Here are the macros:
 \\end{verbatim}
 
 
-\\section{Theorems}
-
-\\begin{theorem}
-There are infinitely many prime numbers.
-\\end{theorem}
-
-\\begin{theorem}
-There are infinitley many prime numbers
-$p$ such that $p \\equiv 1\\ mod\\ 4$.
-\\end{theorem}
-
-\\section{Images}
-
-\\image{http://psurl.s3.amazonaws.com/images/jc/beats-eca1.png}{Figure 1. Two-frequency beats}{width: 350, align: center}
-
-\\section{Lists and Tables}
-
-A list
-
-\\begin{itemize}
-
-\\item This is \\strong{just} a test.
-
-\\item \\italic{And so is this:} $a^2 + b^2 = c^2$
-
-\\begin{itemize}
-
-\\item Items can be nested
-
-\\item And you can do this: $ \\frac{1}{1 + \\frac{2}{3}} $
-
-\\end{itemize}
-
-\\end{itemize}
-
-A table
-
-\\begin{indent}
-\\strong{Light Elements}
-\\begin{tabular}{ l l l l }
-Hydrogen & H & 1 & 1.008 \\\\
-Helium & He & 2 & 4.003 \\\\
-Lithium& Li & 3 & 6.94 \\\\
-Beryllium& Be& 4& 9.012 \\\\
-\\end{tabular}
-\\end{indent}
 
 \\section{Errors and related matters}
 
@@ -328,21 +298,6 @@ Then you will see this:
 
 
 We plan to make further improvements in error reporting.
-Note, by the way, what happens when a nonexistent macro like \\italic{hohoho } is used:
-
-\\begin{indent}
-\\hohoho{123}
-\\end{indent}
-
-This is intentional.  Note also what happens when we use a nonexistent environment like \\italic{joke}:
-
-\\begin{joke}
-Did you hear the one about the mathematician, the philosopher, and the engineer?
-\\end{joke}
-
-This default treatment of unknown environments is also intentional, and can be useful,
-yielding handy placeholders. You can
- redefine default environments in the document you export to standard LaTeX.
 
 \\section{Technology}
 
@@ -364,8 +319,6 @@ Briefly, \\href{https://www.mathjax.org/}{MathJax} is used inside dollar signs, 
 \\section{References}
 
 \\begin{thebibliography}
-
-\\bibitem{D} \\href{https://ocw.mit.edu/courses/physics/8-05-quantum-physics-ii-fall-2013/lecture-notes/MIT8_05F13_Chap_04.pdf}{On Dirac's bra-ket notation}, MIT Courseware.
 
 \\bibitem{G} James Carlson, \\href{https://knode.io/628}{MiniLaTeX Grammar},
 
@@ -532,6 +485,7 @@ f(x) = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^\\infty \\hat f(k) e^{ikx} dk
 
 
 """
+
 
 anharmonic =
     """

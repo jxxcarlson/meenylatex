@@ -1,4 +1,4 @@
-module Internal.MathMacro exposing (evalStr, makeMacroDict, MathMacroDict)
+module Internal.MathMacro exposing (MathMacroDict, evalStr, makeMacroDict)
 
 import Dict exposing (Dict)
 import List.Extra
@@ -24,6 +24,7 @@ type alias MathMacroDict =
 {-|
 
       d2 = makeMacroDict "\\newcommand{\\bb}[0]{\\bf{B}} \\newcommand{\\bt}[1]{\\bf{#1}}"
+      d3 = makeMacroDict "\\newcommand{\\opensets}[0]{\\mathcal{O}}"
       --> Dict.fromList [("bb",<function>),("bt",<function>)]
 
 -}

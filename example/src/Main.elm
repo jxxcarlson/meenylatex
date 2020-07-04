@@ -4,6 +4,7 @@ import Browser
 import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src, style)
 import MiniLatex
+import MiniLatex.Edit
 import MiniLatex.Render exposing (MathJaxRenderOption(..))
 
 
@@ -26,6 +27,7 @@ init =
 
 type Msg
     = NoOp
+    | LatexMsg MiniLatex.Edit.LaTeXMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -36,16 +38,35 @@ update msg model =
 
 ---- VIEW ----
 
-macros = "\\newcommand{\\bra}{\\langle}"
 
-sourceText = "Pythagoras says: $a^2 + b^2 = c^2$"
+macros =
+    "\\newcommand{\\bra}{\\langle}"
+
+
+sourceText =
+    """Standard formula:
+
+
+\\begin{mathmacro}
+\\newcommand{\\set}[1]{\\{#1\\}}
+\\newcommand{\\opensets}[0]{\\mathcal{O}}
+\\end{mathmacro}
+
+
+$$\\set{a,b,c} = \\opensets$$
+
+"""
+
 
 view : Model -> Html Msg
 view model =
-    div [style "margin"  "50px"]
-        [  h1 [] [ text "Example" ]
-        , div [style "font-size" "18px"] [MiniLatex.render NoDelay macros sourceText]
+    div [ style "margin" "50px" ]
+        [ h1 [] [ text "Example" ]
+        , div [ style "font-size" "18px" ]
+            [ MiniLatex.render "noSelectedId" NoDelay macros sourceText |> Html.map LatexMsg
+            ]
         ]
+
 
 
 ---- PROGRAM ----

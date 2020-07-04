@@ -1,24 +1,30 @@
 module Main exposing (main)
 
 import Browser
+import Browser.Dom as Dom
 import Debounce exposing (Debounce)
+import File.Download as Download
 import Html exposing (..)
 import Html.Attributes as HA exposing (..)
 import Html.Events exposing (onClick, onInput)
 import MiniLatex
 import MiniLatex.Edit exposing (Data)
+import MiniLatex.Export
 import MiniLatex.Render exposing (MathJaxRenderOption(..))
 import Random
 import StringsV1
 import StringsV2
 import Style exposing (..)
-import Task exposing(Task)
-import Browser.Dom as Dom
+import Task exposing (Task)
 
 
-initialText = StringsV2.initialText
-  -- "Test: $a^2 = 1$\n\nooo\n\niii"
-    --
+initialText =
+    StringsV2.initialText
+
+
+
+-- "Test: $a^2 = 1$\n\nooo\n\niii"
+--
 
 
 main : Program Flags Model Msg
@@ -30,7 +36,10 @@ main =
         , subscriptions = subscriptions
         }
 
+
+
 -- MODEL
+
 
 type alias Model =
     { sourceText : String
@@ -59,7 +68,7 @@ type Msg
     | ExampleText
     | SetViewPortForElement (Result Dom.Error ( Dom.Element, Dom.Viewport ))
     | LaTeXMsg MiniLatex.Edit.LaTeXMsg
-
+    | Export
 
 
 debounceConfig : Debounce.Config Msg
@@ -82,16 +91,15 @@ init flags =
         editRecord =
             MiniLatex.Edit.init NoDelay flags.seed initialText
 
-
         model =
             { sourceText = initialText
             , macroText = ""
-            , renderedText = render  "" initialText
+            , renderedText = render "" initialText
             , editRecord = editRecord
             , debounce = Debounce.init
             , counter = 0
             , seed = flags.seed
-            , selectedId  = ""
+            , selectedId = ""
             , message = "No message yet ..."
             }
     in
@@ -110,7 +118,8 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp -> (model, Cmd.none)
+        NoOp ->
+            ( model, Cmd.none )
 
         GetContent str ->
             let
@@ -153,6 +162,13 @@ update msg model =
               }
             , Random.generate NewSeed (Random.int 1 10000)
             )
+
+        Export ->
+            let
+                contentForExport =
+                    model.sourceText |> MiniLatex.Export.toLaTeX
+            in
+            ( model, Download.string "mydocument.tex" "text/x-tex" contentForExport )
 
         GenerateSeed ->
             ( model, Random.generate NewSeed (Random.int 1 10000) )
@@ -221,16 +237,19 @@ update msg model =
                     ( model, setViewPortForSelectedLine element viewport )
 
                 Err _ ->
-                    ( model , Cmd.none )
+                    ( model, Cmd.none )
 
         LaTeXMsg laTeXMsg ->
             case laTeXMsg of
                 MiniLatex.Edit.IDClicked id ->
-                  ({model | message = "Clicked: " ++ id
-                    , selectedId = id
-                    , counter = model.counter + 2
-                    , renderedText = renderFromEditRecord id model.counter model.editRecord}, Cmd.none)
-
+                    ( { model
+                        | message = "Clicked: " ++ id
+                        , selectedId = id
+                        , counter = model.counter + 2
+                        , renderedText = renderFromEditRecord id model.counter model.editRecord
+                      }
+                    , Cmd.none
+                    )
 
 
 normalize : String -> String
@@ -288,7 +307,7 @@ lhs model =
             [ text "For more information about MiniLaTeX, please go to  "
             , a [ href "https://minilatex.io", target "_blank" ] [ text "minilatex.io" ]
             ]
-         , p [style "margin-left" "20px"] [text model.message]
+        , p [ style "margin-left" "20px" ] [ text model.message ]
         ]
 
 
@@ -310,7 +329,12 @@ editor : Model -> Html Msg
 editor model =
     div []
         [ textarea (editorTextStyle ++ [ onInput GetContent, value model.sourceText ]) []
-        , p [ style "clear" "left", style "margin-left" "20px", style "margin-top" "-20px" ] [ clearButton 60, restoreTextButton 80, fullRenderButton 100 ]
+        , p [ style "clear" "left", style "margin-left" "20px", style "margin-top" "-20px" ]
+            [ clearButton 60
+            , restoreTextButton 80
+            , fullRenderButton 100
+            , exportButton 80
+            ]
         ]
 
 
@@ -326,7 +350,8 @@ macroPanel model =
 renderedSource : Model -> Html Msg
 renderedSource model =
     Html.div (renderedSourceStyle ++ [ HA.class "rhs" ])
-        [ model.renderedText]
+        [ model.renderedText ]
+
 
 setViewportForElement : String -> Cmd Msg
 setViewportForElement id =
@@ -344,11 +369,12 @@ setViewPortForSelectedLine element viewport =
     Task.attempt (\_ -> NoOp) (Dom.setViewportOf "__RENDERED_TEXT__" 0 y)
 
 
-
 getElementWithViewPort : Dom.Viewport -> String -> Task Dom.Error ( Dom.Element, Dom.Viewport )
 getElementWithViewPort vp id =
     Dom.getElement id
         |> Task.map (\el -> ( el, vp ))
+
+
 
 --
 -- BUTTONS
@@ -365,6 +391,10 @@ fullRenderButton width =
 
 restoreTextButton width =
     button ([ onClick RestoreText ] ++ buttonStyle colorBlue width) [ text "Restore" ]
+
+
+exportButton width =
+    button ([ onClick Export ] ++ buttonStyle colorBlue width) [ text "Export" ]
 
 
 exampleButton width =

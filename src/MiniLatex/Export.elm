@@ -225,6 +225,8 @@ renderEnvironmentDict =
         , ( "useforweb", \args body -> renderUseForWeb body )
         , ( "thebibliography", \args body -> renderTheBibliography body )
         , ( "tabular", \args body -> renderTabular args body )
+        , ( "mathmacro", \args body -> render body )
+        , ( "textmacro", \args body -> render body )
         ]
 
 

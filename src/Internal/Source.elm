@@ -16,15 +16,14 @@ texPrefix : String
 texPrefix =
     """
 \\documentclass[11pt, oneside]{article}
+
+%% Packages
 \\usepackage{geometry}
 \\geometry{letterpaper}
 \\usepackage{changepage}   % for the adjustwidth environment
-
-
 \\usepackage{graphicx}
 \\usepackage{wrapfig}
 \\graphicspath{ {images/} }
-
 \\usepackage{amssymb}
 \\usepackage{amsmath}
 \\usepackage{amscd}
@@ -35,12 +34,11 @@ texPrefix =
     filecolor=magenta,
     urlcolor=blue,
 }
+\\usepackage{xcolor}
+\\usepackage{soul}
 
-%SetFonts
 
-%SetFonts
-
-%%%%%%
+%% Commands
 \\newcommand{\\code}[1]{{\\tt #1}}
 \\newcommand{\\ellie}[1]{\\href{#1}{Link to Ellie}}
 % \\newcommand{\\image}[3]{\\includegraphics[width=3cm]{#1}}
@@ -65,13 +63,22 @@ texPrefix =
     \\end{wrapfigure}
 }
 
-
 \\newcommand{\\italic}[1]{{\\sl #1}}
 \\newcommand{\\strong}[1]{{\\bf #1}}
 \\newcommand{\\subheading}[1]{{\\bf #1}\\par}
 \\newcommand{\\xlinkPublic}[2]{\\href{{http://www.knode.io/\\#@public#1}}{#2}}
+\\newcommand{\\red}[1]{\\textcolor{red}{#1}}
+\\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
+\\newcommand{\\remote}[1]{\\textcolor{red}{#1}}
+\\newcommand{\\local}[1]{\\textcolor{blue}{#1}}
+\\newcommand{\\highlight}[1]{\\hl{#1}}
+\\newcommand{\\strike}[1]{\\st{#1}}
+\\newcommand{\\term}[1]{{\\sl #1}}
+\\newtheorem{remark}{Remark}
+\\newcommand{\\comment}[1]{}
+\\newcommand{\\innertableofcontents}{}
 
-
+%% Theorems
 \\newtheorem{theorem}{Theorem}
 \\newtheorem{axiom}{Axiom}
 \\newtheorem{lemma}{Lemma}
@@ -83,22 +90,14 @@ texPrefix =
 \\newtheorem{problem}{Problem}
 \\newtheorem{exercises}{Exercises}
 
-
-%%%
-%%%
-\\newcommand{\\term}[1]{{\\sl #1}}
-\\newtheorem{remark}{Remark}
-\\newcommand{\\comment}[1]{}
-
+%% Environments
 \\renewenvironment{quotation}
   {\\begin{adjustwidth}{2cm}{} \\footnotesize}
   {\\end{adjustwidth}}
 
-\\newcommand{\\innertableofcontents}{}
-
-
+% Spacing
 \\parindent0pt
-\\parskip10pt
+\\parskip5pt
 
 \\begin{document}
 
@@ -106,7 +105,7 @@ texPrefix =
 """
 
 
-{-| Bolerplate for the end of the document.
+{-| Boilerplate for the end of the document.
 -}
 texSuffix : String
 texSuffix =

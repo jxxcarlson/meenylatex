@@ -109,7 +109,6 @@ renderString mathJaxRenderOption latexState source =
         |> Html.div []
 
 
-
 postProcess : String -> String
 postProcess str =
     str
@@ -430,6 +429,8 @@ renderMacroDict =
         , ( "innertableofcontents", \d s x y z -> renderInnerTableOfContents s x z )
         , ( "red", \d s x y z -> renderRed s x z )
         , ( "blue", \d s x y z -> renderBlue s x z )
+        , ( "remote", \d s x y z -> renderRemote s x z )
+        , ( "local", \d s x y z -> renderLocal s x z )
         , ( "highlight", \d s x y z -> renderHighlighted s x z )
         , ( "strike", \d s x y z -> renderStrikeThrough s x z )
         , ( "term", \d s x y z -> renderTerm s x z )
@@ -1184,6 +1185,24 @@ renderBlue _ latexState args =
     Html.span [ HA.style "color" "blue" ] [ Html.text <| arg ]
 
 
+renderRemote : String -> LatexState -> List LatexExpression -> Html msg
+renderRemote _ latexState args =
+    let
+        arg =
+            Internal.RenderToString.renderArg 0 latexState args
+    in
+    Html.div [ HA.style "color" "red", HA.style "white-space" "pre" ] [ Html.text <| arg ]
+
+
+renderLocal : String -> LatexState -> List LatexExpression -> Html msg
+renderLocal _ latexState args =
+    let
+        arg =
+            Internal.RenderToString.renderArg 0 latexState args
+    in
+    Html.div [ HA.style "color" "blue", HA.style "white-space" "pre" ] [ Html.text <| arg ]
+
+
 renderHighlighted : String -> LatexState -> List LatexExpression -> Html msg
 renderHighlighted _ latexState args =
     let
@@ -1414,7 +1433,6 @@ renderEnvironmentDict =
         , ( "verse", \d s x a y -> renderVerse s x y )
         , ( "mathmacro", \d s x a y -> renderMathMacros d s x y )
         , ( "textmacro", \d s x a y -> renderTextMacros d s x y )
-
         ]
 
 
@@ -1558,6 +1576,7 @@ renderMacros mathJaxRenderOption source latexState body =
 renderMathMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderMathMacros mathJaxRenderOption source latexState body =
     Html.div [] []
+
 
 renderTextMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderTextMacros mathJaxRenderOption source latexState body =

@@ -67,13 +67,6 @@ initialText =
 
 % EXAMPLE 1
 
-\\begin{comment}
-This multi-line comment
-should also not
-be visible in the
-rendered text.
-\\end{comment}
-
 
 \\tableofcontents
 
@@ -97,7 +90,14 @@ Feel free to
 experiment with MiniLatex using this app
 \\mdash you can change the text in the
 left-hand window, or clear it and enter
-your own text. For more information about
+your own text. Use the \\blue{export} button
+below to export the text you write to a
+LaTeX document on your computer.  It can
+be processed as-is by any program that runs LaTeX,
+e.g, TeXShop or \\code{pdflatex}.
+
+
+For more information about
 the MiniLaTeX project, please go to
 \\href{https://minilatex.io}{minilatex.io},
 or write to jxxcarlson at gmail.
@@ -299,11 +299,36 @@ Then you will see this:
 
 We plan to make further improvements in error reporting.
 
-\\section{Technology}
+\\section{More about MiniLaTeX}
 
-MiniLatex is written in \\href{http://elm-lang.org}{Elm}, the statically typed functional
+This app is a simple demonstration of what one can do with MiniLaTeX.
+There are several other apps in various stages of development which
+offer different or more sophisticated services:
+
+\\begin{itemize}
+
+\\item \\href{https://knode.io}{knode.io} is a web app for creating, editing, and distributing
+MiniLaTeX documents.  Try this link: \\href{https://knode.io/424}{QM class notes on knode.io}.
+Public documents can be read by anyone, but to create documents, you need to create an account
+on knode.io.
+
+\\item \\href{https://reader.minilatex.app}{reader.minilatex.app} is a read-only app for
+distributing MiniLaTeX documents on the web.
+
+\\item \\italic{In development}: a desktop app for creating MiniLaTeX content. Documents
+are stored on your computer's hard disk and can also be stored in the cloud.
+Documents can also be posted to any website that implements the app's publishing
+protocol.
+
+\\end{itemize}
+
+For more information about these projects, please contact jxxcarlson at gmail.
+
+\\section{The Technology}
+
+MiniLatex is written in \\href{https://elm-lang.org}{Elm}, the statically typed functional
 programming language created by Evan Czaplicki for building web applications.  Because of its excellent
-\\href{http://package.elm-lang.org/packages/elm-tools/parser/latest}{parser combinator library},
+\\href{http://package.elm-lang.org/packages/elm/parser/latest}{parser combinator library},
 Elm is a good fit for a project like the present one.
 
 
@@ -312,6 +337,9 @@ For an overview of the design of MiniLatex, see
 Briefly, \\href{https://www.mathjax.org/}{MathJax} is used inside dollar signs, and Elm is used outside.
 
 \\href{https://github.com/jxxcarlson/meenylatex}{Github repo}
+
+
+
 
 \\bigskip
 

@@ -286,6 +286,7 @@ renderMacroDict =
         , ( "mdash", \x y -> "---" )
         , ( "ndash", \x y -> "--" )
         , ( "setcounter", \x y -> renderSetCounter x y )
+        , ( "tableofcontents", \x y -> renderTableOfContents x y )
         ]
 
 
@@ -307,6 +308,11 @@ macroRenderer name =
 
         Nothing ->
             reproduceMacro name
+
+
+renderTableOfContents : List LatexExpression -> List LatexExpression -> String
+renderTableOfContents optArgs args =
+    "\\parskip0pt\n\\tableofcontents\n\\parskip5pt"
 
 
 renderCode : List LatexExpression -> List LatexExpression -> String

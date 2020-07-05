@@ -5,3 +5,18 @@ scripts:
   make:  elm make --optimize src/Main.elm --output=public/Main.js
 
   look  : open -a /Applications/Google\ Chrome.app/  public/index.html
+
+  go: open -a /Applications/Google\ Chrome.app/ https://demo.minilatex.app
+
+  publish:
+    cmd:
+      - echo "Compiling ..."
+      - elm make --optimize src/Main.elm --output=public/Main.js
+      - echo "Uglifying ..."
+      - uglifyjs  public/Main.js --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters=true,keep_fargs=false,unsafe_comps=true,unsafe=true,passes=2' --output=public/Main.min.js && uglifyjs public/Main.min.js --mangle --output=public/Main.min.js
+      - mv public/Main.min.js dist/Main.min.js
+      - echo Uploading to server 138.197.81.6 ...
+      - scp -r dist/* root@138.197.81.6:/var/www/demo.minilatex.app/html
+    desc: publish app on Digital Ocean as demo.minilatex.app
+
+  ssh: ssh root@138.197.81.6

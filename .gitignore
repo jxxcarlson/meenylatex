@@ -8,3 +8,6 @@ demo-package/
 **/Main.js
 **/elm-stuff
 **/Main.min.js
+Demo/dist/assets
+Demo/dist/Main.min.js
+Demo/mathjax/

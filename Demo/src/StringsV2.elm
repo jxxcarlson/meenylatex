@@ -292,7 +292,7 @@ For example, suppose you type the  text
   a^2 + b^2 = c^2
 \\end{verbatim}
 
-Then you will see this:
+Then you will see this in the rendered text window:
 
 \\image{http://jxxcarlson.s3.amazonaws.com/miniLaTeXErrorMsg-2020-02-22.png}{Fig 2. Error message}{width: 200}
 
@@ -301,7 +301,7 @@ We plan to make further improvements in error reporting.
 
 \\section{More about MiniLaTeX}
 
-This app is a simple demonstration of what one can do with MiniLaTeX.
+This app is intended as a bare-bones demonstration of what one can do with MiniLaTeX.
 There are several other apps in various stages of development which
 offer different or more sophisticated services:
 
@@ -313,28 +313,45 @@ Public documents can be read by anyone, but to create documents, you need to cre
 on knode.io.
 
 \\item \\href{https://reader.minilatex.app}{reader.minilatex.app} is a read-only app for
-distributing MiniLaTeX documents on the web.
+distributing MiniLaTeX documents on the web.  Good for class notes and the like.
 
 \\item \\italic{In development}: a desktop app for creating MiniLaTeX content. Documents
 are stored on your computer's hard disk and can also be stored in the cloud.
 Documents can also be posted to any website that implements the app's publishing
-protocol.
+protocol.  The desktop app supports two document formats: MiniLaTeX and MathMarkdown,
+a version of Markdown that can render math-mode LaTeX.
 
 \\end{itemize}
 
-For more information about these projects, please contact jxxcarlson at gmail.
+For more information about these or related apps, please contact jxxcarlson at gmail.
+Bug reports and feature requests are best posted on
+the \\href{https://github.com/jxxcarlson/meenylatex}{Github repo} for this project,
+but email is also OK.
 
 \\section{The Technology}
 
 MiniLatex is written in \\href{https://elm-lang.org}{Elm}, the statically typed functional
 programming language created by Evan Czaplicki for building web applications.  Because of its excellent
-\\href{http://package.elm-lang.org/packages/elm/parser/latest}{parser combinator library},
-Elm is a good fit for a project like the present one.
+\\href{https://package.elm-lang.org/packages/elm/parser/latest}{parser combinator library},
+Elm is a good fit for a project like the present one.  Math-mode LaTeX is rendered
+by \\href{https://mathjax.org}{MathJax}.  It is a pleasure to thank Davide Cervone for his
+generous help with MathJax.
 
 
 For an overview of the design of MiniLatex, see
 \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}.
-Briefly, \\href{https://www.mathjax.org/}{MathJax} is used inside dollar signs, and Elm is used outside.
+Briefly, \\href{https://www.mathjax.org/}{MathJax} is used for math-mode
+text and Elm is used for text-mode material.
+
+One feature of note is the default incremental
+parsing and rendering of source text, which is needed for responsive live editing.
+Source text is divided into logical paragraphs: ordinary paragraphs or an outer
+begin-end block.  When a logical paragraph is modified, only that paragraph
+is recompiled.  The upside of this strategy is that recompilation is very fast.
+The downside is that numbering and cross-references can get out of sync.  Press
+the \\blue{Full Render} button to recompile the entire document and bring everything
+into sync.
+
 
 \\href{https://github.com/jxxcarlson/meenylatex}{Github repo}
 

@@ -3,10 +3,12 @@ module Main exposing (main)
 import Browser
 import Browser.Dom as Dom
 import Debounce exposing (Debounce)
+import File exposing (File)
 import File.Download as Download
 import Html exposing (..)
 import Html.Attributes as HA exposing (..)
 import Html.Events exposing (onClick, onInput)
+import Http
 import MiniLatex
 import MiniLatex.Edit exposing (Data)
 import MiniLatex.Export
@@ -51,6 +53,8 @@ type alias Model =
     , seed : Int
     , selectedId : String
     , message : String
+    , images : List String
+    , imageUrl : String
     }
 
 
@@ -101,6 +105,8 @@ init flags =
             , seed = flags.seed
             , selectedId = ""
             , message = "No message yet ..."
+            , images = []
+            , imageUrl = ""
             }
     in
     ( model, Cmd.none )
@@ -165,10 +171,10 @@ update msg model =
 
         Export ->
             let
-                contentForExport =
-                    model.sourceText |> MiniLatex.Export.toLaTeX
+                ( contentForExport, images ) =
+                    model.sourceText |> MiniLatex.Export.toLaTeXWithImages
             in
-            ( model, Download.string "mydocument.tex" "text/x-tex" contentForExport )
+            ( { model | images = images }, Download.string "mydocument.tex" "text/x-tex" contentForExport )
 
         GenerateSeed ->
             ( model, Random.generate NewSeed (Random.int 1 10000) )
@@ -285,9 +291,7 @@ render selectedId sourceText =
 
 
 
---
 -- VIEW FUNCTIONS
----
 
 
 view : Model -> Html Msg
@@ -295,6 +299,24 @@ view model =
     div (outerStyle ++ [ HA.class "container" ])
         [ lhs model
         , renderedSource model
+        , viewImages model
+        ]
+
+
+viewImages model =
+    div [ HA.style "overflow" "scroll", HA.style "height" "500px" ] (List.map viewImage model.images)
+
+
+viewImage : String -> Html Msg
+viewImage url =
+    div []
+        [ Html.a
+            [ HA.style "margin-left" "18px"
+            , HA.style "padding-bottom" "9px"
+            , HA.href url
+            ]
+            [ Html.img [ HA.src url, HA.style "height" "30px" ] []
+            ]
         ]
 
 

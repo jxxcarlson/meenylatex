@@ -67,9 +67,7 @@ initialText =
 
 % EXAMPLE 1
 
-
 \\tableofcontents
-
 
 \\section{Introduction}
 
@@ -85,7 +83,6 @@ The combination of MiniLaTeX and MathJax
 gives you access to both text-mode
 and math-mode LaTeX in the browser.
 
-
 Feel free to
 experiment with MiniLatex using this app
 \\mdash you can change the text in the
@@ -97,11 +94,17 @@ be processed as-is by any program that runs LaTeX,
 e.g, TeXShop or \\code{pdflatex}.
 
 
+Images in MiniLaTeX are accessed by URL (see the example
+in section 4 below). When you export a document, images
+used in it will be listed to the right
+of the rendered text.  To use them in the exported
+document, right (option) click on the image and
+save it in a folder named \\italic{image}.
+
 For more information about
 the MiniLaTeX project, please go to
 \\href{https://minilatex.io}{minilatex.io},
 or write to jxxcarlson at gmail.
-
 
 \\section{Try it out}
 
@@ -122,7 +125,6 @@ An improper integral:
 \\label{integral:exp}
 \\int_0^\\infty e^{-x} dx = 1
 \\end{equation}
-
 
 \\section{Theorems}
 
@@ -168,8 +170,6 @@ Beryllium& Be& 4& 9.012 \\\\
 \\end{tabular}
 \\end{indent}
 
-
-
 \\section{Math-mode macros}
 
 Math-mode macros are added using the \\code{mathmacro} environment:
@@ -202,7 +202,6 @@ Likewise, saying
 \\label{eq:function.type}
 \\mca^{\\bt{Z}} = \\bt{Z} \\to \\mca
 \\end{equation}
-
 \\end{verbatim}
 
 yields
@@ -211,7 +210,6 @@ yields
 \\label{eq:function.type}
 \\mca^{\\bt{Z}} = \\bt{Z} \\to \\mca
 \\end{equation}
-
 
 There are some restrictions:
 
@@ -231,11 +229,8 @@ There are some restrictions:
    the beginning of the document
 \\end{verbatim}
 
-
 Items 1—3 will be eliminated in a
 future release.
-
-
 
 \\section{Text-mode Macros}
 
@@ -264,8 +259,6 @@ Likewise, the text
 
 yields \\hello{John}.
 
-
-
 \\section{MiniLatex Macros}
 
 MiniLatex has a number of macros of its own,  For
@@ -280,8 +273,6 @@ and can \\strike{also be struck}. Here are the macros:
 \\strike
 \\end{verbatim}
 
-
-
 \\section{Errors and related matters}
 
 Errors, as illustrated below, are rendered in real time and are reported in red, in place.
@@ -295,7 +286,6 @@ For example, suppose you type the  text
 Then you will see this in the rendered text window:
 
 \\image{http://jxxcarlson.s3.amazonaws.com/miniLaTeXErrorMsg-2020-02-22.png}{Fig 2. Error message}{width: 200}
-
 
 We plan to make further improvements in error reporting.
 
@@ -337,7 +327,6 @@ Elm is a good fit for a project like the present one.  Math-mode LaTeX is render
 by \\href{https://mathjax.org}{MathJax}.  It is a pleasure to thank Davide Cervone for his
 generous help with MathJax.
 
-
 For an overview of the design of MiniLatex, see
 \\href{https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08}{Towards Latex in the Browser}.
 Briefly, \\href{https://www.mathjax.org/}{MathJax} is used for math-mode
@@ -352,14 +341,9 @@ The downside is that numbering and cross-references can get out of sync.  Press
 the \\blue{Full Render} button to recompile the entire document and bring everything
 into sync.
 
-
 \\href{https://github.com/jxxcarlson/meenylatex}{Github repo}
 
-
-
-
-\\bigskip
-
+\\medskip
 
 \\section{References}
 
@@ -374,10 +358,6 @@ into sync.
 \\bibitem{T} James Carlson, \\href{https://knode.io/525}{MiniLatex Technical Report}
 
 \\end{thebibliography}
-
-
-
-
 """
 
 

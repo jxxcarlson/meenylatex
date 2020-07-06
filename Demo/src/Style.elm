@@ -74,6 +74,7 @@ textStyle width height color =
     , style "background-color" color
     , style "overflow" "scroll"
     , style "float" "left"
+    , style "margin-right" "20px"
     ]
 
 

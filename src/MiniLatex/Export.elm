@@ -46,9 +46,9 @@ toLaTeX str =
         latex_ =
             parsand
                 |> List.map renderLatexList
-                |> List.foldl (\par acc -> acc ++ "\n\n" ++ par) ""
+                |> List.foldl (\renderedElement acc -> acc ++ "\n" ++ renderedElement) ""
     in
-    [ Internal.Source.texPrefix, latex_, Internal.Source.texSuffix ] |> String.join "\n\n"
+    [ Internal.Source.texPrefix, latex_, Internal.Source.texSuffix ] |> String.join "\n"
 
 
 {-| Map MiniLaTeX source text to a tuple,
@@ -64,10 +64,10 @@ toLaTeXWithImages str =
                 |> Internal.Paragraph.logicalParagraphify
                 |> List.map Internal.Parser.parse
 
-        latex =
+        latex_ =
             parsand
                 |> List.map renderLatexList
-                |> List.foldl (\par acc -> acc ++ "\n\n" ++ par) ""
+                |> List.foldl (\renderedElement acc -> acc ++ "\n" ++ renderedElement) ""
 
         imageUrlList =
             parsand
@@ -75,7 +75,7 @@ toLaTeXWithImages str =
                 |> List.map (PT.macroValue_ "image")
                 |> Maybe.Extra.values
     in
-    ( latex, imageUrlList )
+    ( [ Internal.Source.texPrefix, latex_, Internal.Source.texSuffix ] |> String.join "\n", imageUrlList )
 
 
 foo str =
@@ -113,7 +113,7 @@ render latexExpression =
             " $" ++ str ++ "$ "
 
         DisplayMath str ->
-            "$$" ++ str ++ "$$"
+            "$$" ++ str ++ "$$\n"
 
         Environment name args body ->
             renderEnvironment name args body
@@ -235,13 +235,13 @@ renderListing body =
         text =
             render body
     in
-    "\n\\begin{verbatim}\n" ++ Utility.addLineNumbers text ++ "\n\\end{verbatim}\n"
+    "\\begin{verbatim}\n" ++ Utility.addLineNumbers text ++ "\n\\end{verbatim}"
 
 
 renderTheBibliography body =
-    "\n\\begin{thebibliography}{abc}\n"
+    "\\begin{thebibliography}{abc}\n"
         ++ render body
-        ++ "\n\\end{thebibliography}\n"
+        ++ "\n\\end{thebibliography}"
 
 
 renderTabular args body =
@@ -254,7 +254,7 @@ renderTabular args body =
             rows
                 |> List.map renderRow
                 |> String.join "\n"
-                |> (\x -> "\\begin{tabular}{" ++ format ++ "}\n" ++ x ++ "\n\\end{tabular}\n")
+                |> (\x -> "\\begin{tabular}{" ++ format ++ "}\n" ++ x ++ "\n\\end{tabular}")
 
         _ ->
             "renderTabular: error"
@@ -297,7 +297,7 @@ renderMacro name optArgs args =
 
 renderSMacro : String -> List LatexExpression -> List LatexExpression -> LatexExpression -> String
 renderSMacro name optArgs args le =
-    " \\" ++ name ++ renderOptArgList optArgs ++ renderArgList args ++ " " ++ render le ++ "\n\n"
+    " \\" ++ name ++ renderOptArgList optArgs ++ renderArgList args ++ " " ++ render le
 
 
 macroRenderer : String -> (List LatexExpression -> List LatexExpression -> String)

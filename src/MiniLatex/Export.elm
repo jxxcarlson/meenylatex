@@ -227,6 +227,7 @@ renderEnvironmentDict =
         , ( "tabular", \args body -> renderTabular args body )
         , ( "mathmacro", \args body -> render body )
         , ( "textmacro", \args body -> render body )
+        , ( "svg", \args body -> renderSvg body )
         ]
 
 
@@ -236,6 +237,10 @@ renderListing body =
             render body
     in
     "\\begin{verbatim}\n" ++ Utility.addLineNumbers text ++ "\n\\end{verbatim}"
+
+
+renderSvg body =
+    "Cannot yet render Svg images; convert to some other format, e.g., png"
 
 
 renderTheBibliography body =

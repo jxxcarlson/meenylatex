@@ -40,6 +40,7 @@ import MiniLatex.Render exposing (MathJaxRenderOption(..))
 import Parser exposing (DeadEnd, Problem(..))
 import Regex
 import String
+import SvgParser
 
 
 
@@ -1433,7 +1434,18 @@ renderEnvironmentDict =
         , ( "verse", \d s x a y -> renderVerse s x y )
         , ( "mathmacro", \d s x a y -> renderMathMacros d s x y )
         , ( "textmacro", \d s x a y -> renderTextMacros d s x y )
+        , ( "svg", \d s x a y -> renderSvg d s x y )
         ]
+
+
+renderSvg : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
+renderSvg mathJaxRenderOption source latexState body =
+    case SvgParser.parse (Internal.RenderToString.render latexState body) of
+        Ok html_ ->
+            html_
+
+        Err _ ->
+            Html.span [ HA.class "X6" ] [ Html.text "SVG parse error" ]
 
 
 renderAlignEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg

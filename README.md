@@ -3,7 +3,7 @@
 
 
 The MiniLatex package renders a subset of LaTeX to Html.  For a demo, see
-[MiniLatex Live](https://jxxcarlson.github.io/app/miniLatexLive/index.htmll)
+[MiniLatex Live](https://jxxcarlson.github.io/app/miniLatexLive/index.html)
 or [www.knode.io](http://www.knode.io).  There is a technical discussion in the
 see the Hackernoon article, [Towards LaTeX in the Browser](https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08).
 

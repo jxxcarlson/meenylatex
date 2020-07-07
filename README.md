@@ -16,18 +16,16 @@ import MiniLatex.Render exposing(MathJaxRenderOption(..))
 
 text = "Pythagoras says: $a^2 + b^2 = c^2$"
 
-macros = "" -- your macro definitions
-
-MiniLatex.render NoDelay macros text
+MiniLatex.render "" NoDelay text
 
 ```
 
 See the code in `./example`
 
-**NOTE:** (a) macro definitions can be either the empty 
-string or a multiline string of definitions. (b)  With the
-transition to MathJax 3, macro definitions are not working.
-I will have a fix soon.
+**NOTES.** The first parameter is `selectedId', used for highlighting
+selected elements.  It can be left empty.  The second parameter
+determines how MathJax renders text.  The third parameter is the 
+source text.
 
 
 For interactive editors and live rendering, you may want to use
@@ -36,6 +34,13 @@ done, see the code in `./demo`
 
 
 ## This release
+
+- Eliminated `macros` as a parameter of `render`
+
+- Added an `svg` environment.  See [demo.minilatex.app](https://demo.minilatex.app/)
+for an example of how it is used.
+
+## Recent releases
 
 - Changed `MiniLatex.Edit.get` so as to be able to 
 highlight paragraphs in the rendered tex.  There are two 
@@ -53,7 +58,6 @@ used in conjunction with a host app to synchronize source  and rendered text.
 using `\begin{mathmacro} ... \end{mathmacro}` and 
  `\begin{textmacro} ... \end{textmacro}`
 
-## Recent releases
 
 - New method for using math-mode macros.  See
   [MiniLaTeX Demo](https://demo.minilatex.app/), section

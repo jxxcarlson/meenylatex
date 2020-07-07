@@ -53,7 +53,7 @@ sourceText =
 \\end{mathmacro}
 
 
-$$\\set{a,b,c} = \\opensets$$
+$$\\opensets = \\set{a,b,c}$$
 
 """
 

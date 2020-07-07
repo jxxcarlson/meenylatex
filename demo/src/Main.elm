@@ -287,7 +287,7 @@ render selectedId sourceText =
         macroDefinitions =
             initialMacroText
     in
-    MiniLatex.render selectedId NoDelay macroDefinitions sourceText |> Html.map LaTeXMsg
+    MiniLatex.render selectedId NoDelay sourceText |> Html.map LaTeXMsg
 
 
 

@@ -63,7 +63,7 @@ view model =
     div [ style "margin" "50px" ]
         [ h1 [] [ text "Example" ]
         , div [ style "font-size" "18px" ]
-            [ MiniLatex.render "noSelectedId" NoDelay macros sourceText |> Html.map LatexMsg
+            [ MiniLatex.render "noSelectedId" NoDelay sourceText |> Html.map LatexMsg
             ]
         ]
 

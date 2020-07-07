@@ -75,28 +75,26 @@ parse =
 
 {-| The function call
 
-    render NoDelay macros sourceTest
+    render "" NoDelay sourceTest
 
 produces an HTML value corresponding to the given MiniLaTeX source text.
-The macro definitions in `macros`
-are prepended to this string and are used by MathJax
-to render purely mathematical text. The `macros` string
-may be empty. In this example, the first parameter is
-`noDelay`, meaning that MathJax will set about typesetting
-the content passed to it immediately. Use `NoDelay` for
+In this example, the first parameter is an id of an element
+to be highlighted. It can be left empty. The second parameter, here
+`noDelay`, defines the way that MathJax will go about typesetting
+the content passed to it. Use `NoDelay` for
 documents with not too many math elements and for
 editing all documents, since only changed text is re-rendered.
 Use `Delay` for loading document containing many
 math elements.
 
 -}
-render : String -> MathJaxRenderOption -> String -> String -> Html LaTeXMsg
-render selectedId  mathJaxRenderOption macroDefinitions source =
+render : String -> MathJaxRenderOption -> String -> Html LaTeXMsg
+render selectedId mathJaxRenderOption source =
     Internal.LatexDiffer.init
         Internal.Parser.parse
         (Render.renderLatexList mathJaxRenderOption source)
         emptyLatexState
-        (prependMacros macroDefinitions source)
+        source
         |> MiniLatex.Edit.get selectedId
         |> Html.div [ HA.attribute "id" "__RENDERED_TEXT__" ]
 
@@ -107,7 +105,7 @@ render selectedId  mathJaxRenderOption macroDefinitions source =
 
 -}
 renderWithSeed :
-   String
+    String
     -> MathJaxRenderOption
     -> Int
     -> String

@@ -42,7 +42,4 @@ function initKatex() {
 
   customElements.define('math-text', MathText)
 
-
-
-
 }

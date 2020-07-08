@@ -39,21 +39,9 @@ update msg model =
 ---- VIEW ----
 
 
-macros =
-    "\\newcommand{\\bra}{\\langle}"
-
-
 sourceText =
-    """Standard formula:
-
-
-\\begin{mathmacro}
-\\newcommand{\\set}[1]{\\{#1\\}}
-\\newcommand{\\opensets}[0]{\\mathcal{O}}
-\\end{mathmacro}
-
-
-$$\\opensets = \\set{a,b,c}$$
+    """
+Pythagoras said: $a^2 + b^2 = c^2$
 
 """
 

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <!-- Load KaTeX code -->
+    <script src="assets/custom-element-config.js"></script>
+    <script src="assets/math-text-katex.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+            onload="renderMathInElement(document.body);"></script>
+
+    <title>MiniLaTeX Example</title>
+
+    <!-- Style -->
+    <link rel="stylesheet" href="assets/style.css">
+
+    <!-- Load app -->
+    <script src="Main.js" charset="utf-8"></script>
+
+</head>
+
+<body>
+
+<div id="main"></div>
+
+<script>
+
+		// Generate random numbers to see UUID generator
+		const crypto = window.crypto || window.msCrypto;
+		const getRandomInts = (n) => {
+			const randInts = new Uint32Array(n);
+			crypto.getRandomValues(randInts);
+			return Array.from(randInts);
+		};
+		// For a UUID, we need at least 128 bits of randomness.
+		// This means we need to seed our generator with at least 4 32-bit ints.
+		// We get 5 here, since the Pcg.Extended generator performs slightly faster if our extension array
+		// has a size that is a power of two (4 here).
+		const randInts = getRandomInts(5);
+
+		var root = document.getElementById('main');
+		var app = Elm.Main.init({node: root, flags:  { seed: randInts[0], width:  1200, height: 900 }});
+
+	 </script>
+
+</body>
+</html>

@@ -18,24 +18,31 @@ function initKatex() {
   console.log("elm-katex: initializing");
 
   class MathText extends HTMLElement {
-     // The "set content" code below detects the
-     // argument to the custom element
-     // and is necessary for innerHTML
-     // to receive the argument.
-     set content(value) {
-          console.log('katex set content', value )
-    		this.innerHTML = value
-    	}
+
+     constructor() {
+         // Always call super first in constructor
+         super();
+       }
 
     connectedCallback() {
-      console.log('katex connectedCallback',this.innerHTML )
+      console.log('katex connectedCallback',this.content )
+      console.log('katex format',this.format )
+      const displayMode = (this.format == 'display') ? true : false ;
+      console.log ('displayMode', displayMode)
+
       this.attachShadow({mode: "open"});
       this.shadowRoot.innerHTML =
-        katex.renderToString("a^3 + b^3 = c^3", { throwOnError: false });
+        katex.renderToString(
+          this.content,
+          { throwOnError: false, output: "mathml", displayMode: displayMode }
+        );
     }
 
   }
 
   customElements.define('math-text', MathText)
+
+
+
 
 }

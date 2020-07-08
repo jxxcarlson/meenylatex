@@ -134,16 +134,25 @@ extractList latexExpression =
 
 {-| THE MAIN RENDERING FUNCTION
 -}
-mathText : String -> Html msg
-mathText content =
+mathText : String -> String -> Html msg
+mathText format content =
     Html.node "math-text"
-        [ HA.property "content" (Json.Encode.string content) ]
+        [ HA.property "content" (Json.Encode.string content)
+        , HA.property "format" (Json.Encode.string format)
+        ]
         []
 
 
 mathTextDelayed : String -> Html msg
 mathTextDelayed content =
     Html.node "math-text-delayed"
+        [ HA.property "content" (Json.Encode.string content) ]
+        []
+
+
+mathTextDisplayDelayed : String -> Html msg
+mathTextDisplayDelayed content =
+    Html.node "math-text-display-delayed"
         [ HA.property "content" (Json.Encode.string content) ]
         []
 
@@ -249,10 +258,10 @@ inlineMathText latexState mathJaxRenderOption str_ =
     in
     case mathJaxRenderOption of
         Delay ->
-            mathTextDelayed <| "$ " ++ String.trim str ++ " $"
+            mathTextDelayed <| String.trim str
 
         NoDelay ->
-            mathText <| "$ " ++ String.trim str ++ " $"
+            mathText "inline" (String.trim str)
 
 
 displayMathText : LatexState -> MathJaxRenderOption -> String -> Html msg
@@ -265,10 +274,10 @@ displayMathText latexState mathJaxRenderOption str =
     in
     case mathJaxRenderOption of
         Delay ->
-            mathTextDelayed <| "$$\n" ++ str2 ++ "\n$$"
+            mathTextDelayed <| str2
 
         NoDelay ->
-            mathText <| "$$\n" ++ str2 ++ "\n$$"
+            mathText "display" str2
 
 
 

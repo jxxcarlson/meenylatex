@@ -43,6 +43,12 @@ sourceText =
     """
 Pythagoras said: $a^2 + b^2 = c^2$
 
+We learned this in Calculus class:
+
+$$
+\\int_0^1 x^n dx \\frac{1}{n+1}
+$$
+
 """
 
 

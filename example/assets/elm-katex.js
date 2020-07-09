@@ -26,15 +26,13 @@ function initKatex() {
 
     connectedCallback() {
       console.log('katex connectedCallback',this.content )
-      console.log('katex format',this.format )
-      const displayMode = (this.format == 'display') ? true : false ;
-      console.log ('displayMode', displayMode)
+      console.log('katex display',this.display )
 
       this.attachShadow({mode: "open"});
       this.shadowRoot.innerHTML =
         katex.renderToString(
           this.content,
-          { throwOnError: false, output: "mathml", displayMode: displayMode }
+          { throwOnError: false, output: "mathml", displayMode: this.display }
         );
     }
 

@@ -134,27 +134,39 @@ extractList latexExpression =
 
 {-| THE MAIN RENDERING FUNCTION
 -}
-mathText : String -> String -> Html msg
-mathText format content =
+mathText : MathJaxRenderOption -> DisplayMode -> String -> Html msg
+mathText mathJaxRenderOption displayMode content =
     Html.node "math-text"
-        [ HA.property "content" (Json.Encode.string content)
-        , HA.property "format" (Json.Encode.string format)
+        [ HA.property "delay" (Json.Encode.bool (isDelayMode mathJaxRenderOption))
+        , HA.property "display" (Json.Encode.bool (isDisplayMathMode displayMode))
+        , HA.property "content" (Json.Encode.string content)
         ]
         []
 
 
-mathTextDelayed : String -> Html msg
-mathTextDelayed content =
-    Html.node "math-text-delayed"
-        [ HA.property "content" (Json.Encode.string content) ]
-        []
+type DisplayMode
+    = InlineMathMode
+    | DisplayMathMode
 
 
-mathTextDisplayDelayed : String -> Html msg
-mathTextDisplayDelayed content =
-    Html.node "math-text-display-delayed"
-        [ HA.property "content" (Json.Encode.string content) ]
-        []
+isDisplayMathMode : DisplayMode -> Bool
+isDisplayMathMode displayMode =
+    case displayMode of
+        InlineMathMode ->
+            False
+
+        DisplayMathMode ->
+            True
+
+
+isDelayMode : MathJaxRenderOption -> Bool
+isDelayMode mathJaxRenderOption =
+    case mathJaxRenderOption of
+        Delay ->
+            True
+
+        NoDelay ->
+            False
 
 
 {-| The main rendering function. Compute an Html msg value
@@ -256,28 +268,16 @@ inlineMathText latexState mathJaxRenderOption str_ =
         str =
             Internal.MathMacro.evalStr latexState.mathMacroDictionary str_
     in
-    case mathJaxRenderOption of
-        Delay ->
-            mathTextDelayed <| String.trim str
-
-        NoDelay ->
-            mathText "inline" (String.trim str)
+    mathText mathJaxRenderOption InlineMathMode (String.trim str)
 
 
 displayMathText : LatexState -> MathJaxRenderOption -> String -> Html msg
-displayMathText latexState mathJaxRenderOption str =
+displayMathText latexState mathJaxRenderOption str_ =
     let
-        str2 =
-            String.trim str
-
-        --  TODO: FIX |> Internal.MathMacro.evalStr latexState.mathMacroDictionary)
+        str =
+            Internal.MathMacro.evalStr latexState.mathMacroDictionary str_
     in
-    case mathJaxRenderOption of
-        Delay ->
-            mathTextDelayed <| str2
-
-        NoDelay ->
-            mathText "display" str2
+    mathText mathJaxRenderOption DisplayMathMode (String.trim str)
 
 
 

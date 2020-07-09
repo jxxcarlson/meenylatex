@@ -35,6 +35,11 @@ done, see the code in `./demo`
 
 ## This release
 
+- You have the option to render math-mode LaTeX using either
+MathJax or KaTeX.  For now the latter is experimental, pending fixing
+some bugs that affect the way KaTeX is used by the MiniLaTeX renderer.
+See the README in the `examples` folder for more information.
+
 - Eliminated `macros` as a parameter of `render`
 
 - Added an `svg` environment.  See [demo.minilatex.app](https://demo.minilatex.app/)

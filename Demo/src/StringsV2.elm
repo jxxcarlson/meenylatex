@@ -126,6 +126,14 @@ An improper integral:
 \\int_0^\\infty e^{-x} dx = 1
 \\end{equation}
 
+An equation alignment:
+
+\\begin{align}
+2x + 3y &= 1 \\\\
+-x + 5y &= 2 \\\\
+\\end{align}
+
+
 \\section{Theorems}
 
 \\begin{theorem}

@@ -280,6 +280,11 @@ displayMathText latexState mathJaxRenderOption str_ =
     mathText mathJaxRenderOption DisplayMathMode (String.trim str)
 
 
+displayMathText_ : LatexState -> MathJaxRenderOption -> String -> Html msg
+displayMathText_ latexState mathJaxRenderOption str =
+    mathText mathJaxRenderOption DisplayMathMode (String.trim str)
+
+
 
 {- PROCESS SPACES BETWEEN ELEMENTS  V2 -}
 
@@ -1486,6 +1491,7 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
                     str
                         |> String.trim
                         |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
+                        |> String.replace "\\ \\" "\\\\"
 
                 _ ->
                     "Parser error in render align environment"
@@ -1493,7 +1499,7 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
         content =
             "\n\\begin{align*}\n" ++ addendum ++ innerContents ++ "\n\\end{align*}\n"
     in
-    displayMathText latexState mathJaxRenderOption content
+    displayMathText_ latexState mathJaxRenderOption content
 
 
 renderCenterEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
@@ -1527,7 +1533,14 @@ renderDefItemEnvironment mathJaxRenderOption source latexState optArgs body =
 -}
 renderEqnArray : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderEqnArray mathJaxRenderOption source latexState body =
-    displayMathText latexState mathJaxRenderOption (Internal.RenderToString.render latexState body)
+    let
+        body1 =
+            Internal.RenderToString.render latexState body
+
+        body2 =
+            "\\begin{align}" ++ body1 ++ "\\end{align}"
+    in
+    displayMathText latexState mathJaxRenderOption body2
 
 
 renderEquationEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
@@ -1560,11 +1573,8 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
                 _ ->
                     "Parser error in render equation environment"
     in
-    displayMathText latexState mathJaxRenderOption <| "\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}"
-
-
-
--- "\n$$\n\\begin{equation}" ++ addendum ++ r ++ "\\end{equation}\n$$\n"
+    displayMathText_ latexState mathJaxRenderOption <|
+        ("\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}")
 
 
 renderIndentEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg

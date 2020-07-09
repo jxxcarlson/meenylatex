@@ -25,9 +25,6 @@ function initKatex() {
        }
 
     connectedCallback() {
-      console.log('katex connectedCallback',this.content )
-      console.log('katex display',this.display )
-
       this.attachShadow({mode: "open"});
       this.shadowRoot.innerHTML =
         katex.renderToString(

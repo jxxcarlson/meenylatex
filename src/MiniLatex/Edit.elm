@@ -73,14 +73,15 @@ update mathJaxRenderOption version source editRecord =
 
 {-| Retrieve Html from a Data object and construct
 the click handlers used to highlight the selected paragraph
-(if any).  Example:
+(if any). Example:
 
     get "p.1.10" data
 
 will retrieve the rendered text and will hightlight the paragraph
-with ID "p.1.10".  The ID decodes
-as "paragraph 10, version 1".  The version number
+with ID "p.1.10". The ID decodes
+as "paragraph 10, version 1". The version number
 of a paragraph is incremented when it is edited.
+
 -}
 get : String -> Data (Html LaTeXMsg) -> List (Html LaTeXMsg)
 get selectedId editRecord =
@@ -90,39 +91,44 @@ get selectedId editRecord =
 
         mark id_ =
             if selectedId == id_ then
-                 "select:" ++ id_
+                "select:" ++ id_
+
             else if String.left 7 id_ == "selected:" then
-                 String.dropLeft 7 id_
+                String.dropLeft 7 id_
+
             else
                 id_
 
-
         ids =
             editRecord.idList
-            |> List.map mark
+                |> List.map mark
 
         keyedNode : String -> Html LaTeXMsg -> Html LaTeXMsg
-        keyedNode  id para = Keyed.node "p"
-            [ HA.id id, selectedStyle selectedId id
-            , HE.onClick (IDClicked id)
-            , HA.style "margin-bottom" "10px"
-            ]
-            [ ( id, para ) ]
+        keyedNode id para =
+            Keyed.node "p"
+                [ HA.id id
+                , selectedStyle selectedId id
+                , HE.onClick (IDClicked id)
+                , HA.style "margin-bottom" "10px"
+                ]
+                [ ( id, para ) ]
     in
-    List.map2 keyedNode  ids paragraphs
+    List.map2 keyedNode ids paragraphs
 
 
 selectedStyle : String -> String -> Html.Attribute LaTeXMsg
 selectedStyle targetId currentId =
-    case  ("select:" ++ targetId) == currentId of
+    case ("select:" ++ targetId) == currentId of
         True ->
             HA.style "background-color" highlightColor
 
         False ->
             HA.style "background-color" "#fff"
 
+
 highlightColor =
     "#d7d6ff"
+
 
 {-| Used for initialization.
 -}

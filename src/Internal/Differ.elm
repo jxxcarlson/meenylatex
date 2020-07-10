@@ -11,13 +11,13 @@ then parsing and rendering the changed paragraphs.
 
 -}
 
+import BiDict exposing (BiDict)
 import Dict
 import Html exposing (Html)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression(..))
 import Internal.SourceMap as SourceMap exposing (SourceMap)
-import BiDict exposing(BiDict)
 
 
 
@@ -40,7 +40,7 @@ type alias IdListPacket =
 
 
 {-| An EditRecord records a list of (logical) newParagraphs
-correspoing to the text to be rendered as well as corresponding
+corresponding to the text to be rendered as well as corresponding
 list of rendered paragraphs. We need to reveiw this strucure.
 -}
 type alias EditRecord a =
@@ -136,7 +136,6 @@ update seed parser renderer editRecord text =
             -- SourceMap.generate (List.concat astList) p.idList
             -- TODO: this can be improved by diffing
             SourceMap.generate newParagraphs p.idList
-
     in
     EditRecord newParagraphs astList p.idList newRenderedParagraphs editRecord.latexState sourceMap
 
@@ -425,4 +424,3 @@ freshIdList seed editRecord =
     , newIdsStart = Just newIdsStart
     , newIdsEnd = Just newIdsEnd
     }
-

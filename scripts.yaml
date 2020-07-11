@@ -1,0 +1,3 @@
+scripts:
+
+  make: elm make --optimize

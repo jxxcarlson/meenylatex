@@ -40,12 +40,8 @@ initWithSeed seed parser latexState text =
 
         idList =
             makeIdListWithSeed seed paragraphs
-
-        sourceMap =
-            -- TODO: this can be improved by diffing
-            SourceMap.generate paragraphs idList
     in
-    EditRecord paragraphs latexExpressionList idList latexState2 sourceMap
+    EditRecord paragraphs latexExpressionList idList latexState2
 
 
 makeIdList : List String -> List String

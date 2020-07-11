@@ -11,13 +11,9 @@ then parsing and rendering the changed paragraphs.
 
 -}
 
-import BiDict exposing (BiDict)
-import Dict
-import Html exposing (Html)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression(..))
-import Internal.SourceMap as SourceMap exposing (SourceMap)
 
 
 
@@ -48,7 +44,6 @@ type alias EditRecord =
     , astList : List (List LatexExpression)
     , idList : List String
     , latexState : LatexState
-    , sourceMap : SourceMap
     }
 
 
@@ -56,7 +51,7 @@ type alias EditRecord =
 -}
 emptyEditRecord : EditRecord
 emptyEditRecord =
-    EditRecord [] [] [] emptyLatexState BiDict.empty
+    EditRecord [] [] [] emptyLatexState
 
 
 {-| createRecord: Create an edit record by (1)
@@ -78,13 +73,8 @@ init parser renderer text =
 
         astList =
             List.map parser paragraphs
-
-        sourceMap =
-            -- SourceMap.generate (List.concat astList) idList
-            -- TODO: this can be improved by diffing
-            SourceMap.generate paragraphs idList
     in
-    EditRecord paragraphs astList idList emptyLatexState sourceMap
+    EditRecord paragraphs astList idList emptyLatexState
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -118,14 +108,8 @@ update seed parser editRecord text =
 
         p =
             differentialIdList seed diffRecord editRecord
-
-        sourceMap : SourceMap
-        sourceMap =
-            -- SourceMap.generate (List.concat astList) p.idList
-            -- TODO: this can be improved by diffing
-            SourceMap.generate newParagraphs p.idList
     in
-    EditRecord newParagraphs astList p.idList editRecord.latexState sourceMap
+    EditRecord newParagraphs astList p.idList editRecord.latexState
 
 
 {-| Update the renderedList by applying the transformer only to the

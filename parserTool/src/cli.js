@@ -18,9 +18,9 @@ function eval(cmd, _, __, callback) {
 }
 
 function myWriter(output) {
-  return output.toUpperCase();
+  return output
 }
 
-repl.start({ prompt: '> ', eval: eval});
+repl.start({ prompt: '> ', eval: eval, writer: myWriter});
 
 

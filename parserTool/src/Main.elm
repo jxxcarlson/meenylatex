@@ -106,6 +106,7 @@ transform str_ =
 
        diff = ""::"DIFF: ":: (Diff.diffLines str latex |> List.map Debug.toString)
     in
-      "EQ: "::indicator::"":: "SOURCE1: "::str ::"SOURCE2: "::latex :: ""::"AST: "::ast ++ diff
+      -- "EQ: "::indicator::"":: "SOURCE1: "::str ::"SOURCE2: "::latex :: ""::"AST: "::ast ++ diff
+      ast
 
 

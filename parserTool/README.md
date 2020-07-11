@@ -1,4 +1,4 @@
-## How to use the `syntax` tool
+    ## How to use the `syntax` tool
 
 The `syntax` tool is useful for experimenting
 with MiniLaTeX.  Here is a sample session:

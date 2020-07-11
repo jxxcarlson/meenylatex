@@ -1,0 +1,9 @@
+scripts:
+
+  build:
+    cmd: elm make --debug src/Main.elm --output ex/main.js && cp src/cli.js ex/cli.js
+    desc: Build the command-line interpreter
+
+  cli:
+    cmd: node ex/cli.js
+    desc: Run the command-line interpreter

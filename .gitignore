@@ -2,7 +2,7 @@
 script/
 src/Internal/Example.elm
 tests/VerifyExamples/
-tools/main.js
+parserTool/main.js
 demo-package/
 **/node_modules/
 **/Main.js
@@ -12,3 +12,4 @@ Demo/dist/assets
 Demo/dist/Main.min.js
 Demo/mathjax/
 example/lamdera-stuff/
+parserTool/ex/cli.js

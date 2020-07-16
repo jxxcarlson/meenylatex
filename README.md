@@ -35,6 +35,13 @@ done, see the code in `./demo`
 
 ## This release
 
+- Added the exposed module `MiniLatex.EditSimple`. It is like
+`MiniLatex.Edit`, except that it is record type that contains
+no functions. This is need for Lamdera.
+
+
+## Recent releases
+
 - You have the option to render math-mode LaTeX using either
 MathJax or KaTeX.  For now the latter is experimental, pending fixing
 some bugs that affect the way KaTeX is used by the MiniLaTeX renderer.
@@ -44,8 +51,6 @@ See the README in the `examples` folder for more information.
 
 - Added an `svg` environment.  See [demo.minilatex.app](https://demo.minilatex.app/)
 for an example of how it is used.
-
-## Recent releases
 
 - Changed `MiniLatex.Edit.get` so as to be able to 
 highlight paragraphs in the rendered tex.  There are two 

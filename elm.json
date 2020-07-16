@@ -8,7 +8,9 @@
         "MiniLatex",
         "MiniLatex.Edit",
         "MiniLatex.Export",
-        "MiniLatex.Render"
+        "MiniLatex.Render",
+        "MiniLatex.EditSimple"
+
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {

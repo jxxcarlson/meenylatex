@@ -1,17 +1,7 @@
-module MiniLatex.EditSimple exposing (..)
+module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, parse, LaTeXMsg)
 
-{-| Data structures and functions for managing interactive edits. The parse tree, rendered text, and other information needed
-for this is stored in a value of type
-
-    MiniLatex.Edit.Data
-
-That data is initialized using
-
-    data =
-        init version text
-
-where the version is an integer that distinguishes
-different edits.
+{-| This module is like MiniLaTeX.Edit, except that the Data type, which is an
+alias of the record type `Internal.DifferSimple.EditRecord`, contains no functions.
 
 
 # API

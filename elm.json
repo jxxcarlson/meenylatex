@@ -3,7 +3,7 @@
     "name": "jxxcarlson/meenylatex",
     "summary": "A parser for a subset of LaTeX",
     "license": "BSD-3-Clause",
-    "version": "12.1.0",
+    "version": "13.0.0",
     "exposed-modules": [
         "MiniLatex",
         "MiniLatex.Edit",

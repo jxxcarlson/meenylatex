@@ -1,4 +1,4 @@
-module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, parse, LaTeXMsg)
+module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, LaTeXMsg)
 
 {-| This module is like MiniLaTeX.Edit, except that the Data type, which is an
 alias of the record type `Internal.DifferSimple.EditRecord`, contains no functions.
@@ -6,7 +6,7 @@ alias of the record type `Internal.DifferSimple.EditRecord`, contains no functio
 
 # API
 
-@docs Data, emptyData, init, update, get, parse, LaTeXMsg
+@docs Data, emptyData, init, update, get, LaTeXMsg
 
 -}
 
@@ -39,7 +39,7 @@ different edits.
 
 # API
 
-@docs Data, emptyData, init, update, get, parse, LaTeXMsg
+@docs Data, emptyData, init, update, get, LaTeXMsg
 
 -}
 type alias Data =

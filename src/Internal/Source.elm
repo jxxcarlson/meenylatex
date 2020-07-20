@@ -44,9 +44,13 @@ texPrefix =
 % \\newcommand{\\image}[3]{\\includegraphics[width=3cm]{#1}}
 
 \\newcommand{\\imagecenter}[3]{{
+   \\medskip
+   \\begin{figure}
    \\centering
-    \\includegraphics[width=0.80\\textwidth]{#1}
-    \\vglue-10pt \\par {#2}
+    \\includegraphics[width=12cm,height=12cm,keepaspectratio]{#1}
+    \\vglue0pt \\par {#2}
+    \\end{figure}
+    \\medskip
 }}
 
 \\newcommand{\\imagefloatright}[3]{
@@ -89,6 +93,8 @@ texPrefix =
 \\newtheorem{exercise}{Exercise}
 \\newtheorem{problem}{Problem}
 \\newtheorem{exercises}{Exercises}
+\\newcommand{\\bs}[1]{$\\backslash$#1}
+\\newcommand{\\texarg}[1]{\\{#1\\}}
 
 %% Environments
 \\renewenvironment{quotation}

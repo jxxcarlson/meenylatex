@@ -427,7 +427,7 @@ renderMacroDict =
         , ( "mdash", \d s x y z -> renderMdash s x z )
         , ( "ndash", \d s x y z -> renderNdash s x z )
         , ( "underscore", \d s x y z -> renderUnderscore s x z )
-        , ( "backslash", \d s x y z -> renderBackslash d s x z )
+        , ( "bs", \d s x y z -> renderBackslash d s x z )
         , ( "texarg", \d s x y z -> renderTexArg d s x z )
         , ( "ref", \d s x y z -> renderRef s x z )
         , ( "medskip", \d s x y z -> renderMedSkip s x z )

@@ -139,9 +139,6 @@ update msg model =
             , cmd
             )
 
-        GetMacroText str ->
-            ( { model | macroText = str }, Cmd.none )
-
         DebounceMsg msg_ ->
             let
                 ( debounce, cmd ) =
@@ -152,6 +149,9 @@ update msg model =
                         model.debounce
             in
             ( { model | debounce = debounce }, cmd )
+
+        GetMacroText str ->
+                    ( { model | macroText = str }, Cmd.none )
 
         Render str ->
             let

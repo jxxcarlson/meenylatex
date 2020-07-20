@@ -49,6 +49,8 @@ $$
 \\int_0^1 x^n dx \\frac{1}{n+1}
 $$
 
+We don't use \\bs{usepackage} or \\bs{begin}\\texarg{document}
+
 """
 
 

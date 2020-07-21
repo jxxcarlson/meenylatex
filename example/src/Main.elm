@@ -41,15 +41,14 @@ update msg model =
 
 sourceText =
     """
-Pythagoras said: $a^2 + b^2 = c^2$
-
-We learned this in Calculus class:
 
 $$
-\\int_0^1 x^n dx \\frac{1}{n+1}
+\\begin{pmatrix}
+2 & 1 \\\\
+1 & 2 \\\\
+\\end{pmatrix}
 $$
 
-We don't use \\bs{usepackage} or \\bs{begin}\\texarg{document}
 
 """
 

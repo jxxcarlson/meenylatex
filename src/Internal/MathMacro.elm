@@ -401,7 +401,7 @@ macroName =
     variable
         { start = \c -> c == '\\'
         , inner = \c -> Char.isAlphaNum c || c == '*'
-        , reserved = Set.fromList [ "\\begin", "\\end", "\\item", "\\bibitem" ]
+        , reserved = Set.fromList [ "\\item", "\\bibitem" ]
         , expecting = ExpectingMacroReservedWord
         }
         |> map (String.dropLeft 1)

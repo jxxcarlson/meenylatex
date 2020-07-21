@@ -139,7 +139,7 @@ mathText mathJaxRenderOption displayMode content =
     Html.node "math-text"
         [ HA.property "delay" (Json.Encode.bool (isDelayMode mathJaxRenderOption))
         , HA.property "display" (Json.Encode.bool (isDisplayMathMode displayMode))
-        , HA.property "content" (Json.Encode.string content)
+        , HA.property "content" (Json.Encode.string (content |> String.replace "\\ \\" "\\\\"))
         ]
         []
 
@@ -191,6 +191,7 @@ render mathJaxRenderOption source latexState latexExpression =
             Html.span [] [ oneSpace, inlineMathText latexState mathJaxRenderOption (Internal.MathMacro.evalStr latexState.mathMacroDictionary str) ]
 
         DisplayMath str ->
+            -- TODO: fix Internal.MathMacro.evalStr.  It is nuking \begin{pmacro}, etc.
             displayMathText latexState mathJaxRenderOption (Internal.MathMacro.evalStr latexState.mathMacroDictionary str)
 
         Environment name args body ->

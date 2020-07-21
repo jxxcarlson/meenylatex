@@ -1248,6 +1248,7 @@ renderTerm _ latexState args =
 
 renderXLink : String -> LatexState -> List LatexExpression -> Html msg
 renderXLink _ latexState args =
+    -- REVIEW: CHANGED  ref to from ++ "/" ++ to +++ "/u/" ++ for lamdera app
     let
         id =
             Internal.RenderToString.renderArg 0 latexState args

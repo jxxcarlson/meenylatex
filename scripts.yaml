@@ -1,3 +1,6 @@
 scripts:
 
   make: elm make --optimize
+
+  cloc:
+    cmd: cloc --by-file src

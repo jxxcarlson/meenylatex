@@ -2,6 +2,7 @@ module Internal.ParserHelpers exposing
     ( between
     , braces
     , brackets
+    , getTag
     , itemList
     , many
     , manyHelp
@@ -10,6 +11,7 @@ module Internal.ParserHelpers exposing
     , parseBetweenSymbols
     , parseToSymbol
     , parseUntil
+    , removeLabel
     , some
     , spaces
     , transformWords
@@ -35,6 +37,40 @@ type Problem
     | ExpectingRightBracket
     | ExpectingLeftParen
     | ExpectingRightParen
+    | ExpectingLabel
+
+
+removeLabel : String -> String
+removeLabel str =
+    case getArg "label" str of
+        Nothing ->
+            str
+
+        Just word ->
+            String.replace ("\\label{" ++ word ++ "}") "" str
+
+
+getTag : String -> Maybe String
+getTag str =
+    getArg "tag" str
+
+
+parseArg : String -> HParser String
+parseArg macroName =
+    succeed identity
+        |. symbol (Token ("\\" ++ macroName ++ "{") ExpectingLabel)
+        |= getChompedString (chompWhile (\c -> c /= '}'))
+        |. symbol (Token "}" ExpectingRightBrace)
+
+
+getArg : String -> String -> Maybe String
+getArg macroName str =
+    case Parser.Advanced.run (parseArg macroName) str of
+        Ok str_ ->
+            Just str_
+
+        Err _ ->
+            Nothing
 
 
 

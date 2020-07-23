@@ -33,6 +33,7 @@ import Internal.Macro as Macro
 import Internal.MathMacro
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
+import Internal.ParserHelpers
 import Internal.RenderToString
 import Internal.Utility as Utility
 import Json.Encode
@@ -284,6 +285,11 @@ displayMathText latexState mathJaxRenderOption str_ =
 displayMathText_ : LatexState -> MathJaxRenderOption -> String -> Html msg
 displayMathText_ latexState mathJaxRenderOption str =
     mathText mathJaxRenderOption DisplayMathMode (String.trim str)
+
+
+displayMathTextWithLabel_ : LatexState -> MathJaxRenderOption -> String -> String -> Html msg
+displayMathTextWithLabel_ latexState mathJaxRenderOption str label =
+    Html.div [] [ mathText mathJaxRenderOption DisplayMathMode (String.trim str), Html.text label ]
 
 
 
@@ -1499,7 +1505,8 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
                     "Parser error in render align environment"
 
         content =
-            "\n\\begin{align*}\n" ++ addendum ++ innerContents ++ "\n\\end{align*}\n"
+            -- REVIEW: changed for KaTeX
+            "\n\\begin{aligned}\n" ++ addendum ++ innerContents ++ "\n\\end{aligned}\n"
     in
     displayMathText_ latexState mathJaxRenderOption content
 
@@ -1540,7 +1547,8 @@ renderEqnArray mathJaxRenderOption source latexState body =
             Internal.RenderToString.render latexState body
 
         body2 =
-            "\\begin{align}" ++ body1 ++ "\\end{align}"
+            -- REVIEW: changed for KaTeX
+            "\\begin{aligned}" ++ body1 ++ "\\end{aligned}"
     in
     displayMathText latexState mathJaxRenderOption body2
 
@@ -1571,12 +1579,20 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
                     str
                         |> String.trim
                         |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
+                        |> Internal.ParserHelpers.removeLabel
 
                 _ ->
                     "Parser error in render equation environment"
+
+        tag =
+            Internal.ParserHelpers.getTag addendum
+                |> Maybe.map (\x -> "(" ++ x ++ ")")
+                |> Maybe.withDefault ""
     in
-    displayMathText_ latexState mathJaxRenderOption <|
-        ("\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}")
+    -- ("\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}")
+    -- REVIEW; changed for KaTeX
+    -- displayMathTextWithLabel_ latexState mathJaxRenderOption contents tag
+    displayMathText_ latexState mathJaxRenderOption (contents ++ " \\qquad " ++ tag)
 
 
 renderIndentEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg

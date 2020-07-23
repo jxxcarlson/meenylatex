@@ -57,6 +57,11 @@ $$
 \\end{pmatrix}
 $$
 
+\\begin{equation}
+\\label{quadratic}
+x = \\frac{- b \\pm \\sqrt{b^2 - 4ac}}{2a}
+\\end{equation}
+
 
 """
 

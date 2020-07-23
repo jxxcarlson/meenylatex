@@ -1500,15 +1500,24 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
                         |> String.trim
                         |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
                         |> String.replace "\\ \\" "\\\\"
+                        |> Internal.ParserHelpers.removeLabel
 
                 _ ->
                     "Parser error in render align environment"
 
         content =
             -- REVIEW: changed for KaTeX
-            "\n\\begin{aligned}\n" ++ addendum ++ innerContents ++ "\n\\end{aligned}\n"
+            "\n\\begin{aligned}\n" ++ innerContents ++ "\n\\end{aligned}\n"
+
+        tag =
+            case Internal.ParserHelpers.getTag addendum of
+                Nothing ->
+                    ""
+
+                Just tag_ ->
+                    "\\qquad (" ++ tag_ ++ ")"
     in
-    displayMathText_ latexState mathJaxRenderOption content
+    displayMathText_ latexState mathJaxRenderOption (content ++ tag)
 
 
 renderCenterEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
@@ -1585,14 +1594,17 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
                     "Parser error in render equation environment"
 
         tag =
-            Internal.ParserHelpers.getTag addendum
-                |> Maybe.map (\x -> "(" ++ x ++ ")")
-                |> Maybe.withDefault ""
+            case Internal.ParserHelpers.getTag addendum of
+                Nothing ->
+                    ""
+
+                Just tag_ ->
+                    "\\qquad (" ++ tag_ ++ ")"
     in
     -- ("\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}")
     -- REVIEW; changed for KaTeX
     -- displayMathTextWithLabel_ latexState mathJaxRenderOption contents tag
-    displayMathText_ latexState mathJaxRenderOption (contents ++ " \\qquad " ++ tag)
+    displayMathText_ latexState mathJaxRenderOption (contents ++ tag)
 
 
 renderIndentEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg

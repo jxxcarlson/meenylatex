@@ -42,6 +42,14 @@ update msg model =
 sourceText =
     """
 
+Pythagoras: $a^2 + b^2 = c^2$.
+
+Calculus:
+
+$$
+  \\int_0^1 x^n dx \\frac{1}{n + 1}
+$$
+
 $$
 \\begin{pmatrix}
 2 & 1 \\\\

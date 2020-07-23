@@ -5,7 +5,7 @@ const init =  async function(app) {
   var katexJs = document.createElement('script')
   katexJs.type = 'text/javascript'
   katexJs.onload = initKatex
-  katexJs.src = "https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"
+  katexJs.src = "https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
 
   document.head.appendChild(katexJs);
   console.log("elm-katex: I have appended katexJs to document.head");

@@ -4,3 +4,5 @@ scripts:
   make:  elm make --debug src/Main.elm --output=Main.js
 
   look  : open -a /Applications/Google\ Chrome.app/ index.html
+
+  kook  : open -a /Applications/Google\ Chrome.app/ index-katex.html

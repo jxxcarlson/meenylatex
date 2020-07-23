@@ -287,9 +287,30 @@ displayMathText_ latexState mathJaxRenderOption str =
     mathText mathJaxRenderOption DisplayMathMode (String.trim str)
 
 
+
+--
+-- displayMathTextWithLabel1_ : LatexState -> MathJaxRenderOption -> String -> String -> Html msg
+-- displayMathTextWithLabel1_ latexState mathJaxRenderOption str label =
+--     Html.div
+--         [ HA.style "display" "flex"
+--         , HA.style "flex-direction" "row"
+--         , HA.style "justify-content" "center"
+--         ]
+--         [ Html.div [] [ mathText mathJaxRenderOption DisplayMathMode (String.trim str) ]
+--         , Html.div [ HA.style "float" "right" ]
+--             [ Html.text label ]
+--         ]
+
+
 displayMathTextWithLabel_ : LatexState -> MathJaxRenderOption -> String -> String -> Html msg
 displayMathTextWithLabel_ latexState mathJaxRenderOption str label =
-    Html.div [] [ mathText mathJaxRenderOption DisplayMathMode (String.trim str), Html.text label ]
+    Html.div
+        []
+        [ Html.div [ HA.style "float" "right", HA.style "margin-top" "7px" ]
+            [ Html.text label ]
+        , Html.div []
+            [ mathText mathJaxRenderOption DisplayMathMode (String.trim str) ]
+        ]
 
 
 
@@ -1515,9 +1536,9 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
                     ""
 
                 Just tag_ ->
-                    "\\qquad (" ++ tag_ ++ ")"
+                    "(" ++ tag_ ++ ")"
     in
-    displayMathText_ latexState mathJaxRenderOption (content ++ tag)
+    displayMathTextWithLabel_ latexState mathJaxRenderOption content tag
 
 
 renderCenterEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
@@ -1526,7 +1547,12 @@ renderCenterEnvironment mathJaxRenderOption source latexState body =
         r =
             render mathJaxRenderOption source latexState body
     in
-    Html.div [ HA.class "center" ] [ r ]
+    Html.div
+        [ HA.style "display" "flex"
+        , HA.style "flex-direction" "row"
+        , HA.style "justify-content" "center"
+        ]
+        [ r ]
 
 
 renderCommentEnvironment : String -> LatexState -> LatexExpression -> Html msg
@@ -1599,12 +1625,13 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
                     ""
 
                 Just tag_ ->
-                    "\\qquad (" ++ tag_ ++ ")"
+                    --   "\\qquad (" ++ tag_ ++ ")"
+                    "(" ++ tag_ ++ ")"
     in
     -- ("\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}")
     -- REVIEW; changed for KaTeX
-    -- displayMathTextWithLabel_ latexState mathJaxRenderOption contents tag
-    displayMathText_ latexState mathJaxRenderOption (contents ++ tag)
+    -- displayMathText_ latexState mathJaxRenderOption (contents ++ tag)
+    displayMathTextWithLabel_ latexState mathJaxRenderOption contents tag
 
 
 renderIndentEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg

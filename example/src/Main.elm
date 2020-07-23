@@ -62,6 +62,11 @@ $$
 x = \\frac{- b \\pm \\sqrt{b^2 - 4ac}}{2a}
 \\end{equation}
 
+\\begin{equation}
+\\label{yada}
+x = y
+\\end{equation}
+
 
 """
 

@@ -480,6 +480,7 @@ renderMacroDict =
         , ( "term", \d s x y z -> renderTerm s x z )
         , ( "xlink", \d s x y z -> renderXLink s x z )
         , ( "ilink", \d s x y z -> renderILink s x z )
+        , ( "include", \d s x y z -> renderInclude s x z )
         , ( "xlinkPublic", \d s x y z -> renderXLinkPublic s x z )
         , ( "documentTitle", \d s x y z -> renderDocumentTitle s x z )
         , ( "title", \d s x y z -> renderTitle x z )
@@ -1161,7 +1162,7 @@ renderMakeTitle source latexState list =
                 ""
 
         titlePart =
-            Html.div [ HA.style "font-size" "36px" ] [ Html.text <| title ]
+            Html.div [ HA.style "font-size" "28px" ] [ Html.text <| title ]
 
         bodyParts =
             [ author, email, date, revisionText ]
@@ -1326,6 +1327,11 @@ renderILink _ latexState args =
     Html.a [ HA.href ref ] [ Html.text label ]
 
 
+renderInclude : String -> LatexState -> List LatexExpression -> Html msg
+renderInclude _ latexState args =
+    Html.span [] []
+
+
 renderXLinkPublic : String -> LatexState -> List LatexExpression -> Html msg
 renderXLinkPublic _ latexState args =
     let
@@ -1435,6 +1441,7 @@ theoremLikeEnvironments =
     , "corollary"
     , "lemma"
     , "definition"
+    , "problem"
     ]
 
 

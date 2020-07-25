@@ -76,6 +76,7 @@ texPrefix =
 \\newcommand{\\remote}[1]{\\textcolor{red}{#1}}
 \\newcommand{\\local}[1]{\\textcolor{blue}{#1}}
 \\newcommand{\\highlight}[1]{\\hl{#1}}
+\\newcommand{\\meta}[2]{\\textcolor{blue}{#1}: }{\\hl{#1}}
 \\newcommand{\\strike}[1]{\\st{#1}}
 \\newcommand{\\term}[1]{{\\sl #1}}
 \\newtheorem{remark}{Remark}

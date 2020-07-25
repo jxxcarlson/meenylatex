@@ -306,7 +306,7 @@ displayMathTextWithLabel_ : LatexState -> MathJaxRenderOption -> String -> Strin
 displayMathTextWithLabel_ latexState mathJaxRenderOption str label =
     Html.div
         []
-        [ Html.div [ HA.style "float" "right", HA.style "margin-top" "7px" ]
+        [ Html.div [ HA.style "float" "right", HA.style "margin-top" "3px" ]
             [ Html.text label ]
         , Html.div []
             [ mathText mathJaxRenderOption DisplayMathMode (String.trim str) ]
@@ -474,10 +474,12 @@ renderMacroDict =
         , ( "blue", \d s x y z -> renderBlue s x z )
         , ( "remote", \d s x y z -> renderRemote s x z )
         , ( "local", \d s x y z -> renderLocal s x z )
+        , ( "meta", \d s x y z -> renderMeta s x z )
         , ( "highlight", \d s x y z -> renderHighlighted s x z )
         , ( "strike", \d s x y z -> renderStrikeThrough s x z )
         , ( "term", \d s x y z -> renderTerm s x z )
         , ( "xlink", \d s x y z -> renderXLink s x z )
+        , ( "ilink", \d s x y z -> renderILink s x z )
         , ( "xlinkPublic", \d s x y z -> renderXLinkPublic s x z )
         , ( "documentTitle", \d s x y z -> renderDocumentTitle s x z )
         , ( "title", \d s x y z -> renderTitle x z )
@@ -1246,6 +1248,25 @@ renderLocal _ latexState args =
     Html.div [ HA.style "color" "blue", HA.style "white-space" "pre" ] [ Html.text <| arg ]
 
 
+renderMeta : String -> LatexState -> List LatexExpression -> Html msg
+renderMeta _ latexState args =
+    -- TODO: Finish this
+    let
+        author =
+            Internal.RenderToString.renderArg 0 latexState args
+
+        content =
+            Internal.RenderToString.renderArg 1 latexState args
+    in
+    Html.div
+        [ HA.style "display" "flex"
+        , HA.style "flex-direction" "column"
+        ]
+        [ Html.div [ HA.style "color" "blue" ] [ Html.text <| author ]
+        , Html.div [ HA.style "background-color" "yellow" ] [ Html.text <| content ]
+        ]
+
+
 renderHighlighted : String -> LatexState -> List LatexExpression -> Html msg
 renderHighlighted _ latexState args =
     let
@@ -1282,6 +1303,22 @@ renderXLink _ latexState args =
 
         ref =
             getDictionaryItem "setclient" latexState ++ "/" ++ id
+
+        label =
+            Internal.RenderToString.renderArg 1 latexState args
+    in
+    Html.a [ HA.href ref ] [ Html.text label ]
+
+
+renderILink : String -> LatexState -> List LatexExpression -> Html msg
+renderILink _ latexState args =
+    -- REVIEW: CHANGED  ref to from ++ "/" ++ to +++ "/u/" ++ for lamdera app
+    let
+        id =
+            Internal.RenderToString.renderArg 0 latexState args
+
+        ref =
+            getDictionaryItem "setclient" latexState ++ "/i/" ++ id
 
         label =
             Internal.RenderToString.renderArg 1 latexState args

@@ -13,9 +13,9 @@ import Internal.LatexState
         , setDictionaryItem
         , updateCounter
         )
+import Internal.MathMacro
 import Internal.Parser as Parser exposing (LatexExpression(..), macro)
 import Internal.Render as Render exposing (renderLatexList)
-import Internal.MathMacro
 import Internal.StateReducerHelpers as SRH2
 
 
@@ -153,17 +153,22 @@ envReducer name optonalArgs body state =
                 case body of
                     LXString str ->
                         let
-                           mathDict = Internal.MathMacro.makeMacroDict (String.trim str)
+                            mathDict =
+                                Internal.MathMacro.makeMacroDict (String.trim str)
                         in
-                          {state | mathMacroDictionary = mathDict}
-                    _ -> state
+                        { state | mathMacroDictionary = mathDict }
+
+                    _ ->
+                        state
 
             "textmacro" ->
                 case body of
                     LXString str ->
                         SRH2.setDictionary str state
 
-                    _ -> state
+                    _ ->
+                        state
+
             _ ->
                 state
 
@@ -184,11 +189,11 @@ envReducer name optonalArgs body state =
 
 
 theoremWords =
-    [ "theorem", "proposition", "corollary", "lemma", "definition" ]
+    [ "theorem", "proposition", "corollary", "lemma", "definition", "problem" ]
 
 
 dictionaryWords =
-    [ "title", "author", "data", "email", "revision", "host", "setclient", "setdocid" ]
+    [ "title", "author", "date", "email", "revision", "host", "setclient", "setdocid" ]
 
 
 macroReducer : String -> List LatexExpression -> List LatexExpression -> LatexState -> LatexState

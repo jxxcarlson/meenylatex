@@ -4,3 +4,13 @@ scripts:
 
   cloc:
     cmd: cloc --by-file src
+
+  make-macro-table:
+    cmd: awk '{print $3}' MACROS_RAW.md | sed 's/\"//g' | sed 's/,//g' | sort | awk '{print $1 ","}'
+    desc: make a table of macro names using MACROS_RAW.md
+
+  make-env-table:
+    cmd: awk '{print $3}' ENV_RAW.md | sed 's/\"//g' | sed 's/,//g' | sort | awk '{print $1 ","}'
+    desc: make a table of environment names using ENV_RAW.md
+
+  tmp: awk '{print $2}' tmp  | sed 's/\"//g' | sort

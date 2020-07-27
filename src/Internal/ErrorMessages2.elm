@@ -42,7 +42,10 @@ renderErrors source errs =
                 markerOffset =
                     firstErr.col
             in
-            { errorText = getLines firstErr.row source, markerOffset = markerOffset, explanation = displayExpected firstErr.problem }
+            { errorText = getLines firstErr.row source
+            , markerOffset = markerOffset
+            , explanation = displayExpected firstErr.problem
+            }
 
 
 getLines : Int -> String -> List String

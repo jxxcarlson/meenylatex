@@ -1,4 +1,4 @@
-module Internal.Paragraph2 exposing (..)
+module Internal.Paragraph2 exposing (logicalParagraphify)
 
 import Parser exposing (..)
 

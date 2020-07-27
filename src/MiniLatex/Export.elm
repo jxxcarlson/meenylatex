@@ -15,7 +15,7 @@ import Dict
 import Internal.ErrorMessages2 as ErrorMessages
 import Internal.Image as Image
 import Internal.JoinStrings as JoinStrings
-import Internal.Paragraph
+import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression(..), defaultLatexList, latexList)
 import Internal.ParserTools as PT
 import Internal.Source
@@ -40,7 +40,7 @@ toLaTeX str =
     let
         parsand =
             str
-                |> Internal.Paragraph.logicalParagraphify
+                |> Paragraph.logicalParagraphify
                 |> List.map Internal.Parser.parse
 
         latex_ =
@@ -61,7 +61,7 @@ toLaTeXWithImages str =
     let
         parsand =
             str
-                |> Internal.Paragraph.logicalParagraphify
+                |> Paragraph.logicalParagraphify
                 |> List.map Internal.Parser.parse
 
         latex_ =
@@ -80,7 +80,7 @@ toLaTeXWithImages str =
 
 foo str =
     str
-        |> Internal.Paragraph.logicalParagraphify
+        |> Paragraph.logicalParagraphify
         |> List.map Internal.Parser.parse
 
 

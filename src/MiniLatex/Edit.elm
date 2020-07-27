@@ -26,7 +26,7 @@ import Html.Events as HE
 import Html.Keyed as Keyed
 import Internal.Differ
 import Internal.LatexDiffer
-import Internal.Paragraph
+import Internal.Paragraph as Paragraph
 import Internal.Parser
 import Internal.Render
 import MiniLatex.Render exposing (MathJaxRenderOption)
@@ -143,6 +143,6 @@ parse : String -> ( List String, List (List Internal.Parser.LatexExpression) )
 parse text =
     let
         paragraphs =
-            Internal.Paragraph.logicalParagraphify text
+            Paragraph.logicalParagraphify text
     in
     ( paragraphs, List.map Internal.Parser.parse paragraphs )

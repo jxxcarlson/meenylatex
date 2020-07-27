@@ -1,12 +1,119 @@
-module Internal.Paragraph2 exposing (logicalParagraphify)
+module Internal.Paragraph2 exposing (..)
 
-import Parser exposing (..)
+import Parser.Advanced exposing (..)
+
+
+co =
+    """% comment
+"""
+
+
+mb =
+    """$$
+a == b
+$$
+"""
+
+
+ob =
+    """\\begin{foo}
+bar
+\\end{foo}
+"""
+
+
+pa =
+    """one
+two
+
+"""
+
+
+s0 =
+    """one
+two
+
+$$
+a == b
+$$
+
+\\begin{foo}
+bar
+\\end{foo}
+
+three
+four
+
+"""
+
+
+s1 =
+    """
+\\begin{foo}
+bar
+\\end{foo}
+"""
+
+
+s2 =
+    """
+\\begin{foo}
+
+bar
+\\end{foo}
+"""
+
+
+e1 =
+    """
+\\begin{foo}
+
+  """
+
+
+e2 =
+    """
+one
+
+\\begin{foo}
+
+two
+  """
 
 
 type LogicalParagraph
     = Paragraph String
     | OuterBlock String String
     | MathBlock String
+    | Comment String
+
+
+
+--| InitialBlanks
+
+
+type alias PParser a =
+    Parser.Advanced.Parser Context Problem a
+
+
+type Context
+    = CArg String
+    | List
+
+
+type Problem
+    = ExpectingPercent
+    | ExpectingDoubleDollarAtStart
+    | ExpectingToChompUntilDoublelDollar
+    | ExpectingDoubleDollarAtEnd
+    | ExpectingBeginWord
+    | ExpectingMarker String
+    | ChompUntileNewLine
+    | ChompUntileTwoNewLines
+    | ChompUntilEndWord String
+    | ExpectingEndWord String
+    | ExpectingInitialBlank
+    | ExpectingInitialNewLine
 
 
 
@@ -20,7 +127,7 @@ type LogicalParagraph
 
 -}
 logicalParagraphify str =
-    case Parser.run parseMany str of
+    case Parser.Advanced.run parseMany str of
         Ok list ->
             List.map render list
 
@@ -40,6 +147,9 @@ render par =
         MathBlock body ->
             "$$\n" ++ body ++ "\n$$"
 
+        Comment body ->
+            ""
+
 
 {-|
 
@@ -47,81 +157,100 @@ render par =
     Ok [Paragraph ("$$ a == b $$"),Paragraph ("And also:"),OuterBlock "foo" "bar"]
 
 -}
-parseMany : Parser (List LogicalParagraph)
+parseMany : PParser (List LogicalParagraph)
 parseMany =
     many parse
 
 
-many : Parser a -> Parser (List a)
+many : PParser a -> PParser (List a)
 many p =
     loop [] (manyHelp p)
 
 
-manyHelp : Parser a -> List a -> Parser (Step (List a) (List a))
+manyHelp : PParser a -> List a -> PParser (Step (List a) (List a))
 manyHelp p vs =
     oneOf
         [ succeed (\v -> Loop (v :: vs))
             |= p
-            |. spaces
+
+        --|. spaces
         , succeed ()
             |> map (\_ -> Done (List.reverse vs))
         ]
 
 
-parse : Parser LogicalParagraph
+parse : PParser LogicalParagraph
 parse =
-    oneOf [ paragraph, outerBlock, mathBlock ]
+    oneOf [ comment, outerBlock, mathBlock, paragraph ]
 
 
-paragraph : Parser LogicalParagraph
-paragraph =
-    succeed Paragraph
-        |= getChompedString (chompUntil "\n\n")
+
+--
+-- initialBlanks : PParser LogicalParagraph
+-- initialBlanks =
+--     succeed InitialBlanks
+--         |. oneOf [ symbol (Token " " ExpectingInitialBlank), symbol (Token "\n" ExpectingInitialNewLine) ]
+--         |. chompWhile (\c -> c /= ' ' || c /= '\n')
+
+
+comment : PParser LogicalParagraph
+comment =
+    succeed Comment
+        |. symbol (Token "%" ExpectingPercent)
+        |= getChompedString (chompUntil (Token "\n" ChompUntileNewLine))
         |. spaces
 
 
-outerBlock : Parser LogicalParagraph
+paragraph : PParser LogicalParagraph
+paragraph =
+    succeed Paragraph
+        |= getChompedString (chompUntil (Token "\n\n" ChompUntileTwoNewLines))
+        |. spaces
+
+
+outerBlock : PParser LogicalParagraph
 outerBlock =
     blockStart |> andThen blockOfName
 
 
-mathBlock : Parser LogicalParagraph
+mathBlock : PParser LogicalParagraph
 mathBlock =
     succeed MathBlock
-        |. symbol "$$"
-        |= getChompedString (chompUntil "$$")
-        |. symbol "$$"
+        |. symbol (Token "$$" ExpectingDoubleDollarAtStart)
+        |= getChompedString (chompUntil (Token "$$" ExpectingToChompUntilDoublelDollar))
+        |. symbol (Token "$$" ExpectingDoubleDollarAtEnd)
         |. spaces
 
 
-blockStart : Parser String
+blockStart : PParser String
 blockStart =
     --  inContext "envName" <|
     succeed identity
         |. spaces
-        |. symbol "\\begin{"
+        |. symbol (Token "\\begin{" ExpectingBeginWord)
         |= parseToSymbol "}"
 
 
-blockOfName : String -> Parser LogicalParagraph
+blockOfName : String -> PParser LogicalParagraph
 blockOfName name =
     let
         endWord =
             "\\end{" ++ name ++ "}"
     in
     succeed (\s -> OuterBlock name s)
-        |= getChompedString (chompUntil endWord)
+        |= getChompedString (chompUntil (Token endWord (ChompUntilEndWord name)))
+        |. symbol (Token endWord (ExpectingEndWord endWord))
         |. spaces
 
 
 {-| chomp to end of the marker and return the
 chomped string minus the marker.
 -}
-parseToSymbol : String -> Parser String
+parseToSymbol : String -> PParser String
 parseToSymbol marker =
     (getChompedString <|
         succeed identity
             |= chompUntilEndOr marker
-            |. symbol marker
+            |. symbol (Token marker (ExpectingMarker marker))
     )
         |> map (String.dropRight (String.length marker))

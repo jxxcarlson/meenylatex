@@ -1,6 +1,7 @@
 module Internal.ErrorMessages2 exposing (renderError, renderErrors)
 
 import Internal.Parser exposing (Context, Problem(..))
+import List.Extra
 import Parser.Advanced exposing (DeadEnd)
 
 
@@ -33,19 +34,47 @@ type alias ErrorReport =
 
 renderErrors : String -> List (DeadEnd Context Problem) -> ErrorReport
 renderErrors source errs =
-    case List.head errs of
+    -- let
+    --     _ =
+    --         Debug.log "ERRS" errs
+    --
+    --     _ =
+    --         Debug.log "SRC" source
+    -- in
+    case List.head (List.reverse errs) of
         Nothing ->
             { errorText = [], markerOffset = 0, explanation = "no explanation" }
 
-        Just firstErr ->
+        Just theErr ->
             let
+                -- _ =
+                --     Debug.log "ERR (!!)" theErr
+                errColumn =
+                    List.head theErr.contextStack |> Maybe.map .col |> Maybe.withDefault 1
+
                 markerOffset =
-                    firstErr.col
+                    -- theErr.col
+                    errColumn
+
+                -- _ =
+                --     Debug.log "ROW" theErr.row
             in
-            { errorText = getLines firstErr.row source
+            { errorText = getRows theErr.row source
+
+            -- errorText = [ List.Extra.getAt (theErr.row - 1) (String.lines source) |> Maybe.withDefault "errrrr!" ]
+            -- errorText = getLines theErr.row source
             , markerOffset = markerOffset
-            , explanation = displayExpected firstErr.problem
+            , explanation = displayExpected theErr.problem
             }
+
+
+getRows : Int -> String -> List String
+getRows k source =
+    source
+        |> String.lines
+        |> List.indexedMap (\i line -> ( i, line ))
+        |> List.filter (\( i, line ) -> i < k)
+        |> List.map Tuple.second
 
 
 getLines : Int -> String -> List String
@@ -81,7 +110,7 @@ displayExpected problem =
             "Expecting '$' to end inline math"
 
         ExpectingEndOfEnvironmentName ->
-            "Begin or end phrase messed up in environment"
+            "Make complete environment \\begin{??} ... \\end{??}"
 
         ExpectingBeginDisplayMathModeDollarSign ->
             "Expecting '$$' to begin displayed math"
@@ -96,7 +125,7 @@ displayExpected problem =
             "Expecting '\\[' or '\\]' for displayed math"
 
         ExpectingEndForPassThroughBody ->
-            "Begin or end phrase messed up in environment"
+            "Missing \\end{env}"
 
         ExpectingValidTableCell ->
             "Something is to complete the table cell"
@@ -105,7 +134,7 @@ displayExpected problem =
             "Something is missing to complete the optional argument"
 
         ExpectingValidMacroArgWord ->
-            "Something is missing to complete the macro argument'"
+            "Complete the macro argument: {??}"
 
         ExpectingWords ->
             "Something is missing in this sequence of words"
@@ -114,7 +143,7 @@ displayExpected problem =
             "Expecting left brace"
 
         ExpectingRightBrace ->
-            "Expecting right brace"
+            "Complete the argument with right brace : {??}"
 
         ExpectingLeftBracket ->
             "Expecting left bracket"
@@ -149,6 +178,12 @@ displayExpected problem =
         ExpectingLeadingDollarSign ->
             "Expecting $"
 
+        ExpectingEnvironmentNameBegin ->
+            "Close your environment \\begin{??} ... \\end{??}"
+
+        ExpectingEnvironmentNameEnd ->
+            "Expecting \\end{envName}"
+
         ExpectingBeginAndRightBrace ->
             "Expecting begin{"
 
@@ -164,8 +199,8 @@ displayExpected problem =
         ExpectingEscapedItem ->
             "Expecting \\item"
 
-        ExpectingSpace ->
-            "Expecting space"
+        ExpectingSpaceAfterItem ->
+            "Complete your \\item ..."
 
         ExpectingAmpersand ->
             "Expecting &"
@@ -176,5 +211,8 @@ displayExpected problem =
         ExpectingEscapedNewcommandAndBrace ->
             "Expecting \\newcommand{"
 
-        ExpectingEndWord ->
-            "Begin or end phrase messed up"
+        ExpectingEndWord envName ->
+            "Close environment with " ++ envName
+
+        ExpectingEndWordInItemList envName ->
+            "Do you have an incomplete \\item ... ?"

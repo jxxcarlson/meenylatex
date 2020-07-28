@@ -80,16 +80,19 @@ type Problem
     | ExpectingInt
     | InvalidInt
     | ExpectingLeadingDollarSign
+    | ExpectingEnvironmentNameBegin
+    | ExpectingEnvironmentNameEnd
     | ExpectingBeginAndRightBrace
     | ExpectingEndAndRightBrace
     | ExpectingEscapeAndLeftBracket
     | ExpectingDoubleNewline
     | ExpectingEscapedItem
-    | ExpectingSpace
+    | ExpectingSpaceAfterItem
     | ExpectingAmpersand
     | ExpectingDoubleEscapeAndNewline
     | ExpectingEscapedNewcommandAndBrace
-    | ExpectingEndWord
+    | ExpectingEndWord String
+    | ExpectingEndWordInItemList String
 
 
 {-| Transform a string into a list of LatexExpressions
@@ -491,7 +494,7 @@ envName =
     --  inContext "envName" <|
     succeed identity
         |. spaces
-        |. symbol (Token "\\begin{" ExpectingBeginAndRightBrace)
+        |. symbol (Token "\\begin{" ExpectingEnvironmentNameBegin)
         |= parseToSymbol ExpectingEndOfEnvironmentName "}"
 
 
@@ -502,7 +505,7 @@ endWord : LXParser String
 endWord =
     succeed identity
         |. spaces
-        |. symbol (Token "\\end{" ExpectingEndAndRightBrace)
+        |. symbol (Token "\\end{" ExpectingEnvironmentNameEnd)
         |= parseToSymbol ExpectingEndAndRightBrace "}"
         |. ws
 
@@ -573,7 +576,7 @@ standardEnvironmentBody endWoord envType =
         |. ws
         |= (nonEmptyItemList latexExpression |> map LatexList)
         |. ws
-        |. symbol (Token endWoord ExpectingEndWord)
+        |. symbol (Token endWoord (ExpectingEndWord endWoord))
         |. ws
 
 
@@ -603,7 +606,7 @@ itemEnvironmentBody endWoord envType =
         |. ws
         |= itemList (oneOf [ item, lazy (\_ -> environment) ])
         |. ws
-        |. symbol (Token endWoord ExpectingEndWord)
+        |. symbol (Token endWoord (ExpectingEndWordInItemList endWoord))
         |. ws
         |> map LatexList
         |> map (Environment envType [])
@@ -616,7 +619,7 @@ biblioEnvironmentBody endWoord envType =
         |. ws
         |= itemList smacro
         |. ws
-        |. symbol (Token endWoord ExpectingEndWord)
+        |. symbol (Token endWoord (ExpectingEndWord endWoord))
         |. ws
         |> map LatexList
         |> map (Environment envType [])
@@ -640,7 +643,7 @@ item =
     succeed identity
         |. spaces
         |. symbol (Token "\\item" ExpectingEscapedItem)
-        |. symbol (Token " " ExpectingSpace)
+        |. symbol (Token " " ExpectingSpaceAfterItem)
         |. spaces
         |= itemList (oneOf [ words, inlineMath ws, macro ws ])
         |. ws
@@ -659,7 +662,7 @@ tabularEnvironmentBody endWoord envType =
         |= itemList arg
         |= tableBody
         |. ws
-        |. symbol (Token endWoord ExpectingEndWord)
+        |. symbol (Token endWoord (ExpectingEndWord endWoord))
         |. ws
 
 

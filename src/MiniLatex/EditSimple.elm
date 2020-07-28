@@ -99,7 +99,7 @@ get selectedId data =
     let
         -- LatexState → List LatexExpression → List LatexExpression → Html msg
         ( _, paragraphs ) =
-            Accumulator.render (Internal.Render.renderLatexList NoDelay "") data.latexState data.astList
+            Accumulator.render (Internal.Render.renderLatexList NoDelay data.source) data.latexState data.astList
 
         mark id_ =
             if selectedId == id_ then

@@ -40,7 +40,8 @@ corresponding to the text to be rendered as well as corresponding
 list of rendered paragraphs. We need to reveiw this strucure.
 -}
 type alias EditRecord =
-    { paragraphs : List String
+    { source : String
+    , paragraphs : List String
     , astList : List (List LatexExpression)
     , idList : List String
     , latexState : LatexState
@@ -51,7 +52,7 @@ type alias EditRecord =
 -}
 emptyEditRecord : EditRecord
 emptyEditRecord =
-    EditRecord [] [] [] emptyLatexState
+    EditRecord "" [] [] [] emptyLatexState
 
 
 {-| createRecord: Create an edit record by (1)
@@ -74,7 +75,7 @@ init parser renderer text =
         astList =
             List.map parser paragraphs
     in
-    EditRecord paragraphs astList idList emptyLatexState
+    EditRecord text paragraphs astList idList emptyLatexState
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -109,7 +110,7 @@ update seed parser editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-    EditRecord newParagraphs astList p.idList editRecord.latexState
+    EditRecord text newParagraphs astList p.idList editRecord.latexState
 
 
 {-| Update the renderedList by applying the transformer only to the

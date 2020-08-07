@@ -42,7 +42,7 @@ list of rendered paragraphs. We need to reveiw this strucure.
 type alias EditRecord =
     { source : String
     , paragraphs : List String
-    , astList : List (List LatexExpression)
+    , astList : List ( String, List LatexExpression )
     , idList : List String
     , latexState : LatexState
     }
@@ -73,7 +73,7 @@ init parser renderer text =
             List.range 1 n |> List.map (prefixer 0) |> List.map (\i -> "X." ++ i)
 
         astList =
-            List.map parser paragraphs
+            List.map (\p -> ( p, parser p )) paragraphs
     in
     EditRecord text paragraphs astList idList emptyLatexState
 
@@ -240,7 +240,7 @@ prefixer b k =
     "p." ++ String.fromInt b ++ "." ++ String.fromInt k
 
 
-differentialParser : (String -> List LatexExpression) -> DiffRecord -> EditRecord -> List (List LatexExpression)
+differentialParser : (String -> List LatexExpression) -> DiffRecord -> EditRecord -> List ( String, List LatexExpression )
 differentialParser parser diffRecord editRecord =
     let
         ii =
@@ -256,7 +256,7 @@ differentialParser parser diffRecord editRecord =
             takeLast it editRecord.astList
 
         middleSegmentParsed =
-            List.map parser diffRecord.middleSegmentInTarget
+            List.map (\p -> ( p, parser p )) diffRecord.middleSegmentInTarget
     in
     initialSegmentParsed ++ middleSegmentParsed ++ terminalSegmentParsed
 
@@ -265,7 +265,7 @@ differentialCompiler :
     (String -> List LatexExpression)
     -> DiffRecord
     -> EditRecord
-    -> List (List LatexExpression)
+    -> List ( String, List LatexExpression )
 differentialCompiler parser diffRecord editRecord =
     let
         ii =
@@ -280,8 +280,9 @@ differentialCompiler parser diffRecord editRecord =
         terminalSegmentParsed =
             takeLast it editRecord.astList
 
+        middleSegmentParsed : List ( String, List LatexExpression )
         middleSegmentParsed =
-            List.map parser diffRecord.middleSegmentInTarget
+            List.map (\p -> ( p, parser p )) diffRecord.middleSegmentInTarget
     in
     initialSegmentParsed ++ middleSegmentParsed ++ terminalSegmentParsed
 

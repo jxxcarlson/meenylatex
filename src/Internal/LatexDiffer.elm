@@ -4,11 +4,11 @@ import Dict
 import Internal.Accumulator as Accumulator
 import Internal.Differ exposing (EditRecord)
 import Internal.LatexState exposing (LatexState, emptyLatexState)
+import Internal.MathMacro
 import Internal.Paragraph as Paragraph
 import Internal.Parser exposing (LatexExpression)
 import Internal.Render as Render exposing (render)
 import Internal.SourceMap as SourceMap
-import Internal.MathMacro
 
 
 init : (String -> List LatexExpression) -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
@@ -16,10 +16,15 @@ init parser renderer latexState text =
     initWithSeed 0 parser renderer latexState text
 
 
-initWithSeed : Int -> (String -> List LatexExpression) -> (LatexState -> List LatexExpression -> a) -> LatexState -> String -> EditRecord a
+initWithSeed :
+    Int
+    -> (String -> List LatexExpression)
+    -> (LatexState -> List LatexExpression -> a)
+    -> LatexState
+    -> String
+    -> EditRecord a
 initWithSeed seed parser renderer latexState text =
     let
-
         paragraphs =
             text
                 |> Paragraph.logicalParagraphify

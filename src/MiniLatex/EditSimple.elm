@@ -97,9 +97,11 @@ of a paragraph is incremented when it is edited.
 get : String -> Data -> List (Html LaTeXMsg)
 get selectedId data =
     let
-        -- LatexState → List LatexExpression → List LatexExpression → Html msg
         ( _, paragraphs ) =
             Accumulator.render (Internal.Render.renderLatexList NoDelay data.source) data.latexState data.astList
+
+        _ =
+            Debug.log "AST LIST" data.astList
 
         mark id_ =
             if selectedId == id_ then

@@ -1,4 +1,4 @@
-module Internal.Accumulator exposing (parse, render)
+module Internal.Accumulator exposing (parse, render, renderNew)
 
 import Dict
 import Internal.LatexState
@@ -78,6 +78,43 @@ render :
 render renderer latexState paragraphs =
     paragraphs
         |> List.foldl (renderReducer renderer) ( latexState, [] )
+
+
+renderNew :
+    (LatexState -> List ( String, List LatexExpression ) -> a)
+    -> LatexState
+    -> List ( String, List LatexExpression )
+    -> ( LatexState, List a )
+renderNew renderer latexState paragraphs =
+    paragraphs
+        |> List.foldl (renderReducerNew renderer) ( latexState, [] )
+
+
+renderReducerNew :
+    (LatexState -> List ( String, List LatexExpression ) -> a)
+    -> ( String, List LatexExpression )
+    -> ( LatexState, List a )
+    -> ( LatexState, List a )
+renderReducerNew renderer listStringAndLatexExpression ( state, inputList ) =
+    let
+        newState =
+            latexStateReducer (Tuple.second listStringAndLatexExpression) state
+
+        renderedInput =
+            renderer newState [ listStringAndLatexExpression ]
+    in
+    ( newState, inputList ++ [ renderedInput ] )
+
+
+
+--render2 :
+--    (LatexState -> List LatexExpression -> a)
+--    -> LatexState
+--    -> List ( String, List LatexExpression )
+--    -> ( LatexState, List a )
+--render2 renderer latexState paragraphs =
+--    paragraphs
+--        |> List.foldl (renderReducer renderer) ( latexState, [] )
 
 
 renderReducer :

@@ -97,9 +97,15 @@ of a paragraph is incremented when it is edited.
 get : String -> Data -> List (Html LaTeXMsg)
 get selectedId data =
     let
-        ( _, paragraphs ) =
-            Accumulator.render (Internal.Render.renderLatexList NoDelay data.source) data.latexState data.astList
+        ( _, paragraphs_ ) =
+            Accumulator.renderNew Internal.Render.renderLatexListNew data.latexState data.astList
 
+        paragraphs =
+            List.map (\x -> Html.div [] x) paragraphs_
+
+        -- renderLatexListNew : LatexState -> List ( String, List LatexExpression ) -> Html msg
+        --paragraphs =
+        --    Accumulator.render Internal.Render.renderLatexListNew data.latexState data.astList
         _ =
             Debug.log "AST LIST" data.astList
 

@@ -1,6 +1,6 @@
 module Internal.Render exposing
     ( makeTableOfContents, render, renderLatexList, renderString
-    , parseString, renderString2
+    , parseString, renderLatexListNew, renderString2
     )
 
 {-| This module is for quickly preparing latex for export.
@@ -368,9 +368,14 @@ to Html mgs
 -}
 renderLatexList : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
 renderLatexList mathJaxRenderOption source latexState latexList =
-    -- ### Render2.renderLatexList
+    --let
+    --    _ =
+    --        Debug.log "L1" ( List.length latexList, latexList )
+    --
+    --    _ =
+    --        Debug.log "L2" ( List.length (spacify latexList), spacify latexList )
+    --in
     latexList
-        |> spacify
         |> List.map (render mathJaxRenderOption source latexState)
         |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] list)
 
@@ -383,6 +388,42 @@ spacify latexList =
 
 
 
+--renderLatexListNew1 : LatexState -> List ( String, LatexExpression ) -> Html msg
+--renderLatexListNew1 latexState list =
+--    -- ### Reader2.spacify
+--    List.map2 (\x y -> render NoDelay x latexState y)
+--        (List.map Tuple.first list)
+--        (ListMachine.run addSpace (List.map Tuple.second list))
+--        |> (\x -> Html.span [ HA.style "margin-bottom" "10px" ] x)
+
+
+xxx : LatexState -> List ( String, List LatexExpression ) -> List ( String, List LatexExpression )
+xxx latexState list =
+    let
+        foo : List String.String
+        foo =
+            List.map Tuple.first list
+
+        bar : List (List LatexExpression)
+        bar =
+            List.map Tuple.second list
+    in
+    List.map2 (\x y -> ( x, y )) foo bar
+
+
+renderLatexListNew : LatexState -> List ( String, List LatexExpression ) -> List (Html msg)
+renderLatexListNew latexState list =
+    List.map2 (\x y -> renderLatexList NoDelay x latexState y)
+        (List.map Tuple.first list)
+        (List.map Tuple.second list |> List.map spacify)
+
+
+
+-- > (\output -> Html.span [ HA.style "margin-bottom" "10px" ] output)
+-- ### Reader2.spacify
+--List.map2 (\x y -> render NoDelay x latexState y)
+--    (List.map Tuple.first list)
+--    (List.map spacify (List.map Tuple.second list))
 {- RENDER MACRO -}
 
 

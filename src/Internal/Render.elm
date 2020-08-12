@@ -368,13 +368,6 @@ to Html mgs
 -}
 renderLatexList : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
 renderLatexList mathJaxRenderOption source latexState latexList =
-    --let
-    --    _ =
-    --        Debug.log "L1" ( List.length latexList, latexList )
-    --
-    --    _ =
-    --        Debug.log "L2" ( List.length (spacify latexList), spacify latexList )
-    --in
     latexList
         |> List.map (render mathJaxRenderOption source latexState)
         |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] list)
@@ -382,19 +375,8 @@ renderLatexList mathJaxRenderOption source latexState latexList =
 
 spacify : List LatexExpression -> List LatexExpression
 spacify latexList =
-    -- ### Reader2.spacify
     latexList
         |> ListMachine.run addSpace
-
-
-
---renderLatexListNew1 : LatexState -> List ( String, LatexExpression ) -> Html msg
---renderLatexListNew1 latexState list =
---    -- ### Reader2.spacify
---    List.map2 (\x y -> render NoDelay x latexState y)
---        (List.map Tuple.first list)
---        (ListMachine.run addSpace (List.map Tuple.second list))
---        |> (\x -> Html.span [ HA.style "margin-bottom" "10px" ] x)
 
 
 xxx : LatexState -> List ( String, List LatexExpression ) -> List ( String, List LatexExpression )
@@ -515,7 +497,7 @@ renderMacroDict =
         , ( "blue", \d s x y z -> renderBlue s x z )
         , ( "remote", \d s x y z -> renderRemote s x z )
         , ( "local", \d s x y z -> renderLocal s x z )
-        , ( "meta", \d s x y z -> renderMeta s x z )
+        , ( "attachNote", \d s x y z -> renderAttachNote s x z )
         , ( "highlight", \d s x y z -> renderHighlighted s x z )
         , ( "strike", \d s x y z -> renderStrikeThrough s x z )
         , ( "term", \d s x y z -> renderTerm s x z )
@@ -1290,8 +1272,8 @@ renderLocal _ latexState args =
     Html.div [ HA.style "color" "blue", HA.style "white-space" "pre" ] [ Html.text <| arg ]
 
 
-renderMeta : String -> LatexState -> List LatexExpression -> Html msg
-renderMeta _ latexState args =
+renderAttachNote : String -> LatexState -> List LatexExpression -> Html msg
+renderAttachNote _ latexState args =
     -- TODO: Finish this
     let
         author =

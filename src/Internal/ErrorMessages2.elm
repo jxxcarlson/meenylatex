@@ -34,21 +34,22 @@ type alias ErrorReport =
 
 renderErrors : String -> List (DeadEnd Context Problem) -> ErrorReport
 renderErrors source errs =
-    -- let
-    --     _ =
-    --         Debug.log "ERRS" errs
-    --
-    --     _ =
-    --         Debug.log "SRC" source
-    -- in
+    let
+        _ =
+            Debug.log "ERRS" errs
+
+        _ =
+            Debug.log "SRC" source
+    in
     case List.head (List.reverse errs) of
         Nothing ->
             { errorText = [], markerOffset = 0, explanation = "no explanation" }
 
         Just theErr ->
             let
-                -- _ =
-                --     Debug.log "ERR (!!)" theErr
+                _ =
+                    Debug.log "ERR (!!)" theErr
+
                 errColumn =
                     List.head theErr.contextStack |> Maybe.map .col |> Maybe.withDefault 1
 
@@ -59,7 +60,7 @@ renderErrors source errs =
                 -- _ =
                 --     Debug.log "ROW" theErr.row
             in
-            { errorText = getRows theErr.row source
+            { errorText = betterErrorText theErr source -- getRows theErr.row source
 
             -- errorText = [ List.Extra.getAt (theErr.row - 1) (String.lines source) |> Maybe.withDefault "errrrr!" ]
             -- errorText = getLines theErr.row source
@@ -103,6 +104,30 @@ getLine lineNumber str =
             )
 
 
+
+-- ExpectingEndWord
+
+
+betterErrorText : DeadEnd Context Problem -> String -> List String
+betterErrorText theError source =
+    let
+        firstLine source_ =
+            [ getLine 1 source_ ]
+    in
+    case theError.problem of
+        ExpectingValidMacroArgWord ->
+            firstLine source
+
+        ExpectingEndOfEnvironmentName ->
+            firstLine source
+
+        ExpectingEndWord word ->
+            firstLine source
+
+        _ ->
+            getRows theError.row source
+
+
 displayExpected : Problem -> String
 displayExpected problem =
     case problem of
@@ -110,7 +135,7 @@ displayExpected problem =
             "Expecting '$' to end inline math"
 
         ExpectingEndOfEnvironmentName ->
-            "Make complete environment \\begin{??} ... \\end{??}"
+            "Make complete environment \\begin{..} ... \\end{..}"
 
         ExpectingBeginDisplayMathModeDollarSign ->
             "Expecting '$$' to begin displayed math"
@@ -134,7 +159,7 @@ displayExpected problem =
             "Something is missing to complete the optional argument"
 
         ExpectingValidMacroArgWord ->
-            "Complete the macro argument: {??}"
+            "Fill in the macro argument: {..}"
 
         ExpectingWords ->
             "Something is missing in this sequence of words"
@@ -143,7 +168,7 @@ displayExpected problem =
             "Expecting left brace"
 
         ExpectingRightBrace ->
-            "Complete the argument with right brace : {??}"
+            "Complete the argument with a right brace : {..}"
 
         ExpectingLeftBracket ->
             "Expecting left bracket"
@@ -179,7 +204,7 @@ displayExpected problem =
             "Expecting $"
 
         ExpectingEnvironmentNameBegin ->
-            "Close your environment \\begin{??} ... \\end{??}"
+            "Close your environment \\begin{..} ... \\end{..}"
 
         ExpectingEnvironmentNameEnd ->
             "Expecting \\end{envName}"

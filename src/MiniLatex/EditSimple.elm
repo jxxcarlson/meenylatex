@@ -103,12 +103,6 @@ get selectedId data =
         paragraphs =
             List.map (\x -> Html.div [] x) paragraphs_
 
-        -- renderLatexListNew : LatexState -> List ( String, List LatexExpression ) -> Html msg
-        --paragraphs =
-        --    Accumulator.render Internal.Render.renderLatexListNew data.latexState data.astList
-        _ =
-            Debug.log "AST LIST" data.astList
-
         mark id_ =
             if selectedId == id_ then
                 "select:" ++ id_

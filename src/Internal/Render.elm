@@ -186,6 +186,7 @@ render mathJaxRenderOption source latexState latexExpression =
             renderSMacro mathJaxRenderOption source latexState name optArgs args le
 
         Item level latexExpr ->
+            -- TODO: fix spacing issue
             renderItem mathJaxRenderOption source latexState level latexExpr
 
         InlineMath str ->
@@ -199,7 +200,7 @@ render mathJaxRenderOption source latexState latexExpression =
             renderEnvironment mathJaxRenderOption source latexState name args body
 
         LatexList latexList ->
-            renderLatexList mathJaxRenderOption source latexState latexList
+            renderLatexList mathJaxRenderOption source latexState (spacify latexList)
 
         LXString str ->
             case String.left 1 str of
@@ -401,11 +402,6 @@ renderLatexListNew latexState list =
 
 
 
--- > (\output -> Html.span [ HA.style "margin-bottom" "10px" ] output)
--- ### Reader2.spacify
---List.map2 (\x y -> render NoDelay x latexState y)
---    (List.map Tuple.first list)
---    (List.map spacify (List.map Tuple.second list))
 {- RENDER MACRO -}
 
 
@@ -514,6 +510,7 @@ renderMacroDict =
         , ( "setdocid", \d s x y z -> renderSetDocId s x z )
         , ( "setclient", \d s x y z -> renderSetClient s x z )
         , ( "strong", \d s x y z -> renderStrong d s x z )
+        , ( "uuid", \d s x y z -> renderUuid d s x z )
         ]
 
 
@@ -530,6 +527,11 @@ renderBegin _ latexState args =
 renderEnd : String -> LatexState -> List LatexExpression -> Html msg
 renderEnd _ atexState args =
     Html.span [] [ Html.text "\\end" ]
+
+
+renderUuid : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
+renderUuid _ _ _ _ =
+    Html.span [] []
 
 
 renderPercent : String -> LatexState -> List LatexExpression -> Html msg
@@ -1629,6 +1631,7 @@ renderCommentEnvironment source latexState body =
 
 renderEnumerate : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderEnumerate mathJaxRenderOption source latexState body =
+    -- TODO: fix spacing issue
     Html.ol [ HA.style "margin-top" "0px" ] [ render mathJaxRenderOption source latexState body ]
 
 
@@ -1708,6 +1711,7 @@ renderIndentEnvironment mathJaxRenderOption source latexState body =
 
 renderItemize : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 renderItemize mathJaxRenderOption source latexState body =
+    -- TODO: fix space issue
     Html.ul [ HA.style "margin-top" "0px" ] [ render mathJaxRenderOption source latexState body ]
 
 

@@ -34,22 +34,21 @@ type alias ErrorReport =
 
 renderErrors : String -> List (DeadEnd Context Problem) -> ErrorReport
 renderErrors source errs =
-    let
-        _ =
-            Debug.log "ERRS" errs
-
-        _ =
-            Debug.log "SRC" source
-    in
+    --let
+    --    _ =
+    --        Debug.log "ERRS" errs
+    --
+    --    _ =
+    --        Debug.log "SRC" source
+    --in
     case List.head (List.reverse errs) of
         Nothing ->
             { errorText = [], markerOffset = 0, explanation = "no explanation" }
 
         Just theErr ->
             let
-                _ =
-                    Debug.log "ERR (!!)" theErr
-
+                --_ =
+                --    Debug.log "ERR (!!)" theErr
                 errColumn =
                     List.head theErr.contextStack |> Maybe.map .col |> Maybe.withDefault 1
 
@@ -76,6 +75,7 @@ getRows k source =
         |> List.indexedMap (\i line -> ( i, line ))
         |> List.filter (\( i, line ) -> i < k)
         |> List.map Tuple.second
+        |> List.map (String.left 40)
 
 
 getLines : Int -> String -> List String

@@ -5,6 +5,7 @@ import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src, style)
 import MiniLatex
 import MiniLatex.Edit
+import MiniLatex.EditSimple
 import MiniLatex.Render exposing (MathJaxRenderOption(..))
 
 
@@ -27,7 +28,7 @@ init =
 
 type Msg
     = NoOp
-    | LatexMsg MiniLatex.Edit.LaTeXMsg
+    | LatexMsg MiniLatex.EditSimple.LaTeXMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -40,6 +41,18 @@ update msg model =
 
 
 sourceText =
+    """
+This is a \\italic{very important} test.
+
+\\begin{itemize}
+
+\\item This is a \\blue{Blue} item.
+
+\\end{itemize}
+"""
+
+
+sourceText1 =
     """
 
 Pythagoras: $a^2 + b^2 = c^2$.
@@ -76,7 +89,7 @@ view model =
     div [ style "margin" "50px" ]
         [ h1 [] [ text "Example" ]
         , div [ style "font-size" "18px" ]
-            [ MiniLatex.render "noSelectedId" NoDelay sourceText |> Html.map LatexMsg
+            [ MiniLatex.EditSimple.render sourceText |> Html.map LatexMsg
             ]
         ]
 

@@ -1,4 +1,7 @@
-module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, LaTeXMsg)
+module MiniLatex.EditSimple exposing
+    ( Data, emptyData, init, update, get, LaTeXMsg
+    , render
+    )
 
 {-| This module is like MiniLaTeX.Edit, except that the Data type, which is an
 alias of the record type `Internal.DifferSimple.EditRecord`, contains no functions.
@@ -50,6 +53,13 @@ type alias Data =
 -}
 type LaTeXMsg
     = IDClicked String
+
+
+render : String -> Html LaTeXMsg
+render source =
+    init 0 source
+        |> get "-"
+        |> (\list -> Html.div [] list)
 
 
 {-| Create Data from a string of MiniLaTeX text and a version number.

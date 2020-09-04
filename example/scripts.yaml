@@ -3,6 +3,8 @@ scripts:
 
   make:  elm make --debug src/Main.elm --output=Main.js
 
+  make2:  elm make --debug src/Main2.elm --output=Main2.js
+
   look  : open -a /Applications/Google\ Chrome.app/ index.html
 
   kook  : open -a /Applications/Google\ Chrome.app/ index-katex.html

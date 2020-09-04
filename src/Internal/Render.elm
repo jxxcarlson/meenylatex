@@ -12,8 +12,6 @@ module Internal.Render exposing
 
 -}
 
--- import List.Extra
-
 import Dict
 import Html exposing (Attribute, Html)
 import Html.Attributes as HA
@@ -288,21 +286,6 @@ displayMathText_ latexState mathJaxRenderOption str =
     mathText mathJaxRenderOption DisplayMathMode (String.trim str)
 
 
-
---
--- displayMathTextWithLabel1_ : LatexState -> MathJaxRenderOption -> String -> String -> Html msg
--- displayMathTextWithLabel1_ latexState mathJaxRenderOption str label =
---     Html.div
---         [ HA.style "display" "flex"
---         , HA.style "flex-direction" "row"
---         , HA.style "justify-content" "center"
---         ]
---         [ Html.div [] [ mathText mathJaxRenderOption DisplayMathMode (String.trim str) ]
---         , Html.div [ HA.style "float" "right" ]
---             [ Html.text label ]
---         ]
-
-
 displayMathTextWithLabel_ : LatexState -> MathJaxRenderOption -> String -> String -> Html msg
 displayMathTextWithLabel_ latexState mathJaxRenderOption str label =
     Html.div
@@ -447,6 +430,10 @@ boost f =
     \x y z -> f x z
 
 
+
+-- DICT
+
+
 renderMacroDict : Dict.Dict String (MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
 renderMacroDict =
     Dict.fromList
@@ -498,7 +485,9 @@ renderMacroDict =
         , ( "strike", \d s x y z -> renderStrikeThrough s x z )
         , ( "term", \d s x y z -> renderTerm s x z )
         , ( "xlink", \d s x y z -> renderXLink s x z )
-        , ( "ilink", \d s x y z -> renderILink s x z )
+        , ( "ilink1", \d s x y z -> renderILink s x z )
+        , ( "ilink2", \d s x y z -> renderILink s x z )
+        , ( "ilink3", \d s x y z -> renderILink s x z )
         , ( "include", \d s x y z -> renderInclude s x z )
         , ( "xlinkPublic", \d s x y z -> renderXLinkPublic s x z )
         , ( "documentTitle", \d s x y z -> renderDocumentTitle s x z )
@@ -1338,18 +1327,7 @@ renderXLink _ latexState args =
 
 renderILink : String -> LatexState -> List LatexExpression -> Html msg
 renderILink _ latexState args =
-    -- REVIEW: CHANGED  ref to from ++ "/" ++ to +++ "/u/" ++ for lamdera app
-    let
-        id =
-            Internal.RenderToString.renderArg 0 latexState args
-
-        ref =
-            getDictionaryItem "setclient" latexState ++ "/i/" ++ id
-
-        label =
-            Internal.RenderToString.renderArg 1 latexState args
-    in
-    Html.a [ HA.href ref ] [ Html.text label ]
+    Html.span [] []
 
 
 renderInclude : String -> LatexState -> List LatexExpression -> Html msg

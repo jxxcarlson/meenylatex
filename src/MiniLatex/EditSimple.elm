@@ -97,13 +97,6 @@ as "paragraph 10, version 1". The version number
 of a paragraph is incremented when it is edited.
 
 -}
-
-
-
---render : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
---render mathJaxRenderOption source latexState latexExpression
-
-
 get : String -> Data -> List (Html LaTeXMsg)
 get selectedId data =
     let

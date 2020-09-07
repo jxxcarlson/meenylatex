@@ -1,4 +1,4 @@
-module Markdown exposing (render)
+module MiniLatex.Markdown exposing (convert)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -33,13 +33,32 @@ import Internal.Render
 import Internal.RenderToString
 import Internal.Utility as Utility
 import Json.Encode
+import MiniLatex.EditSimple
 import Parser exposing (DeadEnd, Problem(..))
 import Regex
 import String
 import SvgParser
 
 
-{-| The main rendering function. Compute an String value
+convert : String -> String
+convert source =
+    let
+        data =
+            MiniLatex.EditSimple.init 0 source
+
+        astList =
+            data.astList
+
+        latexState =
+            data.latexState
+
+        paragraphs =
+            renderLatexListToList latexState astList
+    in
+    String.join "\n\n" paragraphs
+
+
+{-| The main rendering function. Compute a String value
 from the current LatexState and a LatexExpression.
 -}
 render : String -> LatexState -> LatexExpression -> String

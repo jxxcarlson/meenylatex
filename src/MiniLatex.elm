@@ -32,7 +32,6 @@ import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Parser exposing (LatexExpression)
 import Internal.Render as Render
 import MiniLatex.Edit exposing (LaTeXMsg)
-import MiniLatex.Render exposing (MathJaxRenderOption)
 
 
 {-| Type of the syntax tree

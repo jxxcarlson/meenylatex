@@ -35,7 +35,6 @@ import Internal.ParserHelpers
 import Internal.RenderToString
 import Internal.Utility as Utility
 import Json.Encode
-import MiniLatex.Render exposing (MathJaxRenderOption(..))
 import Parser exposing (DeadEnd, Problem(..))
 import Regex
 import String

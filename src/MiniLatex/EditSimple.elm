@@ -23,7 +23,6 @@ import Internal.LatexDifferSimple
 import Internal.Paragraph
 import Internal.Parser
 import Internal.Render
-import MiniLatex.Render exposing (MathJaxRenderOption(..))
 
 
 {-| Data structures and functions for managing interactive edits. The parse tree, rendered text, and other information needed

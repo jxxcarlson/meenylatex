@@ -29,7 +29,6 @@ import Internal.LatexDiffer
 import Internal.Paragraph as Paragraph
 import Internal.Parser
 import Internal.Render
-import MiniLatex.Render exposing (MathJaxRenderOption)
 
 
 {-| Data for differential parsing and rendering

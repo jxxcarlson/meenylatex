@@ -12,7 +12,6 @@ import Http
 import MiniLatex
 import MiniLatex.Edit exposing (Data)
 import MiniLatex.Export
-import MiniLatex.Render exposing (MathJaxRenderOption(..))
 import Random
 import StringsV1
 import StringsV2

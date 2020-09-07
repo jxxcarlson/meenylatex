@@ -47,26 +47,26 @@ type LaTeXMsg
 {-| Create Data from a string of MiniLaTeX text and a version number.
 The version number should be different for each call of init.
 -}
-init : MathJaxRenderOption -> Int -> String -> Data (Html LaTeXMsg)
-init mathJaxRenderOption version source =
+init : Int -> String -> Data (Html LaTeXMsg)
+init version source =
     Internal.LatexDiffer.update
         version
         Internal.Parser.parse
-        (Internal.Render.renderLatexList mathJaxRenderOption source)
-        (Internal.Render.renderString mathJaxRenderOption)
+        (Internal.Render.renderLatexList source)
+        Internal.Render.renderString
         Internal.Differ.emptyHtmlMsgRecord
         source
 
 
 {-| Update Data with modified text, re-parsing and re-rerendering changed elements.
 -}
-update : MathJaxRenderOption -> Int -> String -> Data (Html LaTeXMsg) -> Data (Html LaTeXMsg)
-update mathJaxRenderOption version source editRecord =
+update : Int -> String -> Data (Html LaTeXMsg) -> Data (Html LaTeXMsg)
+update version source editRecord =
     Internal.LatexDiffer.update
         version
         Internal.Parser.parse
-        (Internal.Render.renderLatexList mathJaxRenderOption source)
-        (Internal.Render.renderString mathJaxRenderOption)
+        (Internal.Render.renderLatexList source)
+        Internal.Render.renderString
         editRecord
         source
 

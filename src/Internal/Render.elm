@@ -56,8 +56,8 @@ parseString_ parser str =
     Parser.run parser str
 
 
-parseString : MathJaxRenderOption -> LatexState -> String -> List ( String, List LatexExpression )
-parseString mathJaxRenderOption latexState source =
+parseString : LatexState -> String -> List ( String, List LatexExpression )
+parseString latexState source =
     let
         paragraphs : List String
         paragraphs =
@@ -73,23 +73,23 @@ parseString mathJaxRenderOption latexState source =
 
 {-| Parse a string, then render it.
 -}
-renderString2 : MathJaxRenderOption -> LatexState -> String -> Html msg
-renderString2 mathJaxRenderOption latexState source =
+renderString2 : LatexState -> String -> Html msg
+renderString2 latexState source =
     let
         render_ : ( String, List LatexExpression ) -> Html msg
         render_ ( source_, ast ) =
-            renderLatexList mathJaxRenderOption source_ latexState ast
+            renderLatexList source_ latexState ast
     in
     source
-        |> parseString mathJaxRenderOption latexState
+        |> parseString latexState
         |> List.map render_
         |> Html.div []
 
 
 {-| Parse a string, then render it.
 -}
-renderString : MathJaxRenderOption -> LatexState -> String -> Html msg
-renderString mathJaxRenderOption latexState source =
+renderString : LatexState -> String -> Html msg
+renderString latexState source =
     let
         paragraphs : List String
         paragraphs =
@@ -101,7 +101,7 @@ renderString mathJaxRenderOption latexState source =
 
         render_ : ( String, List LatexExpression ) -> Html msg
         render_ ( source_, ast ) =
-            renderLatexList mathJaxRenderOption source_ latexState ast
+            renderLatexList source_ latexState ast
     in
     paragraphs
         |> List.map parse
@@ -133,10 +133,10 @@ extractList latexExpression =
 
 {-| THE MAIN RENDERING FUNCTION
 -}
-mathText : MathJaxRenderOption -> DisplayMode -> String -> Html msg
-mathText mathJaxRenderOption displayMode content =
+mathText : DisplayMode -> String -> Html msg
+mathText displayMode content =
     Html.node "math-text"
-        [ HA.property "delay" (Json.Encode.bool (isDelayMode mathJaxRenderOption))
+        [ HA.property "delay" (Json.Encode.bool False)
         , HA.property "display" (Json.Encode.bool (isDisplayMathMode displayMode))
         , HA.property "content" (Json.Encode.string (content |> String.replace "\\ \\" "\\\\"))
         ]
@@ -158,47 +158,37 @@ isDisplayMathMode displayMode =
             True
 
 
-isDelayMode : MathJaxRenderOption -> Bool
-isDelayMode mathJaxRenderOption =
-    case mathJaxRenderOption of
-        Delay ->
-            True
-
-        NoDelay ->
-            False
-
-
 {-| The main rendering function. Compute an Html msg value
 from the current LatexState and a LatexExpression.
 -}
-render : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-render mathJaxRenderOption source latexState latexExpression =
+render : String -> LatexState -> LatexExpression -> Html msg
+render source latexState latexExpression =
     case latexExpression of
         Comment str ->
             Html.p [] [ Html.text <| "" ]
 
         Macro name optArgs args ->
-            renderMacro mathJaxRenderOption source latexState name optArgs args
+            renderMacro source latexState name optArgs args
 
         SMacro name optArgs args le ->
-            renderSMacro mathJaxRenderOption source latexState name optArgs args le
+            renderSMacro source latexState name optArgs args le
 
         Item level latexExpr ->
             -- TODO: fix spacing issue
-            renderItem mathJaxRenderOption source latexState level latexExpr
+            renderItem source latexState level latexExpr
 
         InlineMath str ->
-            Html.span [] [ oneSpace, inlineMathText latexState mathJaxRenderOption (Internal.MathMacro.evalStr latexState.mathMacroDictionary str) ]
+            Html.span [] [ oneSpace, inlineMathText latexState (Internal.MathMacro.evalStr latexState.mathMacroDictionary str) ]
 
         DisplayMath str ->
             -- TODO: fix Internal.MathMacro.evalStr.  It is nuking \begin{pmacro}, etc.
-            displayMathText latexState mathJaxRenderOption (Internal.MathMacro.evalStr latexState.mathMacroDictionary str)
+            displayMathText latexState (Internal.MathMacro.evalStr latexState.mathMacroDictionary str)
 
         Environment name args body ->
-            renderEnvironment mathJaxRenderOption source latexState name args body
+            renderEnvironment source latexState name args body
 
         LatexList latexList ->
-            renderLatexList mathJaxRenderOption source latexState (spacify latexList)
+            renderLatexList source latexState (spacify latexList)
 
         LXString str ->
             case String.left 1 str of
@@ -263,37 +253,37 @@ reportProblem problem =
             "Other problem"
 
 
-inlineMathText : LatexState -> MathJaxRenderOption -> String -> Html msg
-inlineMathText latexState mathJaxRenderOption str_ =
+inlineMathText : LatexState -> String -> Html msg
+inlineMathText latexState str_ =
     let
         str =
             Internal.MathMacro.evalStr latexState.mathMacroDictionary str_
     in
-    mathText mathJaxRenderOption InlineMathMode (String.trim str)
+    mathText InlineMathMode (String.trim str)
 
 
-displayMathText : LatexState -> MathJaxRenderOption -> String -> Html msg
-displayMathText latexState mathJaxRenderOption str_ =
+displayMathText : LatexState -> String -> Html msg
+displayMathText latexState str_ =
     let
         str =
             Internal.MathMacro.evalStr latexState.mathMacroDictionary str_
     in
-    mathText mathJaxRenderOption DisplayMathMode (String.trim str)
+    mathText DisplayMathMode (String.trim str)
 
 
-displayMathText_ : LatexState -> MathJaxRenderOption -> String -> Html msg
-displayMathText_ latexState mathJaxRenderOption str =
-    mathText mathJaxRenderOption DisplayMathMode (String.trim str)
+displayMathText_ : LatexState -> String -> Html msg
+displayMathText_ latexState str =
+    mathText DisplayMathMode (String.trim str)
 
 
-displayMathTextWithLabel_ : LatexState -> MathJaxRenderOption -> String -> String -> Html msg
-displayMathTextWithLabel_ latexState mathJaxRenderOption str label =
+displayMathTextWithLabel_ : LatexState -> String -> String -> Html msg
+displayMathTextWithLabel_ latexState str label =
     Html.div
         []
         [ Html.div [ HA.style "float" "right", HA.style "margin-top" "3px" ]
             [ Html.text label ]
         , Html.div []
-            [ mathText mathJaxRenderOption DisplayMathMode (String.trim str) ]
+            [ mathText DisplayMathMode (String.trim str) ]
         ]
 
 
@@ -350,10 +340,10 @@ firstChar =
 {-| Like `render`, but renders a list of LatexExpressions
 to Html mgs
 -}
-renderLatexList : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
-renderLatexList mathJaxRenderOption source latexState latexList =
+renderLatexList : String -> LatexState -> List LatexExpression -> Html msg
+renderLatexList source latexState latexList =
     latexList
-        |> List.map (render mathJaxRenderOption source latexState)
+        |> List.map (render source latexState)
         |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] list)
 
 
@@ -379,7 +369,7 @@ xxx latexState list =
 
 renderLatexListNew : LatexState -> List ( String, List LatexExpression ) -> List (Html msg)
 renderLatexListNew latexState list =
-    List.map2 (\x y -> renderLatexList NoDelay x latexState y)
+    List.map2 (\x y -> renderLatexList x latexState y)
         (List.map Tuple.first list)
         (List.map Tuple.second list |> List.map spacify)
 
@@ -388,16 +378,16 @@ renderLatexListNew latexState list =
 {- RENDER MACRO -}
 
 
-renderMacro : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
-renderMacro mathJaxRenderOption source latexState name optArgs args =
+renderMacro : String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
+renderMacro source latexState name optArgs args =
     case Dict.get name renderMacroDict of
         Just f ->
-            f mathJaxRenderOption source latexState optArgs args
+            f source latexState optArgs args
 
         Nothing ->
             case Dict.get name latexState.macroDictionary of
                 Nothing ->
-                    reproduceMacro mathJaxRenderOption source name latexState optArgs args
+                    reproduceMacro source name latexState optArgs args
 
                 Just macroDefinition ->
                     let
@@ -407,19 +397,19 @@ renderMacro mathJaxRenderOption source latexState name optArgs args =
                         expr =
                             Macro.expandMacro macro macroDefinition
                     in
-                    render mathJaxRenderOption source latexState expr
+                    render source latexState expr
 
 
-renderArg : MathJaxRenderOption -> String -> Int -> LatexState -> List LatexExpression -> Html msg
-renderArg mathJaxRenderOption source k latexState args =
-    render mathJaxRenderOption source latexState (getElement k args)
+renderArg : String -> Int -> LatexState -> List LatexExpression -> Html msg
+renderArg source k latexState args =
+    render source latexState (getElement k args)
 
 
-reproduceMacro : MathJaxRenderOption -> String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html msg
-reproduceMacro mathJaxRenderOption source name latexState optArgs args =
+reproduceMacro : String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html msg
+reproduceMacro source name latexState optArgs args =
     let
         renderedArgs =
-            renderArgList mathJaxRenderOption source latexState args |> List.map enclose
+            renderArgList source latexState args |> List.map enclose
     in
     Html.span [ HA.style "color" "red" ]
         ([ Html.text <| "\\" ++ name ] ++ renderedArgs)
@@ -434,72 +424,72 @@ boost f =
 -- DICT
 
 
-renderMacroDict : Dict.Dict String (MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
+renderMacroDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
 renderMacroDict =
     Dict.fromList
-        [ ( "bigskip", \d s x y z -> renderBigSkip s x z )
-        , ( "medskip", \d s x y z -> renderMedSkip s x z )
-        , ( "smallskip", \d s x y z -> renderSmallSkip s x z )
-        , ( "cite", \d s x y z -> renderCite s x z )
-        , ( "dollar", \d s x y z -> renderDollar s x z )
-        , ( "texbegin", \d s x y z -> renderBegin s x z )
-        , ( "texend", \d s x y z -> renderEnd s x z )
-        , ( "percent", \d s x y z -> renderPercent s x z )
-        , ( "code", \d s x y z -> renderCode d s x z )
-        , ( "ellie", \d s x y z -> renderEllie s x z )
-        , ( "emph", \d s x y z -> renderItalic d s x z )
-        , ( "eqref", \d s x y z -> renderEqRef s x z )
-        , ( "href", \d s x y z -> renderHRef s x z )
-        , ( "iframe", \d s x y z -> renderIFrame s x z )
-        , ( "image", \d s x y z -> renderImage s x z )
-        , ( "imageref", \d s x y z -> renderImageRef s x z )
-        , ( "index", \d s x y z -> renderIndex s x z )
-        , ( "italic", \d s x y z -> renderItalic d s x z )
-        , ( "label", \d s x y z -> renderLabel s x z )
-        , ( "maintableofcontents", \d s x y z -> renderMainTableOfContents s x z )
-        , ( "maketitle", \d s x y z -> renderMakeTitle s x z )
-        , ( "mdash", \d s x y z -> renderMdash s x z )
-        , ( "ndash", \d s x y z -> renderNdash s x z )
-        , ( "underscore", \d s x y z -> renderUnderscore s x z )
-        , ( "bs", \d s x y z -> renderBackslash d s x z )
-        , ( "texarg", \d s x y z -> renderTexArg d s x z )
-        , ( "ref", \d s x y z -> renderRef s x z )
-        , ( "medskip", \d s x y z -> renderMedSkip s x z )
-        , ( "smallskip", \d s x y z -> renderSmallSkip s x z )
-        , ( "section", \d s x y z -> renderSection s x z )
-        , ( "section*", \d s x y z -> renderSectionStar s x z )
-        , ( "subsection", \d s x y z -> renderSubsection s x z )
-        , ( "subsection*", \d s x y z -> renderSubsectionStar s x z )
-        , ( "subsubsection", \d s x y z -> renderSubSubsection s x z )
-        , ( "subsubsection*", \d s x y z -> renderSubSubsectionStar s x z )
-        , ( "setcounter", \d s x y z -> renderSetCounter s x z )
-        , ( "subheading", \d s x y z -> renderSubheading s x z )
-        , ( "tableofcontents", \d s x y z -> renderTableOfContents s x z )
-        , ( "innertableofcontents", \d s x y z -> renderInnerTableOfContents s x z )
-        , ( "red", \d s x y z -> renderRed s x z )
-        , ( "blue", \d s x y z -> renderBlue s x z )
-        , ( "remote", \d s x y z -> renderRemote s x z )
-        , ( "local", \d s x y z -> renderLocal s x z )
-        , ( "attachNote", \d s x y z -> renderAttachNote s x z )
-        , ( "highlight", \d s x y z -> renderHighlighted s x z )
-        , ( "strike", \d s x y z -> renderStrikeThrough s x z )
-        , ( "term", \d s x y z -> renderTerm s x z )
-        , ( "xlink", \d s x y z -> renderXLink s x z )
-        , ( "ilink1", \d s x y z -> renderILink s x z )
-        , ( "ilink2", \d s x y z -> renderILink s x z )
-        , ( "ilink3", \d s x y z -> renderILink s x z )
-        , ( "include", \d s x y z -> renderInclude s x z )
-        , ( "xlinkPublic", \d s x y z -> renderXLinkPublic s x z )
-        , ( "documentTitle", \d s x y z -> renderDocumentTitle s x z )
-        , ( "title", \d s x y z -> renderTitle x z )
-        , ( "author", \d s x y z -> renderAuthor s x z )
-        , ( "date", \d s x y z -> renderDate s x z )
-        , ( "revision", \d s x y z -> renderRevision s x z )
-        , ( "email", \d s x y z -> renderEmail s x z )
-        , ( "setdocid", \d s x y z -> renderSetDocId s x z )
-        , ( "setclient", \d s x y z -> renderSetClient s x z )
-        , ( "strong", \d s x y z -> renderStrong d s x z )
-        , ( "uuid", \d s x y z -> renderUuid d s x z )
+        [ ( "bigskip", \s x y z -> renderBigSkip s x z )
+        , ( "medskip", \s x y z -> renderMedSkip s x z )
+        , ( "smallskip", \s x y z -> renderSmallSkip s x z )
+        , ( "cite", \s x y z -> renderCite s x z )
+        , ( "dollar", \s x y z -> renderDollar s x z )
+        , ( "texbegin", \s x y z -> renderBegin s x z )
+        , ( "texend", \s x y z -> renderEnd s x z )
+        , ( "percent", \s x y z -> renderPercent s x z )
+        , ( "code", \s x y z -> renderCode s x z )
+        , ( "ellie", \s x y z -> renderEllie s x z )
+        , ( "emph", \s x y z -> renderItalic s x z )
+        , ( "eqref", \s x y z -> renderEqRef s x z )
+        , ( "href", \s x y z -> renderHRef s x z )
+        , ( "iframe", \s x y z -> renderIFrame s x z )
+        , ( "image", \s x y z -> renderImage s x z )
+        , ( "imageref", \s x y z -> renderImageRef s x z )
+        , ( "index", \s x y z -> renderIndex s x z )
+        , ( "italic", \s x y z -> renderItalic s x z )
+        , ( "label", \s x y z -> renderLabel s x z )
+        , ( "maintableofcontents", \s x y z -> renderMainTableOfContents s x z )
+        , ( "maketitle", \s x y z -> renderMakeTitle s x z )
+        , ( "mdash", \s x y z -> renderMdash s x z )
+        , ( "ndash", \s x y z -> renderNdash s x z )
+        , ( "underscore", \s x y z -> renderUnderscore s x z )
+        , ( "bs", \s x y z -> renderBackslash s x z )
+        , ( "texarg", \s x y z -> renderTexArg s x z )
+        , ( "ref", \s x y z -> renderRef s x z )
+        , ( "medskip", \s x y z -> renderMedSkip s x z )
+        , ( "smallskip", \s x y z -> renderSmallSkip s x z )
+        , ( "section", \s x y z -> renderSection s x z )
+        , ( "section*", \s x y z -> renderSectionStar s x z )
+        , ( "subsection", \s x y z -> renderSubsection s x z )
+        , ( "subsection*", \s x y z -> renderSubsectionStar s x z )
+        , ( "subsubsection", \s x y z -> renderSubSubsection s x z )
+        , ( "subsubsection*", \s x y z -> renderSubSubsectionStar s x z )
+        , ( "setcounter", \s x y z -> renderSetCounter s x z )
+        , ( "subheading", \s x y z -> renderSubheading s x z )
+        , ( "tableofcontents", \s x y z -> renderTableOfContents s x z )
+        , ( "innertableofcontents", \s x y z -> renderInnerTableOfContents s x z )
+        , ( "red", \s x y z -> renderRed s x z )
+        , ( "blue", \s x y z -> renderBlue s x z )
+        , ( "remote", \s x y z -> renderRemote s x z )
+        , ( "local", \s x y z -> renderLocal s x z )
+        , ( "attachNote", \s x y z -> renderAttachNote s x z )
+        , ( "highlight", \s x y z -> renderHighlighted s x z )
+        , ( "strike", \s x y z -> renderStrikeThrough s x z )
+        , ( "term", \s x y z -> renderTerm s x z )
+        , ( "xlink", \s x y z -> renderXLink s x z )
+        , ( "ilink1", \s x y z -> renderILink s x z )
+        , ( "ilink2", \s x y z -> renderILink s x z )
+        , ( "ilink3", \s x y z -> renderILink s x z )
+        , ( "include", \s x y z -> renderInclude s x z )
+        , ( "xlinkPublic", \s x y z -> renderXLinkPublic s x z )
+        , ( "documentTitle", \s x y z -> renderDocumentTitle s x z )
+        , ( "title", \s x y z -> renderTitle x z )
+        , ( "author", \s x y z -> renderAuthor s x z )
+        , ( "date", \s x y z -> renderDate s x z )
+        , ( "revision", \s x y z -> renderRevision s x z )
+        , ( "email", \s x y z -> renderEmail s x z )
+        , ( "setdocid", \s x y z -> renderSetDocId s x z )
+        , ( "setclient", \s x y z -> renderSetClient s x z )
+        , ( "strong", \s x y z -> renderStrong s x z )
+        , ( "uuid", \s x y z -> renderUuid s x z )
         ]
 
 
@@ -518,8 +508,8 @@ renderEnd _ atexState args =
     Html.span [] [ Html.text "\\end" ]
 
 
-renderUuid : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
-renderUuid _ _ _ _ =
+renderUuid : String -> LatexState -> List LatexExpression -> Html msg
+renderUuid _ _ _ =
     Html.span [] []
 
 
@@ -528,9 +518,9 @@ renderPercent _ latexState args =
     Html.span [] [ Html.text "%" ]
 
 
-renderArgList : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List (Html msg)
-renderArgList mathJaxRenderOption source latexState args =
-    args |> List.map (render mathJaxRenderOption source latexState)
+renderArgList : String -> LatexState -> List LatexExpression -> List (Html msg)
+renderArgList source latexState args =
+    args |> List.map (render source latexState)
 
 
 enclose : Html msg -> Html msg
@@ -547,23 +537,23 @@ oneSpace =
 {- RENDER INDIVIDUAL MACROS -}
 
 
-renderBozo : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
-renderBozo mathJaxRenderOption source latexState args =
+renderBozo : String -> LatexState -> List LatexExpression -> Html msg
+renderBozo source latexState args =
     Html.span []
         [ Html.text <| "\\bozo"
-        , enclose <| renderArg mathJaxRenderOption source 0 latexState args
-        , enclose <| renderArg mathJaxRenderOption source 1 latexState args
+        , enclose <| renderArg source 0 latexState args
+        , enclose <| renderArg source 1 latexState args
         ]
 
 
-renderItalic : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
-renderItalic mathJaxRenderOption source latexState args =
-    Html.i [] [ Html.text " ", renderArg mathJaxRenderOption source 0 latexState args ]
+renderItalic : String -> LatexState -> List LatexExpression -> Html msg
+renderItalic source latexState args =
+    Html.i [] [ Html.text " ", renderArg source 0 latexState args ]
 
 
-renderStrong : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
-renderStrong mathJaxRenderOption source latexState args =
-    Html.strong [] [ oneSpace, renderArg mathJaxRenderOption source 0 latexState args ]
+renderStrong : String -> LatexState -> List LatexExpression -> Html msg
+renderStrong source latexState args =
+    Html.strong [] [ oneSpace, renderArg source 0 latexState args ]
 
 
 renderBigSkip : String -> LatexState -> List LatexExpression -> Html msg
@@ -604,11 +594,11 @@ renderCite _ latexState args =
         ]
 
 
-renderCode : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
-renderCode mathJaxRenderOption source latexState args =
+renderCode : String -> LatexState -> List LatexExpression -> Html msg
+renderCode source latexState args =
     let
         arg =
-            renderArg mathJaxRenderOption source 0 latexState args
+            renderArg source 0 latexState args
     in
     Html.code [] [ oneSpace, arg ]
 
@@ -935,14 +925,14 @@ renderUnderscore source latexState args =
     Html.span [] [ Html.text "_" ]
 
 
-renderBackslash : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
-renderBackslash mathJaxRenderOption source latexState args =
-    Html.span [] [ Html.text "\\", renderArg mathJaxRenderOption source 0 latexState args ]
+renderBackslash : String -> LatexState -> List LatexExpression -> Html msg
+renderBackslash source latexState args =
+    Html.span [] [ Html.text "\\", renderArg source 0 latexState args ]
 
 
-renderTexArg : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> Html msg
-renderTexArg mathJaxRenderOption source latexState args =
-    Html.span [] [ Html.text "{", renderArg mathJaxRenderOption source 0 latexState args, Html.text "}" ]
+renderTexArg : String -> LatexState -> List LatexExpression -> Html msg
+renderTexArg source latexState args =
+    Html.span [] [ Html.text "{", renderArg source 0 latexState args, Html.text "}" ]
 
 
 renderRef : String -> LatexState -> List LatexExpression -> Html msg
@@ -1355,41 +1345,41 @@ renderXLinkPublic _ latexState args =
 {- SMACROS -}
 
 
-renderSMacroDict : Dict.Dict String (MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg)
+renderSMacroDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg)
 renderSMacroDict =
     Dict.fromList
-        [ ( "bibitem", \mathJaxRenderOption source latexState optArgs args body -> renderBibItem mathJaxRenderOption source latexState optArgs args body )
+        [ ( "bibitem", \source latexState optArgs args body -> renderBibItem source latexState optArgs args body )
         ]
 
 
-renderSMacro : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-renderSMacro mathJaxRenderOption source latexState name optArgs args le =
+renderSMacro : String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderSMacro source latexState name optArgs args le =
     case Dict.get name renderSMacroDict of
         Just f ->
-            f mathJaxRenderOption source latexState optArgs args le
+            f source latexState optArgs args le
 
         Nothing ->
-            reproduceSMacro mathJaxRenderOption source name latexState optArgs args le
+            reproduceSMacro source name latexState optArgs args le
 
 
-reproduceSMacro : MathJaxRenderOption -> String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-reproduceSMacro mathJaxRenderOption source name latexState optArgs args le =
+reproduceSMacro : String -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+reproduceSMacro source name latexState optArgs args le =
     let
         renderedOptArgs =
-            renderArgList mathJaxRenderOption source latexState optArgs |> List.map enclose
+            renderArgList source latexState optArgs |> List.map enclose
 
         renderedArgs =
-            renderArgList mathJaxRenderOption source latexState args |> List.map enclose
+            renderArgList source latexState args |> List.map enclose
 
         renderedLe =
-            render mathJaxRenderOption source latexState le |> enclose
+            render source latexState le |> enclose
     in
     Html.span []
         ([ Html.text <| "\\" ++ name ] ++ renderedOptArgs ++ renderedArgs ++ [ renderedLe ])
 
 
-renderBibItem : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
-renderBibItem mathJaxRenderOption source latexState optArgs args body =
+renderBibItem : String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg
+renderBibItem source latexState optArgs args body =
     let
         label =
             if List.length optArgs == 1 then
@@ -1403,7 +1393,7 @@ renderBibItem mathJaxRenderOption source latexState optArgs args body =
     in
     Html.div []
         [ Html.strong [ HA.id id, HA.style "margin-right" "10px" ] [ Html.text <| "[" ++ label ++ "]" ]
-        , Html.span [] [ render mathJaxRenderOption source latexState body ]
+        , Html.span [] [ render source latexState body ]
         ]
 
 
@@ -1412,9 +1402,9 @@ renderBibItem mathJaxRenderOption source latexState optArgs args body =
 {- LISTS -}
 
 
-renderItem : MathJaxRenderOption -> String -> LatexState -> Int -> LatexExpression -> Html msg
-renderItem mathJaxRenderOption source latexState level latexExpression =
-    Html.li [ HA.style "margin-bottom" "8px" ] [ render mathJaxRenderOption source latexState latexExpression ]
+renderItem : String -> LatexState -> Int -> LatexExpression -> Html msg
+renderItem source latexState level latexExpression =
+    Html.li [ HA.style "margin-bottom" "8px" ] [ render source latexState latexExpression ]
 
 
 
@@ -1422,19 +1412,19 @@ renderItem mathJaxRenderOption source latexState level latexExpression =
 {- BEGIN ENVIRONMENTS -}
 
 
-renderEnvironment : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderEnvironment mathJaxRenderOption source latexState name args body =
-    environmentRenderer mathJaxRenderOption source name latexState args body
+renderEnvironment : String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderEnvironment source latexState name args body =
+    environmentRenderer source name latexState args body
 
 
-environmentRenderer : MathJaxRenderOption -> String -> String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
-environmentRenderer mathJaxRenderOption source name =
+environmentRenderer : String -> String -> (LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+environmentRenderer source name =
     case Dict.get name renderEnvironmentDict of
         Just f ->
-            f mathJaxRenderOption source
+            f source
 
         Nothing ->
-            renderDefaultEnvironment mathJaxRenderOption source name
+            renderDefaultEnvironment source name
 
 
 theoremLikeEnvironments : List String
@@ -1448,20 +1438,20 @@ theoremLikeEnvironments =
     ]
 
 
-renderDefaultEnvironment : MathJaxRenderOption -> String -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
-renderDefaultEnvironment mathJaxRenderOption source name latexState args body =
+renderDefaultEnvironment : String -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment source name latexState args body =
     if List.member name theoremLikeEnvironments then
-        renderTheoremLikeEnvironment mathJaxRenderOption source latexState name args body
+        renderTheoremLikeEnvironment source latexState name args body
 
     else
-        renderDefaultEnvironment2 mathJaxRenderOption source latexState (Utility.capitalize name) args body
+        renderDefaultEnvironment2 source latexState (Utility.capitalize name) args body
 
 
-renderTheoremLikeEnvironment : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderTheoremLikeEnvironment mathJaxRenderOption source latexState name args body =
+renderTheoremLikeEnvironment : String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderTheoremLikeEnvironment source latexState name args body =
     let
         r =
-            render mathJaxRenderOption source latexState body
+            render source latexState body
 
         eqno =
             getCounter "eqno" latexState
@@ -1485,11 +1475,11 @@ renderTheoremLikeEnvironment mathJaxRenderOption source latexState name args bod
         ]
 
 
-renderDefaultEnvironment2 : MathJaxRenderOption -> String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
-renderDefaultEnvironment2 mathJaxRenderOption source latexState name args body =
+renderDefaultEnvironment2 : String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
+renderDefaultEnvironment2 source latexState name args body =
     let
         r =
-            render mathJaxRenderOption source latexState body
+            render source latexState body
     in
     Html.div [ HA.class "environment" ]
         [ Html.strong [] [ Html.text name ]
@@ -1501,35 +1491,35 @@ renderDefaultEnvironment2 mathJaxRenderOption source latexState name args body =
 {- INDIVIDUAL ENVIRONMENT RENDERERS -}
 
 
-renderEnvironmentDict : Dict.Dict String (MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+renderEnvironmentDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 renderEnvironmentDict =
     Dict.fromList
-        [ ( "align", \d s x a y -> renderAlignEnvironment d s x y )
-        , ( "center", \d s x a y -> renderCenterEnvironment d s x y )
-        , ( "comment", \d s x a y -> renderCommentEnvironment s x y )
-        , ( "defitem", \d s x a y -> renderDefItemEnvironment d s x a y )
-        , ( "enumerate", \d s x a y -> renderEnumerate d s x y )
-        , ( "eqnarray", \d s x a y -> renderEqnArray d s x y )
-        , ( "equation", \d s x a y -> renderEquationEnvironment d s x y )
-        , ( "indent", \d s x a y -> renderIndentEnvironment d s x y )
-        , ( "itemize", \d s x a y -> renderItemize d s x y )
-        , ( "listing", \d s x a y -> renderListing s x y )
-        , ( "macros", \d s x a y -> renderMacros d s x y )
-        , ( "maskforweb", \d s x a y -> renderCommentEnvironment s x y )
-        , ( "quotation", \d s x a y -> renderQuotation d s x y )
-        , ( "tabular", \d s x a y -> renderTabular d s x y )
-        , ( "thebibliography", \d s x a y -> renderTheBibliography d s x y )
-        , ( "useforweb", \d s x a y -> renderUseForWeb d s x y )
-        , ( "verbatim", \d s x a y -> renderVerbatim s x y )
-        , ( "verse", \d s x a y -> renderVerse s x y )
-        , ( "mathmacro", \d s x a y -> renderMathMacros d s x y )
-        , ( "textmacro", \d s x a y -> renderTextMacros d s x y )
-        , ( "svg", \d s x a y -> renderSvg d s x y )
+        [ ( "align", \s x a y -> renderAlignEnvironment s x y )
+        , ( "center", \s x a y -> renderCenterEnvironment s x y )
+        , ( "comment", \s x a y -> renderCommentEnvironment s x y )
+        , ( "defitem", \s x a y -> renderDefItemEnvironment s x a y )
+        , ( "enumerate", \s x a y -> renderEnumerate s x y )
+        , ( "eqnarray", \s x a y -> renderEqnArray s x y )
+        , ( "equation", \s x a y -> renderEquationEnvironment s x y )
+        , ( "indent", \s x a y -> renderIndentEnvironment s x y )
+        , ( "itemize", \s x a y -> renderItemize s x y )
+        , ( "listing", \s x a y -> renderListing s x y )
+        , ( "macros", \s x a y -> renderMacros s x y )
+        , ( "maskforweb", \s x a y -> renderCommentEnvironment s x y )
+        , ( "quotation", \s x a y -> renderQuotation s x y )
+        , ( "tabular", \s x a y -> renderTabular s x y )
+        , ( "thebibliography", \s x a y -> renderTheBibliography s x y )
+        , ( "useforweb", \s x a y -> renderUseForWeb s x y )
+        , ( "verbatim", \s x a y -> renderVerbatim s x y )
+        , ( "verse", \s x a y -> renderVerse s x y )
+        , ( "mathmacro", \s x a y -> renderMathMacros s x y )
+        , ( "textmacro", \s x a y -> renderTextMacros s x y )
+        , ( "svg", \s x a y -> renderSvg s x y )
         ]
 
 
-renderSvg : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderSvg mathJaxRenderOption source latexState body =
+renderSvg : String -> LatexState -> LatexExpression -> Html msg
+renderSvg source latexState body =
     case SvgParser.parse (Internal.RenderToString.render latexState body) of
         Ok html_ ->
             html_
@@ -1538,8 +1528,8 @@ renderSvg mathJaxRenderOption source latexState body =
             Html.span [ HA.class "X6" ] [ Html.text "SVG parse error" ]
 
 
-renderAlignEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderAlignEnvironment mathJaxRenderOption source latexState body =
+renderAlignEnvironment : String -> LatexState -> LatexExpression -> Html msg
+renderAlignEnvironment source latexState body =
     let
         r =
             Internal.RenderToString.render latexState body
@@ -1585,14 +1575,14 @@ renderAlignEnvironment mathJaxRenderOption source latexState body =
                 Just tag_ ->
                     "(" ++ tag_ ++ ")"
     in
-    displayMathTextWithLabel_ latexState mathJaxRenderOption content tag
+    displayMathTextWithLabel_ latexState content tag
 
 
-renderCenterEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderCenterEnvironment mathJaxRenderOption source latexState body =
+renderCenterEnvironment : String -> LatexState -> LatexExpression -> Html msg
+renderCenterEnvironment source latexState body =
     let
         r =
-            render mathJaxRenderOption source latexState body
+            render source latexState body
     in
     Html.div
         [ HA.style "display" "flex"
@@ -1607,24 +1597,24 @@ renderCommentEnvironment source latexState body =
     Html.div [] []
 
 
-renderEnumerate : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderEnumerate mathJaxRenderOption source latexState body =
+renderEnumerate : String -> LatexState -> LatexExpression -> Html msg
+renderEnumerate source latexState body =
     -- TODO: fix spacing issue
-    Html.ol [ HA.style "margin-top" "0px" ] [ render mathJaxRenderOption source latexState body ]
+    Html.ol [ HA.style "margin-top" "0px" ] [ render source latexState body ]
 
 
-renderDefItemEnvironment : MathJaxRenderOption -> String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
-renderDefItemEnvironment mathJaxRenderOption source latexState optArgs body =
+renderDefItemEnvironment : String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefItemEnvironment source latexState optArgs body =
     Html.div []
         [ Html.strong [] [ Html.text <| Internal.RenderToString.renderArg 0 latexState optArgs ]
-        , Html.div [ HA.style "margin-left" "25px", HA.style "margin-top" "10px" ] [ render mathJaxRenderOption source latexState body ]
+        , Html.div [ HA.style "margin-left" "25px", HA.style "margin-top" "10px" ] [ render source latexState body ]
         ]
 
 
 {-| XXX
 -}
-renderEqnArray : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderEqnArray mathJaxRenderOption source latexState body =
+renderEqnArray : String -> LatexState -> LatexExpression -> Html msg
+renderEqnArray source latexState body =
     let
         body1 =
             Internal.RenderToString.render latexState body
@@ -1633,11 +1623,11 @@ renderEqnArray mathJaxRenderOption source latexState body =
             -- REVIEW: changed for KaTeX
             "\\begin{aligned}" ++ body1 ++ "\\end{aligned}"
     in
-    displayMathText latexState mathJaxRenderOption body2
+    displayMathText latexState body2
 
 
-renderEquationEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderEquationEnvironment mathJaxRenderOption source latexState body =
+renderEquationEnvironment : String -> LatexState -> LatexExpression -> Html msg
+renderEquationEnvironment source latexState body =
     let
         eqno =
             getCounter "eqno" latexState
@@ -1678,19 +1668,19 @@ renderEquationEnvironment mathJaxRenderOption source latexState body =
     in
     -- ("\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}")
     -- REVIEW; changed for KaTeX
-    -- displayMathText_ latexState mathJaxRenderOption (contents ++ tag)
-    displayMathTextWithLabel_ latexState mathJaxRenderOption contents tag
+    -- displayMathText_ latexState  (contents ++ tag)
+    displayMathTextWithLabel_ latexState contents tag
 
 
-renderIndentEnvironment : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderIndentEnvironment mathJaxRenderOption source latexState body =
-    Html.div [ HA.style "margin-left" "2em" ] [ render mathJaxRenderOption source latexState body ]
+renderIndentEnvironment : String -> LatexState -> LatexExpression -> Html msg
+renderIndentEnvironment source latexState body =
+    Html.div [ HA.style "margin-left" "2em" ] [ render source latexState body ]
 
 
-renderItemize : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderItemize mathJaxRenderOption source latexState body =
+renderItemize : String -> LatexState -> LatexExpression -> Html msg
+renderItemize source latexState body =
     -- TODO: fix space issue
-    Html.ul [ HA.style "margin-top" "0px" ] [ render mathJaxRenderOption source latexState body ]
+    Html.ul [ HA.style "margin-top" "0px" ] [ render source latexState body ]
 
 
 renderListing : String -> LatexState -> LatexExpression -> Html msg
@@ -1705,80 +1695,80 @@ renderListing source latexState body =
     Html.pre [ HA.class "verbatim" ] [ Html.text lines ]
 
 
-renderMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderMacros mathJaxRenderOption source latexState body =
-    displayMathText latexState mathJaxRenderOption (Internal.RenderToString.render latexState body)
+renderMacros : String -> LatexState -> LatexExpression -> Html msg
+renderMacros source latexState body =
+    displayMathText latexState (Internal.RenderToString.render latexState body)
 
 
-renderMathMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderMathMacros mathJaxRenderOption source latexState body =
+renderMathMacros : String -> LatexState -> LatexExpression -> Html msg
+renderMathMacros source latexState body =
     Html.div [] []
 
 
-renderTextMacros : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderTextMacros mathJaxRenderOption source latexState body =
+renderTextMacros : String -> LatexState -> LatexExpression -> Html msg
+renderTextMacros source latexState body =
     Html.div [] []
 
 
-renderQuotation : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderQuotation mathJaxRenderOption source latexState body =
-    Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render mathJaxRenderOption source latexState body ]
+renderQuotation : String -> LatexState -> LatexExpression -> Html msg
+renderQuotation source latexState body =
+    Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render source latexState body ]
 
 
-renderTabular : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderTabular mathJaxRenderOption source latexState body =
+renderTabular : String -> LatexState -> LatexExpression -> Html msg
+renderTabular source latexState body =
     Html.table
         [ HA.style "border-spacing" "20px 10px"
         , HA.style "margin-left" "-20px"
         ]
-        [ renderTableBody mathJaxRenderOption source latexState body ]
+        [ renderTableBody source latexState body ]
 
 
-renderCell : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderCell mathJaxRenderOption source latexState cell =
+renderCell : String -> LatexState -> LatexExpression -> Html msg
+renderCell source latexState cell =
     case cell of
         LXString s ->
             Html.td [] [ Html.text s ]
 
         InlineMath s ->
-            Html.td [] [ inlineMathText latexState mathJaxRenderOption s ]
+            Html.td [] [ inlineMathText latexState s ]
 
         Macro s x y ->
-            Html.td [] [ renderMacro mathJaxRenderOption source emptyLatexState s x y ]
+            Html.td [] [ renderMacro source emptyLatexState s x y ]
 
         -- ###
         _ ->
             Html.td [] []
 
 
-renderRow : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderRow mathJaxRenderOption source latexState row =
+renderRow : String -> LatexState -> LatexExpression -> Html msg
+renderRow source latexState row =
     case row of
         LatexList row_ ->
-            Html.tr [] (row_ |> List.map (renderCell mathJaxRenderOption source latexState))
+            Html.tr [] (row_ |> List.map (renderCell source latexState))
 
         _ ->
             Html.tr [] []
 
 
-renderTableBody : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderTableBody mathJaxRenderOption source latexState body =
+renderTableBody : String -> LatexState -> LatexExpression -> Html msg
+renderTableBody source latexState body =
     case body of
         LatexList body_ ->
-            Html.tbody [] (body_ |> List.map (renderRow mathJaxRenderOption source latexState))
+            Html.tbody [] (body_ |> List.map (renderRow source latexState))
 
         _ ->
             Html.tbody [] []
 
 
-renderTheBibliography : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderTheBibliography mathJaxRenderOption source latexState body =
-    Html.div [] [ render mathJaxRenderOption source latexState body ]
+renderTheBibliography : String -> LatexState -> LatexExpression -> Html msg
+renderTheBibliography source latexState body =
+    Html.div [] [ render source latexState body ]
 
 
-renderUseForWeb : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
-renderUseForWeb mathJaxRenderOption source latexState body =
-    displayMathText latexState mathJaxRenderOption (Internal.RenderToString.render latexState body)
+renderUseForWeb : String -> LatexState -> LatexExpression -> Html msg
+renderUseForWeb source latexState body =
+    displayMathText latexState (Internal.RenderToString.render latexState body)
 
 
 renderVerbatim : String -> LatexState -> LatexExpression -> Html msg

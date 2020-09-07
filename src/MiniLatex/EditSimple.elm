@@ -100,7 +100,7 @@ get : String -> Data -> List (Html LaTeXMsg)
 get selectedId data =
     let
         ( _, paragraphs_ ) =
-            Accumulator.renderNew Internal.Render.renderLatexListNew data.latexState data.astList
+            Accumulator.renderNew Internal.Render.renderLatexListToList data.latexState data.astList
 
         paragraphs =
             List.map (\x -> Html.div [] x) paragraphs_

@@ -1,14 +1,11 @@
-module Internal.Render exposing
-    ( makeTableOfContents, render, renderLatexList, renderString
-    , parseString, renderLatexListNew, renderString2
-    )
+module Internal.Render exposing (makeTableOfContents, render, renderLatexList, renderLatexListToList, renderString)
 
 {-| This module is for quickly preparing latex for export.
 
 
 # API
 
-@docs makeTableOfContents, render, renderLatexList, renderString
+@docs makeTableOfContents, render, renderLatexList, renderLatexListToList, renderString
 
 -}
 
@@ -41,9 +38,86 @@ import String
 import SvgParser
 
 
+{-| The main rendering function. Compute an Html msg value
+from the current LatexState and a LatexExpression.
+-}
+render : String -> LatexState -> LatexExpression -> Html msg
+render source latexState latexExpression =
+    case latexExpression of
+        Comment str ->
+            Html.p [] [ Html.text <| "" ]
 
--- |> \str -> "\n<p>" ++ str ++ "</p>\n"
-{- FUNCTIONS FOR TESTING THINGS -}
+        Macro name optArgs args ->
+            renderMacro source latexState name optArgs args
+
+        SMacro name optArgs args le ->
+            renderSMacro source latexState name optArgs args le
+
+        Item level latexExpr ->
+            -- TODO: fix spacing issue
+            renderItem source latexState level latexExpr
+
+        InlineMath str ->
+            Html.span [] [ oneSpace, inlineMathText latexState (Internal.MathMacro.evalStr latexState.mathMacroDictionary str) ]
+
+        DisplayMath str ->
+            -- TODO: fix Internal.MathMacro.evalStr.  It is nuking \begin{pmacro}, etc.
+            displayMathText latexState (Internal.MathMacro.evalStr latexState.mathMacroDictionary str)
+
+        Environment name args body ->
+            renderEnvironment source latexState name args body
+
+        LatexList latexList ->
+            renderLatexList source latexState (spacify latexList)
+
+        LXString str ->
+            case String.left 1 str of
+                " " ->
+                    Html.span [ HA.style "margin-left" "1px" ] [ Html.text str ]
+
+                _ ->
+                    Html.span [] [ Html.text str ]
+
+        NewCommand commandName numberOfArgs commandBody ->
+            Html.span [] []
+
+        LXError error ->
+            let
+                err =
+                    ErrorMessages.renderErrors source error
+
+                errorText =
+                    Html.p [ HA.style "margin" "0" ] [ Html.text (String.join "\n" err.errorText ++ " ...") ]
+
+                offset =
+                    (String.fromInt <| 5 * err.markerOffset) ++ "px"
+            in
+            Html.div [ HA.style "font" "Courier", HA.style "font-family" "Mono", HA.style "font-size" "15px" ]
+                [ Html.div [ HA.style "color" "blue", HA.style "margin" "0" ] [ errorText ]
+                , Html.div [ HA.style "color" "blue", HA.style "margin-left" offset ] [ Html.text "^" ]
+                , Html.p [ HA.style "color" "red", HA.style "margin" "0" ] [ Html.text err.explanation ]
+                ]
+
+
+{-| Like `render`, but renders a list of LatexExpressions
+to Html mgs
+-}
+renderLatexList : String -> LatexState -> List LatexExpression -> Html msg
+renderLatexList source latexState latexList =
+    latexList
+        |> List.map (render source latexState)
+        |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] list)
+
+
+renderLatexListToList : LatexState -> List ( String, List LatexExpression ) -> List (Html msg)
+renderLatexListToList latexState list =
+    List.map2 (\x y -> renderLatexList x latexState y)
+        (List.map Tuple.first list)
+        (List.map Tuple.second list |> List.map spacify)
+
+
+
+-- HELPERS, TESTING
 
 
 getElement : Int -> List LatexExpression -> LatexExpression
@@ -117,7 +191,7 @@ postProcess str =
 
 
 
-{- TYPES AND DEFAULT VALUES -}
+-- TYPES AND DEFAULT VALUES
 
 
 extractList : LatexExpression -> List LatexExpression
@@ -130,8 +204,10 @@ extractList latexExpression =
             []
 
 
-{-| THE MAIN RENDERING FUNCTION
--}
+
+-- MATH
+
+
 mathText : DisplayMode -> String -> Html msg
 mathText displayMode content =
     Html.node "math-text"
@@ -157,99 +233,8 @@ isDisplayMathMode displayMode =
             True
 
 
-{-| The main rendering function. Compute an Html msg value
-from the current LatexState and a LatexExpression.
--}
-render : String -> LatexState -> LatexExpression -> Html msg
-render source latexState latexExpression =
-    case latexExpression of
-        Comment str ->
-            Html.p [] [ Html.text <| "" ]
 
-        Macro name optArgs args ->
-            renderMacro source latexState name optArgs args
-
-        SMacro name optArgs args le ->
-            renderSMacro source latexState name optArgs args le
-
-        Item level latexExpr ->
-            -- TODO: fix spacing issue
-            renderItem source latexState level latexExpr
-
-        InlineMath str ->
-            Html.span [] [ oneSpace, inlineMathText latexState (Internal.MathMacro.evalStr latexState.mathMacroDictionary str) ]
-
-        DisplayMath str ->
-            -- TODO: fix Internal.MathMacro.evalStr.  It is nuking \begin{pmacro}, etc.
-            displayMathText latexState (Internal.MathMacro.evalStr latexState.mathMacroDictionary str)
-
-        Environment name args body ->
-            renderEnvironment source latexState name args body
-
-        LatexList latexList ->
-            renderLatexList source latexState (spacify latexList)
-
-        LXString str ->
-            case String.left 1 str of
-                " " ->
-                    Html.span [ HA.style "margin-left" "1px" ] [ Html.text str ]
-
-                _ ->
-                    Html.span [] [ Html.text str ]
-
-        NewCommand commandName numberOfArgs commandBody ->
-            Html.span [] []
-
-        LXError error ->
-            let
-                err =
-                    ErrorMessages.renderErrors source error
-
-                errorText =
-                    Html.p [ HA.style "margin" "0" ] [ Html.text (String.join "\n" err.errorText ++ " ...") ]
-
-                offset =
-                    (String.fromInt <| 5 * err.markerOffset) ++ "px"
-            in
-            Html.div [ HA.style "font" "Courier", HA.style "font-family" "Mono", HA.style "font-size" "15px" ]
-                [ Html.div [ HA.style "color" "blue", HA.style "margin" "0" ] [ errorText ]
-                , Html.div [ HA.style "color" "blue", HA.style "margin-left" offset ] [ Html.text "^" ]
-                , Html.p [ HA.style "color" "red", HA.style "margin" "0" ] [ Html.text err.explanation ]
-                ]
-
-
-errorReport : DeadEnd -> String
-errorReport deadEnd =
-    -- "Error at row " ++ String.fromInt deadEnd.row ++ ", column " ++ String.fromInt deadEnd.col ++ "\n: " ++ (reportProblem deadEnd.problem)
-    reportProblem deadEnd.problem
-
-
-reportProblem : Problem -> String
-reportProblem problem =
-    case problem of
-        Expecting str ->
-            "Expecting string: " ++ str
-
-        ExpectingInt ->
-            "Expecting int"
-
-        ExpectingSymbol str ->
-            "Expecting symbol: " ++ str
-
-        ExpectingKeyword str ->
-            "Expecting keyword: " ++ str
-
-        ExpectingEnd ->
-            "Expecting end"
-
-        UnexpectedChar ->
-            "Unexpected char"
-
-        BadRepeat ->
-            "Bad repeat"
-
-        _ ->
-            "Other problem"
+-- MATH
 
 
 inlineMathText : LatexState -> String -> Html msg
@@ -287,7 +272,45 @@ displayMathTextWithLabel_ latexState str label =
 
 
 
-{- PROCESS SPACES BETWEEN ELEMENTS  V2 -}
+-- ERRORS
+
+
+errorReport : DeadEnd -> String
+errorReport deadEnd =
+    -- "Error at row " ++ String.fromInt deadEnd.row ++ ", column " ++ String.fromInt deadEnd.col ++ "\n: " ++ (reportProblem deadEnd.problem)
+    reportProblem deadEnd.problem
+
+
+reportProblem : Problem -> String
+reportProblem problem =
+    case problem of
+        Expecting str ->
+            "Expecting string: " ++ str
+
+        ExpectingInt ->
+            "Expecting int"
+
+        ExpectingSymbol str ->
+            "Expecting symbol: " ++ str
+
+        ExpectingKeyword str ->
+            "Expecting keyword: " ++ str
+
+        ExpectingEnd ->
+            "Expecting end"
+
+        UnexpectedChar ->
+            "Unexpected char"
+
+        BadRepeat ->
+            "Bad repeat"
+
+        _ ->
+            "Other problem"
+
+
+
+-- PROCESS FOR SPACES, SPACIFY
 
 
 addSpace : ListMachine.State LatexExpression -> LatexExpression
@@ -336,14 +359,8 @@ firstChar =
     String.left 1
 
 
-{-| Like `render`, but renders a list of LatexExpressions
-to Html mgs
--}
-renderLatexList : String -> LatexState -> List LatexExpression -> Html msg
-renderLatexList source latexState latexList =
-    latexList
-        |> List.map (render source latexState)
-        |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] list)
+
+--
 
 
 spacify : List LatexExpression -> List LatexExpression
@@ -352,29 +369,8 @@ spacify latexList =
         |> ListMachine.run addSpace
 
 
-xxx : LatexState -> List ( String, List LatexExpression ) -> List ( String, List LatexExpression )
-xxx latexState list =
-    let
-        foo : List String.String
-        foo =
-            List.map Tuple.first list
 
-        bar : List (List LatexExpression)
-        bar =
-            List.map Tuple.second list
-    in
-    List.map2 (\x y -> ( x, y )) foo bar
-
-
-renderLatexListNew : LatexState -> List ( String, List LatexExpression ) -> List (Html msg)
-renderLatexListNew latexState list =
-    List.map2 (\x y -> renderLatexList x latexState y)
-        (List.map Tuple.first list)
-        (List.map Tuple.second list |> List.map spacify)
-
-
-
-{- RENDER MACRO -}
+-- RENDER MACRO
 
 
 renderMacro : String -> LatexState -> String -> List LatexExpression -> List LatexExpression -> Html msg
@@ -420,7 +416,7 @@ boost f =
 
 
 
--- DICT
+-- MACRO DICTIONARY
 
 
 renderMacroDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> List LatexExpression -> Html.Html msg)
@@ -533,7 +529,7 @@ oneSpace =
 
 
 
-{- RENDER INDIVIDUAL MACROS -}
+-- RENDER INDIVIUAL MACROS
 
 
 renderBozo : String -> LatexState -> List LatexExpression -> Html msg
@@ -667,6 +663,10 @@ renderHRef source latexState args =
     Html.a [ HA.href url, HA.target "_blank" ] [ Html.text label ]
 
 
+
+-- RENDER IMAGE
+
+
 renderImage : String -> LatexState -> List LatexExpression -> Html msg
 renderImage source latexState args =
     let
@@ -775,7 +775,7 @@ renderLabel source x z =
 
 
 
-{- RENDER TABLE CONTENTS -}
+-- TABLE OF CONTENTS
 
 
 renderTableOfContents : String -> LatexState -> List LatexExpression -> Html msg
@@ -906,7 +906,7 @@ sectionPrefix level =
 
 
 
-{- END TABLE OF CONTENTS -}
+-- RENDER MACRO
 
 
 renderMdash : String -> LatexState -> List LatexExpression -> Html msg
@@ -984,10 +984,6 @@ renderSection _ latexState args =
             idPhrase "section" sectionName
     in
     Html.h2 (headingStyle ref 24) [ Html.text <| label ++ sectionName ]
-
-
-
--- headingStyle : String -> Float -> Attribute
 
 
 headingStyle ref h =
@@ -1340,8 +1336,7 @@ renderXLinkPublic _ latexState args =
 
 
 
-{- END OF INDIVIDUAL MACROS -}
-{- SMACROS -}
+-- SMACRO
 
 
 renderSMacroDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> Html msg)
@@ -1396,11 +1391,6 @@ renderBibItem source latexState optArgs args body =
         ]
 
 
-
-{- END RENDER INDIVIDUAL SMACROS -}
-{- LISTS -}
-
-
 renderItem : String -> LatexState -> Int -> LatexExpression -> Html msg
 renderItem source latexState level latexExpression =
     Html.li [ HA.style "margin-bottom" "8px" ] [ render source latexState latexExpression ]
@@ -1408,7 +1398,7 @@ renderItem source latexState level latexExpression =
 
 
 {- END LISTS -}
-{- BEGIN ENVIRONMENTS -}
+-- RENDER ENVIRONMENTS
 
 
 renderEnvironment : String -> LatexState -> String -> List LatexExpression -> LatexExpression -> Html msg
@@ -1487,7 +1477,7 @@ renderDefaultEnvironment2 source latexState name args body =
 
 
 
-{- INDIVIDUAL ENVIRONMENT RENDERERS -}
+-- RENDER INDIVIDUAL ENVIRNOMENTS
 
 
 renderEnvironmentDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)

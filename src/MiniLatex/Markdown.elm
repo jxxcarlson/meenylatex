@@ -68,17 +68,14 @@ render source latexState latexExpression =
             ""
 
         Macro name optArgs args ->
-            -- renderMacro source latexState name optArgs args
-            "MACRO"
+            renderMacro source latexState name optArgs args
 
         SMacro name optArgs args le ->
-            -- renderSMacro source latexState name optArgs args le
-            "SMACRO"
+            renderSMacro source latexState name optArgs args le
 
         Item level latexExpr ->
             -- TODO: fix spacing issue
-            -- renderItem source latexState level latexExpr
-            "ITEM"
+            "- " ++ renderItem source latexState level latexExpr
 
         InlineMath str ->
             "$" ++ Internal.MathMacro.evalStr latexState.mathMacroDictionary str ++ "$"
@@ -87,12 +84,10 @@ render source latexState latexExpression =
             "$$\n" ++ Internal.MathMacro.evalStr latexState.mathMacroDictionary str ++ "\n$$"
 
         Environment name args body ->
-            --  renderEnvironment source latexState name args body
-            "ENVIRONMENT"
+            renderEnvironment source latexState name args body
 
         LatexList latexList ->
-            -- renderLatexList source latexState (spacify latexList)
-            "LATEX LIST"
+            renderLatexList source latexState (spacify latexList)
 
         LXString str ->
             str
@@ -544,17 +539,17 @@ renderStrong source latexState args =
 
 renderBigSkip : String -> LatexState -> List LatexExpression -> String
 renderBigSkip _ latexState args =
-    "BIGSKIP"
+    ""
 
 
 renderMedSkip : String -> LatexState -> List LatexExpression -> String
 renderMedSkip _ latexState args =
-    "MEDSKIP"
+    ""
 
 
 renderSmallSkip : String -> LatexState -> List LatexExpression -> String
 renderSmallSkip _ latexState args =
-    "SMALL SKIP"
+    ""
 
 
 renderCite : String -> LatexState -> List LatexExpression -> String
@@ -777,7 +772,7 @@ makeTocItem prefix tocItem =
         href =
             "#" ++ id
     in
-    "- [" ++ ti.name ++ "](" ++ href ++ ")"
+    "1. " ++ ti.name
 
 
 makeId : String -> String -> String
@@ -890,7 +885,7 @@ renderSection _ latexState args =
         ref =
             idPhrase "section" sectionName
     in
-    ref ++ sectionName
+    "# " ++ sectionName
 
 
 renderSectionStar : String -> LatexState -> List LatexExpression -> String
@@ -939,7 +934,7 @@ renderSubsectionStar _ latexState args =
         ref =
             idPhrase "subsection" sectionName
     in
-    "### " ++ sectionName
+    "## " ++ sectionName
 
 
 renderSubSubsection : String -> LatexState -> List LatexExpression -> String
@@ -1059,7 +1054,7 @@ renderMakeTitle source latexState list =
                 |> List.filter (\x -> x /= "")
                 |> String.join "\n"
     in
-    title ++ "\n\n" ++ bodyParts
+    "# " ++ title ++ "\n\n" ++ bodyParts
 
 
 renderTitle : LatexState -> List LatexExpression -> String
@@ -1257,22 +1252,18 @@ reproduceSMacro source name latexState optArgs args le =
 
 renderBibItem : String -> LatexState -> List LatexExpression -> List LatexExpression -> LatexExpression -> String
 renderBibItem source latexState optArgs args body =
-    --let
-    --    label =
-    --        if List.length optArgs == 1 then
-    --            Internal.RenderToString.renderArg 0 latexState optArgs
-    --
-    --        else
-    --            Internal.RenderToString.renderArg 0 latexState args
-    --
-    --    id =
-    --        "bibitem:" ++ label
-    --in
-    --Html.div []
-    --    [ Html.strong [ HA.id id, HA.style "margin-right" "10px" ] [ Html.text <| "[" ++ label ++ "]" ]
-    --    , Html.span [] [ render source latexState body ]
-    --    ]
-    "BIB ITEM"
+    let
+        label =
+            if List.length optArgs == 1 then
+                Internal.RenderToString.renderArg 0 latexState optArgs
+
+            else
+                Internal.RenderToString.renderArg 0 latexState args
+
+        id =
+            "bibitem:" ++ label
+    in
+    "**[" ++ label ++ "]**" ++ render source latexState body
 
 
 renderItem : String -> LatexState -> Int -> LatexExpression -> String
@@ -1342,7 +1333,7 @@ renderTheoremLikeEnvironment source latexState name args body =
             else
                 " " ++ String.fromInt tno
     in
-    "**" ++ Utility.capitalize name ++ tnoString ++ ":**\n" ++ r
+    "**" ++ Utility.capitalize name ++ ".**\n" ++ r
 
 
 renderDefaultEnvironment2 : String -> LatexState -> String -> List LatexExpression -> LatexExpression -> String
@@ -1383,7 +1374,7 @@ renderEnvironmentDict =
 
 renderSvg : String -> LatexState -> LatexExpression -> String
 renderSvg source latexState body =
-    "SVG SOURCE"
+    "@@svg\n" ++ render "" latexState body
 
 
 renderAlignEnvironment : String -> LatexState -> LatexExpression -> String
@@ -1479,23 +1470,6 @@ renderEqnArray source latexState body =
 renderEquationEnvironment : String -> LatexState -> LatexExpression -> String
 renderEquationEnvironment source latexState body =
     let
-        eqno =
-            getCounter "eqno" latexState
-
-        s1 =
-            getCounter "s1" latexState
-
-        addendum =
-            if eqno > 0 then
-                if s1 > 0 then
-                    "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
-
-                else
-                    "\\tag{" ++ String.fromInt eqno ++ "}"
-
-            else
-                ""
-
         contents =
             case body of
                 LXString str ->
@@ -1506,20 +1480,8 @@ renderEquationEnvironment source latexState body =
 
                 _ ->
                     "Parser error in render equation environment"
-
-        tag =
-            case Internal.ParserHelpers.getTag addendum of
-                Nothing ->
-                    ""
-
-                Just tag_ ->
-                    --   "\\qquad (" ++ tag_ ++ ")"
-                    "(" ++ tag_ ++ ")"
     in
-    -- ("\\begin{equation}" ++ contents ++ addendum ++ "\\end{equation}")
-    -- REVIEW; changed for KaTeX
-    -- displayMathText_ latexState  (contents ++ tag)
-    displayMathTextWithLabel_ latexState contents tag
+    "\n$$\n" ++ contents ++ "\n$$\n"
 
 
 renderIndentEnvironment : String -> LatexState -> LatexExpression -> String
@@ -1552,12 +1514,12 @@ renderMacros source latexState body =
 
 renderMathMacros : String -> LatexState -> LatexExpression -> String
 renderMathMacros source latexState body =
-    "MATH MACROS"
+    ""
 
 
 renderTextMacros : String -> LatexState -> LatexExpression -> String
 renderTextMacros source latexState body =
-    "TEXT MACROS"
+    ""
 
 
 renderQuotation : String -> LatexState -> LatexExpression -> String
@@ -1613,7 +1575,7 @@ renderTableBody source latexState body =
 
 renderTheBibliography : String -> LatexState -> LatexExpression -> String
 renderTheBibliography source latexState body =
-    "BIBLIOGRAPHY\n" ++ render source latexState body
+    render source latexState body
 
 
 renderUseForWeb : String -> LatexState -> LatexExpression -> String
@@ -1623,7 +1585,7 @@ renderUseForWeb source latexState body =
 
 renderVerbatim : String -> LatexState -> LatexExpression -> String
 renderVerbatim source latexState body =
-    "```\n" ++ Internal.RenderToString.render latexState body ++ "\n```"
+    "````\n" ++ String.trim (Internal.RenderToString.render latexState body) ++ "\n````"
 
 
 renderVerse : String -> LatexState -> LatexExpression -> String

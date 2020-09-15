@@ -1161,15 +1161,18 @@ renderMakeTitle source latexState list =
                 ""
 
         titlePart =
-            Html.div [ HA.style "font-size" "28px" ] [ Html.text <| title ]
+            Html.div [ HA.style "font-size" "28px", HA.style "padding-bottom" "12px" ] [ Html.text <| title ]
+
+        authorPart =
+            Html.div [ HA.style "font-size" "18px", HA.style "padding-bottom" "4px" ] [ Html.text <| author ]
 
         bodyParts =
-            [ author, email, date, revisionText ]
+            [ date, revisionText, email ]
                 |> List.filter (\x -> x /= "")
-                |> List.map (\x -> Html.div [] [ Html.text x ])
+                |> List.map (\x -> Html.div [ HA.style "font-size" "14px" ] [ Html.text x ])
     in
     Html.div []
-        ([ titlePart ] ++ bodyParts)
+        (titlePart :: authorPart :: bodyParts)
 
 
 renderTitle : LatexState -> List LatexExpression -> Html msg

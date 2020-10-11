@@ -1,4 +1,4 @@
-module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, LaTeXMsg)
+module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, render, LaTeXMsg)
 
 {-| This module is like MiniLaTeX.Edit, except that the Data type, which is an
 alias of the record type `Internal.DifferSimple.EditRecord`, contains no functions.
@@ -93,6 +93,10 @@ of a paragraph is incremented when it is edited.
 --render : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
 --render mathJaxRenderOption source latexState latexExpression
 
+
+render : String -> List (Html LaTeXMsg)
+render source =
+  source |> init 1 |> get "-"
 
 get : String -> Data -> List (Html LaTeXMsg)
 get selectedId data =

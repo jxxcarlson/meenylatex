@@ -474,7 +474,7 @@ renderMacroDict =
         , ( "blue", \d s x y z -> renderBlue s x z )
         , ( "remote", \d s x y z -> renderRemote s x z )
         , ( "local", \d s x y z -> renderLocal s x z )
-        , ( "meta", \d s x y z -> renderMeta s x z )
+        , ( "note", \d s x y z -> renderNote s x z )
         , ( "highlight", \d s x y z -> renderHighlighted s x z )
         , ( "strike", \d s x y z -> renderStrikeThrough s x z )
         , ( "term", \d s x y z -> renderTerm s x z )
@@ -1249,8 +1249,8 @@ renderLocal _ latexState args =
     Html.div [ HA.style "color" "blue", HA.style "white-space" "pre" ] [ Html.text <| arg ]
 
 
-renderMeta : String -> LatexState -> List LatexExpression -> Html msg
-renderMeta _ latexState args =
+renderNote : String -> LatexState -> List LatexExpression -> Html msg
+renderNote _ latexState args =
     -- TODO: Finish this
     let
         author =

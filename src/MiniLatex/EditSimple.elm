@@ -118,7 +118,7 @@ get selectedId data =
         ids =
             data.idList
                 |> List.map mark
-
+ 
         keyedNode : String -> Html LaTeXMsg -> Html LaTeXMsg
         keyedNode id para =
             Keyed.node "p"

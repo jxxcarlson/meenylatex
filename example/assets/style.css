@@ -2,16 +2,11 @@
 
 .mm-paragraph {
 	white-space: normal;
+	margin: 0;
 }
 
 body { font-size: 13px;
        line-height: 19px;}
-
-
-
-Fiddle
-
-Try a system like this instead:
 
 .container {
     width: 100%;

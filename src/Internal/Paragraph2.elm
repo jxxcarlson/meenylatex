@@ -109,7 +109,7 @@ type Problem
     | ExpectingBeginWord
     | ExpectingMarker String
     | ChompUntileNewLine
-    | ChompUntileTwoNewLines
+    | ChompUntilTwoNewLines
     | ChompUntilEndWord String
     | ExpectingEndWord String
     | ExpectingInitialBlank
@@ -204,7 +204,7 @@ comment =
 paragraph : PParser LogicalParagraph
 paragraph =
     succeed Paragraph
-        |= getChompedString (chompUntil (Token "\n\n" ChompUntileTwoNewLines))
+        |= getChompedString (chompUntil (Token "\n\n" ChompUntilTwoNewLines))
         |. spaces
 
 

@@ -40,8 +40,9 @@ corresponding to the text to be rendered as well as corresponding
 list of rendered paragraphs. We need to reveiw this strucure.
 -}
 type alias EditRecord =
-    { paragraphs : List String
-    , astList : List (List LatexExpression)
+    { source : String
+    , paragraphs : List String
+    , astList : List ( String, List LatexExpression )
     , idList : List String
     , latexState : LatexState
     }
@@ -51,7 +52,7 @@ type alias EditRecord =
 -}
 emptyEditRecord : EditRecord
 emptyEditRecord =
-    EditRecord [] [] [] emptyLatexState
+    EditRecord "" [] [] [] emptyLatexState
 
 
 {-| createRecord: Create an edit record by (1)
@@ -72,9 +73,9 @@ init parser renderer text =
             List.range 1 n |> List.map (prefixer 0) |> List.map (\i -> "X." ++ i)
 
         astList =
-            List.map parser paragraphs
+            List.map (\p -> ( p, parser p )) paragraphs
     in
-    EditRecord paragraphs astList idList emptyLatexState
+    EditRecord text paragraphs astList idList emptyLatexState
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -109,7 +110,7 @@ update seed parser editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-    EditRecord newParagraphs astList p.idList editRecord.latexState
+    EditRecord text newParagraphs astList p.idList editRecord.latexState
 
 
 {-| Update the renderedList by applying the transformer only to the
@@ -239,7 +240,7 @@ prefixer b k =
     "p." ++ String.fromInt b ++ "." ++ String.fromInt k
 
 
-differentialParser : (String -> List LatexExpression) -> DiffRecord -> EditRecord -> List (List LatexExpression)
+differentialParser : (String -> List LatexExpression) -> DiffRecord -> EditRecord -> List ( String, List LatexExpression )
 differentialParser parser diffRecord editRecord =
     let
         ii =
@@ -255,7 +256,7 @@ differentialParser parser diffRecord editRecord =
             takeLast it editRecord.astList
 
         middleSegmentParsed =
-            List.map parser diffRecord.middleSegmentInTarget
+            List.map (\p -> ( p, parser p )) diffRecord.middleSegmentInTarget
     in
     initialSegmentParsed ++ middleSegmentParsed ++ terminalSegmentParsed
 
@@ -264,7 +265,7 @@ differentialCompiler :
     (String -> List LatexExpression)
     -> DiffRecord
     -> EditRecord
-    -> List (List LatexExpression)
+    -> List ( String, List LatexExpression )
 differentialCompiler parser diffRecord editRecord =
     let
         ii =
@@ -279,8 +280,9 @@ differentialCompiler parser diffRecord editRecord =
         terminalSegmentParsed =
             takeLast it editRecord.astList
 
+        middleSegmentParsed : List ( String, List LatexExpression )
         middleSegmentParsed =
-            List.map parser diffRecord.middleSegmentInTarget
+            List.map (\p -> ( p, parser p )) diffRecord.middleSegmentInTarget
     in
     initialSegmentParsed ++ middleSegmentParsed ++ terminalSegmentParsed
 

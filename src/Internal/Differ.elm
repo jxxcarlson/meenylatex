@@ -45,7 +45,7 @@ list of rendered paragraphs. We need to reveiw this strucure.
 -}
 type alias EditRecord a =
     { paragraphs : List String
-    , astList : List (List LatexExpression)
+    , astList : List ( String, List LatexExpression )
     , idList : List String
     , renderedParagraphs : List a
     , latexState : LatexState
@@ -86,7 +86,7 @@ init parser renderer text =
             List.range 1 n |> List.map (prefixer 0) |> List.map (\i -> "X." ++ i)
 
         astList =
-            List.map parser paragraphs
+            List.map (\p -> ( p, parser p )) paragraphs
 
         sourceMap =
             -- SourceMap.generate (List.concat astList) idList
@@ -309,7 +309,7 @@ differentialRender renderer diffRecord editRecord =
     initialSegmentRendered ++ middleSegmentRendered ++ terminalSegmentRendered
 
 
-differentialParser : (String -> List LatexExpression) -> DiffRecord -> EditRecord a -> List (List LatexExpression)
+differentialParser : (String -> List LatexExpression) -> DiffRecord -> EditRecord a -> List ( String, List LatexExpression )
 differentialParser parser diffRecord editRecord =
     let
         ii =
@@ -325,7 +325,7 @@ differentialParser parser diffRecord editRecord =
             takeLast it editRecord.astList
 
         middleSegmentParsed =
-            List.map parser diffRecord.middleSegmentInTarget
+            List.map (\p -> ( p, parser p )) diffRecord.middleSegmentInTarget
     in
     initialSegmentParsed ++ middleSegmentParsed ++ terminalSegmentParsed
 
@@ -335,7 +335,7 @@ differentialCompiler :
     -> (String -> a)
     -> DiffRecord
     -> EditRecord a
-    -> ( List (List LatexExpression), List a )
+    -> ( List ( String, List LatexExpression ), List a )
 differentialCompiler parser renderer diffRecord editRecord =
     let
         ii =
@@ -351,7 +351,7 @@ differentialCompiler parser renderer diffRecord editRecord =
             takeLast it editRecord.astList
 
         middleSegmentParsed =
-            List.map parser diffRecord.middleSegmentInTarget
+            List.map (\p -> ( p, parser p )) diffRecord.middleSegmentInTarget
 
         initialSegmentRendered =
             List.take ii editRecord.renderedParagraphs

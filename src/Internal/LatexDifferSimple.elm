@@ -41,7 +41,7 @@ initWithSeed seed parser latexState text =
         idList =
             makeIdListWithSeed seed paragraphs
     in
-    EditRecord paragraphs latexExpressionList idList latexState2
+    EditRecord text paragraphs latexExpressionList idList latexState2
 
 
 makeIdList : List String -> List String

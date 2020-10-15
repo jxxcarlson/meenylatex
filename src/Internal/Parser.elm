@@ -52,6 +52,7 @@ type alias LXParser a =
 
 type Context
     = CArg String
+    | EnvName
     | List
 
 
@@ -491,11 +492,11 @@ pair
 -}
 envName : LXParser String
 envName =
-    --  inContext "envName" <|
-    succeed identity
-        |. spaces
-        |. symbol (Token "\\begin{" ExpectingEnvironmentNameBegin)
-        |= parseToSymbol ExpectingEndOfEnvironmentName "}"
+    inContext EnvName <|
+        succeed identity
+            |. spaces
+            |. symbol (Token "\\begin{" ExpectingEnvironmentNameBegin)
+            |= parseToSymbol ExpectingEndOfEnvironmentName "}"
 
 
 {-| Use to parse begin ... end blocks

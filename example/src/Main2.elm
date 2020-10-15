@@ -1,6 +1,8 @@
-module Main exposing (..)
+module Main2 exposing (..)
 
 import Browser
+import Element exposing (..)
+import Element.Background as Background
 import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src, style)
 import MiniLatex.EditSimple
@@ -40,12 +42,14 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ style "margin" "50px" ]
-        [ h1 [] [ text "Example" ]
-        , div [ style "font-size" "18px" ]
-            [ MiniLatex.EditSimple.render Strings.miniLaTeX |> Html.map LatexMsg
-            ]
-        ]
+    Element.layoutWith { options = [] }
+        [ width fill, height fill, padding 40 ]
+        (mainColumn model)
+
+
+mainColumn model =
+    column []
+        [ MiniLatex.EditSimple.render Strings.sourceText |> Html.map LatexMsg |> Element.html ]
 
 
 

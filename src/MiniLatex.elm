@@ -32,7 +32,6 @@ import Internal.LatexState exposing (LatexState, emptyLatexState)
 import Internal.Parser exposing (LatexExpression)
 import Internal.Render as Render
 import MiniLatex.Edit exposing (LaTeXMsg)
-import MiniLatex.Render exposing (MathJaxRenderOption)
 
 
 {-| Type of the syntax tree
@@ -88,11 +87,11 @@ Use `Delay` for loading document containing many
 math elements.
 
 -}
-render : String -> MathJaxRenderOption -> String -> Html LaTeXMsg
-render selectedId mathJaxRenderOption source =
+render : String -> String -> Html LaTeXMsg
+render selectedId source =
     Internal.LatexDiffer.init
         Internal.Parser.parse
-        (Render.renderLatexList mathJaxRenderOption source)
+        (Render.renderLatexList source)
         emptyLatexState
         source
         |> MiniLatex.Edit.get selectedId
@@ -106,16 +105,15 @@ render selectedId mathJaxRenderOption source =
 -}
 renderWithSeed :
     String
-    -> MathJaxRenderOption
     -> Int
     -> String
     -> String
     -> Html LaTeXMsg
-renderWithSeed selectedId mathJaxRenderOption seed macroDefinitions source =
+renderWithSeed selectedId seed macroDefinitions source =
     Internal.LatexDiffer.initWithSeed
         seed
         Internal.Parser.parse
-        (Render.renderLatexList mathJaxRenderOption source)
+        (Render.renderLatexList source)
         emptyLatexState
         (prependMacros macroDefinitions source)
         |> MiniLatex.Edit.get selectedId

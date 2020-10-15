@@ -1,4 +1,7 @@
-module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, render, LaTeXMsg)
+module MiniLatex.EditSimple exposing
+    ( Data, emptyData, init, update, get, LaTeXMsg
+    , render
+    )
 
 {-| This module is like MiniLaTeX.Edit, except that the Data type, which is an
 alias of the record type `Internal.DifferSimple.EditRecord`, contains no functions.
@@ -20,7 +23,6 @@ import Internal.LatexDifferSimple
 import Internal.Paragraph
 import Internal.Parser
 import Internal.Render
-import MiniLatex.Render exposing (MathJaxRenderOption(..))
 
 
 {-| Data structures and functions for managing interactive edits. The parse tree, rendered text, and other information needed
@@ -50,6 +52,13 @@ type alias Data =
 -}
 type LaTeXMsg
     = IDClicked String
+
+
+render : String -> Html LaTeXMsg
+render source =
+    init 0 source
+        |> get "-"
+        |> (\list -> Html.div [] list)
 
 
 {-| Create Data from a string of MiniLaTeX text and a version number.
@@ -87,23 +96,14 @@ as "paragraph 10, version 1". The version number
 of a paragraph is incremented when it is edited.
 
 -}
-
-
-
---render : MathJaxRenderOption -> String -> LatexState -> LatexExpression -> Html msg
---render mathJaxRenderOption source latexState latexExpression
-
-
-render : String -> List (Html LaTeXMsg)
-render source =
-  source |> init 1 |> get "-"
-
 get : String -> Data -> List (Html LaTeXMsg)
 get selectedId data =
     let
-        -- LatexState → List LatexExpression → List LatexExpression → Html msg
-        ( _, paragraphs ) =
-            Accumulator.render (Internal.Render.renderLatexList NoDelay "") data.latexState data.astList
+        ( _, paragraphs_ ) =
+            Accumulator.renderNew Internal.Render.renderLatexListToList data.latexState data.astList
+
+        paragraphs =
+            List.map (\x -> Html.div [] x) paragraphs_
 
         mark id_ =
             if selectedId == id_ then

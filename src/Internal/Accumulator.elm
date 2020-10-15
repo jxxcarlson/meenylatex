@@ -1,4 +1,4 @@
-module Internal.Accumulator exposing (parse, render)
+module Internal.Accumulator exposing (parse, render, renderNew)
 
 import Dict
 import Internal.LatexState
@@ -40,7 +40,7 @@ parse : LatexState -> List String -> ( List (List LatexExpression), LatexState )
 parse :
     LatexState
     -> List String
-    -> ( LatexState, List (List LatexExpression) )
+    -> ( LatexState, List ( String, List LatexExpression ) )
 parse latexState paragraphs =
     paragraphs
         |> List.foldl parseReducer ( latexState, [] )
@@ -48,15 +48,15 @@ parse latexState paragraphs =
 
 parseReducer :
     String
-    -> ( LatexState, List (List LatexExpression) )
-    -> ( LatexState, List (List LatexExpression) )
+    -> ( LatexState, List ( String, List LatexExpression ) )
+    -> ( LatexState, List ( String, List LatexExpression ) )
 parseReducer inputString ( latexState, inputList ) =
     let
         parsedInput =
-            Parser.parse inputString
+            ( inputString, Parser.parse inputString )
 
         newLatexState =
-            latexStateReducer parsedInput latexState
+            latexStateReducer (Tuple.second parsedInput) latexState
     in
     ( newLatexState, inputList ++ [ parsedInput ] )
 
@@ -73,25 +73,62 @@ NOTE: render renderer is an Accumulator
 render :
     (LatexState -> List LatexExpression -> a)
     -> LatexState
-    -> List (List LatexExpression)
+    -> List ( String, List LatexExpression )
     -> ( LatexState, List a )
 render renderer latexState paragraphs =
     paragraphs
         |> List.foldl (renderReducer renderer) ( latexState, [] )
 
 
-renderReducer :
-    (LatexState -> List LatexExpression -> a)
-    -> List LatexExpression
+renderNew :
+    (LatexState -> List ( String, List LatexExpression ) -> a)
+    -> LatexState
+    -> List ( String, List LatexExpression )
+    -> ( LatexState, List a )
+renderNew renderer latexState paragraphs =
+    paragraphs
+        |> List.foldl (renderReducerNew renderer) ( latexState, [] )
+
+
+renderReducerNew :
+    (LatexState -> List ( String, List LatexExpression ) -> a)
+    -> ( String, List LatexExpression )
     -> ( LatexState, List a )
     -> ( LatexState, List a )
-renderReducer renderer listLatexExpression ( state, inputList ) =
+renderReducerNew renderer listStringAndLatexExpression ( state, inputList ) =
     let
         newState =
-            latexStateReducer listLatexExpression state
+            latexStateReducer (Tuple.second listStringAndLatexExpression) state
 
         renderedInput =
-            renderer newState listLatexExpression
+            renderer newState [ listStringAndLatexExpression ]
+    in
+    ( newState, inputList ++ [ renderedInput ] )
+
+
+
+--render2 :
+--    (LatexState -> List LatexExpression -> a)
+--    -> LatexState
+--    -> List ( String, List LatexExpression )
+--    -> ( LatexState, List a )
+--render2 renderer latexState paragraphs =
+--    paragraphs
+--        |> List.foldl (renderReducer renderer) ( latexState, [] )
+
+
+renderReducer :
+    (LatexState -> List LatexExpression -> a)
+    -> ( String, List LatexExpression )
+    -> ( LatexState, List a )
+    -> ( LatexState, List a )
+renderReducer renderer listStringAndLatexExpression ( state, inputList ) =
+    let
+        newState =
+            latexStateReducer (Tuple.second listStringAndLatexExpression) state
+
+        renderedInput =
+            renderer newState (Tuple.second listStringAndLatexExpression)
     in
     ( newState, inputList ++ [ renderedInput ] )
 

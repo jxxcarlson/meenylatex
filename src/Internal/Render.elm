@@ -1251,13 +1251,8 @@ renderLocal _ latexState args =
     Html.div [ HA.style "color" "blue", HA.style "white-space" "pre" ] [ Html.text <| arg ]
 
 
-<<<<<<< HEAD
-renderNote : String -> LatexState -> List LatexExpression -> Html msg
-renderNote _ latexState args =
-=======
 renderAttachNote : String -> LatexState -> List LatexExpression -> Html msg
 renderAttachNote _ latexState args =
->>>>>>> 6e90ea6ec0f929d1cc1c02a3afa289dc45df92e0
     -- TODO: Finish this
     let
         author =

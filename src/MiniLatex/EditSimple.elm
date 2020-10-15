@@ -54,11 +54,17 @@ type LaTeXMsg
     = IDClicked String
 
 
-render : String -> Html LaTeXMsg
+-- render : String -> Html LaTeXMsg
+-- render source =
+--     init 0 source
+--         |> get "-"
+--         |> (\list -> Html.div [] list)
+
+
+
+render : String -> List (Html LaTeXMsg)
 render source =
-    init 0 source
-        |> get "-"
-        |> (\list -> Html.div [] list)
+  source |> init 1 |> get "-"
 
 
 {-| Create Data from a string of MiniLaTeX text and a version number.

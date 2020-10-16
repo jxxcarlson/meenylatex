@@ -70,13 +70,13 @@ texPrefix =
 \\newcommand{\\italic}[1]{{\\sl #1}}
 \\newcommand{\\strong}[1]{{\\bf #1}}
 \\newcommand{\\subheading}[1]{{\\bf #1}\\par}
-\\newcommand{\\xlinkPublic}[2]{\\href{{http://www.knode.io/\\#@public#1}}{#2}}
+\\newcommand{\\xlink}[2]{\\href{{https://minilatex.lamdera.app/g/#1}}{#2}}
 \\newcommand{\\red}[1]{\\textcolor{red}{#1}}
 \\newcommand{\\blue}[1]{\\textcolor{blue}{#1}}
 \\newcommand{\\remote}[1]{\\textcolor{red}{#1}}
 \\newcommand{\\local}[1]{\\textcolor{blue}{#1}}
 \\newcommand{\\highlight}[1]{\\hl{#1}}
-\\newcommand{\\meta}[2]{\\textcolor{blue}{#1}: }{\\hl{#1}}
+\\newcommand{\\note}[2]{\\textcolor{blue}{#1}{\\hl{#1}}}
 \\newcommand{\\strike}[1]{\\st{#1}}
 \\newcommand{\\term}[1]{{\\sl #1}}
 \\newtheorem{remark}{Remark}

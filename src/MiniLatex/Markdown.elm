@@ -1,6 +1,6 @@
 module MiniLatex.Markdown exposing (convert)
 
-{-| This module is for quickly preparing latex for export.
+{-| Convert MiniLaTeX to Markdown
 
 
 # API

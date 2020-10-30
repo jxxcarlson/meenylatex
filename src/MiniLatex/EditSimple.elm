@@ -1,6 +1,6 @@
 module MiniLatex.EditSimple exposing
     ( Data, emptyData, init, update, get, LaTeXMsg
-    , render
+    , render, renderWithVersion
     )
 
 {-| This module is like MiniLaTeX.Edit, except that the Data type, which is an
@@ -66,6 +66,9 @@ render : String -> List (Html LaTeXMsg)
 render source =
   source |> init 1 |> get "-"
 
+renderWithVersion : Int -> String -> List (Html LaTeXMsg)
+renderWithVersion version source =
+  source |> init version |> get "-"
 
 {-| Create Data from a string of MiniLaTeX text and a version number.
 The version number should be different for each call of init.

@@ -213,7 +213,8 @@ mathText displayMode content =
     Html.node "math-text"
         [ HA.property "delay" (Json.Encode.bool False)
         , HA.property "display" (Json.Encode.bool (isDisplayMathMode displayMode))
-        , HA.property "content" (Json.Encode.string (content |> String.replace "\\ \\" "\\\\"))
+        , HA.property "content" (Json.Encode.string content)
+        --, HA.property "content" (Json.Encode.string content |> String.replace "\\ \\" "\\\\"))
         ]
         []
 
@@ -484,6 +485,7 @@ renderMacroDict =
         , ( "setdocid", \s x y z -> renderSetDocId s x z )
         , ( "setclient", \s x y z -> renderSetClient s x z )
         , ( "strong", \s x y z -> renderStrong s x z )
+        , ( "textbf", \s x y z -> renderStrong s x z )
         , ( "uuid", \s x y z -> renderUuid s x z )
         ]
 
@@ -1486,7 +1488,13 @@ renderDefaultEnvironment2 source latexState name args body =
 renderEnvironmentDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 renderEnvironmentDict =
     Dict.fromList
-        [ ( "align", \s x a y -> renderAlignEnvironment s x y )
+        [ ( "align", \s x a y -> renderMathEnvironment "aligned" s x y )
+        , ( "matrix",  \s x a y -> renderMathEnvironment "matrix" s x y )
+        , ( "pmatrix",  \s x a y -> renderMathEnvironment "pmatrix" s x y )
+        , ( "bmatrix",  \s x a y -> renderMathEnvironment "bmatrix" s x y )
+        , ( "Bmatrix",  \s x a y -> renderMathEnvironment "Bmatrix" s x y )
+        , ( "vmatrix",  \s x a y -> renderMathEnvironment "vmatrix" s x y )
+        , ( "Vmatrix",  \s x a y -> renderMathEnvironment "Vmatrix" s x y )
         , ( "center", \s x a y -> renderCenterEnvironment s x y )
         , ( "comment", \s x a y -> renderCommentEnvironment s x y )
         , ( "defitem", \s x a y -> renderDefItemEnvironment s x a y )
@@ -1520,8 +1528,9 @@ renderSvg source latexState body =
             Html.span [ HA.class "X6" ] [ Html.text "SVG parse error" ]
 
 
-renderAlignEnvironment : String -> LatexState -> LatexExpression -> Html msg
-renderAlignEnvironment source latexState body =
+
+renderMathEnvironment : String -> String -> LatexState -> LatexExpression -> Html msg
+renderMathEnvironment envName source latexState body = 
     let
         r =
             Internal.RenderToString.render latexState body
@@ -1553,11 +1562,11 @@ renderAlignEnvironment source latexState body =
                         |> Internal.ParserHelpers.removeLabel
 
                 _ ->
-                    "Parser error in render align environment"
+                    "" --  "Parser error in render align environment"
 
         content =
             -- REVIEW: changed for KaTeX
-            "\n\\begin{aligned}\n" ++ innerContents ++ "\n\\end{aligned}\n"
+            "\n\\begin{" ++ envName ++ "}\n" ++ innerContents ++ "\n\\end{" ++ envName ++ "}\n"
 
         tag =
             case Internal.ParserHelpers.getTag addendum of

@@ -43,8 +43,7 @@ view model =
     div [ style "margin" "50px" ]
         [ h1 [] [ text "Example" ]
         , div [ style "font-size" "18px" ]
-            [ MiniLatex.EditSimple.render Strings.miniLaTeX |> Html.map LatexMsg
-            ]
+            (MiniLatex.EditSimple.render Strings.miniLaTeX |> List.map (Html.map LatexMsg))           
         ]
 
 

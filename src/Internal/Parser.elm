@@ -530,8 +530,12 @@ environmentOfType envType =
         theEndWord =
             "\\end{" ++ envType ++ "}"
 
+        katex = ["align", "matrix", "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix"]  
+
+
+
         envKind =
-            if List.member envType [ "equation", "align", "eqnarray", "verbatim", "mathmacro", "textmacro", "listing", "verse" ] then
+            if List.member envType ([ "equation", "eqnarray", "verbatim", "mathmacro", "textmacro", "listing", "verse" ] ++ katex ) then
                 "passThrough"
 
             else

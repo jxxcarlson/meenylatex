@@ -45,6 +45,23 @@ x = y
 """
 
 
+-- https://tex.stackexchange.com/questions/74353/what-commands-are-there-for-horizontal-spacing/74354#74354
+
+
+
+-- This \\xcancel{not} right.
+
+-- space: $a\\space b$
+
+-- $a\\, b$
+
+-- thinspace: $a\\thinspace b$
+
+-- $a\\; b$
+
+-- thickmuskip: $a\\thickmuskip b$
+
+
 miniLaTeX =
     """
 
@@ -70,6 +87,8 @@ miniLaTeX =
 \\tableofcontents
 
 \\section{Introduction}
+
+
 
 MiniLatex is a subset of LaTeX that can be
 rendered live in the browser using a custom just-in-time compiler.

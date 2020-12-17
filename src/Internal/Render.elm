@@ -969,8 +969,8 @@ idPhrase prefix name =
 renderSection : String -> LatexState -> List LatexExpression -> Html msg
 renderSection _ latexState args =
     let
-        sectionName =
-            Internal.RenderToString.renderArg 0 latexState args
+        sectionName : List (Html msg)
+        sectionName = renderArgList "source" latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -983,9 +983,10 @@ renderSection _ latexState args =
                 ""
 
         ref =
-            idPhrase "section" sectionName
+            idPhrase "section" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h2 (headingStyle ref 24) [ Html.text <| label ++ sectionName ]
+    Html.h2 (headingStyle ref 24) ([Html.text <| label] ++ sectionName)
+
 
 
 headingStyle ref h =

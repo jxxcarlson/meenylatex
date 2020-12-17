@@ -213,7 +213,7 @@ mathText displayMode content =
     Html.node "math-text"
         [ HA.property "delay" (Json.Encode.bool False)
         , HA.property "display" (Json.Encode.bool (isDisplayMathMode displayMode))
-        , HA.property "content" (Json.Encode.string content)
+        , HA.property "content" (Json.Encode.string (content  |> String.replace "\\ \\" "\\\\"))
         --, HA.property "content" (Json.Encode.string content |> String.replace "\\ \\" "\\\\"))
         ]
         []

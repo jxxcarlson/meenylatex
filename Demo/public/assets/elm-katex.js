@@ -1,4 +1,3 @@
-
 const init =  async function(app) {
 
   console.log("I am starting elm-katex: init");

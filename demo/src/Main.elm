@@ -3,24 +3,25 @@ module Main exposing (main)
 import Browser
 import Browser.Dom as Dom
 import Debounce exposing (Debounce)
-import File exposing (File)
 import File.Download as Download
 import Html exposing (..)
 import Html.Attributes as HA exposing (..)
 import Html.Events exposing (onClick, onInput)
-import Http
 import MiniLatex
 import MiniLatex.Edit exposing (Data)
 import MiniLatex.Export
 import Random
 import StringsV1
-import StringsV2
+import TestData
+import Renzo
 import Style exposing (..)
 import Task exposing (Task)
 
 
-initialText =
-    StringsV2.initialText
+sourceText = TestData.text
+    -- Renzo.text
+    -- TestData.text
+    -- StringsV2.initialText
 
 
 
@@ -92,12 +93,12 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
         editRecord =
-            MiniLatex.Edit.init flags.seed initialText
+            MiniLatex.Edit.init flags.seed sourceText
 
         model =
-            { sourceText = initialText
+            { sourceText = sourceText
             , macroText = ""
-            , renderedText = render "" initialText
+            , renderedText = render "" sourceText
             , editRecord = editRecord
             , debounce = Debounce.init
             , counter = 0
@@ -211,12 +212,12 @@ update msg model =
         RestoreText ->
             let
                 editRecord =
-                    MiniLatex.Edit.init model.seed (prependMacros initialMacroText initialText)
+                    MiniLatex.Edit.init model.seed (prependMacros initialMacroText sourceText)
             in
             ( { model
                 | counter = model.counter + 1
                 , editRecord = editRecord
-                , sourceText = initialText
+                , sourceText = sourceText
                 , renderedText = renderFromEditRecord model.selectedId model.counter editRecord
               }
             , Cmd.none
@@ -225,12 +226,12 @@ update msg model =
         ExampleText ->
             let
                 editRecord =
-                    MiniLatex.Edit.init model.seed (prependMacros initialMacroText StringsV1.mathExampleText)
+                    MiniLatex.Edit.init model.seed (prependMacros initialMacroText sourceText)
             in
             ( { model
                 | counter = model.counter + 1
                 , editRecord = editRecord
-                , sourceText = StringsV1.mathExampleText
+                , sourceText = sourceText
                 , renderedText = renderFromEditRecord model.selectedId model.counter editRecord
               }
             , Cmd.none
@@ -263,8 +264,8 @@ normalize str =
 
 
 prependMacros : String -> String -> String
-prependMacros macros_ sourceText =
-    "$$\n" ++ (macros_ |> normalize) ++ "\n$$\n\n" ++ sourceText
+prependMacros macros_ sourceText_ =
+    "$$\n" ++ (macros_ |> normalize) ++ "\n$$\n\n" ++ sourceText_
 
 
 renderFromEditRecord : String -> Int -> Data (Html MiniLatex.Edit.LaTeXMsg) -> Html Msg
@@ -281,12 +282,12 @@ render_ str =
 
 
 render : String -> String -> Html Msg
-render selectedId sourceText =
+render selectedId sourceText_ =
     let
         macroDefinitions =
             initialMacroText
     in
-    MiniLatex.render selectedId sourceText |> Html.map LaTeXMsg
+    MiniLatex.render selectedId sourceText_ |> Html.map LaTeXMsg
 
 
 

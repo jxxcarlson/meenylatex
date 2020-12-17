@@ -967,10 +967,10 @@ idPhrase prefix name =
 
 
 renderSection : String -> LatexState -> List LatexExpression -> Html msg
-renderSection _ latexState args =
+renderSection source latexState args =
     let
-        sectionName : List (Html msg)
-        sectionName = renderArgList "source" latexState args
+        renderedArgs : List (Html msg)
+        renderedArgs = renderArgList source latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -985,7 +985,7 @@ renderSection _ latexState args =
         ref =
             idPhrase "section" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h2 (headingStyle ref 24) ([Html.text <| label] ++ sectionName)
+    Html.h2 (headingStyle ref 24) ((Html.text label):: renderedArgs)
 
 
 
@@ -997,22 +997,21 @@ headingStyle ref h =
 
 
 renderSectionStar : String -> LatexState -> List LatexExpression -> Html msg
-renderSectionStar _ latexState args =
+renderSectionStar source latexState args =
     let
-        sectionName =
-            Internal.RenderToString.renderArg 0 latexState args
+        renderedArgs = renderArgList source latexState args
+
 
         ref =
-            idPhrase "section" sectionName
+            idPhrase "section" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h2 (headingStyle ref 24) [ Html.text <| sectionName ]
+    Html.h2 (headingStyle ref 24) renderedArgs
 
 
 renderSubsection : String -> LatexState -> List LatexExpression -> Html msg
-renderSubsection _ latexState args =
+renderSubsection source latexState args =
     let
-        sectionName =
-            Internal.RenderToString.renderArg 0 latexState args
+        renderedArgs = renderArgList source latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -1028,28 +1027,26 @@ renderSubsection _ latexState args =
                 ""
 
         ref =
-            idPhrase "subsection" sectionName
+            idPhrase "subsection" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h3 (headingStyle ref 12) [ Html.text <| label ++ sectionName ]
+    Html.h3 (headingStyle ref 12) ((Html.text label)::renderedArgs)
 
 
 renderSubsectionStar : String -> LatexState -> List LatexExpression -> Html msg
-renderSubsectionStar _ latexState args =
+renderSubsectionStar source latexState args =
     let
-        sectionName =
-            Internal.RenderToString.renderArg 0 latexState args
+        renderedArgs = renderArgList source latexState args
 
         ref =
-            idPhrase "subsection" sectionName
+            idPhrase "subsection" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h3 (headingStyle ref 12) [ Html.text <| sectionName ]
+    Html.h3 (headingStyle ref 12) renderedArgs
 
 
 renderSubSubsection : String -> LatexState -> List LatexExpression -> Html msg
-renderSubSubsection _ latexState args =
+renderSubSubsection source latexState args =
     let
-        sectionName =
-            Internal.RenderToString.renderArg 0 latexState args
+        renderedArgs = renderArgList source latexState args
 
         s1 =
             getCounter "s1" latexState
@@ -1068,21 +1065,30 @@ renderSubSubsection _ latexState args =
                 ""
 
         ref =
-            idPhrase "subsubsection" sectionName
+            idPhrase "subsubsection" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h4 [ HA.id ref ] [ Html.text <| label ++ sectionName ]
+    Html.h4 [ HA.id ref ] ((Html.text label)::renderedArgs)
 
 
 renderSubSubsectionStar : String -> LatexState -> List LatexExpression -> Html msg
-renderSubSubsectionStar _ latexState args =
+renderSubSubsectionStar source latexState args =
     let
-        sectionName =
-            Internal.RenderToString.renderArg 0 latexState args
+        renderedArgs = renderArgList source latexState args
 
         ref =
-            idPhrase "subsubsection" sectionName
+            idPhrase "subsubsection" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h4 [ HA.id ref ] [ Html.text <| sectionName ]
+    Html.h4 [ HA.id ref ] renderedArgs
+
+renderSubheading : String -> LatexState -> List LatexExpression -> Html msg
+renderSubheading source latexState args =
+    let
+        renderedArgs = renderArgList source latexState args
+
+        ref =
+            idPhrase "subsubsection" (Internal.RenderToString.renderArg 0 latexState args)
+    in
+    Html.p [ HA.style "font-weight" "bold", HA.style "margin-bottom" "0", HA.style "margin-left" "-2px", HA.id ref ] renderedArgs
 
 
 renderDocumentTitle : String -> LatexState -> List LatexExpression -> Html msg
@@ -1129,13 +1135,6 @@ renderSetCounter _ latexState list =
     Html.span [] []
 
 
-renderSubheading : String -> LatexState -> List LatexExpression -> Html msg
-renderSubheading _ latexState args =
-    let
-        title =
-            Internal.RenderToString.renderArg 0 latexState args
-    in
-    Html.p [ HA.style "font-weight" "bold", HA.style "margin-bottom" "0", HA.style "margin-left" "-2px" ] [ Html.text <| title ]
 
 
 renderMakeTitle : String -> LatexState -> List LatexExpression -> Html msg

@@ -1,8 +1,7 @@
-module Internal.MathMacro exposing (MathMacroDict, evalStr, makeMacroDict)
+module Internal.MathMacro exposing (MathMacroDict, evalStr, parse, newCommand2, makeMacroDict)
 
 import Dict exposing (Dict)
 import List.Extra
-import Maybe.Extra
 import Parser.Advanced exposing (..)
 import Result.Extra
 import Set
@@ -18,9 +17,13 @@ import Set
 
 type MathExpression
     = MathText String
-    | Macro String (List MathExpression)
-    | NewCommand String String (List MathExpression)
+    | Macro MacroName (List MathExpression)
+    | NewCommand MacroName NumberOfArguments (List MathExpression)
     | MathList (List MathExpression)
+
+
+type alias MacroName = String
+type alias NumberOfArguments = String
 
 
 type MacroBody
@@ -349,8 +352,9 @@ macro =
 
 -- |. wsParser
 
+newCommand = oneOf [ backtrackable newCommand1, newCommand2]
 
-newCommand =
+newCommand1 =
     succeed NewCommand
         |. symbol (Token "\\newcommand" ExpectingNewCommand)
         |= newMacroName
@@ -360,6 +364,12 @@ newCommand =
         |= itemList arg
         |. ws
 
+newCommand2 =
+    succeed (\x y -> NewCommand x "0" y)
+        |. symbol (Token "\\newcommand" ExpectingNewCommand)
+        |= newMacroName
+        |= itemList arg
+        |. ws
 
 {-| Use to parse arguments for macros
 -}

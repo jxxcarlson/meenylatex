@@ -2,55 +2,55 @@ module Renzo exposing (..)
 
 text = """
 \\begin{mathmacro}
-\\newcommand{\\A}[0]{\\mathbb{A}}
-\\newcommand{\\B}[0]{\\text{B}}
-\\newcommand{\\C}[0]{\\mathbb{C}}
-\\newcommand{\\Dcal}[0]{\\mathcal{D}}
-\\newcommand{\\Ecal}[0]{\\mathcal{E}}
-\\newcommand{\\Fcal}[0]{\\mathcal{F}}
-\\newcommand{\\G}[0]{\\mathbb{G}}
-\\newcommand{\\g}[0]{\\mathfrak{g}}
-\\newcommand{\\Hcal}[0]{\\mathcal{H}}
-\\newcommand{\\Ical}[0]{\\mathcal{I}}
-\\newcommand{\\K}[0]{\\mathbb{K}}
-\\newcommand{\\Kcal}[0]{\\mathcal{K}}
-\\newcommand{\\Lcal}[0]{\\mathcal{L}}
-\\newcommand{\\Mcal}[0]{\\mathcal{M}}
-\\newcommand{\\N}[0]{\\mathbb{N}}
-\\newcommand{\\Ncal}[0]{\\mathcal{N}}
-\\newcommand{\\Ocal}[0]{\\mathcal{O}}
-\\newcommand{\\Pro}[0]{\\mathbb{P}}
-\\newcommand{\\Pcal}[0]{\\mathcal{P}}
-\\newcommand{\\Q}[0]{\\mathbb{Q}}
-\\newcommand{\\Qcal}[0]{\\mathcal{Q}}
-\\newcommand{\\R}[0]{\\mathbb{R}}
-\\newcommand{\\Scal}[0]{\\mathcal{S}}
-\\newcommand{\\Tcal}[0]{\\mathcal{T}}
-\\newcommand{\\Ucal}[0]{\\mathcal{U}}
-\\newcommand{\\Xcal}[0]{\\mathcal{X}}
-\\newcommand{\\Ycal}[0]{\\mathcal{Y}}
-\\newcommand{\\Z}[0]{\\mathbb{Z}}
-\\newcommand{\\Zcal}[0]{\\mathcal{Z}}
-\\newcommand{\\cart}[0]{\\ar @{} [dr] |{\\Box}}
-\\newcommand{\\Hom}[0]{\\text{Hom}}
-\\newcommand{\\Isom}[0]{\\text{Isom}}
-\\newcommand{\\Pic}[0]{\\text{Pic}}
-\\newcommand{\\GL}[0]{\\text{GL}}
-\\newcommand{\\PGL}[0]{\\text{PGL}}
-\\newcommand{\\SL}[0]{\\text{SL}}
-\\newcommand{\\Sym}[0]{\\text{Sym}}
-\\newcommand{\\Spec}[0]{\\text{Spec}}
-\\newcommand{\\un}[0]{\\underline}
-\\newcommand{\\pr}[0]{\\text{pr}}
-\\newcommand{\\ov}[0]{\\overline}
-\\newcommand{\\im}[0]{\\text{Im}}
-\\newcommand{\\wh}[0]{\\widehat}
+\\newcommand{\\A}{\\mathbb{A}}
+\\newcommand{\\B}{\\text{B}}
+\\newcommand{\\C}{\\mathbb{C}}
+\\newcommand{\\Dcal}{\\mathcal{D}}
+\\newcommand{\\Ecal}{\\mathcal{E}}
+\\newcommand{\\Fcal}{\\mathcal{F}}
+\\newcommand{\\G}{\\mathbb{G}}
+\\newcommand{\\g}{\\mathfrak{g}}
+\\newcommand{\\Hcal}{\\mathcal{H}}
+\\newcommand{\\Ical}{\\mathcal{I}}
+\\newcommand{\\K}{\\mathbb{K}}
+\\newcommand{\\Kcal}{\\mathcal{K}}
+\\newcommand{\\Lcal}{\\mathcal{L}}
+\\newcommand{\\Mcal}{\\mathcal{M}}
+\\newcommand{\\N}{\\mathbb{N}}
+\\newcommand{\\Ncal}{\\mathcal{N}}
+\\newcommand{\\Ocal}{\\mathcal{O}}
+\\newcommand{\\Pro}{\\mathbb{P}}
+\\newcommand{\\Pcal}{\\mathcal{P}}
+\\newcommand{\\Q}{\\mathbb{Q}}
+\\newcommand{\\Qcal}{\\mathcal{Q}}
+\\newcommand{\\R}{\\mathbb{R}}
+\\newcommand{\\Scal}{\\mathcal{S}}
+\\newcommand{\\Tcal}{\\mathcal{T}}
+\\newcommand{\\Ucal}{\\mathcal{U}}
+\\newcommand{\\Xcal}{\\mathcal{X}}
+\\newcommand{\\Ycal}{\\mathcal{Y}}
+\\newcommand{\\Z}{\\mathbb{Z}}
+\\newcommand{\\Zcal}{\\mathcal{Z}}
+\\newcommand{\\cart}{\\ar @{} [dr] |{\\Box}}
+\\newcommand{\\Hom}{\\text{Hom}}
+\\newcommand{\\Isom}{\\text{Isom}}
+\\newcommand{\\Pic}{\\text{Pic}}
+\\newcommand{\\GL}{\\text{GL}}
+\\newcommand{\\PGL}{\\text{PGL}}
+\\newcommand{\\SL}{\\text{SL}}
+\\newcommand{\\Sym}{\\text{Sym}}
+\\newcommand{\\Spec}{\\text{Spec}}
+\\newcommand{\\un}{\\underline}
+\\newcommand{\\pr}{\\text{pr}}
+\\newcommand{\\ov}{\\overline}
+\\newcommand{\\im}{\\text{Im}}
+\\newcommand{\\wh}{\\widehat}
 \\newcommand{\\wt}[1]{\\widetilde}
-\\newcommand{\\ev}[0]{\\text{ev}} 
-\\newcommand{\\Char}[0]{\\text{char}} 
-\\newcommand{\\Bl}[0]{\\text{Bl}} 
-\\newcommand{\\M}[0]{\\text{M}}
-\\newcommand{\\Sch}[0]{\\text{Sch}}
+\\newcommand{\\ev}{\\text{ev}} 
+\\newcommand{\\Char}{\\text{char}} 
+\\newcommand{\\Bl}{\\text{Bl}} 
+\\newcommand{\\M}{\\text{M}}
+\\newcommand{\\Sch}{\\text{Sch}}
 \\newcommand{\\di}[1]{\\displaystyle}
 \\end{mathmacro}
 
@@ -61,6 +61,22 @@ text = """
 \\newcommand{\\damiano}[1]{{\\color{red} \\footnote{\\color{red} Damiano: #1}}}
 \\newcommand{\\dcolor}[1]{{\\color{red}  #1}}
 \\end{textmacro}
+
+\\begin{comment}
+%% \\newenvironment{dem}{\\begin{proof}[\\bf Proof]}{\\end{proof}}
+\\newtheorem{theorem}{\\bf Theorem}[section]
+\\newtheorem*{maintheorem}{\\bf Main Theorem}
+\\newtheorem{lemma}[theorem]{\\bf Lemma}
+\\newtheorem{propos}[theorem]{\\bf Proposition}
+\\newtheorem{corol}[theorem]{\\bf Corollary}
+\\newtheorem{claim}[theorem]{\\bf Claim}
+\\newtheorem{conj}[theorem]{\\bf Conjecture}
+
+\\theoremstyle{definition}
+\\newtheorem{defi}[theorem]{\\bf Definition}
+\\newtheorem{rmk}[theorem]{\\bf Remark}
+\\newtheorem{exm}[theorem]{\\bf Example}
+\\end{comment}
 
 %\\input xy
 %\\xyoption{all}

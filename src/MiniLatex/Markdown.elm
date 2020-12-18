@@ -52,6 +52,7 @@ convert source =
         latexState =
             data.latexState
 
+        paragraphs : List String.String
         paragraphs =
             renderLatexListToList latexState astList
     in

@@ -9,6 +9,38 @@ module Internal.Render exposing (makeTableOfContents, render, renderLatexList, r
 
 -}
 
+{-
+
+COMMENTS
+========
+
+DICTIONARIES
+------------
+
+There are two dictionaries which are used
+to render macros and environements, respectively.  These are
+
+  - renderMacroDict
+  - renderEnvirnomentDict
+
+In addition, there is latexState.mathMacroDictionary, which
+is used for rendering math-mode macros that are defined at
+runtime, that is, in the source text of a MiniLaTeX document.
+
+Text-mode macros are handled by `Macro.expandMacro` inside of
+`renderMacro`.  Thus it does not use a dictionary.
+
+
+STRUCTURE
+---------
+
+The top level rendering function is `render`.
+The SourceText = String argument is passed along
+to aid in error reporting.
+
+
+-}
+
 import Dict
 import Html exposing (Attribute, Html)
 import Html.Attributes as HA
@@ -38,10 +70,13 @@ import String
 import SvgParser
 
 
+type alias SourceText = String
+type alias EnvName = String
+
 {-| The main rendering function. Compute an Html msg value
 from the current LatexState and a LatexExpression.
 -}
-render : String -> LatexState -> LatexExpression -> Html msg
+render : SourceText -> LatexState -> LatexExpression -> Html msg
 render source latexState latexExpression =
     case latexExpression of
         Comment str ->
@@ -102,7 +137,7 @@ render source latexState latexExpression =
 {-| Like `render`, but renders a list of LatexExpressions
 to Html mgs
 -}
-renderLatexList : String -> LatexState -> List LatexExpression -> Html msg
+renderLatexList : SourceText -> LatexState -> List LatexExpression -> Html msg
 renderLatexList source latexState latexList =
     latexList
         |> List.map (render source latexState)
@@ -129,14 +164,14 @@ parseString_ parser str =
     Parser.run parser str
 
 
-parseString : LatexState -> String -> List ( String, List LatexExpression )
-parseString latexState source =
+parseString : LatexState -> SourceText -> List ( SourceText, List LatexExpression )
+parseString _ source =
     let
-        paragraphs : List String
+        paragraphs : List SourceText
         paragraphs =
             Paragraph.logicalParagraphify source
 
-        parse__ : String.String -> ( String, List LatexExpression )
+        parse__ : SourceText -> ( SourceText, List LatexExpression )
         parse__ paragraph =
             ( paragraph, Internal.Parser.parse paragraph |> spacify )
     in
@@ -144,12 +179,12 @@ parseString latexState source =
         |> List.map parse__
 
 
-{-| Parse a string, then render it.
+{-| Parse a string, then render it. TODO: NOT USED?
 -}
-renderString2 : LatexState -> String -> Html msg
+renderString2 : LatexState -> SourceText -> Html msg
 renderString2 latexState source =
     let
-        render_ : ( String, List LatexExpression ) -> Html msg
+        render_ : ( SourceText, List LatexExpression ) -> Html msg
         render_ ( source_, ast ) =
             renderLatexList source_ latexState ast
     in
@@ -159,20 +194,20 @@ renderString2 latexState source =
         |> Html.div []
 
 
-{-| Parse a string, then render it.
+{-| Parse a string, then render it. USED EXTERNALLY:
 -}
-renderString : LatexState -> String -> Html msg
+renderString : LatexState -> SourceText -> Html msg
 renderString latexState source =
     let
-        paragraphs : List String
+        paragraphs : List SourceText
         paragraphs =
             Paragraph.logicalParagraphify source
 
-        parse : String.String -> ( String, List LatexExpression )
+        parse : String.String -> ( SourceText, List LatexExpression )
         parse paragraph =
             ( paragraph, Internal.Parser.parse paragraph |> spacify )
 
-        render_ : ( String, List LatexExpression ) -> Html msg
+        render_ : ( SourceText, List LatexExpression ) -> Html msg
         render_ ( source_, ast ) =
             renderLatexList source_ latexState ast
     in
@@ -1485,8 +1520,9 @@ renderDefaultEnvironment2 source latexState name args body =
 -- RENDER INDIVIDUAL ENVIRNOMENTS
 
 
-renderEnvironmentDict : Dict.Dict String (String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
+renderEnvironmentDict : Dict.Dict String (SourceText -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 renderEnvironmentDict =
+    -- s x a y = SourceText LaTeXState, List LatexExpression, LaTeXExpression
     Dict.fromList
         [ ( "align", \s x a y -> renderMathEnvironment "aligned" s x y )
         , ( "matrix",  \s x a y -> renderMathEnvironment "matrix" s x y )
@@ -1518,7 +1554,7 @@ renderEnvironmentDict =
         ]
 
 
-renderSvg : String -> LatexState -> LatexExpression -> Html msg
+renderSvg : SourceText -> LatexState -> LatexExpression -> Html msg
 renderSvg source latexState body =
     case SvgParser.parse (Internal.RenderToString.render latexState body) of
         Ok html_ ->
@@ -1529,7 +1565,7 @@ renderSvg source latexState body =
 
 
 
-renderMathEnvironment : String -> String -> LatexState -> LatexExpression -> Html msg
+renderMathEnvironment : EnvName -> SourceText -> LatexState -> LatexExpression -> Html msg
 renderMathEnvironment envName source latexState body = 
     let
         r =
@@ -1579,7 +1615,7 @@ renderMathEnvironment envName source latexState body =
     displayMathTextWithLabel_ latexState content tag
 
 
-renderCenterEnvironment : String -> LatexState -> LatexExpression -> Html msg
+renderCenterEnvironment : SourceText -> LatexState -> LatexExpression -> Html msg
 renderCenterEnvironment source latexState body =
     let
         r =
@@ -1593,18 +1629,18 @@ renderCenterEnvironment source latexState body =
         [ r ]
 
 
-renderCommentEnvironment : String -> LatexState -> LatexExpression -> Html msg
+renderCommentEnvironment : SourceText -> LatexState -> LatexExpression -> Html msg
 renderCommentEnvironment source latexState body =
     Html.div [] []
 
 
-renderEnumerate : String -> LatexState -> LatexExpression -> Html msg
+renderEnumerate : SourceText -> LatexState -> LatexExpression -> Html msg
 renderEnumerate source latexState body =
     -- TODO: fix spacing issue
     Html.ol [ HA.style "margin-top" "0px" ] [ render source latexState body ]
 
 
-renderDefItemEnvironment : String -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderDefItemEnvironment : SourceText -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
 renderDefItemEnvironment source latexState optArgs body =
     Html.div []
         [ Html.strong [] [ Html.text <| Internal.RenderToString.renderArg 0 latexState optArgs ]
@@ -1614,7 +1650,7 @@ renderDefItemEnvironment source latexState optArgs body =
 
 {-| XXX
 -}
-renderEqnArray : String -> LatexState -> LatexExpression -> Html msg
+renderEqnArray : SourceText -> LatexState -> LatexExpression -> Html msg
 renderEqnArray source latexState body =
     let
         body1 =
@@ -1627,7 +1663,7 @@ renderEqnArray source latexState body =
     displayMathText latexState body2
 
 
-renderEquationEnvironment : String -> LatexState -> LatexExpression -> Html msg
+renderEquationEnvironment : SourceText -> LatexState -> LatexExpression -> Html msg
 renderEquationEnvironment source latexState body =
     let
         eqno =
@@ -1673,19 +1709,19 @@ renderEquationEnvironment source latexState body =
     displayMathTextWithLabel_ latexState contents tag
 
 
-renderIndentEnvironment : String -> LatexState -> LatexExpression -> Html msg
+renderIndentEnvironment : SourceText -> LatexState -> LatexExpression -> Html msg
 renderIndentEnvironment source latexState body =
     Html.div [ HA.style "margin-left" "2em" ] [ render source latexState body ]
 
 
-renderItemize : String -> LatexState -> LatexExpression -> Html msg
+renderItemize : SourceText -> LatexState -> LatexExpression -> Html msg
 renderItemize source latexState body =
     -- TODO: fix space issue
     Html.ul [ HA.style "margin-top" "0px" ] [ render source latexState body ]
 
 
-renderListing : String -> LatexState -> LatexExpression -> Html msg
-renderListing source latexState body =
+renderListing : SourceText -> LatexState -> LatexExpression -> Html msg
+renderListing _ latexState body =
     let
         text =
             Internal.RenderToString.render latexState body
@@ -1696,27 +1732,27 @@ renderListing source latexState body =
     Html.pre [ HA.class "verbatim" ] [ Html.text lines ]
 
 
-renderMacros : String -> LatexState -> LatexExpression -> Html msg
-renderMacros source latexState body =
+renderMacros : SourceText -> LatexState -> LatexExpression -> Html msg
+renderMacros _ latexState body =
     displayMathText latexState (Internal.RenderToString.render latexState body)
 
 
-renderMathMacros : String -> LatexState -> LatexExpression -> Html msg
-renderMathMacros source latexState body =
+renderMathMacros : SourceText -> LatexState -> LatexExpression -> Html msg
+renderMathMacros _ _ _ =
     Html.div [] []
 
 
-renderTextMacros : String -> LatexState -> LatexExpression -> Html msg
-renderTextMacros source latexState body =
+renderTextMacros : SourceText -> LatexState -> LatexExpression -> Html msg
+renderTextMacros _ _ _ =
     Html.div [] []
 
 
-renderQuotation : String -> LatexState -> LatexExpression -> Html msg
+renderQuotation : SourceText -> LatexState -> LatexExpression -> Html msg
 renderQuotation source latexState body =
     Html.div [ HA.style "margin-left" "2em", HA.style "font-style" "italic" ] [ render source latexState body ]
 
 
-renderTabular : String -> LatexState -> LatexExpression -> Html msg
+renderTabular : SourceText -> LatexState -> LatexExpression -> Html msg
 renderTabular source latexState body =
     Html.table
         [ HA.style "border-spacing" "20px 10px"
@@ -1725,7 +1761,7 @@ renderTabular source latexState body =
         [ renderTableBody source latexState body ]
 
 
-renderCell : String -> LatexState -> LatexExpression -> Html msg
+renderCell : SourceText -> LatexState -> LatexExpression -> Html msg
 renderCell source latexState cell =
     case cell of
         LXString s ->
@@ -1742,7 +1778,7 @@ renderCell source latexState cell =
             Html.td [] []
 
 
-renderRow : String -> LatexState -> LatexExpression -> Html msg
+renderRow : SourceText -> LatexState -> LatexExpression -> Html msg
 renderRow source latexState row =
     case row of
         LatexList row_ ->
@@ -1752,7 +1788,7 @@ renderRow source latexState row =
             Html.tr [] []
 
 
-renderTableBody : String -> LatexState -> LatexExpression -> Html msg
+renderTableBody : SourceText -> LatexState -> LatexExpression -> Html msg
 renderTableBody source latexState body =
     case body of
         LatexList body_ ->
@@ -1762,17 +1798,17 @@ renderTableBody source latexState body =
             Html.tbody [] []
 
 
-renderTheBibliography : String -> LatexState -> LatexExpression -> Html msg
+renderTheBibliography : SourceText -> LatexState -> LatexExpression -> Html msg
 renderTheBibliography source latexState body =
     Html.div [] [ render source latexState body ]
 
 
-renderUseForWeb : String -> LatexState -> LatexExpression -> Html msg
+renderUseForWeb : SourceText -> LatexState -> LatexExpression -> Html msg
 renderUseForWeb source latexState body =
     displayMathText latexState (Internal.RenderToString.render latexState body)
 
 
-renderVerbatim : String -> LatexState -> LatexExpression -> Html msg
+renderVerbatim : SourceText -> LatexState -> LatexExpression -> Html msg
 renderVerbatim source latexState body =
     let
         body2 =
@@ -1781,6 +1817,6 @@ renderVerbatim source latexState body =
     Html.pre [ HA.style "margin-top" "-14px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
-renderVerse : String -> LatexState -> LatexExpression -> Html msg
+renderVerse : SourceText -> LatexState -> LatexExpression -> Html msg
 renderVerse source latexState body =
     Html.div [ HA.style "white-space" "pre-line" ] [ Html.text (String.trim <| Internal.RenderToString.render latexState body) ]

@@ -1,4 +1,5 @@
 module Internal.MathMacro2 exposing (MathMacroDict, evalStr, makeMacroDict)
+-- NOT USED
 
 import Dict exposing (Dict)
 import List.Extra

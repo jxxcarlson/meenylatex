@@ -6,6 +6,10 @@ scripts:
 
   look  : open -a /Applications/Google\ Chrome.app/  public/index.html
 
+  look2  : open -a /Applications/Google\ Chrome.app/  public/index-dual.html
+
+  kook  : open -a /Applications/Google\ Chrome.app/  public/index-katex.html
+
   go: open -a /Applications/Google\ Chrome.app/ https://demo.minilatex.app
 
   publish:

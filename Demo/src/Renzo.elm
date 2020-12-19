@@ -1,5 +1,25 @@
 module Renzo exposing (..)
 
+
+text1 = """
+
+
+\\begin{CD}
+\\require{amscd}
+A @>>> B @>{\\text{very long label}}>> C \\
+@VVV @VVV @VVV \\
+D @>>> E @>{\\phantom{\\text{very long label}}}>> F
+\\end{CD}
+
+
+"""
+
+
+--%\\begin{equation}
+--%\\int_0^1 x^n dx = \\frac{1}{n+1}
+--%\\end{equation}
+
+
 text = """
 \\begin{mathmacro}
 \\newcommand{\\A}{\\mathbb{A}}

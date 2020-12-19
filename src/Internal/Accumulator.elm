@@ -1,22 +1,15 @@
 module Internal.Accumulator exposing (parse, render, renderNew)
 
-import Dict
+
 import Internal.LatexState
     exposing
         ( Counters
         , CrossReferences
         , LatexState
-        , addSection
-        , getCounter
-        , incrementCounter
-        , setCrossReference
-        , setDictionaryItem
-        , updateCounter
         )
 import Internal.MathMacro
 import Internal.Parser as Parser exposing (LatexExpression(..), macro)
-import Internal.Render as Render exposing (renderLatexList)
-import Internal.StateReducerHelpers as SRH2
+import Internal.StateReducerHelpers as ReducerHelper
 
 
 {-| Given an initial state and list of inputs of type a,
@@ -161,7 +154,7 @@ latexStateReducerAux lexpr state =
             smacroReducer name optionalArgs args latexExpression state
 
         NewCommand name nArgs body ->
-            SRH2.setMacroDefinition name body state
+            ReducerHelper.setMacroDefinition name body state
 
         Environment name optonalArgs body ->
             envReducer name optonalArgs body state
@@ -176,15 +169,15 @@ latexStateReducerAux lexpr state =
 envReducer : String -> List LatexExpression -> LatexExpression -> LatexState -> LatexState
 envReducer name optonalArgs body state =
     if List.member name theoremWords then
-        SRH2.setTheoremNumber body state
+        ReducerHelper.setTheoremNumber body state
 
     else
         case name of
             "equation" ->
-                SRH2.setEquationNumber body state
+                ReducerHelper.setEquationNumber body state
 
             "align" ->
-                SRH2.setEquationNumber body state
+                ReducerHelper.setEquationNumber body state
 
             "mathmacro" ->
                 case body of
@@ -201,7 +194,7 @@ envReducer name optonalArgs body state =
             "textmacro" ->
                 case body of
                     LXString str ->
-                        SRH2.setDictionary str state
+                        ReducerHelper.setDictionary str state
 
                     _ ->
                         state
@@ -236,21 +229,21 @@ dictionaryWords =
 macroReducer : String -> List LatexExpression -> List LatexExpression -> LatexState -> LatexState
 macroReducer name optionalArgs args state =
     if List.member name dictionaryWords then
-        SRH2.setDictionaryItemForMacro name args state
+        ReducerHelper.setDictionaryItemForMacro name args state
 
     else
         case name of
             "section" ->
-                SRH2.updateSectionNumber args state
+                ReducerHelper.updateSectionNumber args state
 
             "subsection" ->
-                SRH2.updateSubsectionNumber args state
+                ReducerHelper.updateSubsectionNumber args state
 
             "subsubsection" ->
-                SRH2.updateSubsubsectionNumber args state
+                ReducerHelper.updateSubsubsectionNumber args state
 
             "setcounter" ->
-                SRH2.setSectionCounters args state
+                ReducerHelper.setSectionCounters args state
 
             _ ->
                 state
@@ -260,7 +253,7 @@ smacroReducer : String -> List LatexExpression -> List LatexExpression -> LatexE
 smacroReducer name optionalArgs args latexExpression state =
     case name of
         "bibitem" ->
-            SRH2.setBibItemXRef optionalArgs args state
+            ReducerHelper.setBibItemXRef optionalArgs args state
 
         _ ->
             state

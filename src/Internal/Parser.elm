@@ -535,7 +535,7 @@ environmentOfType envType =
 
 
         envKind =
-            if List.member envType ([ "equation", "eqnarray", "verbatim", "mathmacro", "textmacro", "listing", "verse" ] ++ katex ) then
+            if List.member envType ([ "equation", "eqnarray", "verbatim", "CD", "mathmacro", "textmacro", "listing", "verse" ] ++ katex ) then
                 "passThrough"
 
             else

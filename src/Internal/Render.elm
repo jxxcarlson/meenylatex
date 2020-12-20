@@ -21,7 +21,7 @@ There are two dictionaries which are used
 to render macros and environements, respectively.  These are
 
   - renderMacroDict
-  - renderEnvirnomentDict
+  - renderEnvironmentDict
 
 In addition, there is latexState.mathMacroDictionary, which
 is used for rendering math-mode macros that are defined at
@@ -253,6 +253,14 @@ mathText displayMode content =
         ]
         []
 
+mathJaxText : DisplayMode -> String -> Html msg
+mathJaxText displayMode content =
+    Html.node "mathjax-text"
+        [ HA.property "display" (Json.Encode.bool True)
+        , HA.property "content" (Json.Encode.string ((Debug.log "CONTENT" content)  |> String.replace "\\ \\" "\\\\"))
+        --, HA.property "content" (Json.Encode.string content |> String.replace "\\ \\" "\\\\"))
+        ]
+        []
 
 type DisplayMode
     = InlineMathMode
@@ -304,6 +312,17 @@ displayMathTextWithLabel_ latexState str label =
             [ Html.text label ]
         , Html.div []
             [ mathText DisplayMathMode (String.trim str) ]
+        ]
+
+displayMathJaxTextWithLabel_ : LatexState -> String -> String -> Html msg
+displayMathJaxTextWithLabel_ latexState str label =
+    Html.div
+        []
+        [ Html.div [ HA.style "float" "right", HA.style "margin-top" "3px" ]
+            [ Html.text label ]
+        , Html.div []
+            -- [ Html.text "MathJax"]
+            [ mathJaxText DisplayMathMode (String.trim str) ]
         ]
 
 
@@ -1522,7 +1541,7 @@ renderDefaultEnvironment2 source latexState name args body =
 
 renderEnvironmentDict : Dict.Dict String (SourceText -> LatexState -> List LatexExpression -> LatexExpression -> Html msg)
 renderEnvironmentDict =
-    -- s x a y = SourceText LaTeXState, List LatexExpression, LaTeXExpression
+    -- s x a y = SourceText, LaTeXState, List LatexExpression, LaTeXExpression
     Dict.fromList
         [ ( "align", \s x a y -> renderMathEnvironment "aligned" s x y )
         , ( "matrix",  \s x a y -> renderMathEnvironment "matrix" s x y )
@@ -1532,6 +1551,7 @@ renderEnvironmentDict =
         , ( "vmatrix",  \s x a y -> renderMathEnvironment "vmatrix" s x y )
         , ( "Vmatrix",  \s x a y -> renderMathEnvironment "Vmatrix" s x y )
         , ( "center", \s x a y -> renderCenterEnvironment s x y )
+        , ( "CD",  \s x a y -> renderMathJaxEnvironment "CD" (Debug.log "SO" s) (Debug.log "LLE" x) (Debug.log "LE" y)  )
         , ( "comment", \s x a y -> renderCommentEnvironment s x y )
         , ( "defitem", \s x a y -> renderDefItemEnvironment s x a y )
         , ( "enumerate", \s x a y -> renderEnumerate s x y )
@@ -1565,8 +1585,10 @@ renderSvg source latexState body =
 
 
 
+
+
 renderMathEnvironment : EnvName -> SourceText -> LatexState -> LatexExpression -> Html msg
-renderMathEnvironment envName source latexState body = 
+renderMathEnvironment envName _ latexState body =
     let
         r =
             Internal.RenderToString.render latexState body
@@ -1588,6 +1610,7 @@ renderMathEnvironment envName source latexState body =
             else
                 ""
 
+        innerContents : String.String
         innerContents =
             case body of
                 LXString str ->
@@ -1613,6 +1636,56 @@ renderMathEnvironment envName source latexState body =
                     "(" ++ tag_ ++ ")"
     in
     displayMathTextWithLabel_ latexState content tag
+
+renderMathJaxEnvironment : EnvName -> SourceText -> LatexState -> LatexExpression -> Html msg
+renderMathJaxEnvironment envName source latexState body =
+    let
+        r =
+            Internal.RenderToString.render latexState body
+
+        eqno =
+            getCounter "eqno" latexState
+
+        s1 =
+            getCounter "s1" latexState
+
+        addendum =
+            if eqno > 0 then
+                if s1 > 0 then
+                    "\\tag{" ++ String.fromInt s1 ++ "." ++ String.fromInt eqno ++ "}"
+
+                else
+                    "\\tag{" ++ String.fromInt eqno ++ "}"
+
+            else
+                ""
+
+        innerContents =
+            case body of
+                LXString str ->
+                    str |> Debug.log "LXString"
+                        |> String.trim
+                        |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
+                        |> String.replace "\\ \\" "\\\\"
+                        |> Internal.ParserHelpers.removeLabel
+                        |> (\x -> "\\begin{" ++ envName ++ "}\n" ++ x ++ "\n\\end{" ++ envName ++ "}")
+
+                _ ->
+                    "" --  "Parser error in render align environment"
+
+        content =
+            -- REVIEW: changed for KaTeX
+            "\n\\begin{" ++ envName ++ "}\n" ++ innerContents ++ "\n\\end{" ++ envName ++ "}\n"
+
+        tag =
+            case Internal.ParserHelpers.getTag addendum of
+                Nothing ->
+                    ""
+
+                Just tag_ ->
+                    "(" ++ tag_ ++ ")"
+    in
+    displayMathJaxTextWithLabel_ latexState innerContents tag
 
 
 renderCenterEnvironment : SourceText -> LatexState -> LatexExpression -> Html msg

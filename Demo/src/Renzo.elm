@@ -1,7 +1,32 @@
 module Renzo exposing (..)
 
 
-text1 = """
+text = """
+In class we learned that
+
+$$
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+$$
+
+This is a commutative diagram:
+
+
+\\begin{CD}
+A @>>> B @>{\\alpha}>> C \\\\
+@VVV @VVV @VVV \\\\
+D @>>> E @>{\\beta}>> F
+\\end{CD}
+
+In class we learned that
+
+$$
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+$$
+
+"""
+
+
+text0 = """
 
 
 \\begin{CD}
@@ -13,14 +38,12 @@ D @>>> E @>{\\phantom{\\text{very long label}}}>> F
 
 
 """
-
-
 --%\\begin{equation}
 --%\\int_0^1 x^n dx = \\frac{1}{n+1}
 --%\\end{equation}
 
 
-text = """
+text1 = """
 \\begin{mathmacro}
 \\newcommand{\\A}{\\mathbb{A}}
 \\newcommand{\\B}{\\text{B}}

@@ -1,0 +1,8 @@
+scripts:
+
+  make: elm make src/Main.elm
+
+  look  : open -a /Applications/Google\ Chrome.app/  index.html
+
+  live: elm-live src/Main.elm
+

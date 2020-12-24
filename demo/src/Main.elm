@@ -408,7 +408,7 @@ clearButton width =
 
 
 fullRenderButton width =
-    button ([ onClick FullRender ] ++ buttonStyle colorBlue width) [ text "Full Render" ]
+    button ([ onClick FullRender ] ++ buttonStyle colorBlue width) [ text "Re-render" ]
 
 
 restoreTextButton width =

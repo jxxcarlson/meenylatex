@@ -1,4 +1,4 @@
-module Internal.MathMacro exposing (MathMacroDict, evalStr, parse, newCommand2, makeMacroDict)
+module Internal.MathMacro exposing (MathMacroDict, evalStr, parse, newCommand2, makeMacroDict, parseMany, evalList, evalMacro)
 
 import Dict exposing (Dict)
 import List.Extra
@@ -111,7 +111,7 @@ evalMathExpr macroDict_ expr =
             evalNewCommand name nargs args
 
         MathList list ->
-            List.map toText_ list |> String.join " "
+            evalList macroDict_ list
 
 
 {-|
@@ -126,10 +126,10 @@ evalMacro : MathMacroDict -> String -> List MathExpression -> String
 evalMacro macroDict_ name args =
     case Dict.get name macroDict_ of
         Nothing ->
-            "\\" ++ name ++ (List.map (toText_ >> enclose) args |> String.join "")
+           "\\" ++ name ++ (List.map (evalMathExpr macroDict_ >> enclose) args |> String.join "")
 
         Just (MacroBody n body) ->
-            transform n body (List.map toText_ args)
+           transform n body (List.map (evalMathExpr macroDict_) args)
 
 
 transform : Int -> List MathExpression -> List String -> String

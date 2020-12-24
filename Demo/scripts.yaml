@@ -1,4 +1,5 @@
-
+env:
+  DEST: /Users/jxxcarlson/dev/jxxcarlson.github.io/app/mathjax
 scripts:
   debug: elm make --debug src/Main.elm --output=public/Main.js
 
@@ -6,11 +7,23 @@ scripts:
 
   look  : open -a /Applications/Google\ Chrome.app/  public/index.html
 
-  look2  : open -a /Applications/Google\ Chrome.app/  public/index-dual.html
+  look-dual  : open -a /Applications/Google\ Chrome.app/  public/index-dual.html
 
-  kook  : open -a /Applications/Google\ Chrome.app/  public/index-katex.html
+  look-katex  : open -a /Applications/Google\ Chrome.app/  public/index-katex.html
+
+  look-mathjax  : open -a /Applications/Google\ Chrome.app/  public/index-mathjax.html
 
   go: open -a /Applications/Google\ Chrome.app/ https://demo.minilatex.app
+
+  mathjax-publish:
+    cmd:
+       - cp public/index-mathjax.html ${DEST}/index.html
+       - cp public/Main.js ${DEST}/
+       - cp public/assets/custom-element-config.js ${DEST}/assets/
+       - cp public/assets/math-text.js ${DEST}/assets/
+       - cp public/assets/mathjax-text.js ${DEST}/assets/
+       - cp public/assets/style.css ${DEST}/assets/
+
 
   publish:
     cmd:

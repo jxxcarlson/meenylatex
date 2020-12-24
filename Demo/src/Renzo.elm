@@ -1,14 +1,33 @@
 module Renzo exposing (..)
 
 
-text = """
-In class we learned that
+text2 = """
+
+\\begin{mathmacro}
+\\newcommand{\\wt}[1]{\\widetilde{#1}}
+\\newcommand{\\GL}{\\text{GL}}
+\\end{mathmacro}
+
+$$
+\\text{GL} _2  \\neq \\text{GL} _4
+$$
+
+
+$$
+\\frac{\\GL_2}{\\GL_3}
+$$
+
+Long ago, we learned that
 
 $$
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 $$
 
-This is a commutative diagram:
+
+Renzo: $\\wt{\\Delta} \\xrightarrow{\\pi} \\Delta$
+
+
+Today we will learn about commutative diagrams:
 
 
 \\begin{CD}
@@ -16,12 +35,6 @@ A @>>> B @>{\\alpha}>> C \\\\
 @VVV @VVV @VVV \\\\
 D @>>> E @>{\\beta}>> F
 \\end{CD}
-
-In class we learned that
-
-$$
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-$$
 
 """
 
@@ -43,7 +56,7 @@ D @>>> E @>{\\phantom{\\text{very long label}}}>> F
 --%\\end{equation}
 
 
-text1 = """
+text = """
 \\begin{mathmacro}
 \\newcommand{\\A}{\\mathbb{A}}
 \\newcommand{\\B}{\\text{B}}
@@ -87,8 +100,8 @@ text1 = """
 \\newcommand{\\pr}{\\text{pr}}
 \\newcommand{\\ov}{\\overline}
 \\newcommand{\\im}{\\text{Im}}
-\\newcommand{\\wh}{\\widehat}
-\\newcommand{\\wt}[1]{\\widetilde}
+\\newcommand{\\wh}[1]{\\widehat{#1}}
+\\newcommand{\\wt}[1]{\\widetilde{#1}}
 \\newcommand{\\ev}{\\text{ev}} 
 \\newcommand{\\Char}{\\text{char}} 
 \\newcommand{\\Bl}{\\text{Bl}} 
@@ -313,7 +326,7 @@ where the action of $\\PGL_2$ over $U_{r,d}$ is  as in \\eqref{eq:actpgl2}. We c
 
 Thanks to Proposition \\ref{prop.reduction.GL2}, we are reduced to compute the equivariant intersection ring $A^*_{\\GL_2}\\left( \\widehat{U}_{r,d} \\right)$.  In this Section we reduce the computation to an application of the Atiyah-Bott localization theorem.
 
-First, we recall some facts about equivariant Chow rings we will use, and set notation. Let $T$ denote the maximal torus for $\\GL_2$ represented by diagonal matrices, and consider the induced morphism $Bi: BT \\to B\\GL_2$.  We denote by $E$  the standard representation of $\\GL_2$, which we think of as (the pull-back to the point via the quotient map $pt \\to B\\GL_2$ of) a rank two vector bundle over $B\\GL2$. Since  the Chern classes of $E$ will be frequently used, we denote $c_i(E)$ simply by $c_i$. The pull-back $Bi^\\ast(E^\\vee)$ splits as the direct sum of two line bundles on $BT$: the characters  $\\lambda_1, \\lambda_2$ given by the two coordinate projections of $T$.
+First, we recall some facts about equivariant Chow rings we will use, and set notation. Let $T$ denote the maximal torus for $\\GL_2$ represented by diagonal matrices, and consider the induced morphism $Bi: BT \\to B\\GL_2$.  We denote by $E$  the standard representation of $\\GL_2$, which we think of as (the pull-back to the point via the quotient map $pt \\to B\\GL_2$ of) a rank two vector bundle over $B\\GL_2$. Since  the Chern classes of $E$ will be frequently used, we denote $c_i(E)$ simply by $c_i$. The pull-back $Bi^\\ast(E^\\vee)$ splits as the direct sum of two line bundles on $BT$: the characters  $\\lambda_1, \\lambda_2$ given by the two coordinate projections of $T$.
 
 Denoting $A^{*}_T = A^{ *}_T(pt.)$, it is known (see e.g.  \\cite[Chapter 4]{Mirror-symmetry-book}) that $A^{*}_T=\\Z\\left[  l_1, l_2  \\right]$, with $l_i =  c_1\\left( \\lambda_i \\right)$. By a slight abuse of notation we also denote by $l_i $  the Chern roots of the vector bundle $E^\\vee$, since we have
 
@@ -386,7 +399,7 @@ Now, in general, let $X$ be a $G$-scheme and $\\Delta \\xrightarrow{i} X$ an equ
 A_G^*(\\Delta) \\xrightarrow{i_*} A_G^*(X),
 \\]
 is to use an equivariant envelope of $\\Delta$. Recall that an \\italic{envelope} 
-$\\wt{\\Delta} \\xrightarrow{\\pi} \\Delta$, see \\cite[Definition 18.3]{Ful}, is a proper map such that for every subvariety $V$ of $\\Delta$, there is a subvariety $\\wt{V}$ of $\\wt{\\Delta}$ such that the morphism $\\pi$ maps $\\wt{\\Delta}$ birationally onto $V$. In the category of $G$-schemes, we say that $\\pi$ is an {\\it equivariant envelope}, see \\cite[Section 2.6]{EG}, if $\\pi$ is $G$-equivariant and if we can choose $\\wt{V}$ to be $G$-invariant whenever $V$ is $G$-invariant. Having an equivariant envelope $\\wt{\\Delta} \\xrightarrow{\\pi} \\Delta$ for a closed subscheme $\\Delta \\xrightarrow{i} X$ is especially helpful when we can explicitly describe the Chow group of $\\wt{\\Delta}$ and the image of the group homomorphism
+$\\wt{\\Delta} \\xrightarrow{\\pi} \\Delta$, see \\cite[Definition 18.3]{Ful}, is a proper map such that for every subvariety $V$ of $\\Delta$, there is a subvariety $\\wt{V}$ of $\\wt{\\Delta}$ such that the morphism $\\pi$ maps $\\wt{\\Delta}$ birationally onto $V$. In the category of $G$-schemes, we say that $\\pi$ is an \\italic{equivariant envelope}, see \\cite[Section 2.6]{EG}, if $\\pi$ is $G$-equivariant and if we can choose $\\wt{V}$ to be $G$-invariant whenever $V$ is $G$-invariant. Having an equivariant envelope $\\wt{\\Delta} \\xrightarrow{\\pi} \\Delta$ for a closed subscheme $\\Delta \\xrightarrow{i} X$ is especially helpful when we can explicitly describe the Chow group of $\\wt{\\Delta}$ and the image of the group homomorphism
 \\[
 A_G^*(\\wt{\\Delta}) \\xrightarrow{(i \\circ \\pi)_*} A_G^*(X).
 \\]

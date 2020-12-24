@@ -257,8 +257,7 @@ mathJaxText : DisplayMode -> String -> Html msg
 mathJaxText displayMode content =
     Html.node "mathjax-text"
         [ HA.property "display" (Json.Encode.bool True)
-        , HA.property "content" (Json.Encode.string ((Debug.log "CONTENT" content)  |> String.replace "\\ \\" "\\\\"))
-        --, HA.property "content" (Json.Encode.string content |> String.replace "\\ \\" "\\\\"))
+        , HA.property "content" (Json.Encode.string (content  |> String.replace "\\ \\" "\\\\"))
         ]
         []
 
@@ -1551,7 +1550,7 @@ renderEnvironmentDict =
         , ( "vmatrix",  \s x a y -> renderMathEnvironment "vmatrix" s x y )
         , ( "Vmatrix",  \s x a y -> renderMathEnvironment "Vmatrix" s x y )
         , ( "center", \s x a y -> renderCenterEnvironment s x y )
-        , ( "CD",  \s x a y -> renderMathJaxEnvironment "CD" (Debug.log "SO" s) (Debug.log "LLE" x) (Debug.log "LE" y)  )
+        , ( "CD",  \s x a y -> renderMathJaxEnvironment "CD" s x y  )
         , ( "comment", \s x a y -> renderCommentEnvironment s x y )
         , ( "defitem", \s x a y -> renderDefItemEnvironment s x a y )
         , ( "enumerate", \s x a y -> renderEnumerate s x y )
@@ -1663,8 +1662,7 @@ renderMathJaxEnvironment envName source latexState body =
         innerContents =
             case body of
                 LXString str ->
-                    str |> Debug.log "LXString"
-                        |> String.trim
+                    str |> String.trim
                         |> Internal.MathMacro.evalStr latexState.mathMacroDictionary
                         |> String.replace "\\ \\" "\\\\"
                         |> Internal.ParserHelpers.removeLabel

@@ -1,7 +1,7 @@
 module Renzo exposing (..)
 
 
-text2 = """
+text = """
 
 \\begin{mathmacro}
 \\newcommand{\\wt}[1]{\\widetilde{#1}}
@@ -56,7 +56,7 @@ D @>>> E @>{\\phantom{\\text{very long label}}}>> F
 --%\\end{equation}
 
 
-text = """
+text2 = """
 \\begin{mathmacro}
 \\newcommand{\\A}{\\mathbb{A}}
 \\newcommand{\\B}{\\text{B}}

@@ -44,7 +44,7 @@ convert : String -> String
 convert source =
     let
         data =
-            MiniLatex.EditSimple.init 0 source
+            MiniLatex.EditSimple.init 0 source Nothing
 
         astList =
             data.astList

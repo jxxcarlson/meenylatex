@@ -10,17 +10,23 @@ import Internal.Parser exposing (LatexExpression)
 import Internal.Render as Render exposing (render)
 import Internal.SourceMap as SourceMap
 
+addPreamble : String -> Maybe String -> String
+addPreamble text mpreamble =
+    case mpreamble of
+        Nothing -> text
+        Just str -> str ++ "\n\n" ++ text
 
-init : (String -> List LatexExpression) -> LatexState -> String -> EditRecord
-init parser latexState text =
-    initWithSeed 0 parser latexState text
+init : (String -> List LatexExpression) -> LatexState -> String -> Maybe String -> EditRecord
+init parser latexState text mpreamble =
+    initWithSeed 0 parser latexState text mpreamble
 
 
-initWithSeed : Int -> (String -> List LatexExpression) -> LatexState -> String -> EditRecord
-initWithSeed seed parser latexState text =
+initWithSeed : Int -> (String -> List LatexExpression) -> LatexState -> String -> Maybe String -> EditRecord
+initWithSeed seed parser latexState text mpreamble =
     let
+
         paragraphs =
-            text
+            (addPreamble text mpreamble)
                 |> Paragraph.logicalParagraphify
 
         -- Compute
@@ -41,7 +47,7 @@ initWithSeed seed parser latexState text =
         idList =
             makeIdListWithSeed seed paragraphs
     in
-    EditRecord text paragraphs latexExpressionList idList latexState2
+    EditRecord text mpreamble paragraphs latexExpressionList idList latexState2
 
 
 makeIdList : List String -> List String
@@ -59,11 +65,11 @@ update :
     -> (String -> List LatexExpression)
     -> EditRecord
     -> String
+    -> Maybe String
     -> EditRecord
-update seed parser editRecord source =
+update seed parser editRecord source mpreamble =
     if Internal.DifferSimple.isEmpty editRecord then
-        init parser emptyLatexState source
+        init parser emptyLatexState source mpreamble
 
     else
-        source
-            |> Internal.DifferSimple.update seed parser editRecord
+        Internal.DifferSimple.update seed parser editRecord source mpreamble

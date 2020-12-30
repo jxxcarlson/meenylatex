@@ -41,6 +41,7 @@ list of rendered paragraphs. We need to reveiw this strucure.
 -}
 type alias EditRecord =
     { source : String
+    , mpreamble : Maybe String
     , paragraphs : List String
     , astList : List ( String, List LatexExpression )
     , idList : List String
@@ -52,19 +53,24 @@ type alias EditRecord =
 -}
 emptyEditRecord : EditRecord
 emptyEditRecord =
-    EditRecord "" [] [] [] emptyLatexState
+    EditRecord "" Nothing [] [] [] emptyLatexState
 
+addPreamble : String -> Maybe String -> String
+addPreamble text mpreamble =
+    case mpreamble of
+        Nothing -> text
+        Just str -> str ++ "\n\n" ++ text
 
 {-| createRecord: Create an edit record by (1)
 breaking the text in to paragraphs, (2) applying
 the transformer to each string in the resulting
 list of strings.
 -}
-init : (String -> List LatexExpression) -> (String -> a) -> String -> EditRecord
-init parser renderer text =
+init : (String -> List LatexExpression) -> (String -> a) -> String -> Maybe String -> EditRecord
+init parser renderer text mpreamble =
     let
         paragraphs =
-            Paragraph.logicalParagraphify text
+            Paragraph.logicalParagraphify (addPreamble text mpreamble)
 
         n =
             List.length paragraphs
@@ -74,8 +80,12 @@ init parser renderer text =
 
         astList =
             List.map (\p -> ( p, parser p )) paragraphs
+
+        preamble = case mpreamble of
+            Nothing -> ""
+            Just str -> str
     in
-    EditRecord text paragraphs astList idList emptyLatexState
+    EditRecord text mpreamble paragraphs astList idList emptyLatexState
 
 
 {-| An EditRecord is considered to be empyt if its list of parapgraphs
@@ -95,11 +105,12 @@ accomplishes this using the transformer. The seed is used to produces
 a differential idList. This last step is perhaps unnecessary. To investigate.
 (This was part of an optimization scheme.)
 -}
-update : Int -> (String -> List LatexExpression) -> EditRecord -> String -> EditRecord
-update seed parser editRecord text =
+update : Int -> (String -> List LatexExpression) -> EditRecord -> String -> Maybe String -> EditRecord
+update seed parser editRecord text mpreamble =
     let
-        newParagraphs =
-            Paragraph.logicalParagraphify text
+        newParagraphs = case mpreamble of
+            Nothing ->  Paragraph.logicalParagraphify (addPreamble text editRecord.mpreamble )
+            Just preamble -> Paragraph.logicalParagraphify (preamble ++ "\n\n" ++ text)
 
         diffRecord =
             diff editRecord.paragraphs newParagraphs
@@ -110,7 +121,7 @@ update seed parser editRecord text =
         p =
             differentialIdList seed diffRecord editRecord
     in
-    EditRecord text newParagraphs astList p.idList editRecord.latexState
+    EditRecord text editRecord.mpreamble newParagraphs astList p.idList editRecord.latexState
 
 
 {-| Update the renderedList by applying the transformer only to the

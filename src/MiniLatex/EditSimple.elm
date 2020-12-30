@@ -64,33 +64,37 @@ type LaTeXMsg
 
 render : String -> List (Html LaTeXMsg)
 render source =
-  source |> init 1 |> get "-"
+  init 1 source Nothing |> get "-"
 
 renderWithVersion : Int -> String -> List (Html LaTeXMsg)
 renderWithVersion version source =
-  source |> init version |> get "-"
+  init version source Nothing |> get "-"
 
 {-| Create Data from a string of MiniLaTeX text and a version number.
 The version number should be different for each call of init.
 -}
-init : Int -> String -> Data
-init version source =
+init : Int -> String -> Maybe String -> Data
+init seed source mpreamble =
     Internal.LatexDifferSimple.update
-        version
+        seed
         Internal.Parser.parse
         Internal.DifferSimple.emptyEditRecord
         source
+        mpreamble
 
+--update : Int -> (String -> List LatexExpression) -> EditRecord -> String -> Maybe String -> EditRecord
+--update seed parser editRecord text mpreamble
 
 {-| Update Data with modified text, re-parsing and re-rerendering changed elements.
 -}
-update : Int -> String -> Data -> Data
-update version source editRecord =
+update : Int -> String -> Maybe String -> Data -> Data
+update version source mpreamble editRecord =
     Internal.LatexDifferSimple.update
         version
         Internal.Parser.parse
         editRecord
         source
+        mpreamble
 
 
 {-| Retrieve Html from a Data object and construct

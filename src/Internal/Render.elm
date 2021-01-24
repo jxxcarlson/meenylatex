@@ -1904,6 +1904,7 @@ highlightSyntax lang_ source =
         let
           lang = case lang_ of
               "elm" -> SH.elm
+              "haskell" -> SH.elm
               "js"  ->  SH.javascript
               "xml" -> SH.xml
               "css" -> SH.css

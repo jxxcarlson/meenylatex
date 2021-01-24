@@ -1892,12 +1892,14 @@ renderVerbatim source latexState body =
 
 
 renderCodeEnvironment : SourceText -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
-renderCodeEnvironment source latexState optArgs body =
+renderCodeEnvironment source_ latexState optArgs body =
     let
       lang = Internal.RenderToString.renderArg 0 latexState optArgs
+      prefix = "\\begin{colored}[" ++ lang ++ "]\n"
+      suffix = "\n\\end{colored}"
+      source = source_ |> String.replace prefix "" |> String.replace suffix "" |> String.trim
     in
-    highlightSyntax lang (Internal.RenderToString.render latexState body)
-
+    highlightSyntax lang source
 
 highlightSyntax : String -> String -> Html msg
 highlightSyntax lang_ source =
@@ -1915,7 +1917,7 @@ highlightSyntax lang_ source =
               _ -> SH.noLang
         in
         Html.div []
-            [ SH.useTheme SH.gitHub
+            [ SH.useTheme SH.oneDark
             , lang source
                 |> Result.map (SH.toBlockHtml (Just 1))
                 |> Result.withDefault

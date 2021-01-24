@@ -505,6 +505,7 @@ renderMacroDict =
         , ( "texarg", \s x y z -> renderTexArg s x z )
         , ( "ref", \s x y z -> renderRef s x z )
         , ( "medskip", \s x y z -> renderMedSkip s x z )
+        , ( "par", \s x y z -> renderMedSkip s x z)
         , ( "smallskip", \s x y z -> renderSmallSkip s x z )
         , ( "section", \s x y z -> renderSection s x z )
         , ( "section*", \s x y z -> renderSectionStar s x z )
@@ -1887,7 +1888,7 @@ renderVerbatim source latexState body =
         body2 =
             Internal.RenderToString.render latexState body
     in
-    Html.pre [ HA.style "margin-top" "-14px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
+    Html.pre [ HA.style "margin-top" "0px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
 
 

@@ -615,7 +615,7 @@ passThroughEnv : String -> String -> LatexExpression
 passThroughEnv envType source =
     let
       lines = source |> String.trim |> String.lines |> List.filter (\l -> String.length l > 0)
-      optArgs_ = runParser (itemList optionalArg) (List.head lines |> Maybe.withDefault "") |> Debug.log "OPTARGS"
+      optArgs_ = runParser (itemList optionalArg) (List.head lines |> Maybe.withDefault "")
       body = if optArgs_ == [] then
                  lines |> String.join "\n"
               else

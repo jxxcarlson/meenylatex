@@ -1918,13 +1918,13 @@ highlightSyntax lang_ source =
               "nolang" -> SH.noLang
               _ -> SH.noLang
         in
-        Html.div []
+        Html.div [HA.style "class" "elmsh-pa"]
             [ SH.useTheme SH.oneDark
             , lang source
                 |> Result.map (SH.toBlockHtml (Just 1))
                 -- |> Result.map (SH.toBlockHtml (Just 1) >> \x -> Html.div [HA.style "class" "pre.elmsh {padding: 8px;}"] [x])
                 |> Result.withDefault
-                     (Html.pre [HA.style "padding" "8px"] [ Html.code [] [ Html.text source ]])
+                     (Html.pre [] [ Html.code [HA.style "padding" "8px"] [ Html.text source ]])
             ]
 
 renderVerse : SourceText -> LatexState -> LatexExpression -> Html msg

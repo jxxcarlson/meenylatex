@@ -603,22 +603,6 @@ passed to MathJax for processing and also for the verbatim
 environment.
 -}
 -- TODO
-passThroughBody0 : String -> String -> LXParser LatexExpression
-passThroughBody0 endWoord envType =
-    --  inContext "passThroughBody" <|
-    succeed identity
-        |= parseToSymbol ExpectingEndForPassThroughBody endWoord
-        |. ws
-        |> map LXString
-        |> map (Environment envType [])
-
---passThroughBody2 : String -> String -> LXParser LatexExpression
---passThroughBody2 endWoord envType =
---    --  inContext "passThroughBody" <|
---    succeed identity
---        |= parseToSymbol ExpectingEndForPassThroughBody endWoord
---        |. ws
---        |> map (passThroughBody2 envType)
 passThroughBody : String -> String -> LXParser LatexExpression
 passThroughBody endWoord envType =
     --  inContext "passThroughBody" <|
@@ -631,19 +615,13 @@ passThroughEnv : String -> String -> LatexExpression
 passThroughEnv envType source =
     let
       lines = source |> String.trim |> String.lines |> List.filter (\l -> String.length l > 0)
-      -- optArgs_ = Maybe.map parse (List.head lines) |> Maybe.withDefault []
-      optArgs_ = runParser (itemList optionalArg) (List.head lines |> Maybe.withDefault "")
-      body = List.drop 1 lines |> String.join "\n"
+      optArgs_ = runParser (itemList optionalArg) (List.head lines |> Maybe.withDefault "") |> Debug.log "OPTARGS"
+      body = if optArgs_ == [] then
+                 lines |> String.join "\n"
+              else
+                  List.drop 1 lines |> String.join "\n"
     in
       Environment envType optArgs_ (LXString body)
-
-
-passThroughBodyX : String -> String -> LXParser LatexExpression
-passThroughBodyX endWoord envType =
-    --  inContext "passThroughBody" <|
-    succeed (\optargs str -> Environment envType optargs str)
-        |= itemList optionalArg
-        |= (parseToSymbol ExpectingEndForPassThroughBody endWoord |> map LXString)
 
 
 {- ITEMIZED LISTS -}

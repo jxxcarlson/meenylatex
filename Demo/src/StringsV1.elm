@@ -1,4 +1,4 @@
-module StringsV1 exposing (initialText, macros, mathExampleText)
+module StringsV1 exposing (initialText, macros, mathExampleText, syntaxTest)
 
 
 macros = "\\newcommand{\\bra}{\\langle}"
@@ -13,6 +13,14 @@ macros2 =
 \\newcommand{\\id}{\\mathbb{\\,I\\,}}
 """
 
+
+syntaxTest = """
+\\begin{colored}[haskell]
+push k = ST (\\s -> ((), k::s)
+
+pop = ST (\\(k:ks) -> (k, ks))
+\\end{colored}
+"""
 
 initialText =
     """

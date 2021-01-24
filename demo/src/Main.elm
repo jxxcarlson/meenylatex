@@ -18,7 +18,7 @@ import Style exposing (..)
 import Task exposing (Task)
 
 
-sourceText = Renzo.text
+sourceText = StringsV1.syntaxTest
     -- Renzo.text
     -- TestData.text
     -- StringsV2.initialText

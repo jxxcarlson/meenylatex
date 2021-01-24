@@ -1,8 +1,8 @@
-module Internal.Parser exposing
-    ( LatexExpression(..), macro, parse, defaultLatexList
-    , latexList, endWord, envName, word, latexExpression
-    , Context, LXParser, Problem(..), displayMathBrackets, displayMathDollar, environment, inlineMath, itemList, newcommand, numberOfArgs, texComment, words, ws
-    )
+module Internal.Parser exposing (..)
+    --( LatexExpression(..), macro, parse, defaultLatexList
+    --, runParser, latexList, endWord, envName, word, latexExpression
+    --, Context, LXParser, Problem(..), displayMathBrackets, displayMathDollar, environment, inlineMath, itemList, newcommand, numberOfArgs, texComment, words, ws
+    --)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -117,6 +117,18 @@ parse text =
 
         _ ->
             [ LXString "Dude! not great code here." ]
+
+runParser : LXParser (List LatexExpression) -> String -> (List LatexExpression)
+runParser p str =
+    let
+            expr =
+                Parser.Advanced.run p str
+    in
+        case expr of
+            Ok latexExpr -> latexExpr
+
+            Err error ->
+                [LXError error]
 
 
 {-| Production: $ LatexList &\\Rightarrow LatexExpression^+ $
@@ -535,7 +547,7 @@ environmentOfType envType =
 
 
         envKind =
-            if List.member envType ([ "equation", "eqnarray", "verbatim", "code", "CD", "mathmacro", "textmacro", "listing", "verse" ] ++ katex ) then
+            if List.member envType ([ "equation", "eqnarray", "verbatim", "colored", "CD", "mathmacro", "textmacro", "listing", "verse" ] ++ katex ) then
                 "passThrough"
 
             else
@@ -590,8 +602,9 @@ This parser is used for environments whose body is to be
 passed to MathJax for processing and also for the verbatim
 environment.
 -}
-passThroughBody : String -> String -> LXParser LatexExpression
-passThroughBody endWoord envType =
+-- TODO
+passThroughBody0 : String -> String -> LXParser LatexExpression
+passThroughBody0 endWoord envType =
     --  inContext "passThroughBody" <|
     succeed identity
         |= parseToSymbol ExpectingEndForPassThroughBody endWoord
@@ -599,6 +612,38 @@ passThroughBody endWoord envType =
         |> map LXString
         |> map (Environment envType [])
 
+--passThroughBody2 : String -> String -> LXParser LatexExpression
+--passThroughBody2 endWoord envType =
+--    --  inContext "passThroughBody" <|
+--    succeed identity
+--        |= parseToSymbol ExpectingEndForPassThroughBody endWoord
+--        |. ws
+--        |> map (passThroughBody2 envType)
+passThroughBody : String -> String -> LXParser LatexExpression
+passThroughBody endWoord envType =
+    --  inContext "passThroughBody" <|
+    succeed identity
+        |= parseToSymbol ExpectingEndForPassThroughBody endWoord
+        |. ws
+        |> map (passThroughEnv envType)
+
+passThroughEnv : String -> String -> LatexExpression
+passThroughEnv envType source =
+    let
+      lines = source |> String.trim |> String.lines |> List.filter (\l -> String.length l > 0)
+      -- optArgs_ = Maybe.map parse (List.head lines) |> Maybe.withDefault []
+      optArgs_ = runParser (itemList optionalArg) (List.head lines |> Maybe.withDefault "")
+      body = List.drop 1 lines |> String.join "\n"
+    in
+      Environment envType optArgs_ (LXString body)
+
+
+passThroughBodyX : String -> String -> LXParser LatexExpression
+passThroughBodyX endWoord envType =
+    --  inContext "passThroughBody" <|
+    succeed (\optargs str -> Environment envType optargs str)
+        |= itemList optionalArg
+        |= (parseToSymbol ExpectingEndForPassThroughBody endWoord |> map LXString)
 
 
 {- ITEMIZED LISTS -}

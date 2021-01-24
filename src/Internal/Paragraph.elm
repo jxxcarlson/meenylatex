@@ -1,4 +1,4 @@
-module Internal.Paragraph exposing (logicalParagraphify)
+module Internal.Paragraph exposing(..) -- exposing (logicalParagraphify)
 
 {-| This module exports just one function,
 intended to turn a string into a lisst
@@ -16,6 +16,38 @@ import Internal.Parser
 import Internal.Stack as Stack exposing (Stack)
 import Parser.Advanced
 import Regex
+
+
+lp = logicalParagraphify
+
+ex0 = """
+\\begin{colored}[haskell]
+push k = ST (\\s -> ((), k::s)
+\\end{colored}
+"""
+
+ex0b = """
+\\begin{colored}[haskell, foo]
+push k = ST (\\s -> ((), k::s)
+\\end{colored}
+"""
+
+ex1 = """
+\\begin{colored}[haskell]
+push k = ST (\\s -> ((), k::s)
+
+pop = ST (\\(k:ks) -> (k, ks))
+\\end{colored}
+"""
+
+ex2 = """
+\\begin{colored}[haskell]
+instance Functor (ST s) where
+    fmap f s = ST $  \\t -> let (a,s') = app s t
+                          in ( f a, s')
+\\end{colored}
+"""
+
 
 
 type ParserState

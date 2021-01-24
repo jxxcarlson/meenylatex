@@ -1898,6 +1898,8 @@ renderCodeEnvironment source_ latexState optArgs body =
       prefix = "\\begin{colored}[" ++ lang ++ "]\n"
       suffix = "\n\\end{colored}"
       source = source_ |> String.replace prefix "" |> String.replace suffix "" |> String.trim
+      -- source = source_ |> String.replace prefix "" |> String.replace suffix "" |> String.replace "$" "＄"|> String.trim
+      -- source = source_ |> String.replace prefix "" |> String.replace suffix "" |> String.replace "$" "🤑"|> String.trim |> Debug.log "SOURCE"
     in
     highlightSyntax lang source
 
@@ -1921,7 +1923,7 @@ highlightSyntax lang_ source =
             , lang source
                 |> Result.map (SH.toBlockHtml (Just 1))
                 |> Result.withDefault
-                    (Html.pre [] [ Html.code [] [ Html.text source ]])
+                     (Html.pre [] [ Html.code [] [ Html.text source ]])
             ]
 
 renderVerse : SourceText -> LatexState -> LatexExpression -> Html msg

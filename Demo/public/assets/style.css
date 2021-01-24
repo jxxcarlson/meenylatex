@@ -8,6 +8,9 @@ body { font-size: 13px;
        line-height: 19px;}
 
 
+mjx-stretchy-h > mjx-ext > mjx-c::before {
+  padding-top: 1px;
+}
 
 #__RENDERED_TEXT__ {
   overflow-y: scroll;

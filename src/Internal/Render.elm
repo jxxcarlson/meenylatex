@@ -68,6 +68,7 @@ import Parser exposing (DeadEnd, Problem(..))
 import Regex
 import String
 import SvgParser
+import SyntaxHighlight as SH
 
 
 type alias SourceText = String
@@ -1549,6 +1550,7 @@ renderEnvironmentDict =
         , ( "Bmatrix",  \s x a y -> renderMathEnvironment "Bmatrix" s x y )
         , ( "vmatrix",  \s x a y -> renderMathEnvironment "vmatrix" s x y )
         , ( "Vmatrix",  \s x a y -> renderMathEnvironment "Vmatrix" s x y )
+        , ( "colored",     \s x a y -> renderCodeEnvironment s x a y )
         , ( "center", \s x a y -> renderCenterEnvironment s x y )
         , ( "CD",  \s x a y -> renderMathJaxEnvironment "CD" s x y  )
         , ( "comment", \s x a y -> renderCommentEnvironment s x y )
@@ -1887,6 +1889,37 @@ renderVerbatim source latexState body =
     in
     Html.pre [ HA.style "margin-top" "-14px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
 
+
+
+renderCodeEnvironment : SourceText -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
+renderCodeEnvironment source latexState optArgs body =
+    let
+      lang = Internal.RenderToString.renderArg 0 latexState optArgs
+    in
+    highlightSyntax lang (Internal.RenderToString.render latexState body)
+
+
+highlightSyntax : String -> String -> Html msg
+highlightSyntax lang_ source =
+        let
+          lang = case lang_ of
+              "elm" -> SH.elm
+              "js"  ->  SH.javascript
+              "xml" -> SH.xml
+              "css" -> SH.css
+              "python" -> SH.python
+              "sql" -> SH.sql
+              "json" -> SH.json
+              "nolang" -> SH.noLang
+              _ -> SH.noLang
+        in
+        Html.div []
+            [ SH.useTheme SH.gitHub
+            , lang source
+                |> Result.map (SH.toBlockHtml (Just 1))
+                |> Result.withDefault
+                    (Html.pre [] [ Html.code [] [ Html.text source ]])
+            ]
 
 renderVerse : SourceText -> LatexState -> LatexExpression -> Html msg
 renderVerse source latexState body =

@@ -22,7 +22,8 @@
             "elm-community/maybe-extra": "5.1.0",
             "elm-community/result-extra": "2.3.0",
             "jinjor/elm-debounce": "3.0.0",
-            "mdgriffith/elm-ui": "1.1.5"
+            "mdgriffith/elm-ui": "1.1.5",
+            "pablohirafuji/elm-syntax-highlight": "3.4.0"
         },
         "indirect": {
             "andre-dietrich/parser-combinators": "3.2.0",

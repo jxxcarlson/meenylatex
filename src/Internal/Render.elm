@@ -530,7 +530,7 @@ renderMacroDict =
         , ( "ilink2", \s x y z -> renderILink s x z )
         , ( "ilink3", \s x y z -> renderILink s x z )
         , ( "include", \s x y z -> renderInclude s x z )
-        , ( "xlinkPublic", \s x y z -> renderXLinkPublic s x z )
+        , ( "publicLink", \s x y z -> publicLink s x z )
         , ( "documentTitle", \s x y z -> renderDocumentTitle s x z )
         , ( "title", \s x y z -> renderTitle x z )
         , ( "author", \s x y z -> renderAuthor s x z )
@@ -1380,8 +1380,8 @@ renderInclude _ latexState args =
     Html.span [] []
 
 
-renderXLinkPublic : String -> LatexState -> List LatexExpression -> Html msg
-renderXLinkPublic _ latexState args =
+publicLink : String -> LatexState -> List LatexExpression -> Html msg
+publicLink _ latexState args =
     let
         id =
             Internal.RenderToString.renderArg 0 latexState args

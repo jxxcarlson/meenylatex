@@ -530,7 +530,7 @@ renderMacroDict =
         , ( "ilink2", \s x y z -> renderILink s x z )
         , ( "ilink3", \s x y z -> renderILink s x z )
         , ( "include", \s x y z -> renderInclude s x z )
-        , ( "publicLink", \s x y z -> publicLink s x z )
+        , ( "publiclink", \s x y z -> renderPublicLink s x z )
         , ( "documentTitle", \s x y z -> renderDocumentTitle s x z )
         , ( "title", \s x y z -> renderTitle x z )
         , ( "author", \s x y z -> renderAuthor s x z )
@@ -1380,8 +1380,8 @@ renderInclude _ latexState args =
     Html.span [] []
 
 
-publicLink : String -> LatexState -> List LatexExpression -> Html msg
-publicLink _ latexState args =
+renderPublicLink : String -> LatexState -> List LatexExpression -> Html msg
+renderPublicLink _ latexState args =
     let
         id =
             Internal.RenderToString.renderArg 0 latexState args
@@ -1553,6 +1553,7 @@ renderEnvironmentDict =
         , ( "Vmatrix",  \s x a y -> renderMathEnvironment "Vmatrix" s x y )
         , ( "colored",     \s x a y -> renderCodeEnvironment s x a y )
         , ( "center", \s x a y -> renderCenterEnvironment s x y )
+        , ( "obeylines", \s x a y -> renderObeyLinesEnvironment s x y )
         , ( "CD",  \s x a y -> renderMathJaxEnvironment "CD" s x y  )
         , ( "comment", \s x a y -> renderCommentEnvironment s x y )
         , ( "defitem", \s x a y -> renderDefItemEnvironment s x a y )
@@ -1702,6 +1703,18 @@ renderCenterEnvironment source latexState body =
         ]
         [ r ]
 
+
+renderObeyLinesEnvironment : SourceText -> LatexState -> LatexExpression -> Html msg
+renderObeyLinesEnvironment source latexState body =
+    let
+        r =
+            render source latexState body
+    in
+    Html.div
+        [ HA.style "white-space" "pre"
+
+        ]
+        [ r ]
 
 renderCommentEnvironment : SourceText -> LatexState -> LatexExpression -> Html msg
 renderCommentEnvironment source latexState body =

@@ -481,6 +481,7 @@ renderMacroDict =
         , ( "medskip", \s x y z -> renderMedSkip s x z )
         , ( "smallskip", \s x y z -> renderSmallSkip s x z )
         , ( "cite", \s x y z -> renderCite s x z )
+        , ( "ccolor", \s x y z -> renderColored s x z )
         , ( "dollar", \s x y z -> renderDollar s x z )
         , ( "texbegin", \s x y z -> renderBegin s x z )
         , ( "texend", \s x y z -> renderEnd s x z )
@@ -645,6 +646,34 @@ renderCite _ latexState args =
         , Html.span [] [ Html.text "] " ]
         ]
 
+
+renderColored : String -> LatexState -> List LatexExpression -> Html msg
+renderColored source latexState args =
+    -- TODO
+    let
+        langString : String
+        langString =
+            Internal.RenderToString.renderArg 0 latexState args
+
+        lang = case langString of
+              "elm" -> SH.elm
+              "haskell" -> SH.elm
+              "js"  ->  SH.javascript
+              "xml" -> SH.xml
+              "css" -> SH.css
+              "python" -> SH.python
+              "sql" -> SH.sql
+              "json" -> SH.json
+              "nolang" -> SH.noLang
+              _ -> SH.noLang
+
+        theCode : String
+        theCode = Internal.RenderToString.renderArg 1 latexState args
+    in
+    lang theCode
+            |> Result.map SH.toInlineHtml
+            |> Result.withDefault
+                (Html.code [] [ Html.text "isEmpty : String -> Bool" ])
 
 renderCode : String -> LatexState -> List LatexExpression -> Html msg
 renderCode source latexState args =
@@ -1920,7 +1949,7 @@ highlightSyntax lang_ source =
               _ -> SH.noLang
         in
         Html.div [HA.style "class" "elmsh-pa"]
-            [ SH.useTheme SH.oneDark
+            [ SH.useTheme SH.gitHub
             , lang source
                 |> Result.map (SH.toBlockHtml (Just 1))
                 -- |> Result.map (SH.toBlockHtml (Just 1) >> \x -> Html.div [HA.style "class" "pre.elmsh {padding: 8px;}"] [x])

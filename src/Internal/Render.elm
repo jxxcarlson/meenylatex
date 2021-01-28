@@ -531,6 +531,7 @@ renderMacroDict =
         , ( "ilink3", \s x y z -> renderILink s x z )
         , ( "include", \s x y z -> renderInclude s x z )
         , ( "publiclink", \s x y z -> renderPublicLink s x z )
+        , ( "homepagelink", \s x y z -> renderHomePageLink s x z )
         , ( "documentTitle", \s x y z -> renderDocumentTitle s x z )
         , ( "title", \s x y z -> renderTitle x z )
         , ( "author", \s x y z -> renderAuthor s x z )
@@ -1394,6 +1395,20 @@ renderPublicLink _ latexState args =
     in
     Html.a [ HA.href ref ] [ Html.text label ]
 
+
+renderHomePageLink : String -> LatexState -> List LatexExpression -> Html msg
+renderHomePageLink _ latexState args =
+    let
+        id =
+            Internal.RenderToString.renderArg 0 latexState args
+
+        ref =
+            getDictionaryItem "setclient" latexState ++ "/h/" ++ id
+
+        label =
+            Internal.RenderToString.renderArg 1 latexState args
+    in
+    Html.a [ HA.href ref ] [ Html.text label ]
 
 
 -- SMACRO

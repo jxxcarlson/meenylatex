@@ -647,27 +647,27 @@ renderCite _ latexState args =
         ]
 
 
+
+-- getLang : a -> String.String -> Result (List DeadEnd) SH.HCode
+getLang langString =
+    case langString of
+                  "elm" -> SH.elm
+                  "haskell" -> SH.elm
+                  "js"  ->  SH.javascript
+                  "xml" -> SH.xml
+                  "css" -> SH.css
+                  "python" -> SH.python
+                  "sql" -> SH.sql
+                  "json" -> SH.json
+                  "nolang" -> SH.noLang
+                  _ -> SH.noLang
+
 renderColored : String -> LatexState -> List LatexExpression -> Html msg
 renderColored source latexState args =
     -- TODO
     let
-        langString : String
-        langString =
-            Internal.RenderToString.renderArg 0 latexState args
+        lang = getLang (Internal.RenderToString.renderArg 0 latexState args)
 
-        lang = case langString of
-              "elm" -> SH.elm
-              "haskell" -> SH.elm
-              "js"  ->  SH.javascript
-              "xml" -> SH.xml
-              "css" -> SH.css
-              "python" -> SH.python
-              "sql" -> SH.sql
-              "json" -> SH.json
-              "nolang" -> SH.noLang
-              _ -> SH.noLang
-
-        theCode : String
         theCode = Internal.RenderToString.renderArg 1 latexState args
     in
     lang theCode
@@ -1948,22 +1948,9 @@ renderCodeEnvironment source_ latexState optArgs body =
 
 highlightSyntax : String -> String -> Html msg
 highlightSyntax lang_ source =
-        let
-          lang = case lang_ of
-              "elm" -> SH.elm
-              "haskell" -> SH.elm
-              "js"  ->  SH.javascript
-              "xml" -> SH.xml
-              "css" -> SH.css
-              "python" -> SH.python
-              "sql" -> SH.sql
-              "json" -> SH.json
-              "nolang" -> SH.noLang
-              _ -> SH.noLang
-        in
         Html.div [HA.style "class" "elmsh-pa"]
             [ SH.useTheme SH.gitHub
-            , lang source
+            , (getLang lang_) source
                 |> Result.map (SH.toBlockHtml (Just 1))
                 -- |> Result.map (SH.toBlockHtml (Just 1) >> \x -> Html.div [HA.style "class" "pre.elmsh {padding: 8px;}"] [x])
                 |> Result.withDefault

@@ -481,7 +481,7 @@ renderMacroDict =
         , ( "medskip", \s x y z -> renderMedSkip s x z )
         , ( "smallskip", \s x y z -> renderSmallSkip s x z )
         , ( "cite", \s x y z -> renderCite s x z )
-        , ( "ccolor", \s x y z -> renderColored s x z )
+        , ( "colored", \s x y z -> renderColored s x z )
         , ( "dollar", \s x y z -> renderDollar s x z )
         , ( "texbegin", \s x y z -> renderBegin s x z )
         , ( "texend", \s x y z -> renderEnd s x z )

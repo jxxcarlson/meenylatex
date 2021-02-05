@@ -61,11 +61,14 @@ type LaTeXMsg
 --         |> (\list -> Html.div [] list)
 
 
-
+{-| Simplest function for rendering a string of LaTeX -}
 render : String -> List (Html LaTeXMsg)
 render source =
   init 1 source Nothing |> get "-"
 
+
+{-| Like 'render', but adds a 'version' id to the Html.
+ This is used in applications that edit LaTeX text -}
 renderWithVersion : Int -> String -> List (Html LaTeXMsg)
 renderWithVersion version source =
   init version source Nothing |> get "-"

@@ -9,7 +9,7 @@ alias of the record type `Internal.DifferSimple.EditRecord`, contains no functio
 
 # API
 
-@docs Data, emptyData, init, update, get, LaTeXMsg
+@docs Data, emptyData, init, update, get, render, renderWithVersion, LaTeXMsg
 
 -}
 

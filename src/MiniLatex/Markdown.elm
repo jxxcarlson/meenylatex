@@ -39,7 +39,7 @@ import Regex
 import String
 import SvgParser
 
-{-| ConvertMarkown text to MiniLaTeX text. Useful for generating PDF.  Needs more work -}
+{-| Convert MiniLaTeX to Markdown.  Experimental -}
 convert : String -> String
 convert source =
     let

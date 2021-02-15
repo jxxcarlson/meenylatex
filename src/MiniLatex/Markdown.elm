@@ -5,7 +5,7 @@ module MiniLatex.Markdown exposing (convert)
 
 # API
 
-@docs render
+@docs convert
 
 -}
 
@@ -39,7 +39,7 @@ import Regex
 import String
 import SvgParser
 
-
+{-| ConvertMarkown text to MiniLaTeX text. Useful for generating PDF.  Needs more work -}
 convert : String -> String
 convert source =
     let

@@ -1964,7 +1964,7 @@ renderCodeEnvironment source_ latexState optArgs body =
 highlightSyntax : String -> String -> Html msg
 highlightSyntax lang_ source =
         Html.div [HA.style "class" "elmsh-pa"]
-            [ SH.useTheme SH.gitHub
+            [ SH.useTheme SH.oneDark
             , (getLang lang_) source
                 |> Result.map (SH.toBlockHtml (Just 1))
                 -- |> Result.map (SH.toBlockHtml (Just 1) >> \x -> Html.div [HA.style "class" "pre.elmsh {padding: 8px;}"] [x])

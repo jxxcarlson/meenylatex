@@ -682,7 +682,7 @@ renderCode source latexState args =
         arg =
             renderArg source 0 latexState args
     in
-    Html.code [] [ oneSpace, arg ]
+    Html.code [HA.style "color" "#8a05ff", HA.style "font-weight" "550"] [ oneSpace, arg ]
 
 
 renderEllie : String -> LatexState -> List LatexExpression -> Html msg

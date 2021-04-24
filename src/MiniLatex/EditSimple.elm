@@ -1,7 +1,4 @@
-module MiniLatex.EditSimple exposing
-    ( Data, emptyData, init, update, get, LaTeXMsg
-    , render, renderWithVersion
-    )
+module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, render, renderWithVersion, LaTeXMsg)
 
 {-| This module is like MiniLaTeX.Edit, except that the Data type, which is an
 alias of the record type `Internal.DifferSimple.EditRecord`, contains no functions.
@@ -54,6 +51,7 @@ type LaTeXMsg
     = IDClicked String
 
 
+
 -- render : String -> Html LaTeXMsg
 -- render source =
 --     init 0 source
@@ -61,17 +59,20 @@ type LaTeXMsg
 --         |> (\list -> Html.div [] list)
 
 
-{-| Simplest function for rendering a string of LaTeX -}
+{-| Simplest function for rendering a string of LaTeX
+-}
 render : String -> List (Html LaTeXMsg)
 render source =
-  init 1 source Nothing |> get "-"
+    init 1 source Nothing |> get "-"
 
 
 {-| Like 'render', but adds a 'version' id to the Html.
- This is used in applications that edit LaTeX text -}
+This is used in applications that edit LaTeX text
+-}
 renderWithVersion : Int -> String -> List (Html LaTeXMsg)
 renderWithVersion version source =
-  init version source Nothing |> get "-"
+    init version source Nothing |> get "-"
+
 
 {-| Create Data from a string of MiniLaTeX text and a version number.
 The version number should be different for each call of init.
@@ -85,8 +86,11 @@ init seed source mpreamble =
         source
         mpreamble
 
+
+
 --update : Int -> (String -> List LatexExpression) -> EditRecord -> String -> Maybe String -> EditRecord
 --update seed parser editRecord text mpreamble
+
 
 {-| Update Data with modified text, re-parsing and re-rerendering changed elements.
 -}
@@ -119,7 +123,9 @@ get selectedId data =
             Accumulator.renderNew Internal.Render.renderLatexListToList data.latexState data.astList
 
         paragraphs =
-            List.map (\x -> Html.div [] x) paragraphs_
+            List.map
+                (Html.div [ HA.style "white-space" "normal" ])
+                paragraphs_
 
         mark id_ =
             if selectedId == id_ then
@@ -134,7 +140,7 @@ get selectedId data =
         ids =
             data.idList
                 |> List.map mark
- 
+
         keyedNode : String -> Html LaTeXMsg -> Html LaTeXMsg
         keyedNode id para =
             Keyed.node "p"

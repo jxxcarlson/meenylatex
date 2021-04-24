@@ -124,7 +124,7 @@ get selectedId data =
 
         paragraphs =
             List.map
-                (Html.div [ HA.style "white-space" "normal" ])
+                (Html.div [ HA.style "white-space" "normal", HA.style "line-height" "1.5" ])
                 paragraphs_
 
         mark id_ =

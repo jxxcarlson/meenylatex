@@ -147,7 +147,8 @@ get selectedId data =
                 [ HA.id id
                 , selectedStyle selectedId id
                 , HE.onClick (IDClicked id)
-                , HA.style "margin-bottom" "10px"
+
+                -- , HA.style "margin-bottom" "0px"
                 ]
                 [ ( id, para ) ]
     in

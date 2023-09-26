@@ -1,8 +1,7 @@
 {
     "type": "application",
     "source-directories": [
-        "src",
-        "../src"
+        "src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
@@ -18,11 +17,16 @@
             "elm-community/list-extra": "8.2.4",
             "elm-community/maybe-extra": "5.2.0",
             "elm-community/result-extra": "2.4.0",
+            "jxxcarlson/meenylatex": "14.1.1",
             "mdgriffith/elm-ui": "1.1.8",
             "pablohirafuji/elm-syntax-highlight": "3.4.0"
         },
         "indirect": {
             "andre-dietrich/parser-combinators": "3.2.0",
+            "elm/bytes": "1.0.8",
+            "elm/file": "1.0.5",
+            "elm/http": "2.0.0",
+            "elm/random": "1.0.0",
             "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
@@ -36,11 +40,6 @@
     },
     "test-dependencies": {
         "direct": {},
-        "indirect": {
-            "elm/bytes": "1.0.8",
-            "elm/file": "1.0.5",
-            "elm/http": "2.0.0",
-            "elm/random": "1.0.0"
-        }
+        "indirect": {}
     }
 }

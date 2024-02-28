@@ -203,6 +203,9 @@ displayExpected problem =
         ExpectingLeadingDollarSign ->
             "Expecting $"
 
+        ExpectingLeadingInLineMathDelimiter string ->
+            "Expecting Leading Inline Math Delimiter " ++ string
+
         ExpectingEnvironmentNameBegin ->
             "Close your environment \\begin{..} ... \\end{..}"
 

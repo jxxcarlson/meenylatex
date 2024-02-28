@@ -1,8 +1,4 @@
 module Internal.Parser exposing (..)
-    --( LatexExpression(..), macro, parse, defaultLatexList
-    --, runParser, latexList, endWord, envName, word, latexExpression
-    --, Context, LXParser, Problem(..), displayMathBrackets, displayMathDollar, environment, inlineMath, itemList, newcommand, numberOfArgs, texComment, words, ws
-    --)
 
 {-| This module is for quickly preparing latex for export.
 
@@ -14,6 +10,10 @@ module Internal.Parser exposing (..)
 
 -}
 
+--( LatexExpression(..), macro, parse, defaultLatexList
+--, runParser, latexList, endWord, envName, word, latexExpression
+--, Context, LXParser, Problem(..), displayMathBrackets, displayMathDollar, environment, inlineMath, itemList, newcommand, numberOfArgs, texComment, words, ws
+--)
 -- import Internal.ParserHelpers as PH exposing (..)
 
 import Dict
@@ -81,6 +81,7 @@ type Problem
     | ExpectingInt
     | InvalidInt
     | ExpectingLeadingDollarSign
+    | ExpectingLeadingInLineMathDelimiter String
     | ExpectingEnvironmentNameBegin
     | ExpectingEnvironmentNameEnd
     | ExpectingBeginAndRightBrace
@@ -118,17 +119,19 @@ parse text =
         _ ->
             [ LXString "Dude! not great code here." ]
 
-runParser : LXParser (List LatexExpression) -> String -> (List LatexExpression)
+
+runParser : LXParser (List LatexExpression) -> String -> List LatexExpression
 runParser p str =
     let
-            expr =
-                Parser.Advanced.run p str
+        expr =
+            Parser.Advanced.run p str
     in
-        case expr of
-            Ok latexExpr -> latexExpr
+    case expr of
+        Ok latexExpr ->
+            latexExpr
 
-            Err error ->
-                [LXError error]
+        Err error ->
+            [ LXError error ]
 
 
 {-| Production: $ LatexList &\\Rightarrow LatexExpression^+ $
@@ -450,12 +453,22 @@ smacroName =
     --> Ok (InlineMath ("a^2 + b^2"))
 
 -}
+
 inlineMath : LXParser () -> LXParser LatexExpression
 inlineMath wsParser =
-    succeed InlineMath
-        |. symbol (Token "$" ExpectingLeadingDollarSign)
-        |= parseToSymbol ExpectingEndForInlineMath "$"
-        |. wsParser
+    let
+        inLineMathUsingDelimiters : ( String, String ) -> Parser Context Problem LatexExpression
+        inLineMathUsingDelimiters ( startDelimiter, endDelimiter ) =
+            succeed InlineMath
+                |. symbol (Token startDelimiter <| ExpectingLeadingInLineMathDelimiter startDelimiter)
+                |= parseToSymbol ExpectingEndForInlineMath endDelimiter
+                |. wsParser
+    in
+    oneOf
+        [ inLineMathUsingDelimiters ( "\\(", "\\)" )
+        , inLineMathUsingDelimiters ( "~~", "~~" )
+        , inLineMathUsingDelimiters ( "$", "$" )
+        ]
 
 
 {-|
@@ -542,12 +555,11 @@ environmentOfType envType =
         theEndWord =
             "\\end{" ++ envType ++ "}"
 
-        katex = ["align", "matrix", "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix"]  
-
-
+        katex =
+            [ "align", "matrix", "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix" ]
 
         envKind =
-            if List.member envType ([ "equation", "eqnarray", "verbatim", "colored", "CD", "mathmacro", "textmacro", "listing", "verse" ] ++ katex ) then
+            if List.member envType ([ "equation", "eqnarray", "verbatim", "colored", "CD", "mathmacro", "textmacro", "listing", "verse" ] ++ katex) then
                 "passThrough"
 
             else
@@ -602,7 +614,12 @@ This parser is used for environments whose body is to be
 passed to MathJax for processing and also for the verbatim
 environment.
 -}
+
+
+
 -- TODO
+
+
 passThroughBody : String -> String -> LXParser LatexExpression
 passThroughBody endWoord envType =
     --  inContext "passThroughBody" <|
@@ -611,17 +628,25 @@ passThroughBody endWoord envType =
         |. ws
         |> map (passThroughEnv envType)
 
+
 passThroughEnv : String -> String -> LatexExpression
 passThroughEnv envType source =
     let
-      lines = source |> String.trim |> String.lines |> List.filter (\l -> String.length l > 0)
-      optArgs_ = runParser (itemList optionalArg) (List.head lines |> Maybe.withDefault "")
-      body = if optArgs_ == [] then
-                 lines |> String.join "\n"
-              else
-                  List.drop 1 lines |> String.join "\n"
+        lines =
+            source |> String.trim |> String.lines |> List.filter (\l -> String.length l > 0)
+
+        optArgs_ =
+            runParser (itemList optionalArg) (List.head lines |> Maybe.withDefault "")
+
+        body =
+            if optArgs_ == [] then
+                lines |> String.join "\n"
+
+            else
+                List.drop 1 lines |> String.join "\n"
     in
-      Environment envType optArgs_ (LXString body)
+    Environment envType optArgs_ (LXString body)
+
 
 
 {- ITEMIZED LISTS -}

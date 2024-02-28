@@ -5,11 +5,27 @@ module ParserTest exposing (suite)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Internal.Paragraph exposing (logicalParagraphify)
-import Internal.Parser exposing (..)
-import Parser exposing (Problem(..), run)
+import Internal.Parser
+    exposing
+        ( LXParser
+        , LatexExpression(..)
+        , Problem(..)
+        , latexExpression
+        , latexList
+        , runParser
+        )
+import Parser.Advanced
+    exposing
+        ( Nestable(..)
+        , Step(..)
+        , Token(..)
+        , Trailing(..)
+        , run
+        )
 import Test exposing (..)
 
 
+doTest : String -> c -> c -> Test
 doTest comment inputExpression outputExpression =
     test comment <|
         \_ ->
@@ -18,8 +34,12 @@ doTest comment inputExpression outputExpression =
 
 suite : Test
 suite =
+    let
+        ampere = "\\textit{A} \\equiv \\frac{\\textit{C}}{\\textit{s}} \\equiv \\frac{\\textit{coulomb}}{\\textit{second}}"
+    in
     describe "MiniLatex Parser"
-        [ doTest
+        [ 
+          doTest
             "(1) Comment"
             (run latexExpression "% This is a comment\n")
             (Ok (Comment "% This is a comment\n"))
@@ -27,6 +47,18 @@ suite =
             "(2) InlineMath"
             (run latexExpression "$a^2 = 7$")
             (Ok (InlineMath "a^2 = 7"))
+        , doTest
+            "(2.1) InlineMath using '$"
+            (run latexExpression <| "$" ++ ampere ++ "$")
+            (Ok (InlineMath ampere))
+        , doTest
+            "(2.2) InlineMath for Ampere using '\\\\(' and '\\\\)'"
+            (run latexExpression <| "\\(" ++ ampere ++ "\\)")
+            (Ok (InlineMath ampere))
+        , doTest
+            "(2.3) InlineMath for Ampere using '~~'"
+            (run latexExpression <| "~~" ++ ampere ++ "~~")
+            (Ok (InlineMath ampere))
         , doTest
             "(3) DisplayMath"
             (run latexExpression "$$b^2 = 3$$")
@@ -78,18 +110,18 @@ suite =
         , doTest
             "(17) label"
             (run latexExpression "\\begin{equation}\n\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar\n\\end{equation}")
-            (Ok (Environment "equation" [] (LXString "\n\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar\n")))
+            (Ok (Environment "equation" [] (LXString "\\label{uncertaintyPrinciple}\n\\left[ \\hat p, x\\right] = -i \\hbar")))
         , doTest
             "(18) punctuation"
             (run latexList "test \\code{foo}.")
             (Ok (LatexList [ LXString "test ", Macro "code" [] [ LatexList [ LXString "foo" ] ], LXString "." ]))
         , doTest "(19) verse"
             (run latexList "\\begin{verse}\nTest\n\nTest\n\\end{verse}")
-            (Ok (LatexList [ Environment "verse" [] (LXString "\nTest\n\nTest\n") ]))
+            (Ok (LatexList [ Environment "verse" [] (LXString "Test\nTest") ]))
         , doTest
             "(20) verbatim"
             (run latexList "\\begin{verbatim}\nTest\n\nTest\n\\end{verbatim}")
-            (Ok (LatexList [ Environment "verbatim" [] (LXString "\nTest\n\nTest\n") ]))
+            (Ok (LatexList [ Environment "verbatim" [] (LXString "Test\nTest") ]))
         , doTest
             "(21) nested list"
             (run latexExpression "\\begin{itemize}\n\n\\item One\n\n\\item Two\n\n\\begin{itemize}\n\n\\item Foo\n\n\\item Bar\n\n\\end{itemize}\n\n\\end{itemize}")
@@ -103,5 +135,3 @@ suite =
             (run latexExpression "\\begin{itemize}\n\\item One\n\\item Two\n\\begin{itemize}\n\\item Foo\n\\end{itemize}\n\\end{itemize}\n")
             (Ok (Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "One\n" ]), Item 1 (LatexList [ LXString "Two\n" ]), Environment "itemize" [] (LatexList [ Item 1 (LatexList [ LXString "Foo\n" ]) ]) ])))
         ]
-
-

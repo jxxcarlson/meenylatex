@@ -45,20 +45,13 @@ x = y
 """
 
 
+
 -- https://tex.stackexchange.com/questions/74353/what-commands-are-there-for-horizontal-spacing/74354#74354
-
-
-
 -- This \\xcancel{not} right.
-
 -- space: $a\\space b$
-
 -- $a\\, b$
-
 -- thinspace: $a\\thinspace b$
-
 -- $a\\; b$
-
 -- thickmuskip: $a\\thickmuskip b$
 
 
@@ -67,7 +60,7 @@ miniLaTeX =
 
  
 
-\\title{Sample MiniLaTeX Doc}
+\\title{My Sample MiniLaTeX Doc}
 
 \\begin{mathmacro}
 \\newcommand{\\bt}[1]{\\bf{#1}}
@@ -125,11 +118,25 @@ the MiniLaTeX project, please go to
 \\href{https://minilatex.io}{minilatex.io},
 or write to jxxcarlson at gmail.
 
+For more information about
+QUDT, please go to \\href{https://qudt.org}{qudt.org}, or write to info at quad.org.
+
 \\section{Try it out}
 
 \\italic{Try editing formula \\eqref{integral:xn} or \\eqref{integral:exp} below.}
 Note, e.g., from the source text, that the formulas are written inside
 equation environments.
+
+The \\italic{ampere}, often shortened to \\italic{amp}, is the SI unit of electric current and is one of the seven SI base units.
+\\italic{A} or  \\italic{amp (or ampere)}
+
+equiv\\ \\frac{\\{C}}{\\text{s}}\\ equiv\\ \\frac{\\text{coulomb}}{\\text{second}}\\ equiv\\ \\frac{\\text{J}}{\\text{Wb}}\\ equiv\\ \\frac{\\text{joule}}{\\text{weber}}
+
+Test inline maths: $\\textit{A} \\equiv \\frac{\\textit{C}}{\\textit{s}} \\equiv \\frac{\\textit{coulomb}}{\\text{second}}$ works with 'dollar'.
+
+Test inline maths: ~\\frac{\\text{C}}{\\text{s}}~ - does this work with other delimiters?.
+
+Note that SI supports only the use of symbols and deprecates the use of any abbreviations for units.
 
 The most basic integral:
 

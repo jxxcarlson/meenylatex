@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MiniLaTeX example</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* MiniLaTeX output uses these CSS variables for paragraph spacing and
+       list indentation; without them both collapse to zero. */
+    :root {
+      --paragraph-spacing: 0.8em;
+      --indent: 1.5em;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="assets/math-text.js"></script>
+  <script src="Main.js"></script>
+</head>
+<body>
+  <div id="main"></div>
+  <script>
+    Elm.Main.init({ node: document.getElementById("main") });
+  </script>
+</body>
+</html>

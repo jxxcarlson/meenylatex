@@ -150,6 +150,7 @@ latexExpression =
         [ texComment
         , displayMathDollar
         , displayMathBrackets
+        , inlineMathBrackets ws
         , inlineMath ws
         , newcommand
         , macro ws
@@ -384,7 +385,7 @@ optionalArg : LXParser LatexExpression
 optionalArg =
     succeed identity
         |. symbol (Token "[" ExpectingLeftBracket)
-        |= itemList (oneOf [ optionArgWords, inlineMath spaces ])
+        |= itemList (oneOf [ optionArgWords, inlineMathBrackets spaces, inlineMath spaces ])
         |. symbol (Token "]" ExpectingRightBracket)
         |> map LatexList
 
@@ -396,7 +397,7 @@ arg =
     inContext (CArg "arg") <|
         (succeed identity
             |. symbol (Token "{" ExpectingLeftBrace)
-            |= itemList (oneOf [ macroArgWords, inlineMath spaces, lazy (\_ -> macro spaces) ])
+            |= itemList (oneOf [ macroArgWords, inlineMathBrackets spaces, inlineMath spaces, lazy (\_ -> macro spaces) ])
             |. symbol (Token "}" ExpectingRightBrace)
             |> map LatexList
         )
@@ -492,6 +493,22 @@ displayMathBrackets =
         |. symbol (Token "\\[" ExpectingBeginDisplayMathModeBracket)
         |= parseToSymbol ExpectingEndDisplayMathModeBracket "\\]"
         |. ws
+
+
+{-| The `\(...\)` bracket form of inline math. Produces the same `InlineMath`
+expression as `$...$`, just as `displayMathBrackets` (`\[...\]`) mirrors
+`displayMathDollar` (`$$...$$`).
+
+    LXParser.run inlineMathBrackets "\\(a^2 + b^2\\)"
+    --> Ok (InlineMath ("a^2 + b^2"))
+
+-}
+inlineMathBrackets : LXParser () -> LXParser LatexExpression
+inlineMathBrackets wsParser =
+    succeed InlineMath
+        |. symbol (Token "\\(" ExpectingLeadingDollarSign)
+        |= parseToSymbol ExpectingEndForInlineMath "\\)"
+        |. wsParser
 
 
 
@@ -613,6 +630,52 @@ passThroughBody endWoord envType =
 
 passThroughEnv : String -> String -> LatexExpression
 passThroughEnv envType source =
+    if List.member envType textPassThroughEnvs then
+        Environment envType [] (LXString (trimBlankLines source))
+
+    else
+        mathPassThroughEnv envType source
+
+
+{-| Pass-through environments whose body is text to be shown as written. They
+take no optional arguments, and their interior blank lines and indentation are
+significant (code, poetry), so only surrounding blank lines are dropped.
+-}
+textPassThroughEnvs : List String
+textPassThroughEnvs =
+    [ "verbatim", "listing", "verse" ]
+
+
+{-| Drop the blank lines before the first and after the last non-blank line,
+keeping everything in between exactly as written.
+-}
+trimBlankLines : String -> String
+trimBlankLines source =
+    let
+        isBlank line =
+            String.trim line == ""
+
+        -- Drops leading blank lines and reverses; applied twice it trims both ends.
+        dropLeadingBlanksAndReverse =
+            List.foldl
+                (\line acc ->
+                    if acc == [] && isBlank line then
+                        []
+
+                    else
+                        line :: acc
+                )
+                []
+    in
+    source
+        |> String.lines
+        |> dropLeadingBlanksAndReverse
+        |> dropLeadingBlanksAndReverse
+        |> String.join "\n"
+
+
+mathPassThroughEnv : String -> String -> LatexExpression
+mathPassThroughEnv envType source =
     let
       lines = source |> String.trim |> String.lines |> List.filter (\l -> String.length l > 0)
       optArgs_ = runParser (itemList optionalArg) (List.head lines |> Maybe.withDefault "")
@@ -711,8 +774,35 @@ tableRow =
         |. spaces
         |= andThen (\c -> tableCellHelp [ c ]) tableCell
         |. spaces
-        |. oneOf [ symbol (Token "\n" ExpectingNewline), symbol (Token "\\\\\n" ExpectingDoubleEscapeAndNewline) ]
+        |. oneOf
+            [ symbol (Token "\n" ExpectingNewline)
+            , symbol (Token "\\\\\n" ExpectingDoubleEscapeAndNewline)
+            , atEndOfEnvironment
+            ]
         |> map LatexList
+
+
+{-| Succeeds, consuming nothing, when the upcoming text begins a `\end{...}`.
+Used as the final alternative of the table-row terminator. A plain-text final
+cell's trailing whitespace (see `word`, whose trailing `ws` chomps newlines)
+absorbs the newline that would otherwise end the last row, leaving the parser
+sitting at `\end{tabular}`. Recognizing `\end` here lets the row terminate
+anyway, which makes the trailing `\\` on the final table row optional (standard
+LaTeX does not require it).
+-}
+atEndOfEnvironment : LXParser ()
+atEndOfEnvironment =
+    succeed (\offset src -> String.startsWith "\\end" (String.dropLeft offset src))
+        |= getOffset
+        |= getSource
+        |> andThen
+            (\atEnd ->
+                if atEnd then
+                    succeed ()
+
+                else
+                    problem ExpectingValidTableCell
+            )
 
 
 

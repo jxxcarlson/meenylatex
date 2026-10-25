@@ -124,7 +124,7 @@ get selectedId data =
 
         paragraphs =
             List.map
-                (Html.div [ HA.style "white-space" "normal", HA.style "line-height" "1.5" ])
+                (Html.div [ HA.style "white-space" "normal" ])
                 paragraphs_
 
         mark id_ =
@@ -141,18 +141,39 @@ get selectedId data =
             data.idList
                 |> List.map mark
 
-        keyedNode : String -> Html LaTeXMsg -> Html LaTeXMsg
-        keyedNode id para =
-            Keyed.node "p"
-                [ HA.id id
-                , selectedStyle selectedId id
-                , HE.onClick (IDClicked id)
+        -- NOTE: data.source is the bare text without any preamble. These ranges
+        -- align 1:1 with data.idList / paragraphs only when data.mpreamble == Nothing
+        -- (the only path the app uses: render/renderWithVersion pass Nothing). If
+        -- preamble support is ever used here, paragraphify the preamble-prepended
+        -- text (see Internal.DifferSimple.addPreamble) so the indices stay aligned.
+        lineRanges : List Internal.Paragraph.ParaWithLines
+        lineRanges =
+            Internal.Paragraph.logicalParagraphifyWithLines data.source
 
-                -- , HA.style "margin-bottom" "0px"
-                ]
+        lineAttrs : Int -> List (Html.Attribute LaTeXMsg)
+        lineAttrs i =
+            case List.drop i lineRanges |> List.head of
+                Just r ->
+                    [ HA.attribute "data-line" (String.fromInt r.startLine)
+                    , HA.attribute "data-lines" (String.fromInt (r.lineCount - 1))
+                    ]
+
+                Nothing ->
+                    []
+
+        keyedNode : Int -> String -> Html LaTeXMsg -> Html LaTeXMsg
+        keyedNode i id para =
+            Keyed.node "p"
+                ([ HA.id id
+                 , selectedStyle selectedId id
+                 , HE.onClick (IDClicked id)
+                 , HA.style "margin-bottom" "var(--paragraph-spacing)"
+                 ]
+                    ++ lineAttrs i
+                )
                 [ ( id, para ) ]
     in
-    List.map2 keyedNode ids paragraphs
+    List.map3 keyedNode (List.range 0 (List.length ids - 1)) ids paragraphs
 
 
 selectedStyle : String -> String -> Html.Attribute LaTeXMsg

@@ -1,9 +1,0 @@
-{
-  "root": "../src",
-  "tests": [
-       "Internal.Macro"
-     , "Internal.Parser"
-     , "Internal.ParserHelpers"
-     ,  "Internal.Stack"
-  ]
-}

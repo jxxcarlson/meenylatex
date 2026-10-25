@@ -3,7 +3,7 @@ module Main exposing (..)
 import Browser
 import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src, style)
-import MiniLatex.EditSimple
+import MiniLatex.API
 import Strings
 
 
@@ -26,7 +26,7 @@ init =
 
 type Msg
     = NoOp
-    | LatexMsg MiniLatex.EditSimple.LaTeXMsg
+    | LatexMsg MiniLatex.API.LaTeXMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -43,7 +43,7 @@ view model =
     div [ style "margin" "50px" ]
         [ h1 [] [ text "Example" ]
         , div [ style "font-size" "18px" ]
-            (MiniLatex.EditSimple.render Strings.miniLaTeX |> List.map (Html.map LatexMsg))           
+            (MiniLatex.API.render Strings.miniLaTeX |> List.map (Html.map LatexMsg))
         ]
 
 

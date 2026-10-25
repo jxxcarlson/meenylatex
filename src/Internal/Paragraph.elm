@@ -118,7 +118,21 @@ lineType line =
         --     Ignore
 
     else if String.startsWith "\\begin" line then
-        BeginBlock (getBeginArg line)
+        let
+            arg =
+                getBeginArg line
+        in
+        if String.contains ("\\end{" ++ arg ++ "}") line then
+            -- The environment opens and closes on this single line, e.g.
+            -- `\begin{pmatrix} a & b \\ c & d \end{pmatrix}`. It is self-contained,
+            -- so treat it as ordinary text rather than opening a block. Otherwise
+            -- the matching `\end` (which is not at the start of a line) is never
+            -- counted, the block stack never rebalances, and the "paragraph"
+            -- swallows the rest of the document.
+            Text
+
+        else
+            BeginBlock arg
 
     else if String.startsWith "\\end" line then
         EndBlock (getEndArg line)
@@ -348,3 +362,152 @@ paragraphify text =
     Regex.split para text
         |> List.filter (\x -> String.length x /= 0)
         |> List.map (String.trim >> (\x -> x ++ "\n\n"))
+
+
+{-| A logical paragraph together with its source line range:
+`startLine` is the 0-indexed first source line; `lineCount` is how many source
+lines it spans (covering lines `startLine .. startLine + lineCount - 1`).
+-}
+type alias ParaWithLines =
+    { text : String, startLine : Int, lineCount : Int }
+
+
+type alias ParserRecordL =
+    { currentParagraph : String
+    , paragraphList : List ParaWithLines
+    , state : ParserState
+    , stack : Stack String
+    , lineIndex : Int
+    , paraStartLine : Int
+    , paraEndLine : Int
+    }
+
+
+initParserRecordL : ParserRecordL
+initParserRecordL =
+    { currentParagraph = ""
+    , paragraphList = []
+    , state = Start
+    , stack = Stack.empty
+    , lineIndex = 0
+    , paraStartLine = -1
+    , paraEndLine = -1
+    }
+
+
+{-| Line-tracking analogue of `updateParserRecord`. Reuses `getNextState` so
+grouping (incl. nested environments via its stack) is identical; only line
+bookkeeping is added. A line is "content" when appended to the current
+paragraph (InParagraph/InMathBlock/InBlock, and the Start branch when the
+triggering line is non-empty, e.g. a block's `\end`). The trailing blank line
+ending a normal paragraph is NOT content.
+-}
+updateParserRecordL : String -> ParserRecordL -> ParserRecordL
+updateParserRecordL line record =
+    let
+        ( nextState, nextStack ) =
+            getNextState line ( record.state, record.stack )
+
+        idx =
+            record.lineIndex
+
+        contentStart =
+            if record.paraStartLine < 0 then
+                idx
+
+            else
+                record.paraStartLine
+
+        bumped =
+            { record | lineIndex = idx + 1, state = nextState, stack = nextStack }
+    in
+    case nextState of
+        Start ->
+            let
+                lineIsContent =
+                    line /= ""
+
+                startL =
+                    if lineIsContent then
+                        contentStart
+
+                    else
+                        record.paraStartLine
+
+                endL =
+                    if lineIsContent then
+                        idx
+
+                    else
+                        record.paraEndLine
+
+                count =
+                    if startL < 0 then
+                        0
+
+                    else
+                        endL - startL + 1
+            in
+            { bumped
+                | currentParagraph = ""
+                , paragraphList =
+                    record.paragraphList
+                        ++ [ { text = joinLines record.currentParagraph line, startLine = startL, lineCount = count } ]
+                , paraStartLine = -1
+                , paraEndLine = -1
+            }
+
+        InParagraph ->
+            { bumped
+                | currentParagraph = joinLines record.currentParagraph line
+                , paraStartLine = contentStart
+                , paraEndLine = idx
+            }
+
+        InMathBlock ->
+            { bumped
+                | currentParagraph = joinLines record.currentParagraph line
+                , paraStartLine = contentStart
+                , paraEndLine = idx
+            }
+
+        InBlock _ ->
+            { bumped
+                | currentParagraph = joinLines record.currentParagraph (fixLine line)
+                , paraStartLine = contentStart
+                , paraEndLine = idx
+            }
+
+        IgnoreLine ->
+            bumped
+
+        Error ->
+            { record | stack = nextStack, lineIndex = idx + 1 }
+
+
+{-| Like `logicalParagraphify`, but each paragraph carries its source line
+range. Grouping, trimming, and empty-paragraph filtering match
+`logicalParagraphify` so results align 1:1 (by index).
+-}
+logicalParagraphifyWithLines : String -> List ParaWithLines
+logicalParagraphifyWithLines text =
+    let
+        lastState =
+            (text ++ "\n")
+                |> String.split "\n"
+                |> List.foldl updateParserRecordL initParserRecordL
+
+        trailing =
+            { text = lastState.currentParagraph
+            , startLine = lastState.paraStartLine
+            , lineCount =
+                if lastState.paraStartLine < 0 then
+                    0
+
+                else
+                    lastState.paraEndLine - lastState.paraStartLine + 1
+            }
+    in
+    (lastState.paragraphList ++ [ trailing ])
+        |> List.filter (\p -> p.text /= "")
+        |> List.map (\p -> { p | text = String.trim p.text ++ "\n\n" })

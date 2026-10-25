@@ -24,15 +24,6 @@ import Maybe.Extra
 import String
 
 
-table =
-    """
-\\begin{tabular}
-A & B \\\\
-C & D \\\\
-\\end{tabular}
-"""
-
-
 {-| Map MiniLaTeX source text to standard LaTeX
 -}
 toLaTeX : String -> String

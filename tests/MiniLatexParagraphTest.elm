@@ -1,9 +1,7 @@
-module ParagraphTest exposing (suite)
+module MiniLatexParagraphTest exposing (suite)
 
--- http://package.elm-lang.org/packages/elm-community/elm-test/latest
 
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
 import Internal.Paragraph exposing (logicalParagraphify)
 import Test exposing (..)
 

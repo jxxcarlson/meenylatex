@@ -1,4 +1,4 @@
-module Data exposing(..)
+module MiniLatexTestData exposing (qftIntroText)
 
 qftIntroText = """
 \\title{Notes on Quantum Field Theory}

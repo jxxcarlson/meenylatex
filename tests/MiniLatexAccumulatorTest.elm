@@ -1,18 +1,15 @@
-module AccumulatorTest exposing (suite)
+module MiniLatexAccumulatorTest exposing (suite)
 
--- http://package.elm-lang.org/packages/elm-community/elm-test/latest
 
-import Data
+import MiniLatexTestData as Data
 import Dict exposing(Dict)
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
 import Internal.Accumulator as Accumulator
 import Internal.Differ as Differ
 import Internal.Paragraph as Paragraph
 import Internal.LatexDiffer as LatexDiffer
 import Internal.LatexState exposing (emptyLatexState)
 import Internal.Parser as Parser exposing (LatexExpression(..))
-import MiniLatex.Render as Render
 import Test exposing (..)
 
 
@@ -54,8 +51,11 @@ suite =
                               , crossReferences = Dict.fromList [("debroglie","1.7"),("debroglie2","1.6")]
                               , dictionary = Dict.fromList [
                                  ("author","James  Carlson")
+                                 -- Accumulator now records \date (Internal.Accumulator, dictionary keys)
+                                 ,("date","March  2017")
                                  ,("title","Notes  on  Quantum  Field  Theory")
                                ], macroDictionary = Dict.fromList []
+                               , mathMacroDictionary = Dict.empty
                                , tableOfContents = [{ label = "1", level = 1, name = "Trajectories  and  Uncertainty" }
                                ,{ label = "1.1", level = 2, name = "Classical  mechanics" }
                                ,{ label = "1.2", level = 2, name = "Uncertainty  Principle" }

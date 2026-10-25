@@ -142,7 +142,7 @@ renderLatexList : SourceText -> LatexState -> List LatexExpression -> Html msg
 renderLatexList source latexState latexList =
     latexList
         |> List.map (render source latexState)
-        |> (\list -> Html.span [ HA.style "margin-bottom" "10px" ] list)
+        |> (\list -> Html.span [ HA.style "margin-bottom" "0.6em" ] list)
 
 
 renderLatexListToList : LatexState -> List ( String, List LatexExpression ) -> List (Html msg)
@@ -254,13 +254,6 @@ mathText displayMode content =
         ]
         []
 
-mathJaxText : DisplayMode -> String -> Html msg
-mathJaxText displayMode content =
-    Html.node "mathjax-text"
-        [ HA.property "display" (Json.Encode.bool True)
-        , HA.property "content" (Json.Encode.string (content  |> String.replace "\\ \\" "\\\\"))
-        ]
-        []
 
 type DisplayMode
     = InlineMathMode
@@ -313,18 +306,6 @@ displayMathTextWithLabel_ latexState str label =
         , Html.div []
             [ mathText DisplayMathMode (String.trim str) ]
         ]
-
-displayMathJaxTextWithLabel_ : LatexState -> String -> String -> Html msg
-displayMathJaxTextWithLabel_ latexState str label =
-    Html.div
-        []
-        [ Html.div [ HA.style "float" "right", HA.style "margin-top" "3px" ]
-            [ Html.text label ]
-        , Html.div []
-            -- [ Html.text "MathJax"]
-            [ mathJaxText DisplayMathMode (String.trim str) ]
-        ]
-
 
 
 -- ERRORS
@@ -941,12 +922,12 @@ makeTocItem prefix tocItem =
             "#" ++ id
     in
     Html.p
-        [ HA.style "font-size" "14px"
+        [ HA.style "font-size" "0.875em"
         , HA.style "padding-bottom" "0px"
         , HA.style "margin-bottom" "0px"
         , HA.style "padding-top" "0px"
         , HA.style "margin-top" "0px"
-        , HA.style "line-height" "20px"
+        , HA.style "line-height" "1.4"
         ]
         [ Html.text number
         , Html.a [ HA.href href ] [ Html.text ti.name ]
@@ -1070,14 +1051,14 @@ renderSection source latexState args =
         ref =
             idPhrase "section" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h2 (headingStyle ref 24) ((Html.text label):: renderedArgs)
+    Html.h2 (headingStyle ref 1.5) ((Html.text label):: renderedArgs)
 
 
 
 headingStyle ref h =
     [ HA.id ref
-    , HA.style "margin-top" (String.fromFloat h ++ "px")
-    , HA.style "margin-bottom" (String.fromFloat (0.0 * h) ++ "px")
+    , HA.style "margin-top" (String.fromFloat h ++ "em")
+    , HA.style "margin-bottom" "0"
     ]
 
 
@@ -1090,7 +1071,7 @@ renderSectionStar source latexState args =
         ref =
             idPhrase "section" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h2 (headingStyle ref 24) renderedArgs
+    Html.h2 (headingStyle ref 1.5) renderedArgs
 
 
 renderSubsection : String -> LatexState -> List LatexExpression -> Html msg
@@ -1114,7 +1095,7 @@ renderSubsection source latexState args =
         ref =
             idPhrase "subsection" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h3 (headingStyle ref 12) ((Html.text label)::renderedArgs)
+    Html.h3 (headingStyle ref 0.75) ((Html.text label)::renderedArgs)
 
 
 renderSubsectionStar : String -> LatexState -> List LatexExpression -> Html msg
@@ -1125,7 +1106,7 @@ renderSubsectionStar source latexState args =
         ref =
             idPhrase "subsection" (Internal.RenderToString.renderArg 0 latexState args)
     in
-    Html.h3 (headingStyle ref 12) renderedArgs
+    Html.h3 (headingStyle ref 0.75) renderedArgs
 
 
 renderSubSubsection : String -> LatexState -> List LatexExpression -> Html msg
@@ -1248,15 +1229,15 @@ renderMakeTitle source latexState list =
                 ""
 
         titlePart =
-            Html.div [ HA.style "font-size" "28px", HA.style "padding-bottom" "12px" ] [ Html.text <| title ]
+            Html.div [ HA.style "font-size" "1.75em", HA.style "padding-bottom" "0.75em" ] [ Html.text <| title ]
 
         authorPart =
-            Html.div [ HA.style "font-size" "18px", HA.style "padding-bottom" "4px" ] [ Html.text <| author ]
+            Html.div [ HA.style "font-size" "1.125em", HA.style "padding-bottom" "0.25em" ] [ Html.text <| author ]
 
         bodyParts =
             [ date, revisionText, email ]
                 |> List.filter (\x -> x /= "")
-                |> List.map (\x -> Html.div [ HA.style "font-size" "14px" ] [ Html.text x ])
+                |> List.map (\x -> Html.div [ HA.style "font-size" "0.875em" ] [ Html.text x ])
     in
     Html.div []
         (titlePart :: authorPart :: bodyParts)
@@ -1497,7 +1478,7 @@ renderBibItem source latexState optArgs args body =
 
 renderItem : String -> LatexState -> Int -> LatexExpression -> Html msg
 renderItem source latexState level latexExpression =
-    Html.li [ HA.style "margin-bottom" "8px" ] [ render source latexState latexExpression ]
+    Html.li [ HA.style "margin-bottom" "0.5em" ] [ render source latexState latexExpression ]
 
 
 
@@ -1731,7 +1712,7 @@ renderMathJaxEnvironment envName source latexState body =
                 Just tag_ ->
                     "(" ++ tag_ ++ ")"
     in
-    displayMathJaxTextWithLabel_ latexState innerContents tag
+    displayMathTextWithLabel_ latexState innerContents tag
 
 
 renderCenterEnvironment : SourceText -> LatexState -> LatexExpression -> Html msg
@@ -1765,17 +1746,114 @@ renderCommentEnvironment source latexState body =
     Html.div [] []
 
 
+{-| Per-level styling for a list. `padding-left` (applied at every level) offsets
+the markers from the running text and makes nesting compound. The outermost list
+(depth 1) additionally gets a `margin-left` so the whole structure sits in from
+the running text; nested levels get only padding, so that base offset does not
+compound. Marker style cycles with depth the way LaTeX nests lists: ordered lists
+go decimal -> lower-alpha -> lower-roman, bulleted lists disc -> circle -> square.
+-}
+listStyle : String -> Int -> List (Html.Attribute msg)
+listStyle tag depth =
+    let
+        markerStyle =
+            if tag == "ol" then
+                case modBy 3 depth of
+                    1 ->
+                        "decimal"
+
+                    2 ->
+                        "lower-alpha"
+
+                    _ ->
+                        "lower-roman"
+
+            else
+                case modBy 3 depth of
+                    1 ->
+                        "disc"
+
+                    2 ->
+                        "circle"
+
+                    _ ->
+                        "square"
+
+        baseMargin =
+            if depth == 1 then
+                [ HA.style "margin-left" "var(--indent)" ]
+
+            else
+                []
+    in
+    [ HA.style "margin-top" "0px"
+    , HA.style "margin-bottom" "0px"
+    , HA.style "padding-left" "var(--indent)"
+    , HA.style "list-style-type" markerStyle
+    ]
+        ++ baseMargin
+
+
+{-| Render the body of an itemize/enumerate environment as the DIRECT children of
+the enclosing `<ul>`/`<ol>`, at nesting depth `depth`. The body is a `LatexList`
+whose elements are `Item`s and (for nested lists) `Environment`s; we keep only
+those, so the list contains `<li>` and nested `<ul>`/`<ol>` children directly with
+no intervening `<span>` wrapper that would break `<ul> -> <li>` semantics. Nested
+itemize/enumerate are rendered here (not via the generic dispatcher) so the depth
+counter increments; stray whitespace and comments between items are dropped.
+-}
+renderListChildren : Int -> SourceText -> LatexState -> LatexExpression -> List (Html msg)
+renderListChildren depth source latexState body =
+    let
+        elements =
+            case body of
+                LatexList list ->
+                    list
+
+                _ ->
+                    [ body ]
+    in
+    elements
+        |> List.filter isListChild
+        |> List.map (renderListChild depth source latexState)
+
+
+renderListChild : Int -> SourceText -> LatexState -> LatexExpression -> Html msg
+renderListChild depth source latexState expr =
+    case expr of
+        Environment "itemize" _ nestedBody ->
+            Html.ul (listStyle "ul" (depth + 1)) (renderListChildren (depth + 1) source latexState nestedBody)
+
+        Environment "enumerate" _ nestedBody ->
+            Html.ol (listStyle "ol" (depth + 1)) (renderListChildren (depth + 1) source latexState nestedBody)
+
+        _ ->
+            render source latexState expr
+
+
+isListChild : LatexExpression -> Bool
+isListChild expr =
+    case expr of
+        Item _ _ ->
+            True
+
+        Environment _ _ _ ->
+            True
+
+        _ ->
+            False
+
+
 renderEnumerate : SourceText -> LatexState -> LatexExpression -> Html msg
 renderEnumerate source latexState body =
-    -- TODO: fix spacing issue
-    Html.ol [ HA.style "margin-top" "0px" ] [ render source latexState body ]
+    Html.ol (listStyle "ol" 1) (renderListChildren 1 source latexState body)
 
 
 renderDefItemEnvironment : SourceText -> LatexState -> List LatexExpression -> LatexExpression -> Html msg
 renderDefItemEnvironment source latexState optArgs body =
     Html.div []
         [ Html.strong [] [ Html.text <| Internal.RenderToString.renderArg 0 latexState optArgs ]
-        , Html.div [ HA.style "margin-left" "25px", HA.style "margin-top" "10px" ] [ render source latexState body ]
+        , Html.div [ HA.style "margin-left" "1.5em", HA.style "margin-top" "0.6em" ] [ render source latexState body ]
         ]
 
 
@@ -1847,8 +1925,7 @@ renderIndentEnvironment source latexState body =
 
 renderItemize : SourceText -> LatexState -> LatexExpression -> Html msg
 renderItemize source latexState body =
-    -- TODO: fix space issue
-    Html.ul [ HA.style "margin-top" "0px" ] [ render source latexState body ]
+    Html.ul (listStyle "ul" 1) (renderListChildren 1 source latexState body)
 
 
 renderListing : SourceText -> LatexState -> LatexExpression -> Html msg
@@ -1945,7 +2022,7 @@ renderVerbatim source latexState body =
         body2 =
             Internal.RenderToString.render latexState body
     in
-    Html.pre [ HA.style "margin-top" "0px", HA.style "margin-bottom" "0px", HA.style "margin-left" "25px", HA.style "font-size" "14px" ] [ Html.text body2 ]
+    Html.pre [ HA.style "margin-top" "0px", HA.style "margin-bottom" "0px", HA.style "margin-left" "var(--indent)", HA.style "font-size" "0.875em" ] [ Html.text body2 ]
 
 
 

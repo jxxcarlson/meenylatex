@@ -67,6 +67,11 @@ suite =
             \_ ->
                 rendered (API.parse "\\begin{verbatim}\ncode\n\\end{verbatim}")
                     |> Query.has [ style "margin-left" "var(--indent, 1.5em)" ]
+        , test "an equation number sits 1em from the right edge" <|
+            \_ ->
+                rendered (API.parse "\\begin{equation}\na = b\n\\end{equation}")
+                    |> Query.find [ style "float" "right" ]
+                    |> Query.has [ style "margin-right" "1em", text "(1)" ]
         , test "update with an added paragraph renders it" <|
             \_ ->
                 rendered (API.parse original |> API.update (original ++ "\n\nFourth paragraph."))

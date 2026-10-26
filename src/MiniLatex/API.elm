@@ -3,10 +3,14 @@ module MiniLatex.API exposing
     , Data, parse, update, renderData, source
     , TocEntry, tableOfContents
     , toLaTeX, toLaTeXBody, images
+    , toMarkdown
     )
 
 {-| The public interface to MiniLaTeX: everything the frontend calls goes
 through this module.
+
+See this [Hackernoon article](https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08)
+for an explanation of the theory behind the MiniLatex package.
 
 
 # Rendering
@@ -28,12 +32,18 @@ through this module.
 
 @docs toLaTeX, toLaTeXBody, images
 
+
+# Markdown
+
+@docs toMarkdown
+
 -}
 
 import Html exposing (Html)
 import Internal.Render
-import MiniLatex.Export
 import MiniLatex.EditSimple
+import MiniLatex.Export
+import MiniLatex.Markdown
 
 
 {-| Messages emitted by rendered MiniLaTeX (e.g. a paragraph was clicked).
@@ -135,3 +145,12 @@ there before compiling.
 images : String -> List { url : String, filename : String }
 images =
     MiniLatex.Export.images
+
+
+{-| Convert MiniLaTeX source to Markdown: sections become headings, math stays
+as `$...$` / `$$...$$`, and other macros and environments map to their nearest
+Markdown equivalents.
+-}
+toMarkdown : String -> String
+toMarkdown =
+    MiniLatex.Markdown.convert

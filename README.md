@@ -63,6 +63,12 @@ viewToc data =
   to each one as `image/<filename>`; download each `url` to that path before
   compiling.
 
+## Export to Markdown
+
+`API.toMarkdown source` converts MiniLaTeX to Markdown: sections become
+headings, math stays as `$...$` / `$$...$$`, and other macros and environments
+map to their nearest Markdown equivalents.
+
 ## Math
 
 Math is emitted as `<math-text>` custom elements, which the host page must
@@ -98,13 +104,15 @@ Html, for example:
 
 ## Development
 
-The source of truth is the vendored copy in the Scripta app
-(`scripta-app-v4/frontend/minilatex/` and its MiniLaTeX tests). Changes are made
-and tested there, then copied here with `scripts/sync-meenylatex.sh` in that
-repository and published from this directory. Don't edit `src/` or `tests/` here
-directly: the next sync overwrites them.
+Develop and test here. `src/` is the package source, `tests/` its tests, and
+`example/` compiles the package straight from `../src`, so it always shows the
+current source.
 
 ```bash
 elm make --docs=docs.json   # build and check documentation
 elm-test                    # run the tests (elm-test 0.19.2-0 for elm 0.19.2)
 ```
+
+To try a change inside an app before publishing, temporarily add this
+directory's `src` to the app's `source-directories` and remove the package from
+its dependencies.

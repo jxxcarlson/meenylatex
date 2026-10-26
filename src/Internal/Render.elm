@@ -301,7 +301,7 @@ displayMathTextWithLabel_ : LatexState -> String -> String -> Html msg
 displayMathTextWithLabel_ latexState str label =
     Html.div
         []
-        [ Html.div [ HA.style "float" "right", HA.style "margin-top" "3px" ]
+        [ Html.div [ HA.style "float" "right", HA.style "margin-top" "3px", HA.style "margin-right" "1em" ]
             [ Html.text label ]
         , Html.div []
             [ mathText DisplayMathMode (String.trim str) ]

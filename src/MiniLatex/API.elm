@@ -1,6 +1,8 @@
 module MiniLatex.API exposing
     ( LaTeXMsg, render
     , Data, parse, update, renderData, source
+    , TocEntry, tableOfContents
+    , toLaTeX, toLaTeXBody, images
     )
 
 {-| The public interface to MiniLaTeX: everything the frontend calls goes
@@ -16,9 +18,21 @@ through this module.
 
 @docs Data, parse, update, renderData, source
 
+
+# Table of contents
+
+@docs TocEntry, tableOfContents
+
+
+# Export
+
+@docs toLaTeX, toLaTeXBody, images
+
 -}
 
 import Html exposing (Html)
+import Internal.Render
+import MiniLatex.Export
 import MiniLatex.EditSimple
 
 
@@ -74,3 +88,50 @@ renderData (Data d) =
 source : Data -> String
 source (Data d) =
     d.record.source
+
+
+{-| One numbered heading: `level` is 1 for `\section`, 2 for `\subsection` and
+3 for `\subsubsection`; `number` is its label, e.g. `"2.1"`; `id` is the DOM id
+of the rendered heading, for links and scrolling.
+-}
+type alias TocEntry =
+    { level : Int, number : String, title : String, id : String }
+
+
+{-| The numbered headings of the document, in order.
+-}
+tableOfContents : Data -> List TocEntry
+tableOfContents (Data d) =
+    d.record.latexState.tableOfContents
+        |> List.map
+            (\e ->
+                { level = e.level
+                , number = e.label
+                , title = String.join " " (String.words e.name)
+                , id = Internal.Render.headingId e.level e.name
+                }
+            )
+
+
+{-| Map MiniLaTeX source to a complete standard LaTeX document, ready for
+xelatex: preamble, `\begin{document}`, body, `\end{document}`.
+-}
+toLaTeX : String -> String
+toLaTeX =
+    MiniLatex.Export.toLaTeX
+
+
+{-| Map MiniLaTeX source to standard LaTeX: the document body only.
+-}
+toLaTeXBody : String -> String
+toLaTeXBody =
+    MiniLatex.Export.toLaTeXBody
+
+
+{-| The images in MiniLaTeX source: each one's `url`, and the `filename` the
+output of `toLaTeX` uses for it, as `image/<filename>`. Download the images
+there before compiling.
+-}
+images : String -> List { url : String, filename : String }
+images =
+    MiniLatex.Export.images

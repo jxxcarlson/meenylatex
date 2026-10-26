@@ -68,7 +68,7 @@ updateSubsubsectionNumber macroArgs latexState =
     in
     latexState
         |> incrementCounter "s3"
-        |> addSection (PT.unpackString macroArgs) label 2
+        |> addSection (PT.unpackString macroArgs) label 3
 
 
 setSectionCounters : List LatexExpression -> LatexState -> LatexState

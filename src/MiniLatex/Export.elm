@@ -1,11 +1,11 @@
-module MiniLatex.Export exposing (toLaTeX, toLaTeXWithImages)
+module MiniLatex.Export exposing (toLaTeX, toLaTeXBody, toLaTeXWithImages, images)
 
 {-| This module is for preparing latex for export.
 
 
 # API
 
-@docs toLaTeX, toLaTeXWithImages
+@docs toLaTeX, toLaTeXBody, toLaTeXWithImages, images
 
 -}
 
@@ -24,22 +24,23 @@ import Maybe.Extra
 import String
 
 
-{-| Map MiniLaTeX source text to standard LaTeX
+{-| Map MiniLaTeX source text to a complete standard LaTeX document.
 -}
 toLaTeX : String -> String
 toLaTeX str =
-    let
-        parsand =
-            str
-                |> Paragraph.logicalParagraphify
-                |> List.map Internal.Parser.parse
+    [ Internal.Source.texPrefix, toLaTeXBody str, Internal.Source.texSuffix ] |> String.join "\n"
 
-        latex_ =
-            parsand
-                |> List.map renderLatexList
-                |> List.foldl (\renderedElement acc -> acc ++ "\n" ++ renderedElement) ""
-    in
-    [ Internal.Source.texPrefix, latex_, Internal.Source.texSuffix ] |> String.join "\n"
+
+{-| Map MiniLaTeX source text to standard LaTeX: the document body only,
+without the preamble or `\begin{document}` ... `\end{document}`.
+-}
+toLaTeXBody : String -> String
+toLaTeXBody str =
+    str
+        |> Paragraph.logicalParagraphify
+        |> List.map Internal.Parser.parse
+        |> List.map renderLatexList
+        |> List.foldl (\renderedElement acc -> acc ++ "\n" ++ renderedElement) ""
 
 
 {-| Map MiniLaTeX source text to a tuple,
@@ -115,11 +116,42 @@ render latexExpression =
         LXString str ->
             str
 
-        NewCommand _ _ _ ->
-            ""
+        NewCommand name nargs body ->
+            renderNewCommand name nargs body
 
         LXError error ->
             List.map ErrorMessages.renderError error |> String.join "; "
+
+
+{-| A `\newcommand` from the document. Its body is rendered as is: `#1` etc.
+are parameters here, so `fixBadChars` must not escape them.
+-}
+renderNewCommand : String -> Int -> LatexExpression -> String
+renderNewCommand name nargs body =
+    let
+        argCount =
+            if nargs > 0 then
+                "[" ++ String.fromInt nargs ++ "]"
+
+            else
+                ""
+    in
+    "\\newcommand{\\" ++ name ++ "}" ++ argCount ++ "{" ++ String.trim (renderRaw body) ++ "}\n"
+
+
+{-| Like `render`, but leaves `#` and `_` in macro arguments unescaped.
+-}
+renderRaw : LatexExpression -> String
+renderRaw expr =
+    case expr of
+        Macro name optArgs args ->
+            "\\" ++ name ++ renderOptArgList optArgs ++ String.concat (List.map (\a -> "{" ++ renderRaw a ++ "}") args)
+
+        LatexList list ->
+            String.concat (List.map renderRaw list)
+
+        _ ->
+            render expr
 
 
 renderLatexList : List LatexExpression -> String
@@ -340,17 +372,31 @@ reproduceMacro name optArgs args =
 
 
 getExportUrl url =
+    "image/" ++ imageFileName url
+
+
+{-| The file name an exported document uses for the image at `url`: the last
+segment of the url. The image is expected at `image/<file name>`.
+-}
+imageFileName : String -> String
+imageFileName url =
     let
         parts =
             String.split "/" url
 
         n =
             List.length parts
-
-        lastPart =
-            parts |> List.drop (n - 1) |> List.head |> Maybe.withDefault "xxx"
     in
-    "image/" ++ lastPart
+    parts |> List.drop (n - 1) |> List.head |> Maybe.withDefault "xxx"
+
+
+{-| The images in MiniLaTeX source text: each one's url, and the file name the
+exported LaTeX refers to it by (as `image/<filename>`).
+-}
+images : String -> List { url : String, filename : String }
+images str =
+    Tuple.second (toLaTeXWithImages str)
+        |> List.map (\url -> { url = url, filename = imageFileName url })
 
 
 renderImage : List LatexExpression -> String

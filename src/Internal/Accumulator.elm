@@ -1,4 +1,4 @@
-module Internal.Accumulator exposing (parse, render, renderNew)
+module Internal.Accumulator exposing (parse, reduce, render, renderNew)
 
 
 import Internal.LatexState
@@ -37,6 +37,14 @@ parse :
 parse latexState paragraphs =
     paragraphs
         |> List.foldl parseReducer ( latexState, [] )
+
+
+{-| The LatexState that `parse` would compute, from paragraphs that are
+already parsed: no re-parsing, only the state pass.
+-}
+reduce : LatexState -> List ( String, List LatexExpression ) -> LatexState
+reduce latexState paragraphs =
+    List.foldl (\( _, exprs ) state -> latexStateReducer exprs state) latexState paragraphs
 
 
 parseReducer :

@@ -36,18 +36,26 @@ initWithSeed seed parser latexState text mpreamble =
 
         -- Save computed LatexState
         latexState2 =
-            { emptyLatexState
-                | crossReferences = latexState1.crossReferences
-                , tableOfContents = latexState1.tableOfContents
-                , dictionary = latexState1.dictionary
-                , macroDictionary = latexState1.macroDictionary
-                , mathMacroDictionary = latexState1.mathMacroDictionary
-            }
+            savedState latexState1
 
         idList =
             makeIdListWithSeed seed paragraphs
     in
     EditRecord text mpreamble paragraphs latexExpressionList idList latexState2
+
+
+{-| The parts of a computed LatexState that are kept in the EditRecord:
+everything except the counters, which rendering recomputes.
+-}
+savedState : LatexState -> LatexState
+savedState latexState1 =
+    { emptyLatexState
+        | crossReferences = latexState1.crossReferences
+        , tableOfContents = latexState1.tableOfContents
+        , dictionary = latexState1.dictionary
+        , macroDictionary = latexState1.macroDictionary
+        , mathMacroDictionary = latexState1.mathMacroDictionary
+    }
 
 
 makeIdList : List String -> List String
@@ -73,3 +81,13 @@ update seed parser editRecord source mpreamble =
 
     else
         Internal.DifferSimple.update seed parser editRecord source mpreamble
+            |> refreshState
+
+
+{-| `DifferSimple.update` re-parses only the changed paragraphs and keeps the
+old LatexState; recompute it (table of contents, cross-references, macros)
+from the updated paragraphs.
+-}
+refreshState : EditRecord -> EditRecord
+refreshState editRecord =
+    { editRecord | latexState = savedState (Accumulator.reduce emptyLatexState editRecord.astList) }

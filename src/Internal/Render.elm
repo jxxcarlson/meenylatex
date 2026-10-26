@@ -1,11 +1,11 @@
-module Internal.Render exposing (makeTableOfContents, render, renderLatexList, renderLatexListToList, renderString)
+module Internal.Render exposing (headingId, makeTableOfContents, render, renderLatexList, renderLatexListToList, renderString)
 
 {-| This module is for quickly preparing latex for export.
 
 
 # API
 
-@docs makeTableOfContents, render, renderLatexList, renderLatexListToList, renderString
+@docs headingId, makeTableOfContents, render, renderLatexList, renderLatexListToList, renderString
 
 -}
 
@@ -934,6 +934,13 @@ makeTocItem prefix tocItem =
         ]
 
 
+{-| The DOM id of the rendered heading with the given level (1 = section) and title.
+-}
+headingId : Int -> String -> String
+headingId level name =
+    makeId (sectionPrefix level) name
+
+
 makeId : String -> String -> String
 makeId prefix name =
     String.join "_" [ "", prefix, compress "_" name ]
@@ -1781,14 +1788,14 @@ listStyle tag depth =
 
         baseMargin =
             if depth == 1 then
-                [ HA.style "margin-left" "var(--indent)" ]
+                [ HA.style "margin-left" "var(--indent, 1.5em)" ]
 
             else
                 []
     in
     [ HA.style "margin-top" "0px"
     , HA.style "margin-bottom" "0px"
-    , HA.style "padding-left" "var(--indent)"
+    , HA.style "padding-left" "var(--indent, 1.5em)"
     , HA.style "list-style-type" markerStyle
     ]
         ++ baseMargin
@@ -2022,7 +2029,7 @@ renderVerbatim source latexState body =
         body2 =
             Internal.RenderToString.render latexState body
     in
-    Html.pre [ HA.style "margin-top" "0px", HA.style "margin-bottom" "0px", HA.style "margin-left" "var(--indent)", HA.style "font-size" "0.875em" ] [ Html.text body2 ]
+    Html.pre [ HA.style "margin-top" "0px", HA.style "margin-bottom" "0px", HA.style "margin-left" "var(--indent, 1.5em)", HA.style "font-size" "0.875em" ] [ Html.text body2 ]
 
 
 

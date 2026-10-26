@@ -167,7 +167,7 @@ get selectedId data =
                 ([ HA.id id
                  , selectedStyle selectedId id
                  , HE.onClick (IDClicked id)
-                 , HA.style "margin-bottom" "var(--paragraph-spacing)"
+                 , HA.style "margin-bottom" "var(--paragraph-spacing, 0.85em)"
                  ]
                     ++ lineAttrs i
                 )

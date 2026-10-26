@@ -5,12 +5,7 @@
     "license": "BSD-3-Clause",
     "version": "14.1.1",
     "exposed-modules": [
-        "MiniLatex.API",
-        "MiniLatex",
-        "MiniLatex.Edit",
-        "MiniLatex.EditSimple",
-        "MiniLatex.Export",
-        "MiniLatex.Markdown"
+        "MiniLatex.API"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {

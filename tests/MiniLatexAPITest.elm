@@ -9,7 +9,7 @@ import Html
 import MiniLatex.API as API
 import Test exposing (..)
 import Test.Html.Query as Query
-import Test.Html.Selector exposing (id, tag, text)
+import Test.Html.Selector exposing (id, style, tag, text)
 
 
 original : String
@@ -59,6 +59,14 @@ suite =
             \_ ->
                 rendered (API.parse original |> API.update edited)
                     |> Query.has [ id "p.0.1" ]
+        , test "paragraph spacing falls back to 0.85em when --paragraph-spacing is not set" <|
+            \_ ->
+                rendered (API.parse original)
+                    |> Query.has [ style "margin-bottom" "var(--paragraph-spacing, 0.85em)" ]
+        , test "indentation falls back to 1.5em when --indent is not set" <|
+            \_ ->
+                rendered (API.parse "\\begin{verbatim}\ncode\n\\end{verbatim}")
+                    |> Query.has [ style "margin-left" "var(--indent, 1.5em)" ]
         , test "update with an added paragraph renders it" <|
             \_ ->
                 rendered (API.parse original |> API.update (original ++ "\n\nFourth paragraph."))

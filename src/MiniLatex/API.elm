@@ -1,21 +1,21 @@
 module MiniLatex.API exposing
-    ( LaTeXMsg, render
+    ( LaTeXMsg, clickedParagraphId, render
     , Data, parse, update, renderData, source
     , TocEntry, tableOfContents
     , toLaTeX, toLaTeXBody, images
     , toMarkdown
     )
 
-{-| The public interface to MiniLaTeX: everything the frontend calls goes
-through this module.
+{-| Parse, render and export MiniLaTeX, a subset of LaTeX. This is the
+package's only module: everything an app needs goes through it.
 
 See this [Hackernoon article](https://hackernoon.com/towards-latex-in-the-browser-2ff4d94a0c08)
-for an explanation of the theory behind the MiniLatex package.
+for an explanation of the theory behind MiniLaTeX.
 
 
 # Rendering
 
-@docs LaTeXMsg, render
+@docs LaTeXMsg, clickedParagraphId, render
 
 
 # Parse once, update incrementally
@@ -46,10 +46,22 @@ import MiniLatex.Export
 import MiniLatex.Markdown
 
 
-{-| Messages emitted by rendered MiniLaTeX (e.g. a paragraph was clicked).
+{-| Messages emitted by rendered MiniLaTeX: a paragraph was clicked. Read the
+paragraph's id with `clickedParagraphId`.
 -}
 type alias LaTeXMsg =
     MiniLatex.EditSimple.LaTeXMsg
+
+
+{-| The DOM id of the paragraph that was clicked, e.g. `"p.0.3"`. Use it to
+highlight the paragraph, or to find its source lines through the paragraph's
+`data-line` / `data-lines` attributes.
+-}
+clickedParagraphId : LaTeXMsg -> String
+clickedParagraphId msg =
+    case msg of
+        MiniLatex.EditSimple.IDClicked id ->
+            id
 
 
 {-| A parsed MiniLaTeX document. Create it with `parse`, keep it in your model,

@@ -1,4 +1,4 @@
-module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, render, renderWithVersion, LaTeXMsg)
+module MiniLatex.EditSimple exposing (Data, emptyData, init, update, get, render, renderWithVersion, LaTeXMsg(..))
 
 {-| This module is like MiniLaTeX.Edit, except that the Data type, which is an
 alias of the record type `Internal.DifferSimple.EditRecord`, contains no functions.

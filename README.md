@@ -28,7 +28,8 @@ view model =
 ```
 
 The rendered Html produces messages of type `API.LaTeXMsg` (a paragraph was
-clicked); use `Html.map` to fit them into your own `Msg`.
+clicked); use `Html.map` to fit them into your own `Msg`, and
+`API.clickedParagraphId` to read which paragraph it was.
 
 Each rendered paragraph carries `data-line` / `data-lines` attributes (its
 source line range), for editor ↔ preview synchronization.

@@ -8,6 +8,7 @@ import Expect
 import Html
 import MiniLatex.API as API
 import Test exposing (..)
+import Test.Html.Event as Event
 import Test.Html.Query as Query
 import Test.Html.Selector exposing (id, style, tag, text)
 
@@ -72,6 +73,14 @@ suite =
                 rendered (API.parse "\\begin{equation}\na = b\n\\end{equation}")
                     |> Query.find [ style "float" "right" ]
                     |> Query.has [ style "margin-right" "1em", text "(1)" ]
+        , test "clicking a paragraph gives a message carrying that paragraph's id" <|
+            \_ ->
+                rendered (API.parse original)
+                    |> Query.find [ id "p.0.1" ]
+                    |> Event.simulate Event.click
+                    |> Event.toResult
+                    |> Result.map API.clickedParagraphId
+                    |> Expect.equal (Ok "p.0.1")
         , test "update with an added paragraph renders it" <|
             \_ ->
                 rendered (API.parse original |> API.update (original ++ "\n\nFourth paragraph."))

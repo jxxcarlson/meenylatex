@@ -197,7 +197,7 @@ words =
 words_ : Problem -> LXParser LatexExpression
 words_ problem =
     nonEmptyItemList (word problem notSpaceOrSpecialCharacters)
-        |> map (String.join " ")
+        |> map (String.concat)
         |> map LXString
 
 
@@ -223,6 +223,8 @@ LXParser.run word "this is a test"
 
 -}
 word : Problem -> (Char -> Bool) -> LXParser String
+-- The slice includes the spaces after the word, so word lists are joined with
+-- String.concat: joining with " " would double every gap.
 word problem inWord =
     succeed String.slice
         |. ws
@@ -241,7 +243,7 @@ word problem inWord =
 macroArgWords : LXParser LatexExpression
 macroArgWords =
     nonEmptyItemList (word ExpectingValidMacroArgWord inMacroArg)
-        |> map (String.join " ")
+        |> map (String.concat)
         |> map LXString
 
 
@@ -257,7 +259,7 @@ inMacroArg c =
 optionArgWords : LXParser LatexExpression
 optionArgWords =
     nonEmptyItemList (word ExpectingValidOptionArgWord inOptionArgWord)
-        |> map (String.join " ")
+        |> map (String.concat)
         |> map LXString
 
 
@@ -273,7 +275,7 @@ inOptionArgWord c =
 tableCellWords : LXParser LatexExpression
 tableCellWords =
     nonEmptyItemList (word ExpectingValidTableCell inTableCellWord)
-        |> map (String.join " ")
+        |> map (String.concat)
         |> map String.trim
         |> map LXString
 

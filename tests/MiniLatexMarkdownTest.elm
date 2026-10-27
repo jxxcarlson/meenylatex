@@ -32,9 +32,14 @@ suite =
                 API.toMarkdown doc
                     |> String.contains "$a^2 + b^2 = c^2$"
                     |> Expect.equal True
-        , test "plain text is kept (word for word: the converter may double spaces, which Markdown ignores)" <|
+        , test "plain text is kept, with single spaces between words" <|
             \_ ->
                 API.toMarkdown "Just some text."
-                    |> String.words
-                    |> Expect.equal [ "Just", "some", "text." ]
+                    |> String.trim
+                    |> Expect.equal "Just some text."
+        , test "text in a macro argument keeps single spaces" <|
+            \_ ->
+                API.toMarkdown "\\section{Two words here}"
+                    |> String.contains "Two words here"
+                    |> Expect.equal True
         ]
